@@ -8,6 +8,7 @@ BoatData.Default_Attributes = {
 	["UpgradeLevel"] = 1,
 	["Name"] = FFGEnum.BOAT.NAME.Quality1,
 	["isUnlocked"] = false,
+	["isActive"] = false,
 }
 
 return BoatData
