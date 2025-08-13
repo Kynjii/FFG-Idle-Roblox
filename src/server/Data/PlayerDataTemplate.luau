@@ -1,5 +1,5 @@
 return {
-	Gold = 10,
+	Gold = 250,
 
 	Inventory = {},
 }
