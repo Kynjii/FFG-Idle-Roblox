@@ -31,17 +31,6 @@ function DataManager.DetachReplica(player: Player)
 	end
 end
 
-local function setLeaderstat(player: Player, name: string, value: number)
-	local stats = player:FindFirstChild("leaderstats")
-	if not stats then
-		return
-	end
-	local v = stats:FindFirstChild(name)
-	if v and v:IsA("NumberValue") then
-		v.Value = value
-	end
-end
-
 function DataManager.Earn(player: Player, currencyType: string, amount: number)
 	local profile = DataManager.Profiles[player]
 	if not profile then
@@ -57,9 +46,6 @@ function DataManager.Earn(player: Player, currencyType: string, amount: number)
 	local current = tonumber(profile.Data[currencyType]) or 0
 	local newValue = current + amount
 	profile.Data[currencyType] = newValue
-
-	-- //TODO - Remove this and handle for when we have more than 1 currency/stat
-	setLeaderstat(player, currencyType, newValue)
 
 	local replica = DataManager.Replicas[player]
 	if replica then
@@ -95,13 +81,23 @@ function DataManager.Spend(player: Player, currencyType: string, amount: number)
 	local newValue = current - amount
 	profile.Data[currencyType] = newValue
 
-	-- //TODO - Remove this and handle for when we have more than 1 currency/stat
-	setLeaderstat(player, currencyType, newValue)
-
 	local replica = DataManager.Replicas[player]
 	if replica then
 		replica:Set({ "Currencies", currencyType }, newValue)
 	end
+end
+
+function DataManager.ResetAllData(player: Player)
+	local profile = DataManager.Profiles[player]
+	if not profile then
+		print("No profile found when attempting to reset data")
+		return
+	end
+
+	profile.Data = PlayerDataTemplate
+
+	DataManager.DetachReplica(player)
+	DataManager.AttachReplica(player, profile)
 end
 
 return DataManager

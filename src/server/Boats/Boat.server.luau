@@ -8,8 +8,8 @@ local taggedBoats = CollectionService:GetTagged("Boat")
 
 local BOAT = {}
 
-BOAT.SetupProximityPrompt = function(primaryPart: Part, purchaseButton: Part)
-	local proximityPrompt = Instance.new("ProximityPrompt", purchaseButton)
+BOAT.SetupProximityPrompt = function(primaryPart: Part, purchaseBoard: Part)
+	local proximityPrompt = Instance.new("ProximityPrompt", purchaseBoard)
 	proximityPrompt.ObjectText = primaryPart:GetAttribute("isUnlocked") and "Upgrade" or "Unlock"
 	proximityPrompt.ActionText = primaryPart:GetAttribute("isUnlocked")
 			and "Level: " .. tostring(primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.Level))
@@ -28,10 +28,10 @@ BOAT.SetupProximityPrompt = function(primaryPart: Part, purchaseButton: Part)
 end
 
 BOAT.SetupUpgradeStore = function(boat: Model, primaryPart: Instance)
-	local purchaseButton = boat:WaitForChild("Purchase_Button")
+	local purchaseBoard = boat:WaitForChild("Purchase_Board")
 	local pbDetails = {}
-	pbDetails.NameLabel = FFGHelpers.deepWait(purchaseButton, "SurfaceGui", "Main", "Header", "Name", "TextLabel")
-	pbDetails.LevelLabel = FFGHelpers.deepWait(purchaseButton, "SurfaceGui", "Main", "Header", "Level", "TextLabel")
+	pbDetails.NameLabel = FFGHelpers.deepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel")
+	pbDetails.LevelLabel = FFGHelpers.deepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel")
 
 	if pbDetails then
 		local level = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.Level)
@@ -51,7 +51,7 @@ BOAT.SetupUpgradeStore = function(boat: Model, primaryPart: Instance)
 		pbDetails.LevelLabel.Text = "Level: " .. level
 	end
 
-	return purchaseButton
+	return purchaseBoard
 end
 
 BOAT.SetupBoat = function(boat: Model)
@@ -63,8 +63,8 @@ BOAT.SetupBoat = function(boat: Model)
 		primaryPart:SetAttribute(key, value)
 	end
 
-	local purchaseButton = BOAT.SetupUpgradeStore(boat, primaryPart)
-	BOAT.SetupProximityPrompt(primaryPart, purchaseButton)
+	local purchaseBoard = BOAT.SetupUpgradeStore(boat, primaryPart)
+	BOAT.SetupProximityPrompt(primaryPart, purchaseBoard)
 end
 
 for _, taggedBoat in ipairs(taggedBoats) do

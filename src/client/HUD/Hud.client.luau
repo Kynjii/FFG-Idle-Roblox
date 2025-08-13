@@ -2,36 +2,53 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
+local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local FFGHelpers = require(ReplicatedStorage.Shared.Utils.FFGHelpers)
 local Replica = require(ReplicatedStorage.Shared.ReplicaClient)
 Replica.RequestData()
 
--- Grab your HUD pieces (runtime UI lives under PlayerGui, not StarterGui)
 local player = Players.LocalPlayer
 local hud = FFGHelpers.deepWait(player, "PlayerGui", "HUD")
 
 local labels = {
 	Gold = hud:WaitForChild("GoldLabel"),
-	-- Pearls = hud:FindFirstChild("PearlsLabel"), -- add more when you create them
 }
 
 local current = {
 	Gold = 0,
-	-- Pearls = 0,
 }
 
--- Pretty number formatter (1.2K / 3.4M / 5.6B)
+-- Formats with 0–2 decimals depending on size, strips trailing .0
 local function fmt(n: number): string
-	if n >= 1e9 then
-		return string.format("%.1fB", n / 1e9)
+	local absn = math.abs(n)
+
+	-- choose suffix if >= 1e3
+	for _, s in ipairs(FFGEnum.SUFFIXES) do
+		if absn >= s.value then
+			local v = n / s.value
+			local av = math.abs(v)
+			local decimals
+			if av >= 100 then
+				decimals = 0
+			elseif av >= 10 then
+				decimals = 1
+			else
+				decimals = 2
+			end
+			local out = string.format("%." .. decimals .. "f", v)
+			out = out:gsub("(%..-)0+$", "%1"):gsub("%.$", "") -- trim trailing zeros/dot
+			return out .. s.symbol
+		end
 	end
-	if n >= 1e6 then
-		return string.format("%.1fM", n / 1e6)
+
+	-- no suffix (< 1e3): still keep it tidy
+	if absn >= 100 then
+		return string.format("%.0f", n)
+	elseif absn >= 10 then
+		return (string.format("%.1f", n):gsub("(%..-)0+$", "%1"):gsub("%.$", ""))
+	else
+		return (string.format("%.2f", n):gsub("(%..-)0+$", "%1"):gsub("%.$", ""))
 	end
-	if n >= 1e3 then
-		return string.format("%.1fK", n / 1e3)
-	end
-	return tostring(n)
 end
 
 local function setCurrency(name: string, v: number)
@@ -43,7 +60,7 @@ local function setCurrency(name: string, v: number)
 	local prev = current[name] or 0
 	current[name] = v
 
-	-- update label text
+	label.Font = FFGEnum.FONT
 	label.Text = string.format("%s: %s", name, fmt(v))
 
 	-- flash color on change (green for gain, red for spend)

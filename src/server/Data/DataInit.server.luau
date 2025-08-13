@@ -1,28 +1,15 @@
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
+local FFGHelpers = require(ReplicatedStorage.Shared.Utils.FFGHelpers)
 local PlayerDataTemplate = require(ServerScriptService.Server.Data.PlayerDataTemplate)
 local ProfileStore = require(ServerScriptService.Server.Libs.ProfileStore)
 local DataManager = require(ServerScriptService.Server.Data.DataManager)
 
-local function GetStoreName()
-	return RunService:IsStudio() and "Staging" or "Live"
-end
-
-local PlayerStore = ProfileStore.New(GetStoreName(), PlayerDataTemplate)
+local PlayerStore = ProfileStore.New(FFGHelpers.GetStoreName(), PlayerDataTemplate)
 
 local function Initialize(player: Player, profile: typeof(PlayerStore:StartSessionAsync()))
-	-- Leaderstats (optional but nice for the default leaderboard)
-	local leaderstats = Instance.new("Folder")
-	leaderstats.Name = "leaderstats"
-	leaderstats.Parent = player
-
-	local Gold = Instance.new("NumberValue")
-	Gold.Name = "Gold"
-	Gold.Value = profile.Data.Gold or 0
-	Gold.Parent = leaderstats
-
 	DataManager.AttachReplica(player, profile)
 end
 

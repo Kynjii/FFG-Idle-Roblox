@@ -1,3 +1,4 @@
+local RunService = game:GetService("RunService")
 local FFGHelpers = {}
 
 FFGHelpers.deepWait = function(parent, ...)
@@ -6,6 +7,10 @@ FFGHelpers.deepWait = function(parent, ...)
 		result = result:WaitForChild(name)
 	end
 	return result
+end
+
+FFGHelpers.GetStoreName = function()
+	return RunService:IsStudio() and "Staging" or "Live"
 end
 
 return FFGHelpers
