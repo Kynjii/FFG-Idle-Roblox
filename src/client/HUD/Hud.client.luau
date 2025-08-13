@@ -5,6 +5,7 @@ local TweenService = game:GetService("TweenService")
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local FFGHelpers = require(ReplicatedStorage.Shared.Utils.FFGHelpers)
 local Replica = require(ReplicatedStorage.Shared.ReplicaClient)
+local FFGDefaults = require(ReplicatedStorage.Shared.Utils.FFGDefaults)
 Replica.RequestData()
 
 local player = Players.LocalPlayer
@@ -23,7 +24,7 @@ local function fmt(n: number): string
 	local absn = math.abs(n)
 
 	-- choose suffix if >= 1e3
-	for _, s in ipairs(FFGEnum.SUFFIXES) do
+	for _, s in ipairs(FFGDefaults.SUFFIXES) do
 		if absn >= s.value then
 			local v = n / s.value
 			local av = math.abs(v)
