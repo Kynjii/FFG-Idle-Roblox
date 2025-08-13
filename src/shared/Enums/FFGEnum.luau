@@ -101,4 +101,8 @@ FFGEnum.ATTRIBUTES = {
 	["isActive"] = "isActive",
 }
 
+FFGEnum.CURRENCY_TYPES = {
+	["Gold"] = "Gold",
+}
+
 return FFGEnum

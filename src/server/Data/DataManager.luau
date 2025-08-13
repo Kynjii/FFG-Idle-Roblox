@@ -1,18 +1,36 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local DataManager = {}
 
--- Stores profiles from ProfileStore
+local DataManager = {}
 DataManager.Profiles = {}
 
-function DataManager.AddGold(player: Player, amount: number)
+function DataManager.Earn(player: Player, currencyType: string, amount: number)
 	local profile = DataManager.Profiles[player]
 	if not profile then
 		return
 	end
 
-	profile.Data.Gold += amount
-	player.leaderstats.Gold.Value = profile.Data.Gold -- created within DataInit, ignore warning
-	ReplicatedStorage.UpdateGold:FireClient(player, profile.Data.Gold)
+	profile.Data[currencyType] += amount
+	player.leaderstats[currencyType].Value = profile.Data[currencyType]
+	ReplicatedStorage["Update" .. currencyType]:FireClient(player, profile.Data[currencyType])
+end
+
+function DataManager.CanAfford(player: Player, currencyType: string, amount: number)
+	local profile = DataManager.Profiles[player]
+	if not profile then
+		return
+	end
+	return profile.Data[currencyType] >= amount
+end
+
+function DataManager.Spend(player: Player, currencyType: string, amount: number)
+	local profile = DataManager.Profiles[player]
+	if not profile then
+		return
+	end
+
+	profile.Data[currencyType] -= amount
+	player.leaderstats[currencyType].Value = profile.Data[currencyType]
+	ReplicatedStorage["Update" .. currencyType]:FireClient(player, profile.Data[currencyType])
 end
 
 return DataManager
