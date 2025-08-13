@@ -11,8 +11,8 @@ local BOAT = {}
 
 BOAT.SetupProximityPrompt = function(primaryPart: Part, purchaseBoard: Part)
 	local proximityPrompt = Instance.new("ProximityPrompt", purchaseBoard)
-	proximityPrompt.ObjectText = primaryPart:GetAttribute("isUnlocked") and "Upgrade" or "Unlock"
-	proximityPrompt.ActionText = primaryPart:GetAttribute("isUnlocked")
+	proximityPrompt.ObjectText = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) and "Upgrade" or "Unlock"
+	proximityPrompt.ActionText = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased)
 			and "Level: " .. tostring(primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level))
 		or "Boat"
 
@@ -57,7 +57,6 @@ end
 
 BOAT.SetupBoat = function(boat: Model)
 	local primaryPart = boat.PrimaryPart
-
 	local attributes = FFGDefaults.BOAT_STARTING_ATT
 
 	for key, value in pairs(attributes) do
