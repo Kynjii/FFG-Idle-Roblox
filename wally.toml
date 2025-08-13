@@ -8,3 +8,4 @@ directory = "./src/Packages"
 [dependencies]
 Signal = "sleitnick/signal@^1"
 TableUtil = "sleitnick/table-util@^1"
+Find = "sleitnick/find@1.0.0"

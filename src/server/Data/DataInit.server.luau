@@ -27,7 +27,7 @@ local function Initialize(player: Player, profile: typeof(PlayerStore:StartSessi
 	Gold.Value = profile.Data.Gold
 
 	-- sync player data
-	ReplicatedStorage.UpdateGold:FireClient(player, profile.Data.Gold)
+	ReplicatedStorage.Remotes.UpdateGold:FireClient(player, profile.Data.Gold)
 end
 
 -- Creates and stores a profile
