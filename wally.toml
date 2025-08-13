@@ -3,6 +3,7 @@ name = "dtbur/ffg-idle-roblox"
 version = "0.1.0"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
+directory = "./src/Packages"
 
 [dependencies]
 Signal = "sleitnick/signal@^1"

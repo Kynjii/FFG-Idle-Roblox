@@ -7,9 +7,7 @@
             "Shared": {
                 "$path": "src/shared"
             },
-            "Packages": {
-                "$path": "src/Packages"
-            },
+            "Packages": { "$path": "Packages" },
             "Remotes": {
                 "$className": "Folder",
                 "UpdateGold": {
