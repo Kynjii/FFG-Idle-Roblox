@@ -489,10 +489,7 @@ end
 
 function Replica:FireClient(player, ...)
 	if self.replication ~= nil then
-		if
-			(self.replication[REPLICATION_ALL] == true and ReadyPlayers[player] == true)
-			or self.replication[player] ~= nil
-		then
+		if (self.replication[REPLICATION_ALL] == true and ReadyPlayers[player] == true) or self.replication[player] ~= nil then
 			RemoteSignal:FireClient(player, self.Id, ...)
 		end
 	end
@@ -515,10 +512,7 @@ end
 
 function Replica:UFireClient(player, ...)
 	if self.replication ~= nil then
-		if
-			(self.replication[REPLICATION_ALL] == true and ReadyPlayers[player] == true)
-			or self.replication[player] ~= nil
-		then
+		if (self.replication[REPLICATION_ALL] == true and ReadyPlayers[player] == true) or self.replication[player] ~= nil then
 			RemoteSignalUnreliable:FireClient(player, self.Id, ...)
 		end
 	end
@@ -672,17 +666,8 @@ function Replica:BindToInstance(instance: Instance)
 		error(`[{script.Name}]: Can't change Replica bind to another Instance`)
 	end
 
-	if
-		instance:IsA("Model") == true
-		and (
-			instance.ModelStreamingMode == Enum.ModelStreamingMode.Default
-			or instance.ModelStreamingMode == Enum.ModelStreamingMode.Nonatomic
-		)
-	then
-		warn(
-			`[{script.Name}]: Bound Replica to a model that has improper "ModelStreamingMode" setup; Traceback:\n`
-				.. debug.traceback()
-		)
+	if instance:IsA("Model") == true and (instance.ModelStreamingMode == Enum.ModelStreamingMode.Default or instance.ModelStreamingMode == Enum.ModelStreamingMode.Nonatomic) then
+		warn(`[{script.Name}]: Bound Replica to a model that has improper "ModelStreamingMode" setup; Traceback:\n` .. debug.traceback())
 	end
 
 	local bind_value = BindValuePrefab:Clone()
@@ -955,10 +940,7 @@ local function RemoteSignalHandle(player: Player, id: number, ...)
 	local replica = Replicas[id]
 
 	if replica ~= nil then
-		if
-			replica.replication ~= nil
-			and (replica.replication[REPLICATION_ALL] == true or replica.replication[player] ~= nil)
-		then
+		if replica.replication ~= nil and (replica.replication[REPLICATION_ALL] == true or replica.replication[player] ~= nil) then
 			replica.OnServerEvent:Fire(player, ...)
 		end
 	end

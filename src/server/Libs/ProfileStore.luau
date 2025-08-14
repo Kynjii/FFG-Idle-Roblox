@@ -336,15 +336,14 @@ local MockFlag = false
 local OnError = Signal.New() -- (message, store_name, profile_key)
 local OnOverwrite = Signal.New() -- (store_name, profile_key)
 
-local UpdateQueue =
-	{ -- For stability sake, we won't do UpdateAsync calls for the same key until all previous calls finish
-		--[[
+local UpdateQueue = { -- For stability sake, we won't do UpdateAsync calls for the same key until all previous calls finish
+	--[[
 		[session_token] = {
 			coroutine, ...
 		},
 		...
 	--]]
-	}
+}
 
 local function WaitInUpdateQueue(session_token) --> next_in_queue()
 	local is_first = false
@@ -432,14 +431,7 @@ local function NewMockDataStoreKeyInfo(params)
 	return {
 		CreatedTime = params.CreatedTime,
 		UpdatedTime = params.UpdatedTime,
-		Version = string.rep("0", 16)
-			.. "."
-			.. string.rep("0", 10 - string.len(version_id_string))
-			.. version_id_string
-			.. "."
-			.. string.rep("0", 16)
-			.. "."
-			.. "01",
+		Version = string.rep("0", 16) .. "." .. string.rep("0", 10 - string.len(version_id_string)) .. version_id_string .. "." .. string.rep("0", 16) .. "." .. "01",
 
 		GetMetadata = function()
 			return DeepCopyTable(meta_data)
@@ -522,11 +514,7 @@ local function UpdateAsync(profile_store, profile_key, transform_params, is_user
 				missing_profile = true
 				overwritten = true
 			else
-				if
-					type(latest_data.Data) == "table"
-					and type(latest_data.MetaData) == "table"
-					and type(latest_data.GlobalUpdates) == "table"
-				then
+				if type(latest_data.Data) == "table" and type(latest_data.MetaData) == "table" and type(latest_data.GlobalUpdates) == "table" then
 					-- Regular profile structure detected:
 
 					latest_data.WasOverwritten = false -- Must be set to false if set previously
@@ -535,11 +523,7 @@ local function UpdateAsync(profile_store, profile_key, transform_params, is_user
 					if transform_params.ExistingProfileHandle ~= nil then
 						transform_params.ExistingProfileHandle(latest_data)
 					end
-				elseif
-					latest_data.Data == nil
-					and latest_data.MetaData == nil
-					and type(latest_data.GlobalUpdates) == "table"
-				then
+				elseif latest_data.Data == nil and latest_data.MetaData == nil and type(latest_data.GlobalUpdates) == "table" then
 					-- Regular structure not detected, but GlobalUpdate data exists:
 
 					latest_data.WasOverwritten = false -- Must be set to false if set previously
@@ -577,12 +561,10 @@ local function UpdateAsync(profile_store, profile_key, transform_params, is_user
 		end
 
 		if is_user_mock == true then -- Used when the profile is accessed through ProfileStore.Mock
-			loaded_data, key_info =
-				MockUpdateAsync(UserMockStore, profile_store.Name, profile_key, transform_function, is_get_call)
+			loaded_data, key_info = MockUpdateAsync(UserMockStore, profile_store.Name, profile_key, transform_function, is_get_call)
 			task.wait() -- Simulate API call yield
 		elseif DataStoreState ~= "Access" then -- Used when API access is disabled
-			loaded_data, key_info =
-				MockUpdateAsync(MockStore, profile_store.Name, profile_key, transform_function, is_get_call)
+			loaded_data, key_info = MockUpdateAsync(MockStore, profile_store.Name, profile_key, transform_function, is_get_call)
 			task.wait() -- Simulate API call yield
 		else
 			if is_get_call == true then
@@ -591,11 +573,7 @@ local function UpdateAsync(profile_store, profile_key, transform_params, is_user
 						loaded_data, key_info = profile_store.data_store:GetVersionAsync(profile_key, version)
 					end)
 
-					if
-						success == false
-						and type(error_message) == "string"
-						and string.find(error_message, "not valid") ~= nil
-					then
+					if success == false and type(error_message) == "string" and string.find(error_message, "not valid") ~= nil then
 						warn(`[{script.Name}]: Passed version argument is not valid; Traceback:\n` .. debug.traceback())
 					end
 				else
@@ -675,9 +653,7 @@ end
 
 local function SaveProfileAsync(profile, is_ending_session, is_overwriting, last_save_reason)
 	if type(profile.Data) ~= "table" then
-		error(
-			`[{script.Name}]: Developer code likely set "Profile.Data" to a non-table value! (STORE:{profile.ProfileStore.Name}; KEY:{profile.Key})`
-		)
+		error(`[{script.Name}]: Developer code likely set "Profile.Data" to a non-table value! (STORE:{profile.ProfileStore.Name}; KEY:{profile.Key})`)
 	end
 
 	profile.OnSave:Fire()
@@ -718,8 +694,7 @@ local function SaveProfileAsync(profile, is_ending_session, is_overwriting, last
 					local session_load_count = latest_data.MetaData.SessionLoadCount
 
 					if type(active_session) == "table" then
-						session_owns_profile = IsThisSession(active_session)
-							and session_load_count == profile.load_index
+						session_owns_profile = IsThisSession(active_session) and session_load_count == profile.load_index
 					end
 				else
 					session_owns_profile = true
@@ -919,17 +894,11 @@ export type Profile<T> = {
 	KeyInfo: DataStoreKeyInfo,
 	OnSave: { Connect: (self: any, listener: () -> ()) -> { Disconnect: (self: any) -> () } },
 	OnLastSave: {
-		Connect: (
-			self: any,
-			listener: (reason: "Manual" | "External" | "Shutdown") -> ()
-		) -> { Disconnect: (self: any) -> () },
+		Connect: (self: any, listener: (reason: "Manual" | "External" | "Shutdown") -> ()) -> { Disconnect: (self: any) -> () },
 	},
 	OnSessionEnd: { Connect: (self: any, listener: () -> ()) -> { Disconnect: (self: any) -> () } },
 	OnAfterSave: {
-		Connect: (
-			self: any,
-			listener: (last_saved_data: T & JSONAcceptable) -> ()
-		) -> { Disconnect: (self: any) -> () },
+		Connect: (self: any, listener: (last_saved_data: T & JSONAcceptable) -> ()) -> { Disconnect: (self: any) -> () },
 	},
 	ProfileStore: JSONAcceptable,
 	Key: string,
@@ -953,13 +922,7 @@ type ProfileStoreStandard<T> = {
 	StartSessionAsync: (self: any, profile_key: string, params: { Steal: boolean? }) -> Profile<T>?,
 	MessageAsync: (self: any, profile_key: string, message: JSONAcceptable) -> boolean,
 	GetAsync: (self: any, profile_key: string, version: string?) -> Profile<T>?,
-	VersionQuery: (
-		self: any,
-		profile_key: string,
-		sort_direction: Enum.SortDirection?,
-		min_date: DateTime | number | nil,
-		max_date: DateTime | number | nil
-	) -> VersionQuery<T>,
+	VersionQuery: (self: any, profile_key: string, sort_direction: Enum.SortDirection?, min_date: DateTime | number | nil, max_date: DateTime | number | nil) -> VersionQuery<T>,
 	RemoveAsync: (self: any, profile_key: string) -> boolean,
 }
 
@@ -967,32 +930,16 @@ export type ProfileStore<T> = {
 	Mock: ProfileStoreStandard<T>,
 } & ProfileStoreStandard<T>
 
-type ConstantName =
-	"AUTO_SAVE_PERIOD"
-	| "LOAD_REPEAT_PERIOD"
-	| "FIRST_LOAD_REPEAT"
-	| "SESSION_STEAL"
-	| "ASSUME_DEAD"
-	| "START_SESSION_TIMEOUT"
-	| "CRITICAL_STATE_ERROR_COUNT"
-	| "CRITICAL_STATE_ERROR_EXPIRE"
-	| "CRITICAL_STATE_EXPIRE"
-	| "MAX_MESSAGE_QUEUE"
+type ConstantName = "AUTO_SAVE_PERIOD" | "LOAD_REPEAT_PERIOD" | "FIRST_LOAD_REPEAT" | "SESSION_STEAL" | "ASSUME_DEAD" | "START_SESSION_TIMEOUT" | "CRITICAL_STATE_ERROR_COUNT" | "CRITICAL_STATE_ERROR_EXPIRE" | "CRITICAL_STATE_EXPIRE" | "MAX_MESSAGE_QUEUE"
 
 export type ProfileStoreModule = {
 	IsClosing: boolean,
 	IsCriticalState: boolean,
 	OnError: {
-		Connect: (
-			self: any,
-			listener: (message: string, store_name: string, profile_key: string) -> ()
-		) -> { Disconnect: (self: any) -> () },
+		Connect: (self: any, listener: (message: string, store_name: string, profile_key: string) -> ()) -> { Disconnect: (self: any) -> () },
 	},
 	OnOverwrite: {
-		Connect: (
-			self: any,
-			listener: (store_name: string, profile_key: string) -> ()
-		) -> { Disconnect: (self: any) -> () },
+		Connect: (self: any, listener: (store_name: string, profile_key: string) -> ()) -> { Disconnect: (self: any) -> () },
 	},
 	OnCriticalToggle: {
 		Connect: (self: any, listener: (is_critical: boolean) -> ()) -> { Disconnect: (self: any) -> () },
@@ -1067,10 +1014,7 @@ end
 
 function Profile:AddUserId(user_id) -- Associates user_id with profile (GDPR compliance)
 	if type(user_id) ~= "number" or user_id % 1 ~= 0 then
-		warn(
-			`[{script.Name}]: Invalid UserId argument for :AddUserId() ({tostring(user_id)}); Traceback:\n`
-				.. debug.traceback()
-		)
+		warn(`[{script.Name}]: Invalid UserId argument for :AddUserId() ({tostring(user_id)}); Traceback:\n` .. debug.traceback())
 		return
 	end
 
@@ -1085,10 +1029,7 @@ end
 
 function Profile:RemoveUserId(user_id) -- Removes user_id association with profile (safe function)
 	if type(user_id) ~= "number" or user_id % 1 ~= 0 then
-		warn(
-			`[{script.Name}]: Invalid UserId argument for :RemoveUserId() ({tostring(user_id)}); Traceback:\n`
-				.. debug.traceback()
-		)
+		warn(`[{script.Name}]: Invalid UserId argument for :RemoveUserId() ({tostring(user_id)}); Traceback:\n` .. debug.traceback())
 		return
 	end
 
@@ -1141,11 +1082,7 @@ function Profile:Save()
 	end
 
 	if self:IsActive() == false then
-		warn(
-			`[{script.Name}]: Attempted saving an inactive profile (STORE:{self.ProfileStore.Name}; KEY:{self.Key});`
-				.. ` Traceback:\n`
-				.. debug.traceback()
-		)
+		warn(`[{script.Name}]: Attempted saving an inactive profile (STORE:{self.ProfileStore.Name}; KEY:{self.Key});` .. ` Traceback:\n` .. debug.traceback())
 		return
 	end
 
@@ -1422,9 +1359,7 @@ function ProfileStore:StartSessionAsync(profile_key, params)
 								end
 							end
 							if steal_session == true or user_steal == true then
-								local force_load_interrupted = if force_load_session ~= nil
-									then not IsThisSession(force_load_session)
-									else true
+								local force_load_interrupted = if force_load_session ~= nil then not IsThisSession(force_load_session) else true
 								if force_load_interrupted == false or user_steal == true then
 									latest_data.MetaData.ActiveSession = { PlaceId, JobId, unique_session_id }
 									latest_data.MetaData.ForceLoadSession = nil
@@ -1503,9 +1438,7 @@ function ProfileStore:StartSessionAsync(profile_key, params)
 					-- Profile is taken by some other session:
 
 					local force_load_session = loaded_data.MetaData.ForceLoadSession
-					local force_load_interrupted = if force_load_session ~= nil
-						then not IsThisSession(force_load_session)
-						else true
+					local force_load_interrupted = if force_load_session ~= nil then not IsThisSession(force_load_session) else true
 
 					if force_load_interrupted == false then
 						if request_force_load == false then
@@ -1518,17 +1451,11 @@ function ProfileStore:StartSessionAsync(profile_key, params)
 						-- Request the remote server to end its session:
 						if type(active_session[3]) == "string" then
 							local session_load_count = loaded_data.MetaData.SessionLoadCount or 0
-							task.spawn(
-								MessagingService.PublishAsync,
-								MessagingService,
-								"PS_" .. active_session[3],
-								{ LoadCount = session_load_count, EndSession = true }
-							)
+							task.spawn(MessagingService.PublishAsync, MessagingService, "PS_" .. active_session[3], { LoadCount = session_load_count, EndSession = true })
 						end
 
 						-- Attempt to load the profile again after a delay
-						local wait_until = os.clock()
-							+ if request_force_load == true then FIRST_LOAD_REPEAT else LOAD_REPEAT_PERIOD
+						local wait_until = os.clock() + if request_force_load == true then FIRST_LOAD_REPEAT else LOAD_REPEAT_PERIOD
 						repeat
 							task.wait()
 						until os.clock() >= wait_until or ProfileStore.IsClosing == true
@@ -1632,12 +1559,7 @@ function ProfileStore:MessageAsync(profile_key, message)
 
 				if type(active_session) == "table" and type(active_session[3]) == "string" then
 					-- Request the remote server to auto-save sooner and receive the message:
-					task.spawn(
-						MessagingService.PublishAsync,
-						MessagingService,
-						"PS_" .. active_session[3],
-						{ LoadCount = session_load_count }
-					)
+					task.spawn(MessagingService.PublishAsync, MessagingService, "PS_" .. active_session[3], { LoadCount = session_load_count })
 				end
 			end
 
@@ -1850,12 +1772,7 @@ function ProfileVersionQuery:NextAsync()
 			end)
 
 			local list_success, error_message = pcall(function()
-				self.query_pages = self.profile_store.data_store:ListVersionsAsync(
-					self.profile_key,
-					self.sort_direction,
-					self.min_date,
-					self.max_date
-				)
+				self.query_pages = self.profile_store.data_store:ListVersionsAsync(self.profile_key, self.sort_direction, self.min_date, self.max_date)
 				self.query_index = 0
 			end)
 
@@ -1939,10 +1856,7 @@ function ProfileStore:VersionQuery(profile_key, sort_direction, min_date, max_da
 
 	-- Type check:
 
-	if
-		sort_direction ~= nil
-		and (typeof(sort_direction) ~= "EnumItem" or sort_direction.EnumType ~= Enum.SortDirection)
-	then
+	if sort_direction ~= nil and (typeof(sort_direction) ~= "EnumItem" or sort_direction.EnumType ~= Enum.SortDirection) then
 		error(`[{script.Name}]: Invalid sort_direction ({tostring(sort_direction)})`)
 	end
 
@@ -1978,8 +1892,7 @@ if IsStudio == true then
 		end
 
 		if
-			status == false
-			and (
+			status == false and (
 				string.find(message, "403", 1, true) ~= nil -- Cannot write to DataStore from studio if API access is not enabled
 				or string.find(message, "must publish", 1, true) ~= nil -- Game must be published to access live keys
 				or no_internet_access == true

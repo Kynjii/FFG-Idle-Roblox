@@ -151,9 +151,7 @@ function Maid:Add(object: any)
 
 	if object_type == "table" then
 		if type(object.Destroy) ~= "function" and type(object.Disconnect) ~= "function" then
-			error(
-				`[{script.Name}]: Received table as cleanup object, but couldn't detect a :Destroy() or :Disconnect() method`
-			)
+			error(`[{script.Name}]: Received table as cleanup object, but couldn't detect a :Destroy() or :Disconnect() method`)
 		end
 	elseif object_type ~= "function" and object_type ~= "RBXScriptConnection" and object_type ~= "Instance" then
 		error(`[{script.Name}]: Cleanup of type \"{object_type}\" not supported`)

@@ -13,13 +13,15 @@ local BOAT = {}
 BOAT.SetupProximityPrompt = function(boat: Model, primaryPart: Part, purchaseBoard: Part)
 	local proximityPrompt = Instance.new("ProximityPrompt", purchaseBoard)
 	proximityPrompt.HoldDuration = 1
-	proximityPrompt.ObjectText = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) and "Upgrade Boat"
-		or "Purchase"
-	proximityPrompt.ActionText = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased)
-			and "Level: " .. tostring(primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level) + 1)
-		or "Boat"
+	proximityPrompt.ObjectText = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) and "Upgrade Boat" or "Purchase"
+	proximityPrompt.ActionText = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) and "Level: " .. tostring(primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level) + 1) or "Boat"
 
 	proximityPrompt.TriggerEnded:Connect(function(player)
+		-- //TODO - replace amount with the upgrade cost
+		if not DataManager.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, 500) then
+			return
+		end
+
 		if primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) then
 			local newValue = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level) + 1
 			primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level, newValue)
@@ -30,11 +32,8 @@ BOAT.SetupProximityPrompt = function(boat: Model, primaryPart: Part, purchaseBoa
 			primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased, true)
 			primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.isActive, true)
 
-			proximityPrompt.ObjectText = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) and "Upgrade"
-				or "Unlock"
-			proximityPrompt.ActionText = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased)
-					and "Level: " .. tostring(primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level) + 1)
-				or "Boat"
+			proximityPrompt.ObjectText = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) and "Upgrade" or "Unlock"
+			proximityPrompt.ActionText = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) and "Level: " .. tostring(primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level) + 1) or "Boat"
 
 			local boatParts = boat:GetChildren()
 			for _, part in pairs(boatParts) do
@@ -61,25 +60,13 @@ BOAT.SetupUpgradeStore = function(boat: Model, primaryPart: Part)
 	pbDetails.LevelLabel = FFGHelpers.deepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel")
 
 	if pbDetails then
+		local upgradeStage = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.UpgradeStage)
 		local level = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level)
-		for i, threshold in ipairs(FFGEnum.QUALITY_PROMOTION_LEVELS) do
-			if level == threshold + 1 then
-				local qualityInfo = FFGEnum.QUALITY[i]
-				if qualityInfo then
-					local color = qualityInfo.color
-					pbDetails.NameLabel.TextColor3 = color
-					pbDetails.NameLabel.Text = FFGEnum.BOAT.NAME[i]
-				end
-
-				break
-			end
-		end
-		pbDetails.NameLabel.Text = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased)
-				and primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Name)
-			or ""
-
-		pbDetails.LevelLabel.Text = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) and "Level: " .. level
-			or "Purchase Boat"
+		local qualityInfo = FFGEnum.QUALITY[upgradeStage]
+		local color = qualityInfo.color
+		pbDetails.NameLabel.TextColor3 = color
+		pbDetails.NameLabel.Text = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) and FFGEnum.BOAT.NAME[upgradeStage] or FFGEnum.ATTRIBUTES.BOAT.Name
+		pbDetails.LevelLabel.Text = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) and "Level: " .. level or "Purchase Boat"
 	end
 
 	return purchaseBoard
@@ -112,27 +99,35 @@ BOAT.UpdateBoardUI = function(primaryPart: Part, purchaseBoard: Part, attributeN
 end
 
 BOAT.SetupAttributeListeners = function(primaryPart: Part, purchaseBoard: Part, proximityPrompt: ProximityPrompt)
-	if primaryPart and purchaseBoard then
-		primaryPart:GetAttributeChangedSignal(FFGEnum.ATTRIBUTES.BOAT.Level):Connect(function()
-			BOAT.UpdateBoardUI(primaryPart, purchaseBoard, FFGEnum.ATTRIBUTES.BOAT.Level)
-		end)
+	if not primaryPart and not purchaseBoard then
+		return
+	end
 
-		if proximityPrompt then
-			primaryPart:GetAttributeChangedSignal(FFGEnum.ATTRIBUTES.BOAT.Level):Connect(function()
-				BOAT.UpdateProximityPromptUI(proximityPrompt, primaryPart)
-			end)
-		end
+	-- When the level is changed, update the board to reflect
+	primaryPart:GetAttributeChangedSignal(FFGEnum.ATTRIBUTES.BOAT.Level):Connect(function()
+		BOAT.UpdateBoardUI(primaryPart, purchaseBoard, FFGEnum.ATTRIBUTES.BOAT.Level)
+	end)
+
+	-- When the level is changed, update the prox prompt labels
+	if proximityPrompt then
+		primaryPart:GetAttributeChangedSignal(FFGEnum.ATTRIBUTES.BOAT.Level):Connect(function()
+			BOAT.UpdateProximityPromptUI(proximityPrompt, primaryPart)
+		end)
 	end
 end
 
 BOAT.SetupBoat = function(boat: Model)
 	local primaryPart = boat.PrimaryPart
+
+	-- //TODO - get boat state or FFGDefaults.BOAT_STARTING_ATT
 	local attributes = FFGDefaults.BOAT_STARTING_ATT
 
+	-- apply attributes to boat Primary Part
 	for key, value in pairs(attributes) do
 		primaryPart:SetAttribute(key, value)
 	end
 
+	-- Setup the purchase board info and attribute listeners
 	local purchaseBoard = BOAT.SetupUpgradeStore(boat, primaryPart)
 	if purchaseBoard then
 		local proximityPrompt = BOAT.SetupProximityPrompt(boat, primaryPart, purchaseBoard)

@@ -108,8 +108,7 @@ local RemoteBind = Remote.New("ReplicaBind") -- (replica_id)
 local RemoteDestroy = Remote.New("ReplicaDestroy") -- (replica_id)
 local RemoteSignalUnreliable = Remote.New("ReplicaSignalUnreliable", true) -- (replica_id, ...)
 
-local WriteLibCache: { [ModuleScript]: { [string | number]: { Name: string, Id: number, fn: (...any) -> ...any } } } =
-	{}
+local WriteLibCache: { [ModuleScript]: { [string | number]: { Name: string, Id: number, fn: (...any) -> ...any } } } = {}
 local ReplicationFlag = false
 
 local function LoadWriteLib(module: ModuleScript)
@@ -159,15 +158,7 @@ export type Replica = {
 
 	OnSet: (self: any, path: {}, listener: () -> ()) -> Signal.Connection,
 	OnWrite: (self: any, function_name: string, listener: (...any) -> ()) -> Signal.Connection,
-	OnChange: (
-		self: any,
-		listener: (
-			action: "Set" | "SetValues" | "TableInsert" | "TableRemove",
-			path: { any },
-			param1: any,
-			param2: any?
-		) -> ()
-	) -> Signal.Connection,
+	OnChange: (self: any, listener: (action: "Set" | "SetValues" | "TableInsert" | "TableRemove", path: { any }, param1: any, param2: any?) -> ()) -> Signal.Connection,
 	GetChild: (self: any, token: string) -> Replica?,
 	FireServer: (self: any, ...any) -> (),
 	UFireServer: (self: any, ...any) -> (),
@@ -332,12 +323,7 @@ function Replica:OnWrite(function_name: string, listener: (...any) -> ()): Signa
 	return listeners:Connect(listener)
 end
 
-function Replica:OnChange(listener: (
-	action: "Set" | "SetValues" | "TableInsert" | "TableRemove",
-	path: { any },
-	param1: any,
-	param2: any?
-) -> ()): Signal.Connection
+function Replica:OnChange(listener: (action: "Set" | "SetValues" | "TableInsert" | "TableRemove", path: { any }, param1: any, param2: any?) -> ()): Signal.Connection
 	return self.changed_listeners:Connect(listener)
 end
 
@@ -771,45 +757,41 @@ end)
 RemoteCreate.OnClientEvent:Connect(function(creation: {}, root_id: number?) -- (creation) or ({creation, ...})
 	local announce_buffer = {} -- {replica, ...} -- Announce these
 
-	BreadthCreationSort(
-		creation,
-		root_id,
-		function(id: number, self_creation: {}) -- self_creation = {token, tags, data, parent_id, write_module}
-			local parent_id = self_creation[4]
-			local replica = ReplicaNew(id, self_creation)
-			local is_bind_buffered = false
+	BreadthCreationSort(creation, root_id, function(id: number, self_creation: {}) -- self_creation = {token, tags, data, parent_id, write_module}
+		local parent_id = self_creation[4]
+		local replica = ReplicaNew(id, self_creation)
+		local is_bind_buffered = false
 
-			if parent_id == 0 then -- Top replica
-				if replica.Tags[BIND_TAG] == true then
-					local bound_instance = BindInstances[id]
-					replica.BoundInstance = bound_instance
+		if parent_id == 0 then -- Top replica
+			if replica.Tags[BIND_TAG] == true then
+				local bound_instance = BindInstances[id]
+				replica.BoundInstance = bound_instance
 
-					if bound_instance == nil then
-						is_bind_buffered = true
-					end
+				if bound_instance == nil then
+					is_bind_buffered = true
 				end
-			elseif BindReplicas[parent_id] ~= nil then
-				is_bind_buffered = true
 			end
-
-			if is_bind_buffered == true then
-				BindReplicas[id] = replica
-			else
-				local token = replica.Token
-				local token_replicas = TokenReplicas[token]
-
-				if token_replicas == nil then
-					token_replicas = {}
-					TokenReplicas[token] = token_replicas
-				end
-
-				token_replicas[replica] = true
-				Replicas[id] = replica
-
-				table.insert(announce_buffer, replica)
-			end
+		elseif BindReplicas[parent_id] ~= nil then
+			is_bind_buffered = true
 		end
-	)
+
+		if is_bind_buffered == true then
+			BindReplicas[id] = replica
+		else
+			local token = replica.Token
+			local token_replicas = TokenReplicas[token]
+
+			if token_replicas == nil then
+				token_replicas = {}
+				TokenReplicas[token] = token_replicas
+			end
+
+			token_replicas[replica] = true
+			Replicas[id] = replica
+
+			table.insert(announce_buffer, replica)
+		end
+	end)
 
 	for _, replica in ipairs(announce_buffer) do
 		local listeners = NewReplicaListeners[replica.Token]
