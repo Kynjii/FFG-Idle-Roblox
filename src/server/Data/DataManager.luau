@@ -124,6 +124,7 @@ end
 
 function DataManager.UpdateBoatState(player: Player, stateKey, newStateValue, ownerId)
 	-- //TODO - probably do a check to see if boat owner matches player, if not then return
+	-- //TODO - think if you want to pass the current attributes to determine things like tier, it might help with finding inxed instead of hardcoding
 	local profile = DataManager.Profiles[player]
 	if not profile then
 		FFGHelpers.PrintLog("No profile found when attempting to update state for: ", player)

@@ -99,6 +99,7 @@ FFGEnum.ATTRIBUTES = {
 	GENERAL = {
 		["Name"] = "Name",
 		["isUnlocked"] = "isUnlocked",
+		["Id"] = "Id",
 	},
 	BOAT = {
 		["Owner"] = "Owner",

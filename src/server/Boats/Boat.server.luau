@@ -13,9 +13,10 @@ local BOAT = {}
 BOAT.SetupProximityPrompt = function(boat: Model, primaryPart: Part, purchaseBoard: Part)
 	local proximityPrompt = Instance.new("ProximityPrompt", purchaseBoard)
 	proximityPrompt.HoldDuration = 1
-	proximityPrompt.ObjectText = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) and "Upgrade" or "Unlock"
+	proximityPrompt.ObjectText = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) and "Upgrade Boat"
+		or "Purchase"
 	proximityPrompt.ActionText = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased)
-			and "Level: " .. tostring(primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level))
+			and "Level: " .. tostring(primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level) + 1)
 		or "Boat"
 
 	proximityPrompt.TriggerEnded:Connect(function(player)
@@ -43,9 +44,17 @@ BOAT.SetupProximityPrompt = function(boat: Model, primaryPart: Part, purchaseBoa
 			end
 		end
 	end)
+
+	return proximityPrompt
 end
 
-BOAT.SetupUpgradeStore = function(boat: Model, primaryPart: Instance)
+BOAT.UpdateProximityPromptUI = function(proximityPrompt: ProximityPrompt, primaryPart: Part)
+	if proximityPrompt then
+		proximityPrompt.ActionText = "Level: " .. tostring(primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level) + 1)
+	end
+end
+
+BOAT.SetupUpgradeStore = function(boat: Model, primaryPart: Part)
 	local purchaseBoard = boat:WaitForChild("Purchase_Board")
 	local pbDetails = {}
 	pbDetails.NameLabel = FFGHelpers.deepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel")
@@ -53,23 +62,67 @@ BOAT.SetupUpgradeStore = function(boat: Model, primaryPart: Instance)
 
 	if pbDetails then
 		local level = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level)
-		for qualityIndex, qualityLevelCap in ipairs(FFGEnum.QUALITY_PROMOTION_LEVELS) do
-			if level <= qualityLevelCap then
-				local qualityInfo = FFGEnum.QUALITY[qualityIndex]
+		for i, threshold in ipairs(FFGEnum.QUALITY_PROMOTION_LEVELS) do
+			if level == threshold + 1 then
+				local qualityInfo = FFGEnum.QUALITY[i]
 				if qualityInfo then
 					local color = qualityInfo.color
 					pbDetails.NameLabel.TextColor3 = color
+					pbDetails.NameLabel.Text = FFGEnum.BOAT.NAME[i]
 				end
 
 				break
 			end
 		end
-		pbDetails.NameLabel.Text = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Name)
+		pbDetails.NameLabel.Text = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased)
+				and primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Name)
+			or ""
 
-		pbDetails.LevelLabel.Text = "Level: " .. level
+		pbDetails.LevelLabel.Text = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) and "Level: " .. level
+			or "Purchase Boat"
 	end
 
 	return purchaseBoard
+end
+
+BOAT.UpdateBoardUI = function(primaryPart: Part, purchaseBoard: Part, attributeName)
+	if not attributeName or not purchaseBoard then
+		FFGHelpers.PrintLog("No attributeName or purchaseBoard found")
+		return
+	end
+
+	local pbDetails = {}
+	pbDetails.NameLabel = FFGHelpers.deepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel")
+	pbDetails.LevelLabel = FFGHelpers.deepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel")
+
+	if attributeName == FFGEnum.ATTRIBUTES.BOAT.Level then
+		local level = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level)
+		pbDetails.LevelLabel.Text = "Level: " .. level
+
+		local currentUpgradeStage = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.UpgradeStage)
+
+		for i, threshold in ipairs(FFGEnum.QUALITY_PROMOTION_LEVELS) do
+			if level == threshold + 1 then
+				FFGHelpers.PrintLog("Level matches UpgradeStage + 1, updating")
+				primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.UpgradeStage, currentUpgradeStage + 1)
+				break
+			end
+		end
+	end
+end
+
+BOAT.SetupAttributeListeners = function(primaryPart: Part, purchaseBoard: Part, proximityPrompt: ProximityPrompt)
+	if primaryPart and purchaseBoard then
+		primaryPart:GetAttributeChangedSignal(FFGEnum.ATTRIBUTES.BOAT.Level):Connect(function()
+			BOAT.UpdateBoardUI(primaryPart, purchaseBoard, FFGEnum.ATTRIBUTES.BOAT.Level)
+		end)
+
+		if proximityPrompt then
+			primaryPart:GetAttributeChangedSignal(FFGEnum.ATTRIBUTES.BOAT.Level):Connect(function()
+				BOAT.UpdateProximityPromptUI(proximityPrompt, primaryPart)
+			end)
+		end
+	end
 end
 
 BOAT.SetupBoat = function(boat: Model)
@@ -79,11 +132,12 @@ BOAT.SetupBoat = function(boat: Model)
 	for key, value in pairs(attributes) do
 		primaryPart:SetAttribute(key, value)
 	end
-	-- //TODO Look into on attribute changed and then have other attributes update based that
-	--  https://create.roblox.com/docs/reference/engine/classes/Instance#GetAttributeChangedSignal
 
 	local purchaseBoard = BOAT.SetupUpgradeStore(boat, primaryPart)
-	BOAT.SetupProximityPrompt(boat, primaryPart, purchaseBoard)
+	if purchaseBoard then
+		local proximityPrompt = BOAT.SetupProximityPrompt(boat, primaryPart, purchaseBoard)
+		BOAT.SetupAttributeListeners(primaryPart, purchaseBoard, proximityPrompt)
+	end
 end
 
 for _, taggedBoat in ipairs(taggedBoats) do
