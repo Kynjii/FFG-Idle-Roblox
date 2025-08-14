@@ -39,9 +39,7 @@ local RateLimit = {}
 RateLimit.__index = RateLimit
 
 function RateLimit.New(rate: number, is_full_wait: boolean?) --> [RateLimit]
-	if rate <= 0 then
-		error("[RateLimit]: Invalid rate")
-	end
+	if rate <= 0 then error("[RateLimit]: Invalid rate") end
 
 	local self = {
 		sources = {},
@@ -59,9 +57,7 @@ function RateLimit:CheckRate(source): boolean --> is_to_be_processed [bool] -- W
 	local sources = self.sources
 	local os_clock = os.clock()
 
-	if source == nil then
-		source = "nil"
-	end
+	if source == nil then source = "nil" end
 
 	local rate_time: number = sources[source]
 
@@ -84,9 +80,7 @@ function RateLimit:CheckRate(source): boolean --> is_to_be_processed [bool] -- W
 		end
 	else
 		-- Preventing from remembering players that already left:
-		if typeof(source) == "Instance" and source:IsA("Player") and PlayerReference[source] == nil then
-			return false
-		end
+		if typeof(source) == "Instance" and source:IsA("Player") and PlayerReference[source] == nil then return false end
 		sources[source] = os_clock + self.rate_period
 		return true
 	end

@@ -160,9 +160,7 @@ local function LoadWriteLib(module: ModuleScript)
 
 	local loaded_module = require(module)
 
-	if type(loaded_module) ~= "table" then
-		error(`[{script.Name}]: A "WriteLib" ModuleScript must return a table`)
-	end
+	if type(loaded_module) ~= "table" then error(`[{script.Name}]: A "WriteLib" ModuleScript must return a table`) end
 
 	local function_list = {} -- fn_id = {fn_name, fn}
 
@@ -251,13 +249,9 @@ local LockedReplica = {}
 LockedReplica.__index = LockedReplica
 
 function Replica.Token(name: string)
-	if type(name) ~= "string" then
-		error(`[{script.Name}]: name must be a string`)
-	end
+	if type(name) ~= "string" then error(`[{script.Name}]: name must be a string`) end
 
-	if Tokens[name] == true then
-		error(`[{script.Name}]: Token "{name}" duplicate`)
-	end
+	if Tokens[name] == true then error(`[{script.Name}]: Token "{name}" duplicate`) end
 
 	Tokens[name] = true
 
@@ -286,9 +280,7 @@ function Replica.New(params: { Token: typeof(ReplicaToken), Tags: {}?, Data: {}?
 		error(`[{script.Name}]: "Tags.{BIND_TAG}" key is reserved`)
 	end
 
-	if params.WriteLib ~= nil then
-		write_lib = LoadWriteLib(params.WriteLib)
-	end
+	if params.WriteLib ~= nil then write_lib = LoadWriteLib(params.WriteLib) end
 
 	Index += 1
 
@@ -461,9 +453,7 @@ function Replica:Write(function_name: string, ...): ...any
 	local return_params = table.pack(pcall(write_lib_entry.fn, self, ...))
 	WriteFlag = false
 
-	if return_params[1] ~= true then
-		error(`[{script.Name}]: (WriteLib) ` .. tostring(return_params[2]))
-	end
+	if return_params[1] ~= true then error(`[{script.Name}]: (WriteLib) ` .. tostring(return_params[2])) end
 
 	table.remove(return_params, 1)
 
@@ -489,9 +479,7 @@ end
 
 function Replica:FireClient(player, ...)
 	if self.replication ~= nil then
-		if (self.replication[REPLICATION_ALL] == true and ReadyPlayers[player] == true) or self.replication[player] ~= nil then
-			RemoteSignal:FireClient(player, self.Id, ...)
-		end
+		if (self.replication[REPLICATION_ALL] == true and ReadyPlayers[player] == true) or self.replication[player] ~= nil then RemoteSignal:FireClient(player, self.Id, ...) end
 	end
 end
 
@@ -512,9 +500,7 @@ end
 
 function Replica:UFireClient(player, ...)
 	if self.replication ~= nil then
-		if (self.replication[REPLICATION_ALL] == true and ReadyPlayers[player] == true) or self.replication[player] ~= nil then
-			RemoteSignalUnreliable:FireClient(player, self.Id, ...)
-		end
+		if (self.replication[REPLICATION_ALL] == true and ReadyPlayers[player] == true) or self.replication[player] ~= nil then RemoteSignalUnreliable:FireClient(player, self.Id, ...) end
 	end
 end
 
@@ -542,13 +528,9 @@ function Replica:SetParent(new_parent)
 
 	-- Top Replica / Bind check:
 
-	if TopReplicas[self] ~= nil then
-		error(`[{script.Name}]: Can't change parent for top level Replica`)
-	end
+	if TopReplicas[self] ~= nil then error(`[{script.Name}]: Can't change parent for top level Replica`) end
 
-	if self.BoundInstance ~= nil then
-		error(`[{script.Name}]: Can't change parent for bound Replica`)
-	end
+	if self.BoundInstance ~= nil then error(`[{script.Name}]: Can't change parent for bound Replica`) end
 
 	-- Recursion check:
 
@@ -556,24 +538,18 @@ function Replica:SetParent(new_parent)
 
 	while recursion_check ~= nil do
 		recursion_check = recursion_check.Parent
-		if recursion_check == self then
-			error(`[{script.Name}]: Can't set descendant Replica as parent`)
-		end
+		if recursion_check == self then error(`[{script.Name}]: Can't set descendant Replica as parent`) end
 	end
 
 	-- Hierarchy:
 
 	local old_parent = self.Parent
 
-	if old_parent == new_parent then
-		return
-	end
+	if old_parent == new_parent then return end
 
 	self.Parent = new_parent
 
-	if old_parent ~= nil then
-		old_parent.Children[self] = nil
-	end
+	if old_parent ~= nil then old_parent.Children[self] = nil end
 
 	new_parent.Children[self] = true
 
@@ -581,9 +557,7 @@ function Replica:SetParent(new_parent)
 
 	IterateGroup(self, function(group_replica)
 		local string_id = tostring(group_replica.Id)
-		if old_parent ~= nil and old_parent.creation ~= nil then
-			old_parent.creation[string_id] = nil
-		end
+		if old_parent ~= nil and old_parent.creation ~= nil then old_parent.creation[string_id] = nil end
 		if new_parent.creation ~= nil then
 			local self_creation = group_replica.self_creation
 			self_creation[4] = group_replica.Parent.Id
@@ -624,9 +598,7 @@ function Replica:SetParent(new_parent)
 	if old_parent ~= nil and old_parent.replication ~= nil then
 		if new_parent.replication ~= old_parent.replication and new_subscriptions ~= ReadyPlayers then
 			for player in pairs(old_subscriptions) do
-				if new_subscriptions[player] == nil then
-					RemoteDestroy:FireClient(player, self_id)
-				end
+				if new_subscriptions[player] == nil then RemoteDestroy:FireClient(player, self_id) end
 			end
 		end
 	end
@@ -654,21 +626,13 @@ function Replica:SetParent(new_parent)
 end
 
 function Replica:BindToInstance(instance: Instance)
-	if typeof(instance) ~= "Instance" then
-		error(`[{script.Name}]: "instance" argument is not an Instance ({tostring(instance)})`)
-	end
+	if typeof(instance) ~= "Instance" then error(`[{script.Name}]: "instance" argument is not an Instance ({tostring(instance)})`) end
 
-	if self.Parent ~= nil then
-		error(`[{script.Name}]: Can't bind Replica parented to another Replica`)
-	end
+	if self.Parent ~= nil then error(`[{script.Name}]: Can't bind Replica parented to another Replica`) end
 
-	if self.BoundInstance ~= nil then
-		error(`[{script.Name}]: Can't change Replica bind to another Instance`)
-	end
+	if self.BoundInstance ~= nil then error(`[{script.Name}]: Can't change Replica bind to another Instance`) end
 
-	if instance:IsA("Model") == true and (instance.ModelStreamingMode == Enum.ModelStreamingMode.Default or instance.ModelStreamingMode == Enum.ModelStreamingMode.Nonatomic) then
-		warn(`[{script.Name}]: Bound Replica to a model that has improper "ModelStreamingMode" setup; Traceback:\n` .. debug.traceback())
-	end
+	if instance:IsA("Model") == true and (instance.ModelStreamingMode == Enum.ModelStreamingMode.Default or instance.ModelStreamingMode == Enum.ModelStreamingMode.Nonatomic) then warn(`[{script.Name}]: Bound Replica to a model that has improper "ModelStreamingMode" setup; Traceback:\n` .. debug.traceback()) end
 
 	local bind_value = BindValuePrefab:Clone()
 	bind_value.Value = self.Id
@@ -694,9 +658,7 @@ function Replica:BindToInstance(instance: Instance)
 end
 
 function Replica:Replicate()
-	if self.Parent ~= nil then
-		error(`[{script.Name}]: Can't selectively replicate Replica parented to another Replica`)
-	end
+	if self.Parent ~= nil then error(`[{script.Name}]: Can't selectively replicate Replica parented to another Replica`) end
 
 	if self.creation == nil then
 		GenerateCreation(self)
@@ -723,15 +685,11 @@ function Replica:Replicate()
 end
 
 function Replica:DontReplicate()
-	if self.Parent ~= nil then
-		error(`[{script.Name}]: Can't selectively replicate Replica parented to another Replica`)
-	end
+	if self.Parent ~= nil then error(`[{script.Name}]: Can't selectively replicate Replica parented to another Replica`) end
 
 	local replication = self.replication
 
-	if replication == nil or next(replication) == nil then
-		return
-	end
+	if replication == nil or next(replication) == nil then return end
 
 	ReplicationAllReplicas[self] = nil
 
@@ -752,9 +710,7 @@ function Replica:DontReplicate()
 end
 
 function Replica:Subscribe(player: Player)
-	if self.Parent ~= nil then
-		error(`[{script.Name}]: Can't selectively replicate Replica parented to another Replica`)
-	end
+	if self.Parent ~= nil then error(`[{script.Name}]: Can't selectively replicate Replica parented to another Replica`) end
 
 	if self.creation == nil then
 		GenerateCreation(self)
@@ -781,19 +737,13 @@ function Replica:Subscribe(player: Player)
 end
 
 function Replica:Unsubscribe(player: Player)
-	if self.Parent ~= nil then
-		error(`[{script.Name}]: Can't selectively replicate Replica parented to another Replica`)
-	end
+	if self.Parent ~= nil then error(`[{script.Name}]: Can't selectively replicate Replica parented to another Replica`) end
 
 	local replication = self.replication
 
-	if replication == nil then
-		return
-	end
+	if replication == nil then return end
 
-	if replication[REPLICATION_ALL] == true then
-		error(`[{script.Name}]: "Unsubscribe()" is locked after calling "Replicate()"`)
-	end
+	if replication[REPLICATION_ALL] == true then error(`[{script.Name}]: "Unsubscribe()" is locked after calling "Replicate()"`) end
 
 	if replication[player] ~= nil then
 		replication[player] = nil
@@ -835,9 +785,7 @@ local function DestroyReplica(replica)
 		replica.bind_value = nil
 	end
 	-- Remove creation data:
-	if replica.creation ~= nil then
-		replica.creation[tostring(id)] = nil
-	end
+	if replica.creation ~= nil then replica.creation[tostring(id)] = nil end
 	-- Swap metatables:
 	setmetatable(replica, LockedReplica)
 end
@@ -845,9 +793,7 @@ end
 function Replica:Destroy()
 	local self_id = self.Id
 
-	if Replicas[self_id] == nil then
-		return
-	end
+	if Replicas[self_id] == nil then return end
 
 	local is_top = TopReplicas[self] == true
 
@@ -861,9 +807,7 @@ function Replica:Destroy()
 		else
 			for player in pairs(self.replication) do
 				RemoteDestroy:FireClient(player, self_id)
-				if is_top == true then
-					SelectiveSubscriptions[player][self] = nil
-				end
+				if is_top == true then SelectiveSubscriptions[player][self] = nil end
 			end
 		end
 	end
@@ -873,9 +817,7 @@ function Replica:Destroy()
 	TopReplicas[self] = nil
 	ReplicationAllReplicas[self] = nil
 
-	if self.Parent ~= nil then
-		self.Parent.Children[self] = nil
-	end
+	if self.Parent ~= nil then self.Parent.Children[self] = nil end
 
 	-- Recursive destruction:
 
@@ -906,9 +848,7 @@ end
 -- New player data replication:
 
 RemoteRequestData.OnServerEvent:Connect(function(player: Player)
-	if ReadyPlayers[player] ~= nil and player:IsDescendantOf(Players) == true then
-		return
-	end
+	if ReadyPlayers[player] ~= nil and player:IsDescendantOf(Players) == true then return end
 
 	-- Make the client create all replicas that are initially replicated to the client;
 	-- Pack up and send initially replicated replicas:
@@ -933,16 +873,12 @@ end)
 
 local function RemoteSignalHandle(player: Player, id: number, ...)
 	-- Missing player prevention, spam prevention and exploit prevention:
-	if ReadyPlayers[player] == nil or GlobalRateLimit:CheckRate(player) == false or type(id) ~= "number" then
-		return
-	end
+	if ReadyPlayers[player] == nil or GlobalRateLimit:CheckRate(player) == false or type(id) ~= "number" then return end
 
 	local replica = Replicas[id]
 
 	if replica ~= nil then
-		if replica.replication ~= nil and (replica.replication[REPLICATION_ALL] == true or replica.replication[player] ~= nil) then
-			replica.OnServerEvent:Fire(player, ...)
-		end
+		if replica.replication ~= nil and (replica.replication[REPLICATION_ALL] == true or replica.replication[player] ~= nil) then replica.OnServerEvent:Fire(player, ...) end
 	end
 end
 
@@ -952,9 +888,7 @@ RemoteSignalUnreliable.OnServerEvent:Connect(RemoteSignalHandle)
 -- Player leave handling:
 
 Players.PlayerRemoving:Connect(function(player)
-	if ReadyPlayers[player] == nil then
-		return
-	end
+	if ReadyPlayers[player] == nil then return end
 
 	-- Remove player from subscription settings:
 

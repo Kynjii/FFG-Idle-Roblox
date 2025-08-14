@@ -74,9 +74,7 @@ local function Cleanup(object: any, ...)
 end
 
 local function CleanupInThread(...)
-	if not FreeRunnerThread then
-		FreeRunnerThread = coroutine.create(RunEventHandlerInFreeThread)
-	end
+	if not FreeRunnerThread then FreeRunnerThread = coroutine.create(RunEventHandlerInFreeThread) end
 	task.spawn(assert(FreeRunnerThread), Cleanup, ...)
 end
 
@@ -114,9 +112,7 @@ function MaidToken:Destroy()
 end
 
 function MaidToken:Cleanup(...)
-	if self.object == nil then
-		return
-	end
+	if self.object == nil then return end
 
 	self.maid.tokens[self] = nil
 	CleanupInThread(self.object, ...)
@@ -143,16 +139,12 @@ function Maid:IsActive()
 end
 
 function Maid:Add(object: any)
-	if self.is_cleaned == true then
-		CleanupInThread(object)
-	end
+	if self.is_cleaned == true then CleanupInThread(object) end
 
 	local object_type = typeof(object)
 
 	if object_type == "table" then
-		if type(object.Destroy) ~= "function" and type(object.Disconnect) ~= "function" then
-			error(`[{script.Name}]: Received table as cleanup object, but couldn't detect a :Destroy() or :Disconnect() method`)
-		end
+		if type(object.Destroy) ~= "function" and type(object.Disconnect) ~= "function" then error(`[{script.Name}]: Received table as cleanup object, but couldn't detect a :Destroy() or :Disconnect() method`) end
 	elseif object_type ~= "function" and object_type ~= "RBXScriptConnection" and object_type ~= "Instance" then
 		error(`[{script.Name}]: Cleanup of type \"{object_type}\" not supported`)
 	end
@@ -164,9 +156,7 @@ function Maid:Add(object: any)
 end
 
 function Maid:Cleanup(...)
-	if self.key ~= nil then
-		error(`[{script.Name}]: "Cleanup()" is locked for this Maid`)
-	end
+	if self.key ~= nil then error(`[{script.Name}]: "Cleanup()" is locked for this Maid`) end
 
 	self.is_cleaned = true
 
@@ -176,9 +166,7 @@ function Maid:Cleanup(...)
 end
 
 function Maid:Unlock(key: any)
-	if self.key ~= nil and self.key ~= key then
-		error(`[{script.Name}]: Invalid lock key`)
-	end
+	if self.key ~= nil and self.key ~= key then error(`[{script.Name}]: Invalid lock key`) end
 	self.key = nil
 end
 

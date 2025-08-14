@@ -75,9 +75,7 @@ local Signal = {}
 Signal.__index = Signal
 
 function Connection:Disconnect()
-	if self.IsConnected == false then
-		return
-	end
+	if self.IsConnected == false then return end
 
 	local signal = self.signal
 	self.IsConnected = false
@@ -89,9 +87,7 @@ function Connection:Disconnect()
 		while prev ~= nil and prev.next ~= self do
 			prev = prev.next
 		end
-		if prev ~= nil then
-			prev.next = self.next
-		end
+		if prev ~= nil then prev.next = self.next end
 	end
 end
 
@@ -105,9 +101,7 @@ function Signal.New<T...>(): Signal<T...>
 end
 
 function Signal:Connect(listener: (...any) -> ())
-	if type(listener) ~= "function" then
-		error(`[{script.Name}]: \"listener\" must be a function; Received {typeof(listener)}`)
-	end
+	if type(listener) ~= "function" then error(`[{script.Name}]: \"listener\" must be a function; Received {typeof(listener)}`) end
 
 	local connection = {
 		listener = listener,
@@ -126,9 +120,7 @@ function Signal:Fire(...)
 	local item = self.head
 	while item ~= nil do
 		if item.IsConnected == true then
-			if not FreeRunnerThread then
-				FreeRunnerThread = coroutine.create(RunEventHandlerInFreeThread)
-			end
+			if not FreeRunnerThread then FreeRunnerThread = coroutine.create(RunEventHandlerInFreeThread) end
 			task.spawn(FreeRunnerThread :: thread, item.listener, ...)
 		end
 		item = item.next
@@ -146,9 +138,7 @@ function Signal:Wait()
 end
 
 function Signal:FireUntil(continue_callback: () -> boolean, ...)
-	if type(continue_callback) ~= "function" then
-		error(`[{script.Name}]: \"continue_callback\" must be a function; Received {typeof(continue_callback)}`)
-	end
+	if type(continue_callback) ~= "function" then error(`[{script.Name}]: \"continue_callback\" must be a function; Received {typeof(continue_callback)}`) end
 
 	local items = {}
 	local args = table.pack(...)
@@ -163,9 +153,7 @@ function Signal:FireUntil(continue_callback: () -> boolean, ...)
 		for _, check_item in ipairs(items) do
 			if check_item.IsConnected == true then
 				check_item.listener(table.unpack(args))
-				if continue_callback() ~= true then
-					return
-				end
+				if continue_callback() ~= true then return end
 			end
 		end
 	end)

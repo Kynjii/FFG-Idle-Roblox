@@ -198,9 +198,7 @@ Replica.__index = Replica
 
 local function ReplicaNew(id: number, self_creation: {}) -- self_creation = {token, tags, data, parent_id, write_module}
 	local write_lib = nil
-	if self_creation[5] ~= nil then
-		write_lib = LoadWriteLib(self_creation[5])
-	end
+	if self_creation[5] ~= nil then write_lib = LoadWriteLib(self_creation[5]) end
 
 	local token = self_creation[1]
 	local parent = BindReplicas[self_creation[4]] or Replicas[self_creation[4]]
@@ -225,17 +223,13 @@ local function ReplicaNew(id: number, self_creation: {}) -- self_creation = {tok
 		changed_listeners = Signal.New(),
 	}, Replica)
 
-	if parent ~= nil then
-		parent.Children[self] = true
-	end
+	if parent ~= nil then parent.Children[self] = true end
 
 	return self
 end
 
 function Replica.RequestData()
-	if DataRequestStarted == true then
-		return
-	end
+	if DataRequestStarted == true then return end
 
 	DataRequestStarted = true
 
@@ -243,18 +237,14 @@ function Replica.RequestData()
 		RemoteRequestData:FireServer()
 
 		while task.wait(REQUEST_DATA_REPEAT) do
-			if Replica.IsReady == true then
-				break
-			end
+			if Replica.IsReady == true then break end
 			RemoteRequestData:FireServer()
 		end
 	end)
 end
 
 function Replica.OnNew(token: string, listener: (replica: Replica) -> ()): Signal.Connection
-	if type(token) ~= "string" then
-		error(`[{script.Name}]: "token" must be a string`)
-	end
+	if type(token) ~= "string" then error(`[{script.Name}]: "token" must be a string`) end
 
 	local listeners = NewReplicaListeners[token]
 
@@ -275,12 +265,8 @@ function Replica.OnNew(token: string, listener: (replica: Replica) -> ()): Signa
 
 		task.defer(function()
 			for replica in pairs(announce) do
-				if connection.IsConnected ~= true then
-					break
-				end
-				if not FreeRunnerThread then
-					FreeRunnerThread = coroutine.create(RunEventHandlerInFreeThread)
-				end
+				if connection.IsConnected ~= true then break end
+				if not FreeRunnerThread then FreeRunnerThread = coroutine.create(RunEventHandlerInFreeThread) end
 				task.spawn(FreeRunnerThread, listener, replica)
 			end
 		end)
@@ -328,13 +314,9 @@ function Replica:OnChange(listener: (action: "Set" | "SetValues" | "TableInsert"
 end
 
 function Replica:GetChild(token: string): Replica?
-	if type(token) ~= "string" then
-		error(`[{script.Name}]: "token" must be a string`)
-	end
+	if type(token) ~= "string" then error(`[{script.Name}]: "token" must be a string`) end
 	for replica in pairs(self.Children) do
-		if replica.Token == token then
-			return replica
-		end
+		if replica.Token == token then return replica end
 	end
 	return nil
 end
@@ -362,9 +344,7 @@ function Replica:IsActive(): boolean
 end
 
 function Replica:Set(path: { string }, value: any)
-	if ReplicationFlag ~= true then
-		error(`[{script.Name}]: "Set()" can't be called outside of WriteLibs client-side`)
-	end
+	if ReplicationFlag ~= true then error(`[{script.Name}]: "Set()" can't be called outside of WriteLibs client-side`) end
 
 	-- Apply local change:
 
@@ -380,17 +360,13 @@ function Replica:Set(path: { string }, value: any)
 
 	if next(self.set_listeners) ~= nil then
 		local listeners = self.set_listeners[table.concat(path, ".")]
-		if listeners ~= nil then
-			listeners:Fire(value, old_value)
-		end
+		if listeners ~= nil then listeners:Fire(value, old_value) end
 	end
 	self.changed_listeners:Fire("Set", path, value, old_value)
 end
 
 function Replica:SetValues(path: { string }, values: { [string]: any })
-	if ReplicationFlag ~= true then
-		error(`[{script.Name}]: "SetValues()" can't be called outside of WriteLibs client-side`)
-	end
+	if ReplicationFlag ~= true then error(`[{script.Name}]: "SetValues()" can't be called outside of WriteLibs client-side`) end
 
 	-- Apply local change:
 
@@ -408,9 +384,7 @@ function Replica:SetValues(path: { string }, values: { [string]: any })
 end
 
 function Replica:TableInsert(path: { string }, value: any, index: number?): number
-	if ReplicationFlag ~= true then
-		error(`[{script.Name}]: "TableInsert()" can't be called outside of WriteLibs client-side`)
-	end
+	if ReplicationFlag ~= true then error(`[{script.Name}]: "TableInsert()" can't be called outside of WriteLibs client-side`) end
 
 	-- Apply local change:
 
@@ -433,9 +407,7 @@ function Replica:TableInsert(path: { string }, value: any, index: number?): numb
 end
 
 function Replica:TableRemove(path: { string }, index: number): any
-	if ReplicationFlag ~= true then
-		error(`[{script.Name}]: "TableRemove()" can't be called outside of WriteLibs client-side`)
-	end
+	if ReplicationFlag ~= true then error(`[{script.Name}]: "TableRemove()" can't be called outside of WriteLibs client-side`) end
 
 	-- Apply local change:
 
@@ -453,9 +425,7 @@ function Replica:TableRemove(path: { string }, index: number): any
 end
 
 function Replica:Write(function_name: string, ...): ...any
-	if ReplicationFlag ~= true then
-		error(`[{script.Name}]: "Write()" can't be called outside of WriteLibs client-side`)
-	end
+	if ReplicationFlag ~= true then error(`[{script.Name}]: "Write()" can't be called outside of WriteLibs client-side`) end
 
 	-- Apply local change:
 
@@ -465,9 +435,7 @@ function Replica:Write(function_name: string, ...): ...any
 	-- Firing signals:
 
 	local listeners = self.write_listeners[function_name]
-	if listeners ~= nil then
-		listeners:Fire(...)
-	end
+	if listeners ~= nil then listeners:Fire(...) end
 
 	return table.unpack(return_params)
 end
@@ -479,24 +447,16 @@ local function DestroyReplica(replica, is_depth_call)
 	end
 
 	if is_depth_call ~= true then
-		if replica.Parent ~= nil then
-			replica.Parent.Children[replica] = nil
-		end
+		if replica.Parent ~= nil then replica.Parent.Children[replica] = nil end
 	end
 
 	local id = replica.Id
 
 	-- Clear replica references:
 	local token_replicas = TokenReplicas[replica.Token]
-	if token_replicas ~= nil then
-		token_replicas[replica] = nil
-	end
-	if Replicas[id] == replica then
-		Replicas[id] = nil
-	end
-	if BindReplicas[id] == replica then
-		BindReplicas[id] = nil
-	end
+	if token_replicas ~= nil then token_replicas[replica] = nil end
+	if Replicas[id] == replica then Replicas[id] = nil end
+	if BindReplicas[id] == replica then BindReplicas[id] = nil end
 	-- Cleanup:
 	replica.Maid:Unlock(MAID_LOCK)
 	replica.Maid:Cleanup()
@@ -516,9 +476,7 @@ local function ReplicaToBindBuffer(replica, is_depth_call)
 
 	-- Destroy original:
 
-	if is_depth_call ~= true then
-		DestroyReplica(replica)
-	end
+	if is_depth_call ~= true then DestroyReplica(replica) end
 
 	return copy_replica
 end
@@ -553,9 +511,7 @@ local function ReplicaFromBindBuffer(replica, announce_buffer)
 	if top_call == true then
 		for _, replica in ipairs(announce_buffer) do
 			local listeners = NewReplicaListeners[replica.Token]
-			if listeners ~= nil then
-				listeners:Fire(replica)
-			end
+			if listeners ~= nil then listeners:Fire(replica) end
 		end
 	end
 end
@@ -658,18 +614,14 @@ end
 
 local function GetInternalReplica(id)
 	local replica = Replicas[id] or BindReplicas[id]
-	if replica == nil then
-		error(`[{script.Name}]: Received update for missing replica [Id:{id}]`)
-	end
+	if replica == nil then error(`[{script.Name}]: Received update for missing replica [Id:{id}]`) end
 	return replica
 end
 
 ----- Init -----
 
 RemoteRequestData.OnClientEvent:Connect(function()
-	if Replica.IsReady == true then
-		return
-	end
+	if Replica.IsReady == true then return end
 
 	Replica.IsReady = true
 	print(`[{script.Name}]: Initial data received`)
@@ -681,9 +633,7 @@ RemoteSet.OnClientEvent:Connect(function(id: number, path: {}, value: any)
 	ReplicationFlag = true
 	local success, msg = pcall(replica.Set, replica, path, value)
 	ReplicationFlag = false
-	if success ~= true then
-		error(`[{script.Name}]: Error while updating replica:\n{replica:Identify()}\n` .. msg)
-	end
+	if success ~= true then error(`[{script.Name}]: Error while updating replica:\n{replica:Identify()}\n` .. msg) end
 end)
 
 RemoteSetValues.OnClientEvent:Connect(function(id: number, path: {}, values: {})
@@ -691,9 +641,7 @@ RemoteSetValues.OnClientEvent:Connect(function(id: number, path: {}, values: {})
 	ReplicationFlag = true
 	local success, msg = pcall(replica.SetValues, replica, path, values)
 	ReplicationFlag = false
-	if success ~= true then
-		error(`[{script.Name}]: Error while updating replica:\n{replica:Identify()}\n` .. msg)
-	end
+	if success ~= true then error(`[{script.Name}]: Error while updating replica:\n{replica:Identify()}\n` .. msg) end
 end)
 
 RemoteTableInsert.OnClientEvent:Connect(function(id: number, path: {}, value: any, index: number?)
@@ -701,9 +649,7 @@ RemoteTableInsert.OnClientEvent:Connect(function(id: number, path: {}, value: an
 	ReplicationFlag = true
 	local success, msg = pcall(replica.TableInsert, replica, path, value, index)
 	ReplicationFlag = false
-	if success ~= true then
-		error(`[{script.Name}]: Error while updating replica:\n{replica:Identify()}\n` .. msg)
-	end
+	if success ~= true then error(`[{script.Name}]: Error while updating replica:\n{replica:Identify()}\n` .. msg) end
 end)
 
 RemoteTableRemove.OnClientEvent:Connect(function(id: number, path: {}, index: number)
@@ -711,9 +657,7 @@ RemoteTableRemove.OnClientEvent:Connect(function(id: number, path: {}, index: nu
 	ReplicationFlag = true
 	local success, msg = pcall(replica.TableRemove, replica, path, index)
 	ReplicationFlag = false
-	if success ~= true then
-		error(`[{script.Name}]: Error while updating replica:\n{replica:Identify()}\n` .. msg)
-	end
+	if success ~= true then error(`[{script.Name}]: Error while updating replica:\n{replica:Identify()}\n` .. msg) end
 end)
 
 RemoteWrite.OnClientEvent:Connect(function(id: number, fn_id: number, ...)
@@ -722,9 +666,7 @@ RemoteWrite.OnClientEvent:Connect(function(id: number, fn_id: number, ...)
 	ReplicationFlag = true
 	local success, msg = pcall(replica.Write, replica, fn_name, ...)
 	ReplicationFlag = false
-	if success ~= true then
-		error(`[{script.Name}]: Error while updating replica:\n{replica:Identify()}\n` .. msg)
-	end
+	if success ~= true then error(`[{script.Name}]: Error while updating replica:\n{replica:Identify()}\n` .. msg) end
 end)
 
 local function RemoteSignalHandle(id: number, ...)
@@ -767,9 +709,7 @@ RemoteCreate.OnClientEvent:Connect(function(creation: {}, root_id: number?) -- (
 				local bound_instance = BindInstances[id]
 				replica.BoundInstance = bound_instance
 
-				if bound_instance == nil then
-					is_bind_buffered = true
-				end
+				if bound_instance == nil then is_bind_buffered = true end
 			end
 		elseif BindReplicas[parent_id] ~= nil then
 			is_bind_buffered = true
@@ -795,9 +735,7 @@ RemoteCreate.OnClientEvent:Connect(function(creation: {}, root_id: number?) -- (
 
 	for _, replica in ipairs(announce_buffer) do
 		local listeners = NewReplicaListeners[replica.Token]
-		if listeners ~= nil then
-			listeners:Fire(replica)
-		end
+		if listeners ~= nil then listeners:Fire(replica) end
 	end
 end)
 
@@ -808,9 +746,7 @@ RemoteBind.OnClientEvent:Connect(function(id: number)
 	local bound_instance = BindInstances[id]
 	replica.BoundInstance = bound_instance
 
-	if bound_instance == nil then
-		ReplicaToBindBuffer(replica)
-	end
+	if bound_instance == nil then ReplicaToBindBuffer(replica) end
 end)
 
 RemoteDestroy.OnClientEvent:Connect(function(id: number)
@@ -839,27 +775,19 @@ local function OnBindInstanceRemoved(instance: NumberValue)
 
 	local replica = Replicas[id]
 
-	if replica ~= nil then
-		ReplicaToBindBuffer(replica)
-	end
+	if replica ~= nil then ReplicaToBindBuffer(replica) end
 end
 
 CollectionService:GetInstanceAddedSignal(CS_TAG):Connect(function(instance: NumberValue)
-	if instance:IsA("NumberValue") == true then
-		OnBindInstanceAdded(instance)
-	end
+	if instance:IsA("NumberValue") == true then OnBindInstanceAdded(instance) end
 end)
 
 CollectionService:GetInstanceRemovedSignal(CS_TAG):Connect(function(instance: NumberValue)
-	if instance:IsA("NumberValue") == true then
-		OnBindInstanceRemoved(instance)
-	end
+	if instance:IsA("NumberValue") == true then OnBindInstanceRemoved(instance) end
 end)
 
 for _, instance: NumberValue in pairs(CollectionService:GetTagged(CS_TAG)) do
-	if instance:IsA("NumberValue") == true then
-		OnBindInstanceAdded(instance)
-	end
+	if instance:IsA("NumberValue") == true then OnBindInstanceAdded(instance) end
 end
 
 return Replica

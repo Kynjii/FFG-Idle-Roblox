@@ -29,9 +29,7 @@ do
 		Container = ReplicatedStorage:FindFirstChild(CONTAINER_NAME)
 
 		if Container ~= nil then
-			if IsStudio == true then
-				warn(`[{script.Name}]: ReplicatedStorage "{CONTAINER_NAME}" container was already defined`)
-			end
+			if IsStudio == true then warn(`[{script.Name}]: ReplicatedStorage "{CONTAINER_NAME}" container was already defined`) end
 		else
 			Container = Instance.new("Folder")
 			Container.Name = CONTAINER_NAME
@@ -71,23 +69,17 @@ end
 
 function Connection:Disconnect()
 	self.is_disconnected = true
-	if self.real_connection ~= nil then
-		self.real_connection:Disconnect()
-	end
+	if self.real_connection ~= nil then self.real_connection:Disconnect() end
 end
 
 local Remote = {}
 Remote.__index = Remote
 
 function Remote.New(name: string, is_unreliable: boolean?): RemoteEvent
-	if type(name) ~= "string" then
-		error(`[{script.Name}]: name must be a string`)
-	end
+	if type(name) ~= "string" then error(`[{script.Name}]: name must be a string`) end
 
 	if IsServer == true then
-		if DefinedRemotes[name] ~= nil then
-			error(`[{script.Name}]: RemoteEvent {name} was already defined`)
-		end
+		if DefinedRemotes[name] ~= nil then error(`[{script.Name}]: RemoteEvent {name} was already defined`) end
 
 		DefinedRemotes[name] = true
 
@@ -99,9 +91,7 @@ function Remote.New(name: string, is_unreliable: boolean?): RemoteEvent
 	else
 		local remote: RemoteEvent = Container and Container:FindFirstChild(name)
 
-		if remote ~= nil then
-			return remote
-		end
+		if remote ~= nil then return remote end
 
 		local connections = {}
 
@@ -142,9 +132,7 @@ function Remote.New(name: string, is_unreliable: boolean?): RemoteEvent
 			end
 
 			for _, connection in ipairs(connections) do
-				if connection.is_disconnected == false then
-					connection.real_connection = remote.OnClientEvent:Connect(connection.fn)
-				end
+				if connection.is_disconnected == false then connection.real_connection = remote.OnClientEvent:Connect(connection.fn) end
 			end
 
 			self.RemoteEvent = remote
@@ -166,9 +154,7 @@ function Remote.New(name: string, is_unreliable: boolean?): RemoteEvent
 end
 
 function Remote:FireServer(...)
-	if self.RemoteEvent ~= nil then
-		self.RemoteEvent:FireServer(...)
-	end
+	if self.RemoteEvent ~= nil then self.RemoteEvent:FireServer(...) end
 end
 
 function Remote:FireClient()
