@@ -19,7 +19,12 @@ BOAT.SetupProximityPrompt = function(boat: Model, primaryPart: Part, purchaseBoa
 
 	proximityPrompt.TriggerEnded:Connect(function(player)
 		-- //TODO - replace amount with the upgrade cost
-		if not DataManager.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, 200) then return end
+		local upgradeCost = 1000
+		if not DataManager.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, upgradeCost) then
+			return
+		else
+			DataManager.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, upgradeCost)
+		end
 
 		if primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) then
 			local newValue = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level) + 1
