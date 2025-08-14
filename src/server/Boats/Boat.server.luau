@@ -22,25 +22,24 @@ BOAT.SetupProximityPrompt = function(boat: Model, primaryPart: Part, purchaseBoa
 		if not DataManager.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, 200) then return end
 
 		if primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) then
-			-- update level
 			local newValue = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level) + 1
-			primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level, newValue)
-			DataManager.UpdateBoatState(player, FFGEnum.ATTRIBUTES.BOAT.Level, newValue)
-
-			BOAT.UpdateNameState(player, primaryPart)
+			BOAT.UpdateLevel(player, primaryPart, newValue)
+			BOAT.UpdateName(player, primaryPart)
 
 			-- if the new level matches the threshold in quality promo, update the UpgradeStage
 			for k, v in ipairs(FFGEnum.QUALITY_PROMOTION_LEVELS) do
 				if newValue == v + 1 then
 					-- update boat name and upgrade stage
 					local newStage = tonumber(k) + 1
-					BOAT.UpdateUpgradeStage(player, primaryPart, newStage)
-					BOAT.UpdateNameState(player, primaryPart)
+					BOAT.IncreaseUpgradeStage(player, primaryPart, newStage)
+					BOAT.UpdateName(player, primaryPart)
 					break
 				end
 			end
 		else
-			BOAT.UpdateNameState(player, primaryPart)
+			BOAT.Show(boat)
+			BOAT.CanCollide(boat)
+			BOAT.UpdateName(player, primaryPart)
 			BOAT.UpdatePurchasedState(player, primaryPart)
 			BOAT.UpdateActiveState(player, primaryPart, true)
 			-- Add owner //TODO - need to figure out how to handle this later for multiple players
@@ -49,11 +48,6 @@ BOAT.SetupProximityPrompt = function(boat: Model, primaryPart: Part, purchaseBoa
 
 			proximityPrompt.ObjectText = "Upgrade"
 			proximityPrompt.ActionText = "Level: " .. tostring(primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level) + 1)
-
-			local boatParts = boat:GetChildren()
-			for _, part in pairs(boatParts) do
-				if part.Transparency and part.Transparency == 1 then part.Transparency = 0 end
-			end
 		end
 	end)
 
@@ -146,6 +140,14 @@ BOAT.SetupBoat = function(boat: Model)
 		primaryPart:SetAttribute(key, value)
 	end
 
+	if not primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) then
+		BOAT.Hide(boat)
+		BOAT.CannotCollide(boat)
+	else
+		BOAT.Show(boat)
+		BOAT.CanCollide(boat)
+	end
+
 	-- Setup the purchase board info and attribute listeners
 	local purchaseBoard = BOAT.SetupUpgradeStore(boat, primaryPart)
 	if purchaseBoard then
@@ -154,7 +156,12 @@ BOAT.SetupBoat = function(boat: Model)
 	end
 end
 
-BOAT.UpdateNameState = function(player: Player, primaryPart: Part)
+BOAT.UpdateName = function(player: Player, primaryPart: Part)
+	primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.Name, FFGEnum.BOAT.NAME[primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.UpgradeStage)])
+	DataManager.UpdateBoatState(player, FFGEnum.ATTRIBUTES.BOAT.Name, FFGEnum.BOAT.NAME[primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.UpgradeStage)], player.UserId)
+end
+
+BOAT.UpdateLevel = function(player: Player, primaryPart: Part)
 	primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.Name, FFGEnum.BOAT.NAME[primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.UpgradeStage)])
 	DataManager.UpdateBoatState(player, FFGEnum.ATTRIBUTES.BOAT.Name, FFGEnum.BOAT.NAME[primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.UpgradeStage)])
 end
@@ -174,9 +181,41 @@ BOAT.AddOwner = function(player: Player, primaryPart: Part)
 	DataManager.UpdateBoatState(player, FFGEnum.ATTRIBUTES.BOAT.Owner, player.UserId)
 end
 
-BOAT.UpdateUpgradeStage = function(player: Player, primaryPart: Part, newStage: number)
+BOAT.IncreaseUpgradeStage = function(player: Player, primaryPart: Part, newStage: number)
 	primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.UpgradeStage, newStage)
 	DataManager.UpdateBoatState(player, FFGEnum.ATTRIBUTES.BOAT.UpgradeStage, newStage)
+end
+
+BOAT.Show = function(boat: Model)
+	local boatParts = boat:GetChildren()
+	for _, part in pairs(boatParts) do
+		if part.Name == "Purchase_Board" then continue end
+		if part.Transparency and part.Transparency == 1 then part.Transparency = 0 end
+	end
+end
+
+BOAT.CanCollide = function(boat: Model)
+	local boatParts = boat:GetChildren()
+	for _, part in pairs(boatParts) do
+		if part.Name == "Purchase_Board" then continue end
+		if not part.CanCollide then part.CanCollide = true end
+	end
+end
+
+BOAT.CannotCollide = function(boat: Model)
+	local boatParts = boat:GetChildren()
+	for _, part in pairs(boatParts) do
+		if part.Name == "Purchase_Board" then continue end
+		if part.CanCollide then part.CanCollide = false end
+	end
+end
+
+BOAT.Hide = function(boat: Model)
+	local boatParts = boat:GetChildren()
+	for _, part in pairs(boatParts) do
+		if part.Name == "Purchase_Board" then continue end
+		if part.Transparency and part.Transparency == 0 then part.Transparency = 1 end
+	end
 end
 
 for _, taggedBoat in ipairs(taggedBoats) do

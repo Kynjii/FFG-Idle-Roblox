@@ -10,18 +10,14 @@ local giveGoldButton = FFGHelpers.deepWait(Workspace, "DevGiveGold")
 local debounce = false
 giveGoldButton.Touched:Connect(function(hit)
 	print("Touched")
-	if debounce then
-		return
-	end
+	if debounce then return end
 	debounce = true
 
 	local character = hit and hit:FindFirstAncestorOfClass("Model")
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	if humanoid then
 		local player = Players:GetPlayerFromCharacter(character)
-		if player then
-			DataManager.Earn(player, FFGEnum.CURRENCY_TYPES.Gold, 100)
-		end
+		if player then DataManager.Earn(player, FFGEnum.CURRENCY_TYPES.Gold, 100000) end
 	end
 
 	task.delay(0.5, function()
@@ -32,18 +28,14 @@ end)
 local resetGoldButton = FFGHelpers.deepWait(Workspace, "DevResetGold")
 local resetDebounce = false
 resetGoldButton.Touched:Connect(function(hit)
-	if resetDebounce then
-		return
-	end
+	if resetDebounce then return end
 	resetDebounce = true
 
 	local character = hit and hit:FindFirstAncestorOfClass("Model")
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	if humanoid then
 		local player = Players:GetPlayerFromCharacter(character)
-		if player then
-			DataManager.ResetAllPlayerData(player)
-		end
+		if player then DataManager.ResetAllPlayerData(player) end
 	end
 
 	task.delay(1, function()
