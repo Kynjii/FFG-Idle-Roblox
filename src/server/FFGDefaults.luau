@@ -20,6 +20,10 @@ FFGDefaults.BOAT_STARTING_ATT = {
 	[FFGEnum.ATTRIBUTES.BOAT.UpgradeStage] = 1,
 	[FFGEnum.ATTRIBUTES.BOAT.CurrentMaxStorage] = Formulas.BOAT.BaseStorage,
 	[FFGEnum.ATTRIBUTES.BOAT.NextLvlMaxStorage] = Formulas.BOAT.BaseStorage,
+	[FFGEnum.ATTRIBUTES.BOAT.RealmLevel] = 1,
+	[FFGEnum.ATTRIBUTES.BOAT.MaxLevel] = 100,
+	[FFGEnum.ATTRIBUTES.BOAT.BaseCost] = Formulas.BOAT.BaseCost,
+	[FFGEnum.ATTRIBUTES.BOAT.UpgradeCost] = 100,
 }
 
 return FFGDefaults

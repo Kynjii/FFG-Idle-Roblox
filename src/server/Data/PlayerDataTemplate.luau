@@ -1,13 +1,13 @@
 local ServerScriptService = game:GetService("ServerScriptService")
 local FFGDefaults = require(ServerScriptService.Server.FFGDefaults)
 return {
+	CurrentRealm = 1,
 	Realms = {
 		[1] = {
 			isUnlocked = true,
 			maxBoats = 6,
 			Lanes = {
 				[1] = {
-					isPurchased = true,
 					Boat = FFGDefaults.BOAT_STARTING_ATT,
 				},
 			},
@@ -23,6 +23,6 @@ return {
 		},
 	},
 	Currencies = {
-		Gold = 250000,
+		Gold = 250,
 	},
 }

@@ -40,6 +40,16 @@ function DataManager.DetachReplica(player: Player)
 	end
 end
 
+function DataManager.CurrentRealm(player: Player)
+	local profile = DataManager.Profiles[player]
+	if not profile then
+		FFGHelpers.PrintLog("No profile found when attempting to get current realm")
+		return
+	end
+
+	return profile.Data.CurrentRealm
+end
+
 function DataManager.Earn(player: Player, currencyType: string, amount: number)
 	local profile = DataManager.Profiles[player]
 	if not profile then

@@ -112,6 +112,10 @@ FFGEnum.ATTRIBUTES = {
 		["Id"] = "Id",
 		["CurrentMaxStorage"] = "CurrentMaxStorage",
 		["NextLvlMaxStorage"] = "NextLvlMaxStorage",
+		["RealmLevel"] = "RealmLevel",
+		["MaxLevel"] = "MaxLevel",
+		["BaseCost"] = "BaseCost",
+		["UpgradeCost"] = "UpgradeCost",
 	},
 }
 

@@ -6,6 +6,7 @@ local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local FFGDefaults = require(ServerScriptService.Server.FFGDefaults)
 local Calculators = require(ServerScriptService.Server.Game.Calculators)
 local FFGHelpers = require(ReplicatedStorage.Shared.Utils.FFGHelpers)
+local BoatEnums = FFGEnum.ATTRIBUTES.BOAT
 
 local taggedBoats = CollectionService:GetTagged("Boat")
 
@@ -31,42 +32,42 @@ BOAT.SetupBoat = function(boat: Model, player: Player)
 	local state = BOAT.GetBoatState(player)
 
 	local attributes = nil
-	task.delay(1, function()
-		attributes = state or FFGDefaults.BOAT_STARTING_ATT
+	attributes = state or FFGDefaults.BOAT_STARTING_ATT
 
-		FFGHelpers.PrintLog("Attempting to apply state to boat: ", state)
+	FFGHelpers.PrintLog("Attempting to apply state to boat: ", state)
 
-		for key, value in pairs(attributes) do
-			primaryPart:SetAttribute(key, value)
+	for key, value in pairs(attributes) do
+		-- if the basecost is the default one, calculate and assign the appropriate baseCost
+		if key == BoatEnums.BaseCost and value == FFGDefaults.BOAT_STARTING_ATT[BoatEnums.BaseCost] then
+			local baseCost = BOAT.GetBaseCost(attributes[BoatEnums.Level], attributes[BoatEnums.Tier], attributes[BoatEnums.RealmLevel])
+
+			if baseCost then primaryPart:SetAttribute(key, baseCost) end
 		end
+		primaryPart:SetAttribute(key, value)
+	end
 
-		if not primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) then
-			BOAT.Hide(boat)
-			BOAT.CannotCollide(boat)
-		else
-			BOAT.Show(boat)
-			BOAT.CanCollide(boat)
-		end
+	if not primaryPart:GetAttribute(BoatEnums.isPurchased) then
+		BOAT.Hide(boat)
+		BOAT.CannotCollide(boat)
+	else
+		BOAT.Show(boat)
+		BOAT.CanCollide(boat)
+	end
 
-		-- Setup the purchase board info and attribute listeners
-		local purchaseBoard = BOAT.SetupPurchaseBoard(boat, primaryPart, state)
-		if purchaseBoard then
-			BOAT.SetupProximityPrompt(boat, primaryPart, purchaseBoard)
-			BOAT.SetupAttributeListeners(primaryPart, purchaseBoard)
-		end
-	end)
+	-- Setup the purchase board info and attribute listeners
+	local purchaseBoard = BOAT.SetupPurchaseBoard(boat, primaryPart, state)
+	if purchaseBoard then
+		BOAT.SetupProximityPrompt(boat, primaryPart, purchaseBoard)
+		BOAT.SetupAttributeListeners(primaryPart, purchaseBoard)
+	end
 end
 
 -- STATE MANAGEMENT FOR BOAT - Proximity Prompt currently handles a lot of the management as it triggers all changes to the Boat
 BOAT.SetupProximityPrompt = function(boat: Model, primaryPart: Part, purchaseBoard: Part)
 	local currentState = {}
-	currentState[FFGEnum.ATTRIBUTES.BOAT.isPurchased] = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased)
-	currentState[FFGEnum.ATTRIBUTES.BOAT.Level] = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level)
-	currentState[FFGEnum.ATTRIBUTES.BOAT.Tier] = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Tier)
-	currentState[FFGEnum.ATTRIBUTES.BOAT.isActive] = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isActive)
-	currentState[FFGEnum.ATTRIBUTES.BOAT.UpgradeStage] = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.UpgradeStage)
-	currentState[FFGEnum.ATTRIBUTES.BOAT.CurrentMaxStorage] = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.CurrentMaxStorage)
-	currentState[FFGEnum.ATTRIBUTES.BOAT.NextLvlMaxStorage] = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.NextLvlMaxStorage)
+	for k, v in pairs(primaryPart:GetAttributes()) do
+		currentState[k] = v
+	end
 
 	-- Create the prompt and apply conditional text
 	local proximityPrompt = Instance.new("ProximityPrompt", purchaseBoard)
@@ -75,8 +76,7 @@ BOAT.SetupProximityPrompt = function(boat: Model, primaryPart: Part, purchaseBoa
 	proximityPrompt.ActionText = currentState.IsPurchased and "Level: " .. tostring(currentState.Level + 1) or "Tier " .. currentState.Tier .. " Boat"
 
 	proximityPrompt.TriggerEnded:Connect(function(player)
-		-- //TODO - replace amount with the upgrade cost
-		local upgradeCost = 1000
+		local upgradeCost = currentState.isPurchased and currentState.UpgradeCost > 100 or currentState.BaseCost
 		if not DataManager.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, upgradeCost) then
 			FFGHelpers.PrintLog("Unable to afford upgrade, cost is: ", upgradeCost)
 			return
@@ -130,11 +130,11 @@ BOAT.SetupPurchaseBoard = function(boat: Model, primaryPart: Part, boatState: { 
 	pbDetails.CurrentMaxStorageLabel = FFGHelpers.deepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "CurrentMaxStorage", "TextLabel") :: TextLabel
 	pbDetails.NextMaxStorageLabel = FFGHelpers.deepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "NextMaxStorage", "TextLabel") :: TextLabel
 
-	local isPurchased = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased)
+	local isPurchased = primaryPart:GetAttribute(BoatEnums.isPurchased)
 
 	if pbDetails then
-		local upgradeStage = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.UpgradeStage)
-		local level = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level)
+		local upgradeStage = primaryPart:GetAttribute(BoatEnums.UpgradeStage)
+		local level = primaryPart:GetAttribute(BoatEnums.Level)
 		local qualityInfo = FFGEnum.QUALITY[upgradeStage]
 		local color = qualityInfo.Color
 		pbDetails.NameLabel.TextColor3 = color
@@ -142,7 +142,7 @@ BOAT.SetupPurchaseBoard = function(boat: Model, primaryPart: Part, boatState: { 
 		if not isPurchased then
 			pbDetails.NameLabel.Parent.Visible = false
 		else
-			pbDetails.NameLabel.Text = FFGEnum.BOAT.NAME[upgradeStage] or FFGEnum.ATTRIBUTES.BOAT.Name
+			pbDetails.NameLabel.Text = FFGEnum.BOAT.NAME[upgradeStage] or BoatEnums.Name
 			pbDetails.NameLabel.Parent.Visible = true
 		end
 
@@ -150,8 +150,8 @@ BOAT.SetupPurchaseBoard = function(boat: Model, primaryPart: Part, boatState: { 
 
 		-- //TODO - use formatting helper
 		local storage = {
-			current = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.CurrentMaxStorage),
-			next = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.NextLvlMaxStorage),
+			current = primaryPart:GetAttribute(BoatEnums.CurrentMaxStorage),
+			next = primaryPart:GetAttribute(BoatEnums.NextLvlMaxStorage),
 		}
 		pbDetails.CurrentMaxStorageLabel.Text = isPurchased and tostring(storage.current) or ""
 		pbDetails.NextMaxStorageLabel.Text = isPurchased and tostring(storage.next) or ""
@@ -176,7 +176,7 @@ BOAT.UpdatePurchaseBoardUI = function(primaryPart: Part, purchaseBoard: Part, at
 		return
 	end
 
-	local isPurchased = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased)
+	local isPurchased = primaryPart:GetAttribute(BoatEnums.isPurchased)
 
 	local pbDetails = {}
 	pbDetails.NameLabel = FFGHelpers.deepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel") :: TextLabel
@@ -186,29 +186,33 @@ BOAT.UpdatePurchaseBoardUI = function(primaryPart: Part, purchaseBoard: Part, at
 
 	-- //TODO - use formatting helper
 	local storage = {
-		current = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.CurrentMaxStorage),
-		next = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.NextLvlMaxStorage),
+		current = primaryPart:GetAttribute(BoatEnums.CurrentMaxStorage),
+		next = primaryPart:GetAttribute(BoatEnums.NextLvlMaxStorage),
 	}
 	pbDetails.CurrentMaxStorageLabel.Text = isPurchased and tostring(storage.current) or ""
 	pbDetails.NextMaxStorageLabel.Text = isPurchased and tostring(storage.next) or ""
 
-	local level = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level)
+	local level = primaryPart:GetAttribute(BoatEnums.Level)
 	pbDetails.LevelLabel.Text = "Level: " .. level
 
-	local currentUpgradeStage = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.UpgradeStage)
+	local currentUpgradeStage = primaryPart:GetAttribute(BoatEnums.UpgradeStage)
 
 	local qualityInfo = FFGEnum.QUALITY[currentUpgradeStage]
 	local color = qualityInfo.Color
 	pbDetails.NameLabel.TextColor3 = color
 	pbDetails.NameLabel.Text = FFGEnum.BOAT.NAME[currentUpgradeStage]
 
-	if attributeName == FFGEnum.ATTRIBUTES.BOAT.isPurchased then pbDetails.NameLabel.Parent.Visible = true end
+	if attributeName == BoatEnums.isPurchased then pbDetails.NameLabel.Parent.Visible = true end
 end
 -- //!SECTION
 
 -- //SECTION - Handles Boat calculations
 BOAT.GetMaxStorage = function(level: number, tier: number)
 	return Calculators.MaxStorage(FFGEnum.ENTITIES.Boat, level, tier)
+end
+
+BOAT.GetUpgradeCost = function(level: number, tier: number, realmLevel: number, baseCost: number)
+	return Calculators.UpgradeCost(FFGEnum.ENTITIES.Boat, level, tier, realmLevel, baseCost)
 end
 
 BOAT.GetFPS = function()
@@ -219,8 +223,8 @@ BOAT.GetBoosts = function()
 	--
 end
 
-BOAT.GetCosts = function()
-	-- return {baseCost, upgradeCost}
+BOAT.GetBaseCost = function(level: number, tier: number, realmLevel: number)
+	return Calculators.GetBaseCost(FFGEnum.ENTITIES.Boat, level, tier, realmLevel)
 end
 
 -- //!SECTION
@@ -230,16 +234,16 @@ BOAT.SetupAttributeListeners = function(primaryPart: Part, purchaseBoard: Part)
 	if not primaryPart and not purchaseBoard then return end
 
 	-- Update Board UI
-	primaryPart:GetAttributeChangedSignal(FFGEnum.ATTRIBUTES.BOAT.Level):Connect(function()
-		BOAT.UpdatePurchaseBoardUI(primaryPart, purchaseBoard, FFGEnum.ATTRIBUTES.BOAT.Level)
+	primaryPart:GetAttributeChangedSignal(BoatEnums.Level):Connect(function()
+		BOAT.UpdatePurchaseBoardUI(primaryPart, purchaseBoard, BoatEnums.Level)
 	end)
 
-	primaryPart:GetAttributeChangedSignal(FFGEnum.ATTRIBUTES.BOAT.UpgradeStage):Connect(function()
-		BOAT.UpdatePurchaseBoardUI(primaryPart, purchaseBoard, FFGEnum.ATTRIBUTES.BOAT.UpgradeStage)
+	primaryPart:GetAttributeChangedSignal(BoatEnums.UpgradeStage):Connect(function()
+		BOAT.UpdatePurchaseBoardUI(primaryPart, purchaseBoard, BoatEnums.UpgradeStage)
 	end)
 
-	primaryPart:GetAttributeChangedSignal(FFGEnum.ATTRIBUTES.BOAT.isPurchased):Connect(function()
-		BOAT.UpdatePurchaseBoardUI(primaryPart, purchaseBoard, FFGEnum.ATTRIBUTES.BOAT.isPurchased)
+	primaryPart:GetAttributeChangedSignal(BoatEnums.isPurchased):Connect(function()
+		BOAT.UpdatePurchaseBoardUI(primaryPart, purchaseBoard, BoatEnums.isPurchased)
 	end)
 end
 -- //!SECTION
@@ -250,41 +254,52 @@ BOAT.GetBoatState = function(player: Player)
 end
 
 BOAT.UpdateName = function(player: Player, primaryPart: Part, upgradeStage: number)
-	primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.Name, FFGEnum.BOAT.NAME[upgradeStage])
-	DataManager.UpdateBoatState(player, FFGEnum.ATTRIBUTES.BOAT.Name, FFGEnum.BOAT.NAME[upgradeStage])
+	primaryPart:SetAttribute(BoatEnums.Name, FFGEnum.BOAT.NAME[upgradeStage])
+	DataManager.UpdateBoatState(player, BoatEnums.Name, FFGEnum.BOAT.NAME[upgradeStage])
 end
 
-BOAT.UpdateLevel = function(player: Player, primaryPart: Part, currentState: { Level: number, Tier: number })
-	primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level, currentState.Level)
-	DataManager.UpdateBoatState(player, FFGEnum.ATTRIBUTES.BOAT.Level, currentState.Level)
+BOAT.UpdateLevel = function(player: Player, primaryPart: Part, currentState: { Level: number, Tier: number, RealmLevel: number, BaseCost: number })
+	primaryPart:SetAttribute(BoatEnums.Level, currentState.Level)
+	DataManager.UpdateBoatState(player, BoatEnums.Level, currentState.Level)
 
-	-- set max storage calcs
-	local current, nextValue = BOAT.GetMaxStorage(currentState.Level, currentState.Tier)
-	primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.CurrentMaxStorage, current)
-	DataManager.UpdateBoatState(player, FFGEnum.ATTRIBUTES.BOAT.CurrentMaxStorage, current)
+	-- do and set max storage calcs
+	local current, nextValue = BOAT.GetMaxStorage(currentState.Level, currentState.Tier, currentState.RealmLevel)
+	if current and nextValue then
+		primaryPart:SetAttribute(BoatEnums.CurrentMaxStorage, current)
+		DataManager.UpdateBoatState(player, BoatEnums.CurrentMaxStorage, current)
 
-	primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.NextLvlMaxStorage, nextValue)
-	DataManager.UpdateBoatState(player, FFGEnum.ATTRIBUTES.BOAT.NextLvlMaxStorage, nextValue)
+		primaryPart:SetAttribute(BoatEnums.NextLvlMaxStorage, nextValue)
+		DataManager.UpdateBoatState(player, BoatEnums.NextLvlMaxStorage, nextValue)
+	end
+
+	-- do and set upgrade cost calcs
+	local value = BOAT.GetUpgradeCost(currentState.Level, currentState.Tier, currentState.RealmLevel, currentState.BaseCost)
+	if value then
+		primaryPart:SetAttribute(BoatEnums.UpgradeCost, value)
+		DataManager.UpdateBoatState(player, BoatEnums.UpgradeCost, value)
+	else
+		FFGHelpers.PrintLog("No value found for upgradeCost", value)
+	end
 end
 
 BOAT.UpdatePurchasedState = function(player: Player, primaryPart: Part, state: BoolValue)
-	primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased, state)
-	DataManager.UpdateBoatState(player, FFGEnum.ATTRIBUTES.BOAT.isPurchased, state)
+	primaryPart:SetAttribute(BoatEnums.isPurchased, state)
+	DataManager.UpdateBoatState(player, BoatEnums.isPurchased, state)
 end
 
 BOAT.UpdateActiveState = function(player: Player, primaryPart: Part, state: BoolValue)
-	primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.isActive, state)
-	DataManager.UpdateBoatState(player, FFGEnum.ATTRIBUTES.BOAT.isActive, state)
+	primaryPart:SetAttribute(BoatEnums.isActive, state)
+	DataManager.UpdateBoatState(player, BoatEnums.isActive, state)
 end
 
 BOAT.AddOwner = function(player: Player, primaryPart: Part)
-	primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.Owner, player.UserId)
-	DataManager.UpdateBoatState(player, FFGEnum.ATTRIBUTES.BOAT.Owner, player.UserId)
+	primaryPart:SetAttribute(BoatEnums.Owner, player.UserId)
+	DataManager.UpdateBoatState(player, BoatEnums.Owner, player.UserId)
 end
 
 BOAT.IncreaseUpgradeStage = function(player: Player, primaryPart: Part, newStage: number)
-	primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.UpgradeStage, newStage)
-	DataManager.UpdateBoatState(player, FFGEnum.ATTRIBUTES.BOAT.UpgradeStage, newStage)
+	primaryPart:SetAttribute(BoatEnums.UpgradeStage, newStage)
+	DataManager.UpdateBoatState(player, BoatEnums.UpgradeStage, newStage)
 end
 -- //!SECTION
 
