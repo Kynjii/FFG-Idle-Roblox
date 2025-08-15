@@ -1,5 +1,4 @@
 local CollectionService = game:GetService("CollectionService")
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local DataManager = require(ServerScriptService.Server.Data.DataManager)
@@ -11,6 +10,53 @@ local taggedBoats = CollectionService:GetTagged("Boat")
 
 local BOAT = {}
 
+-- //SECTION - BOAT SETUP (Boat, Purchase Board and Proximity Prompt)
+BOAT.SetupTaggedBoats = function(player)
+	if player then task.delay(1, function()
+		for _, taggedBoat in ipairs(taggedBoats) do
+			BOAT.SetupBoat(taggedBoat, player)
+		end
+	end) end
+end
+
+BOAT.SetupBoat = function(boat: Model, player: Player)
+	local primaryPart = boat.PrimaryPart
+
+	if not player then
+		FFGHelpers.PrintLog("No local player found, unable to setup boat")
+		return
+	end
+
+	local state = BOAT.GetBoatState(player)
+
+	local attributes = nil
+	task.delay(1, function()
+		attributes = state or FFGDefaults.BOAT_STARTING_ATT
+
+		FFGHelpers.PrintLog("Attempting to apply state to boat: ", state)
+
+		for key, value in pairs(attributes) do
+			primaryPart:SetAttribute(key, value)
+		end
+
+		if not primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) then
+			BOAT.Hide(boat)
+			BOAT.CannotCollide(boat)
+		else
+			BOAT.Show(boat)
+			BOAT.CanCollide(boat)
+		end
+
+		-- Setup the purchase board info and attribute listeners
+		local purchaseBoard = BOAT.SetupPurchaseBoard(boat, primaryPart)
+		if purchaseBoard then
+			BOAT.SetupProximityPrompt(boat, primaryPart, purchaseBoard)
+			BOAT.SetupAttributeListeners(primaryPart, purchaseBoard)
+		end
+	end)
+end
+
+-- STATE MANAGEMENT FOR BOAT - Proximity Prompt currently handles a lot of the management as it triggers all changes to the Boat
 BOAT.SetupProximityPrompt = function(boat: Model, primaryPart: Part, purchaseBoard: Part)
 	local currentState = {}
 	currentState.IsPurchased = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased)
@@ -72,14 +118,8 @@ BOAT.SetupProximityPrompt = function(boat: Model, primaryPart: Part, purchaseBoa
 	return proximityPrompt
 end
 
-BOAT.UpdateProximityPromptUI = function(proximityPrompt: ProximityPrompt, primaryPart: Part, actText: string, objText: string)
-	if proximityPrompt and primaryPart then
-		proximityPrompt.ObjectText = actText or "Upgrade"
-		proximityPrompt.ActionText = objText or "Null"
-	end
-end
-
-BOAT.SetupUpgradeStore = function(boat: Model, primaryPart: Part)
+-- Set's the current state of the Boat on the Purchase Board
+BOAT.SetupPurchaseBoard = function(boat: Model, primaryPart: Part)
 	local purchaseBoard = boat:WaitForChild("Purchase_Board")
 	local pbDetails = {}
 	pbDetails.NameLabel = FFGHelpers.deepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel")
@@ -105,7 +145,17 @@ BOAT.SetupUpgradeStore = function(boat: Model, primaryPart: Part)
 	return purchaseBoard
 end
 
-BOAT.UpdateBoardUI = function(primaryPart: Part, purchaseBoard: Part, attributeName)
+--  //!SECTION
+
+-- //SECTION - UI Updates for Proximity Prompt and Purchase Board
+BOAT.UpdateProximityPromptUI = function(proximityPrompt: ProximityPrompt, primaryPart: Part, actText: string, objText: string)
+	if proximityPrompt and primaryPart then
+		proximityPrompt.ObjectText = actText or "Upgrade"
+		proximityPrompt.ActionText = objText or "Null"
+	end
+end
+
+BOAT.UpdatePurchaseBoardUI = function(primaryPart: Part, purchaseBoard: Part, attributeName)
 	if not attributeName or not purchaseBoard then
 		FFGHelpers.PrintLog("No attributeName or purchaseBoard found")
 		return
@@ -127,77 +177,32 @@ BOAT.UpdateBoardUI = function(primaryPart: Part, purchaseBoard: Part, attributeN
 
 	if attributeName == FFGEnum.ATTRIBUTES.BOAT.isPurchased then pbDetails.NameLabel.Parent.Visible = true end
 end
+-- //!SECTION
 
+-- //SECTION - ATTRIBUTE LISTENERS
 BOAT.SetupAttributeListeners = function(primaryPart: Part, purchaseBoard: Part)
 	if not primaryPart and not purchaseBoard then return end
 
 	-- Update Board UI
 	primaryPart:GetAttributeChangedSignal(FFGEnum.ATTRIBUTES.BOAT.Level):Connect(function()
-		BOAT.UpdateBoardUI(primaryPart, purchaseBoard, FFGEnum.ATTRIBUTES.BOAT.Level)
+		BOAT.UpdatePurchaseBoardUI(primaryPart, purchaseBoard, FFGEnum.ATTRIBUTES.BOAT.Level)
 	end)
 
 	primaryPart:GetAttributeChangedSignal(FFGEnum.ATTRIBUTES.BOAT.UpgradeStage):Connect(function()
-		BOAT.UpdateBoardUI(primaryPart, purchaseBoard, FFGEnum.ATTRIBUTES.BOAT.UpgradeStage)
+		BOAT.UpdatePurchaseBoardUI(primaryPart, purchaseBoard, FFGEnum.ATTRIBUTES.BOAT.UpgradeStage)
 	end)
 
 	primaryPart:GetAttributeChangedSignal(FFGEnum.ATTRIBUTES.BOAT.isPurchased):Connect(function()
-		BOAT.UpdateBoardUI(primaryPart, purchaseBoard, FFGEnum.ATTRIBUTES.BOAT.isPurchased)
+		BOAT.UpdatePurchaseBoardUI(primaryPart, purchaseBoard, FFGEnum.ATTRIBUTES.BOAT.isPurchased)
 	end)
 end
-
-BOAT.SetupBoat = function(boat: Model, player: Player)
-	local primaryPart = boat.PrimaryPart
-
-	if not player then
-		FFGHelpers.PrintLog("No local player found, unable to setup boat")
-		return
-	end
-
-	local state = BOAT.GetBoatState(player)
-
-	local attributes = nil
-	task.delay(1, function()
-		attributes = state or FFGDefaults.BOAT_STARTING_ATT
-
-		FFGHelpers.PrintLog("Attempting to apply state to boat: ", state)
-
-		for key, value in pairs(attributes) do
-			primaryPart:SetAttribute(key, value)
-		end
-
-		if not primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) then
-			BOAT.Hide(boat)
-			BOAT.CannotCollide(boat)
-		else
-			BOAT.Show(boat)
-			BOAT.CanCollide(boat)
-		end
-
-		-- Setup the purchase board info and attribute listeners
-		local purchaseBoard = BOAT.SetupUpgradeStore(boat, primaryPart)
-		if purchaseBoard then
-			BOAT.SetupProximityPrompt(boat, primaryPart, purchaseBoard)
-			BOAT.SetupAttributeListeners(primaryPart, purchaseBoard)
-		end
-	end)
-end
-
-BOAT.ResetBoat = function(boat: Model, player: Player)
-	local primaryPart = boat.PrimaryPart
-
-	local attributes = FFGDefaults.BOAT_STARTING_ATT
-
-	for key, value in pairs(attributes) do
-		primaryPart:SetAttribute(key, value)
-	end
-
-	FFGHelpers.PrintLog("Reset Attributes completed: ", primaryPart:GetAttributes())
-end
+-- //!SECTION
 
 BOAT.GetBoatState = function(player: Player)
 	return DataManager.LoadBoatState(player)
 end
 
+-- //SECTION - Handles State updates for the boat
 BOAT.UpdateName = function(player: Player, primaryPart: Part, upgradeStage: number)
 	primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.Name, FFGEnum.BOAT.NAME[upgradeStage])
 	DataManager.UpdateBoatState(player, FFGEnum.ATTRIBUTES.BOAT.Name, FFGEnum.BOAT.NAME[upgradeStage])
@@ -227,7 +232,9 @@ BOAT.IncreaseUpgradeStage = function(player: Player, primaryPart: Part, newStage
 	primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.UpgradeStage, newStage)
 	DataManager.UpdateBoatState(player, FFGEnum.ATTRIBUTES.BOAT.UpgradeStage, newStage)
 end
+-- //!SECTION
 
+-- //SECTION - Boat  Utilities
 BOAT.Show = function(boat: Model)
 	local boatParts = boat:GetChildren()
 	for _, part in pairs(boatParts) do
@@ -260,12 +267,16 @@ BOAT.Hide = function(boat: Model)
 	end
 end
 
-BOAT.SetupTaggedBoats = function(player)
-	if player then task.delay(1, function()
-		for _, taggedBoat in ipairs(taggedBoats) do
-			BOAT.SetupBoat(taggedBoat, player)
-		end
-	end) end
+BOAT.ResetBoat = function(boat: Model, player: Player)
+	local primaryPart = boat.PrimaryPart
+
+	local attributes = FFGDefaults.BOAT_STARTING_ATT
+
+	for key, value in pairs(attributes) do
+		primaryPart:SetAttribute(key, value)
+	end
+
+	FFGHelpers.PrintLog("Reset Attributes completed: ", primaryPart:GetAttributes())
 end
 
 BOAT.ResetTaggedBoats = function(player)
@@ -275,5 +286,6 @@ BOAT.ResetTaggedBoats = function(player)
 		end
 	end
 end
+-- //!SECTION
 
 return BOAT
