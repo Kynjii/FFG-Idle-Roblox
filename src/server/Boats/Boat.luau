@@ -83,11 +83,26 @@ BOAT.SetupProximityPrompt = function(boat: Model, primaryPart: Part, purchaseBoa
 
 	-- Create the prompt and apply conditional text
 	local proximityPrompt = Instance.new("ProximityPrompt", purchaseBoard)
+	-- handle case when boat is max level
+	local level = getAndCacheAttribute(BoatEnums.Level)
+	local maxLevel = getAndCacheAttribute(BoatEnums.MaxLevel)
+	if level == maxLevel then
+		local actText = ""
+		local objText = "Max Level Reached"
+		BOAT.UpdateProximityPromptUI(proximityPrompt, primaryPart, actText, objText)
+		return
+	end
+
 	proximityPrompt.HoldDuration = 0
 	proximityPrompt.ObjectText = currentState[BoatEnums.isPurchased] and "Upgrade Boat" or "Purchase" :: string
 	proximityPrompt.ActionText = currentState[BoatEnums.isPurchased] and "Level: " .. tostring(currentState.Level + 1) or "Tier " .. currentState.Tier .. " Boat" :: string
 
 	proximityPrompt.Triggered:Connect(function(player)
+		local level = getAndCacheAttribute(BoatEnums.Level)
+		local maxLevel = getAndCacheAttribute(BoatEnums.MaxLevel)
+
+		local isMaxLevel = level == maxLevel
+
 		-- Use cached values but refresh critical ones to be safe
 		local isPurchased = getAndCacheAttribute(BoatEnums.isPurchased) :: boolean
 		local upgradeCost = isPurchased and getAndCacheAttribute(BoatEnums.UpgradeCost) or getAndCacheAttribute(BoatEnums.BaseCost) :: number
@@ -105,11 +120,11 @@ BOAT.SetupProximityPrompt = function(boat: Model, primaryPart: Part, purchaseBoa
 			currentState[BoatEnums.Level] = currentLevel + 1
 
 			-- if the new level passes the threshold in quality promo, update the UpgradeStage
-			for k, v in ipairs(FFGEnum.QUALITY_PROMOTION_LEVELS) do
-				if currentState.Level == v + 1 then
-					local newStage = k + 1
+			for k, v in ipairs(FFGEnum.BOAT_PROMOTION_LEVELS) do
+				if currentState.Level == v then
+					local newStage = k
 					BOAT.IncreaseUpgradeStage(player, primaryPart, newStage)
-					currentState.UpgradeStage += 1
+					currentState.UpgradeStage = newStage
 					break
 				end
 			end
@@ -132,8 +147,15 @@ BOAT.SetupProximityPrompt = function(boat: Model, primaryPart: Part, purchaseBoa
 			BOAT.AddOwner(player, primaryPart)
 		end
 
-		local actText = "Upgrade"
-		local objText = "Level: " .. tostring(currentState.Level + 1)
+		local actText = ""
+		local objText = ""
+		if isMaxLevel then
+			actText = ""
+			objText = "Max Level Reached"
+		else
+			actText = "Upgrade"
+			objText = "Level: " .. tostring(currentState.Level + 1)
+		end
 		BOAT.UpdateProximityPromptUI(proximityPrompt, primaryPart, actText, objText)
 	end)
 
@@ -184,8 +206,8 @@ end
 -- //SECTION - UI Updates for Proximity Prompt and Purchase Board
 BOAT.UpdateProximityPromptUI = function(proximityPrompt: ProximityPrompt, primaryPart: Part, actText: string, objText: string)
 	if proximityPrompt and primaryPart then
-		proximityPrompt.ObjectText = actText or "Upgrade"
-		proximityPrompt.ActionText = objText or "Null"
+		proximityPrompt.ObjectText = actText or ""
+		proximityPrompt.ActionText = objText or ""
 	end
 end
 

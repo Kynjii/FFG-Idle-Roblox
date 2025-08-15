@@ -17,7 +17,7 @@ giveGoldButton.Touched:Connect(function(hit)
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	if humanoid then
 		local player = Players:GetPlayerFromCharacter(character)
-		if player then DataManager.Earn(player, FFGEnum.CURRENCY_TYPES.Gold, 100000) end
+		if player then DataManager.Earn(player, FFGEnum.CURRENCY_TYPES.Gold, 1000000000) end
 	end
 
 	task.delay(0.5, function()

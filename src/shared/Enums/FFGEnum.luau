@@ -16,6 +16,20 @@ FFGEnum.QUALITY_PROMOTION_LEVELS = {
 	[11] = 700,
 }
 
+FFGEnum.BOAT_PROMOTION_LEVELS = {
+	[1] = 1,
+	[2] = 10,
+	[3] = 20,
+	[4] = 30,
+	[5] = 40,
+	[6] = 50,
+	[7] = 60,
+	[8] = 70,
+	[9] = 80,
+	[10] = 90,
+	[11] = 100,
+}
+
 FFGEnum.BOAT = {
 	NAME = {
 		[1] = "Driftwood Skiff",
