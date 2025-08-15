@@ -50,48 +50,48 @@ FFGEnum.TENDER = {
 
 FFGEnum.QUALITY = {
 	[1] = {
-		label = "Common",
-		color = Color3.fromHex("#BFBFBF"),
+		Label = "Common",
+		Color = Color3.fromHex("#BFBFBF"),
 	},
 	[2] = {
-		label = "Uncommon",
-		color = Color3.fromHex("#3EFF3E"),
+		Label = "Uncommon",
+		Color = Color3.fromHex("#3EFF3E"),
 	},
 	[3] = {
-		label = "Rare",
-		color = Color3.fromHex("#0070DD"),
+		Label = "Rare",
+		Color = Color3.fromHex("#0070DD"),
 	},
 	[4] = {
-		label = "Epic",
-		color = Color3.fromHex("#A335EE"),
+		Label = "Epic",
+		Color = Color3.fromHex("#A335EE"),
 	},
 	[5] = {
-		label = "Legendary",
-		color = Color3.fromHex("#FF9A00"),
+		Label = "Legendary",
+		Color = Color3.fromHex("#FF9A00"),
 	},
 	[6] = {
-		label = "Exotic",
-		color = Color3.fromHex("#E6C266"),
+		Label = "Exotic",
+		Color = Color3.fromHex("#E6C266"),
 	},
 	[7] = {
-		label = "Ascended",
-		color = Color3.fromHex("#FF66CC"),
+		Label = "Ascended",
+		Color = Color3.fromHex("#FF66CC"),
 	},
 	[8] = {
-		label = "Mythic",
-		color = Color3.fromHex("#00FFFF"),
+		Label = "Mythic",
+		Color = Color3.fromHex("#00FFFF"),
 	},
 	[9] = {
-		label = "Divine",
-		color = Color3.fromHex("#FFD700"),
+		Label = "Divine",
+		Color = Color3.fromHex("#FFD700"),
 	},
 	[10] = {
-		label = "Eternal",
-		color = Color3.fromHex("#C0C0FF"),
+		Label = "Eternal",
+		Color = Color3.fromHex("#C0C0FF"),
 	},
 	[11] = {
-		label = "Transcendent",
-		color = Color3.fromHex("#F5E663"),
+		Label = "Transcendent",
+		Color = Color3.fromHex("#F5E663"),
 	},
 }
 
@@ -115,6 +115,11 @@ FFGEnum.ATTRIBUTES = {
 
 FFGEnum.CURRENCY_TYPES = {
 	["Gold"] = "Gold",
+}
+
+FFGEnum.ENTITIES = {
+	["Boat"] = "Boat",
+	["Tender"] = "Tender",
 }
 
 return FFGEnum

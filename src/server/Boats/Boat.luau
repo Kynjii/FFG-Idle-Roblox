@@ -129,7 +129,7 @@ BOAT.SetupPurchaseBoard = function(boat: Model, primaryPart: Part)
 		local upgradeStage = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.UpgradeStage)
 		local level = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.Level)
 		local qualityInfo = FFGEnum.QUALITY[upgradeStage]
-		local color = qualityInfo.color
+		local color = qualityInfo.Color
 		pbDetails.NameLabel.TextColor3 = color
 
 		if not primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.isPurchased) then
@@ -171,12 +171,31 @@ BOAT.UpdatePurchaseBoardUI = function(primaryPart: Part, purchaseBoard: Part, at
 	local currentUpgradeStage = primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.UpgradeStage)
 
 	local qualityInfo = FFGEnum.QUALITY[currentUpgradeStage]
-	local color = qualityInfo.color
+	local color = qualityInfo.Color
 	pbDetails.NameLabel.TextColor3 = color
 	pbDetails.NameLabel.Text = FFGEnum.BOAT.NAME[currentUpgradeStage]
 
 	if attributeName == FFGEnum.ATTRIBUTES.BOAT.isPurchased then pbDetails.NameLabel.Parent.Visible = true end
 end
+-- //!SECTION
+
+-- //SECTION - Handles Boat calculations
+BOAT.GetMaxStorage = function()
+	--
+end
+
+BOAT.GetFPS = function()
+	--
+end
+
+BOAT.GetBoosts = function()
+	--
+end
+
+BOAT.GetCosts = function()
+	-- return {baseCost, upgradeCost}
+end
+
 -- //!SECTION
 
 -- //SECTION - ATTRIBUTE LISTENERS
@@ -198,11 +217,11 @@ BOAT.SetupAttributeListeners = function(primaryPart: Part, purchaseBoard: Part)
 end
 -- //!SECTION
 
+-- //SECTION - Handles State updates for the boat
 BOAT.GetBoatState = function(player: Player)
 	return DataManager.LoadBoatState(player)
 end
 
--- //SECTION - Handles State updates for the boat
 BOAT.UpdateName = function(player: Player, primaryPart: Part, upgradeStage: number)
 	primaryPart:SetAttribute(FFGEnum.ATTRIBUTES.BOAT.Name, FFGEnum.BOAT.NAME[upgradeStage])
 	DataManager.UpdateBoatState(player, FFGEnum.ATTRIBUTES.BOAT.Name, FFGEnum.BOAT.NAME[upgradeStage])
