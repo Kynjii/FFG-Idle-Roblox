@@ -1,6 +1,5 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local FFGHelpers = require(ReplicatedStorage.Shared.Utils.FFGHelpers)
@@ -11,7 +10,7 @@ local player = Players.LocalPlayer
 local hud = FFGHelpers.deepWait(player, "PlayerGui", "HUD")
 
 local labels = {
-	Gold = hud:WaitForChild("GoldLabel"),
+	Gold = FFGHelpers.deepWait(hud, "Currencies", "Gold", "TextLabel"),
 }
 
 local current = {
@@ -53,23 +52,11 @@ end
 
 local function setCurrency(name: string, v: number)
 	local label = labels[name]
-	if not label then
-		return
-	end
-
-	local prev = current[name] or 0
+	if not label then return end
 	current[name] = v
 
 	label.Font = FFGEnum.FONT
-	label.Text = string.format("%s: %s", name, fmt(v))
-
-	-- flash color on change (green for gain, red for spend)
-	if v ~= prev then
-		local orig = label.TextColor3
-		local flash = (v > prev) and Color3.fromRGB(80, 220, 120) or Color3.fromRGB(230, 90, 90)
-		label.TextColor3 = flash
-		TweenService:Create(label, TweenInfo.new(0.25), { TextColor3 = orig }):Play()
-	end
+	label.Text = fmt(v)
 end
 
 Replica.OnNew("PlayerState", function(replica)
@@ -78,9 +65,7 @@ Replica.OnNew("PlayerState", function(replica)
 	-- Initial snapshot
 	if data.Currencies then
 		for k, n in pairs(data.Currencies) do
-			if typeof(n) == "number" then
-				setCurrency(k, n)
-			end
+			if typeof(n) == "number" then setCurrency(k, n) end
 		end
 	end
 
@@ -89,14 +74,10 @@ Replica.OnNew("PlayerState", function(replica)
 	local subscribed: { [string]: boolean } = {}
 
 	local function subscribeCurrency(key: string)
-		if subscribed[key] then
-			return
-		end
+		if subscribed[key] then return end
 		subscribed[key] = true
 		replica:OnSet({ "Currencies", key }, function(v)
-			if typeof(v) == "number" then
-				setCurrency(key, v)
-			end
+			if typeof(v) == "number" then setCurrency(key, v) end
 		end)
 	end
 

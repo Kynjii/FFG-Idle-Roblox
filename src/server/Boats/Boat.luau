@@ -102,6 +102,7 @@ BOAT.SetupProximityPrompt = function(boat: Model, primaryPart: Part, purchaseBoa
 		local maxLevel = getAndCacheAttribute(BoatEnums.MaxLevel)
 
 		local isMaxLevel = level == maxLevel
+		if isMaxLevel then return end
 
 		-- Use cached values but refresh critical ones to be safe
 		local isPurchased = getAndCacheAttribute(BoatEnums.isPurchased) :: boolean
