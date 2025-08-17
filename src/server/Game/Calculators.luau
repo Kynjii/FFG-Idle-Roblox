@@ -1,4 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
+local FFGDefaults = require(ServerScriptService.Server.FFGDefaults)
 local Formulas = require(script.Parent.Formulas)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local FFGHelpers = require(ReplicatedStorage.Shared.Utils.FFGHelpers)
@@ -121,6 +123,20 @@ CALCULATOR.UpgradeCost = function(type: string, level: number, tier: number, rea
 	-- //TODO - handle boosts
 
 	return cost
+end
+
+CALCULATOR.FishPerSecond = function(level: number, tier: number, realmLevel: number)
+	-- //TODO - look into why i am not calulating base cost based on tier note: i get basecost from the upgradableentity that's why
+	local baseFPS = FFGDefaults.BOAT_STARTING_ATT[FFGEnum.ATTRIBUTES.BOAT.FPS] or 10
+	local growthRate = Formulas.BOAT.GrowthRate
+	local tierMultiplier = Formulas.TIER_MULTIPLIER[tier]
+
+	local fpsCalc = baseFPS * math.pow(growthRate, level) * tierMultiplier
+	local nextLvlFPS = baseFPS * math.pow(growthRate, level + 1) * tierMultiplier
+
+	-- //TODO - handle boosts
+
+	return fpsCalc, nextLvlFPS
 end
 
 return CALCULATOR

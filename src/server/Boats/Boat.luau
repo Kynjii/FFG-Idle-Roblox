@@ -249,23 +249,44 @@ end
 -- //!SECTION
 
 -- //SECTION - Handles Boat calculations
-BOAT.GetMaxStorage = function(level: number, tier: number)
+BOAT.GetMaxStorage = function(level: number, tier: number): number
 	return Calculators.MaxStorage(FFGEnum.ENTITIES.Boat, level, tier)
 end
 
-BOAT.GetUpgradeCost = function(level: number, tier: number, realmLevel: number, baseCost: number)
+BOAT.GetUpgradeCost = function(level: number, tier: number, realmLevel: number, baseCost: number): number
 	return Calculators.UpgradeCost(FFGEnum.ENTITIES.Boat, level, tier, realmLevel, baseCost)
 end
 
-BOAT.GetFPS = function()
-	--
+-- Fishing related
+BOAT.GetFPS = function(level: number, tier: number, realmLevel: number): number
+	return Calculators.FishPerSecond(level, tier, realmLevel)
+end
+
+BOAT.AddFish = function(primaryPart: Part, amount: number)
+	if BOAT.IsStorageFull(primaryPart) then return end
+
+	-- add fish to storage
+
+	-- if storage is > than max storage, storage = max storage
+end
+
+BOAT.RemoveFish = function(primaryPart: Part, amount: number)
+	-- this.fishInStorage = Math.max(this.currentFishInStorage.raw - amount, 0);
+end
+
+BOAT.StartFishing = function(primaryPart: Part)
+	-- set boat state isActive to true
+end
+
+BOAT.StopFishing = function(primaryPart: Part)
+	-- set boat state isActive to false
 end
 
 BOAT.GetBoosts = function()
 	--
 end
 
-BOAT.GetBaseCost = function(level: number, tier: number, realmLevel: number)
+BOAT.GetBaseCost = function(level: number, tier: number, realmLevel: number): number
 	return Calculators.GetBaseCost(FFGEnum.ENTITIES.Boat, level, tier, realmLevel)
 end
 
@@ -346,6 +367,10 @@ end
 -- //!SECTION
 
 -- //SECTION - Boat  Utilities
+BOAT.IsStorageFull = function(primaryPart: Part): boolean
+	return primaryPart:GetAttribute(FFGEnum.ATTRIBUTES.BOAT.StorageFull)
+end
+
 BOAT.Show = function(boat: Model)
 	local boatParts = boat:GetChildren()
 	for _, part in pairs(boatParts) do

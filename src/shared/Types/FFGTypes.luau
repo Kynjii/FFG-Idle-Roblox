@@ -11,6 +11,9 @@ export type BoatState = {
 	UpgradeStage: number,
 	CurrentMaxStorage: number?,
 	NextLvlMaxStorage: number?,
+	FPS: number?,
+	FishInStorage: number?,
+	StorageFull: boolean,
 }
 
 return {}

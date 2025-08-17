@@ -130,6 +130,9 @@ FFGEnum.ATTRIBUTES = {
 		["MaxLevel"] = "MaxLevel",
 		["BaseCost"] = "BaseCost",
 		["UpgradeCost"] = "UpgradeCost",
+		["FPS"] = "FPS",
+		["FishInStorage"] = "FishInStorage",
+		["StorageFull"] = "StorageFull",
 	},
 }
 

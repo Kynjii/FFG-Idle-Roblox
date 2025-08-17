@@ -24,6 +24,9 @@ FFGDefaults.BOAT_STARTING_ATT = {
 	[FFGEnum.ATTRIBUTES.BOAT.MaxLevel] = 100,
 	[FFGEnum.ATTRIBUTES.BOAT.BaseCost] = Formulas.BOAT.BaseCost,
 	[FFGEnum.ATTRIBUTES.BOAT.UpgradeCost] = 100,
+	[FFGEnum.ATTRIBUTES.BOAT.FPS] = 10,
+	[FFGEnum.ATTRIBUTES.BOAT.FishInStorage] = 0,
+	[FFGEnum.ATTRIBUTES.BOAT.StorageFull] = false,
 }
 
 return FFGDefaults
