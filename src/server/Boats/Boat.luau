@@ -275,11 +275,11 @@ BOAT.RemoveFish = function(primaryPart: Part, amount: number)
 end
 
 BOAT.StartFishing = function(primaryPart: Part)
-	-- set boat state isActive to true
+	-- handle fishing logic
 end
 
 BOAT.StopFishing = function(primaryPart: Part)
-	-- set boat state isActive to false
+	-- not sure yet
 end
 
 BOAT.GetBoosts = function()
@@ -307,6 +307,11 @@ BOAT.SetupAttributeListeners = function(primaryPart: Part, purchaseBoard: Part)
 
 	primaryPart:GetAttributeChangedSignal(BoatEnums.isPurchased):Connect(function()
 		BOAT.UpdatePurchaseBoardUI(primaryPart, purchaseBoard, BoatEnums.isPurchased)
+	end)
+
+	-- PassiveFishing
+	primaryPart:GetAttributeChangedSignal(BoatEnums.isActive):Connect(function()
+		BOAT.UpdateFishingState(primaryPart, BoatEnums.isPurchased)
 	end)
 end
 -- //!SECTION
@@ -363,6 +368,14 @@ end
 BOAT.IncreaseUpgradeStage = function(player: Player, primaryPart: Part, newStage: number)
 	primaryPart:SetAttribute(BoatEnums.UpgradeStage, newStage)
 	DataManager.UpdateBoatState(player, BoatEnums.UpgradeStage, newStage)
+end
+
+BOAT.UpdateFishingState = function(primaryPart: Part, isActive: boolean)
+	if isActive then
+		BOAT.StartFishing(primaryPart)
+	else
+		BOAT.StopFishing(primaryPart)
+	end
 end
 -- //!SECTION
 

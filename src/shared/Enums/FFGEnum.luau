@@ -133,6 +133,7 @@ FFGEnum.ATTRIBUTES = {
 		["FPS"] = "FPS",
 		["FishInStorage"] = "FishInStorage",
 		["StorageFull"] = "StorageFull",
+		["BoatModel"] = "BoatModel",
 	},
 }
 
