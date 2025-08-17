@@ -1,6 +1,7 @@
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local BoatInstance = require(script.Parent.BoatInstance)
 local DataManager = require(ServerScriptService.Server.Data.DataManager)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local FFGTypes = require(ReplicatedStorage.Shared.Types.FFGTypes)
@@ -32,35 +33,38 @@ BOAT.SetupBoat = function(boat: Model, player: Player)
 
 	local state = BOAT.GetBoatState(player)
 
-	local attributes = nil
-	attributes = state or FFGDefaults.BOAT_STARTING_ATT
+	-- Create BoatInstance with state, owner ID, and model
+	local boatInstance = BoatInstance:New(state, player.UserId, boat)
 
-	FFGHelpers.PrintLog("Attempting to apply state to boat: ", state)
+	-- local attributes = nil
+	-- attributes = state or FFGDefaults.BOAT_STARTING_ATT
 
-	for key, value in pairs(attributes) do
-		-- if the basecost is the default one, calculate and assign the appropriate baseCost
-		if key == BoatEnums.BaseCost and value == FFGDefaults.BOAT_STARTING_ATT[BoatEnums.BaseCost] then
-			local baseCost = BOAT.GetBaseCost(attributes[BoatEnums.Level], attributes[BoatEnums.Tier], attributes[BoatEnums.RealmLevel])
+	-- FFGHelpers.PrintLog("Attempting to apply state to boat: ", state)
 
-			if baseCost then primaryPart:SetAttribute(key, baseCost) end
-		end
-		primaryPart:SetAttribute(key, value)
-	end
+	-- for key, value in pairs(attributes) do
+	-- 	-- if the basecost is the default one, calculate and assign the appropriate baseCost
+	-- 	if key == BoatEnums.BaseCost and value == FFGDefaults.BOAT_STARTING_ATT[BoatEnums.BaseCost] then
+	-- 		local baseCost = BOAT.GetBaseCost(attributes[BoatEnums.Level], attributes[BoatEnums.Tier], attributes[BoatEnums.RealmLevel])
 
-	if not primaryPart:GetAttribute(BoatEnums.isPurchased) then
-		BOAT.Hide(boat)
-		BOAT.CannotCollide(boat)
-	else
-		BOAT.Show(boat)
-		BOAT.CanCollide(boat)
-	end
+	-- 		if baseCost then primaryPart:SetAttribute(key, baseCost) end
+	-- 	end
+	-- 	primaryPart:SetAttribute(key, value)
+	-- end
 
-	-- Setup the purchase board info and attribute listeners
-	local purchaseBoard = BOAT.SetupPurchaseBoard(boat, primaryPart, state)
-	if purchaseBoard then
-		BOAT.SetupProximityPrompt(boat, primaryPart, purchaseBoard, state)
-		BOAT.SetupAttributeListeners(primaryPart, purchaseBoard)
-	end
+	-- if not primaryPart:GetAttribute(BoatEnums.isPurchased) then
+	-- 	BOAT.Hide(boat)
+	-- 	BOAT.CannotCollide(boat)
+	-- else
+	-- 	BOAT.Show(boat)
+	-- 	BOAT.CanCollide(boat)
+	-- end
+
+	-- -- Setup the purchase board info and attribute listeners
+	-- local purchaseBoard = BOAT.SetupPurchaseBoard(boat, primaryPart, state)
+	-- if purchaseBoard then
+	-- 	BOAT.SetupProximityPrompt(boat, primaryPart, purchaseBoard, state)
+	-- 	BOAT.SetupAttributeListeners(primaryPart, purchaseBoard)
+	-- end
 end
 
 -- STATE MANAGEMENT FOR BOAT - Proximity Prompt currently handles a lot of the management as it triggers all changes to the Boat

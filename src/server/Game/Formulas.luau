@@ -4,6 +4,7 @@ local FORMULAS = {
 		GrowthRate = 1.1,
 		CostGrowthRate = 1.4,
 		BaseStorage = 100,
+		BaseFPS = 10,
 	},
 	TENDER = {
 		BaseCost = 100,

@@ -40,22 +40,49 @@ local STARTER_STATS: FFGTypes.BoatState = {
 	[BOATEnum.Level] = 1,
 	[BOATEnum.MaxLevel] = 100,
 	[BOATEnum.Tier] = 1,
-	[BOATEnum.Name] = NAME[1],
 	[BOATEnum.isActive] = false,
 	[BOATEnum.isPurchased] = false,
 	[BOATEnum.UpgradeStage] = 1,
-	[BOATEnum.CurrentMaxStorage] = 100,
-	[BOATEnum.NextLvlMaxStorage] = 100,
-	[BOATEnum.RealmLevel] = 1,
-	[BOATEnum.BaseCost] = Formulas.BOAT.BaseCost,
-	[BOATEnum.UpgradeCost] = 100,
-	[BOATEnum.FPS] = 10,
-	[BOATEnum.FishInStorage] = 0,
 	[BOATEnum.StorageFull] = false,
 }
 
 local BoatInstance = {}
 BoatInstance.__index = BoatInstance
+
+-- //SECTION - Constructor
+function BoatInstance:New(state: FFGTypes.BoatState, ownerId: number, model: Model, currentrealm: number)
+	local instance = setmetatable({}, BoatInstance)
+
+	-- Start with default stats as base
+	for key, value in pairs(STARTER_STATS) do
+		instance[key] = value
+	end
+
+	-- Override with provided state values
+	if state then
+		for key, value in pairs(state) do
+			instance[key] = value
+		end
+	end
+
+	-- Calculate derived properties after instance is set up
+	instance[BOATEnum.Id] = instance[BOATEnum.Id] or HttpService:GenerateGUID(false)
+	instance[BOATEnum.Owner] = instance[BOATEnum.Owner] or ownerId
+	instance[BOATEnum.BoatModel] = model
+	instance[BOATEnum.RealmLevel] = instance[BOATEnum.RealmLevel] or currentrealm
+	instance[BOATEnum.Name] = instance[BOATEnum.Name] or instance:GetName()
+	instance[BOATEnum.BaseCost] = instance[BOATEnum.BaseCost] or instance:CalculateBaseCost()
+	instance[BOATEnum.UpgradeCost] = instance[BOATEnum.UpgradeCost] or instance:CalculateUpgradeCost()
+
+	local currentMaxStorage: number, nextLvlMaxStorage: number = self:CalculateMaxStorage()
+	instance[BOATEnum.CurrentMaxStorage] = instance[BOATEnum.CurrentMaxStorage] or currentMaxStorage
+	instance[BOATEnum.NextLvlMaxStorage] = instance[BOATEnum.NextLvlMaxStorage] or nextLvlMaxStorage
+
+	instance[BOATEnum.FPS] = instance[BOATEnum.FPS] or self:CalculateFPS()
+
+	return instance
+end
+-- //!SECTION
 
 function BoatInstance:Purchase()
 	self[BOATEnum.isPurchased] = true
@@ -65,16 +92,40 @@ function BoatInstance:Upgrade()
 	self[BOATEnum.Level] += 1
 	self[BOATEnum.UpgradeCost] = self:CalculateUpgradeCost()
 	self[BOATEnum.Name] = self:GetName()
-	self[BOATEnum.CurrentMaxStorage] = self:CalculateMaxStorage()
+
+	local current: number, next: number = self:CalculateMaxStorage()
+	self[BOATEnum.CurrentMaxStorage] = current
+	self[BOATEnum.NextLvlMaxStorage] = next
+end
+
+function BoatInstance:CalculateBaseFPS(): number
+	local baseFPS = Formulas.BOAT.BaseFPS
+
+	local tierMultiplier = Formulas.TIER_MULTIPLIER[self[BOATEnum.Tier]]
+	local realmMultiplier = math.pow(self[BOATEnum.RealmLevel], 2.25) -- scaling curve
+
+	local baseFPSCalc = baseFPS * tierMultiplier * realmMultiplier
+
+	return baseFPSCalc
+end
+
+function BoatInstance:CalculateFPS(): number
+	local baseFPS = self:CalculateBaseFPS()
+
+	local growthRate = Formulas.BOAT.GrowthRate
+	local tierMultiplier = Formulas.TIER_MULTIPLIER[self[BOATEnum.Tier]]
+	local level = self[BOATEnum.Level] :: number
+
+	local fpsCalc = baseFPS * math.pow(growthRate, level) * tierMultiplier
+	local nextLvlFPS = baseFPS * math.pow(growthRate, level + 1) * tierMultiplier
+
+	-- //TODO - handle boosts
+
+	return fpsCalc, nextLvlFPS
 end
 
 function BoatInstance:CalculateBaseCost(): number
 	local baseCost = Formulas.BOAT.BaseCost
-
-	if baseCost <= 0 then
-		FFGHelpers.PrintLog("Base Cost is either 0 or below, returning")
-		return
-	end
 
 	local tierMultiplier = Formulas.TIER_MULTIPLIER[self[BOATEnum.Tier]]
 	local realmMultiplier = math.pow(self[BOATEnum.RealmLevel], 2.25) -- scaling curve
@@ -163,6 +214,24 @@ end
 -- end
 -- //!SECTION
 
+function BoatInstance:GetMaxStorage()
+	local baseStorage = Formulas.BOAT.BaseStorage
+
+	if baseStorage <= 0 then
+		FFGHelpers.PrintLog("Base Storage is either 0 or below, returning")
+		return
+	end
+
+	local growthRate = Formulas.BOAT.GrowthRate + self[BOATEnum.Tier] * 0.02 :: number
+	local tierMultiplier = Formulas.TIER_MULTIPLIER[self[BOATEnum.Tier]] :: number
+	local maxStorage = baseStorage * math.pow(growthRate, self[BOATEnum.Level]) * tierMultiplier :: number
+	local nextLvlMaxStorage = baseStorage * math.pow(growthRate, self[BOATEnum.Level] + 1) * tierMultiplier :: number
+
+	-- //TODO - handle boosts
+
+	return maxStorage, nextLvlMaxStorage
+end
+
 -- //SECTION - (De)Serialization
 function BoatInstance:serialize()
 	return {
@@ -243,21 +312,5 @@ function BoatInstance:ResetBoat(boat: Model, player: Player)
 	FFGHelpers.PrintLog("Reset Attributes completed: ", primaryPart:GetAttributes())
 end
 -- //!SECTION
-
-function BoatInstance:New(state: FFGTypes.BoatState, ownerId, model)
-	local instance = setmetatable({}, BoatInstance)
-
-	instance[BOATEnum.Id] = state.Id or HttpService:GenerateGUID(false)
-	instance[BOATEnum.Owner] = state.Owner or ownerId
-	instance[BOATEnum.Level] = state.Level or STARTER_STATS.Level
-	instance[BOATEnum.MaxLevel] = state.MaxLevel or STARTER_STATS.MaxLevel
-	instance[BOATEnum.Tier] = state.Tier or STARTER_STATS.Tier
-	instance[BOATEnum.Name] = state.Name or STARTER_STATS.Name
-	instance[BOATEnum.BoatModel] = model
-	instance[BOATEnum.BaseCost] = instance:CalculateBaseCost() or STARTER_STATS.BaseCost
-	instance[BOATEnum.UpgradeCost] = instance:CalculateUpgradeCost() or STARTER_STATS.UpgradeCost
-
-	return instance
-end
 
 return BoatInstance
