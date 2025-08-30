@@ -72,19 +72,19 @@ function BoatInstance:New(state: FFGTypes.BoatState, player: Player, model: Mode
 	end
 
 	-- Calculate derived properties after instance is set up
-	instance[BOATEnum.Id] = instance[BOATEnum.Id] or HttpService:GenerateGUID(false)
-	instance[BOATEnum.Owner] = instance[BOATEnum.Owner] or player.UserId
-	instance[BOATEnum.BoatModel] = model
-	instance[BOATEnum.RealmId] = instance[BOATEnum.RealmId] or currentrealm or STARTER_STATS.RealmId
-	instance[BOATEnum.Name] = instance[BOATEnum.Name] or instance:GetName()
-	instance[BOATEnum.BaseCost] = instance[BOATEnum.BaseCost] or instance:CalculateBaseCost()
-	instance[BOATEnum.UpgradeCost] = instance[BOATEnum.UpgradeCost] or instance:CalculateUpgradeCost()
+	instance[BOATEnum.Id] = instance[BOATEnum.Id] or HttpService:GenerateGUID(false) :: string
+	instance[BOATEnum.Owner] = instance[BOATEnum.Owner] or player.UserId :: number
+	instance[BOATEnum.BoatModel] = model :: Model
+	instance[BOATEnum.RealmId] = instance[BOATEnum.RealmId] or currentrealm or STARTER_STATS.RealmId :: number
+	instance[BOATEnum.Name] = instance[BOATEnum.Name] or instance:GetName() :: string
+	instance[BOATEnum.BaseCost] = instance[BOATEnum.BaseCost] or instance:CalculateBaseCost() :: number
+	instance[BOATEnum.UpgradeCost] = instance[BOATEnum.UpgradeCost] or instance:CalculateUpgradeCost() :: number
 
 	local currentMaxStorage: number, nextLvlMaxStorage: number = instance:CalculateMaxStorage()
-	instance[BOATEnum.CurrentMaxStorage] = instance[BOATEnum.CurrentMaxStorage] or currentMaxStorage
-	instance[BOATEnum.NextLvlMaxStorage] = instance[BOATEnum.NextLvlMaxStorage] or nextLvlMaxStorage
+	instance[BOATEnum.CurrentMaxStorage] = instance[BOATEnum.CurrentMaxStorage] or currentMaxStorage :: number
+	instance[BOATEnum.NextLvlMaxStorage] = instance[BOATEnum.NextLvlMaxStorage] or nextLvlMaxStorage :: number
 
-	instance[BOATEnum.FPS] = instance[BOATEnum.FPS] or instance:CalculateFPS()
+	instance[BOATEnum.FPS] = instance[BOATEnum.FPS] or instance:CalculateFPS() :: number
 
 	return instance
 end
@@ -110,8 +110,8 @@ function BoatInstance:CalculateMaxStorage()
 	local baseStorage = STARTER_STATS.BaseStorage
 	local growthRate = STARTER_STATS.GrowthRate + self[BOATEnum.Tier] * 0.02 :: number
 	local tierMultiplier = Formulas.TIER_MULTIPLIER[self[BOATEnum.Tier]] :: number
-	local maxStorage = baseStorage * math.pow(growthRate, self[BOATEnum.Level]) * tierMultiplier :: number
-	local nextLvlMaxStorage = baseStorage * math.pow(growthRate, self[BOATEnum.Level] + 1) * tierMultiplier :: number
+	local maxStorage = baseStorage * math.pow(growthRate :: number, self[BOATEnum.Level] :: number) * tierMultiplier :: number
+	local nextLvlMaxStorage = baseStorage * math.pow(growthRate :: number, self[BOATEnum.Level] :: number + 1) * tierMultiplier :: number
 
 	-- //TODO - handle boosts
 
@@ -122,7 +122,7 @@ function BoatInstance:CalculateBaseFPS(): number
 	local baseFPS = STARTER_STATS.BaseFPS
 
 	local tierMultiplier = Formulas.TIER_MULTIPLIER[self[BOATEnum.Tier]]
-	local realmMultiplier = math.pow(self[BOATEnum.RealmId], 2.25) -- scaling curve
+	local realmMultiplier = math.pow(self[BOATEnum.RealmId] :: number, 2.25) -- scaling curve
 
 	local baseFPSCalc = baseFPS * tierMultiplier * realmMultiplier
 
@@ -148,7 +148,7 @@ function BoatInstance:CalculateBaseCost(): number
 	local baseCost = STARTER_STATS.BaseCost
 
 	local tierMultiplier = Formulas.TIER_MULTIPLIER[self[BOATEnum.Tier]]
-	local realmMultiplier = math.pow(self[BOATEnum.RealmId], 2.25) -- scaling curve
+	local realmMultiplier = math.pow(self[BOATEnum.RealmId] :: number, 2.25) -- scaling curve
 
 	local cost = baseCost * tierMultiplier * realmMultiplier
 
@@ -165,11 +165,11 @@ function BoatInstance:CalculateUpgradeCost(): number
 
 	local tierMultiplier = Formulas.TIER_MULTIPLIER[self[BOATEnum.Tier]]
 
-	local realmMultiplier = math.pow(self[BOATEnum.RealmId], 2.25) -- scaling curve
+	local realmMultiplier = math.pow(self[BOATEnum.RealmId] :: number, 2.25) -- scaling curve
 
 	local growthRate = STARTER_STATS.CostGrowthRate
 
-	local cost = baseCost * math.pow(growthRate, self[BOATEnum.Level]) * tierMultiplier * realmMultiplier
+	local cost = baseCost * math.pow(growthRate, self[BOATEnum.Level] :: number) * tierMultiplier * realmMultiplier
 
 	-- //TODO - handle boosts
 
