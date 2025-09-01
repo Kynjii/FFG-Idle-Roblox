@@ -127,7 +127,7 @@ end
 
 CALCULATOR.FishPerSecond = function(level: number, tier: number, RealmId: number)
 	-- //TODO - look into why i am not calulating base cost based on tier note: i get basecost from the upgradableentity but i dont have a calculation for baseFPS that's why
-	local baseFPS = FFGDefaults.BOAT_STARTING_ATT[FFGEnum.ATTRIBUTES.BOAT.FPS] or 10
+	local baseFPS = FFGDefaults.BOAT_STARTING_ATT[FFGEnum.ATTRIBUTES.BOAT.BaseFPS] or 10
 	local growthRate = Formulas.BOAT.GrowthRate
 	local tierMultiplier = Formulas.TIER_MULTIPLIER[tier]
 

@@ -99,7 +99,8 @@ FFGEnum.ATTRIBUTES = {
 		["MaxLevel"] = "MaxLevel",
 		["BaseCost"] = "BaseCost",
 		["UpgradeCost"] = "UpgradeCost",
-		["FPS"] = "FPS",
+		["CurrentFPS"] = "CurrentFPS",
+		["NextFPS"] = "NextFPS",
 		["FishInStorage"] = "FishInStorage",
 		["StorageFull"] = "StorageFull",
 		["BoatModel"] = "BoatModel",
@@ -107,6 +108,7 @@ FFGEnum.ATTRIBUTES = {
 		["CostGrowthRate"] = "CostGrowthRate",
 		["BaseFPS"] = "BaseFPS",
 		["BaseStorage"] = "BaseStorage",
+		["FishingInterval"] = "FishingInterval",
 	},
 }
 

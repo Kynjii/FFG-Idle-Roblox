@@ -5,6 +5,7 @@ local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
+local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 local SetInterval = require(ServerScriptService.Server.Modules.SetInterval)
 local BOATEnum = FFGEnum.ATTRIBUTES.BOAT
@@ -23,7 +24,8 @@ export type BoatState = {
 	UpgradeStage: number,
 	CurrentMaxStorage: number?,
 	NextLvlMaxStorage: number?,
-	FPS: number?,
+	CurrentFPS: number?,
+	NextFPS: number?,
 	FishInStorage: number?,
 	StorageFull: boolean,
 	GrowthRate: number,
@@ -44,6 +46,7 @@ export type BoatClass = BoatState & {
 	CalculateBaseCost: (self: BoatClass) -> number,
 	CalculateUpgradeCost: (self: BoatClass) -> number,
 	GetMaxStorage: (self: BoatClass) -> number,
+	CalculateFPS: (self: BoatClass) -> number,
 
 	-- Fishing
 	StartFishing: (self: BoatClass) -> (),
@@ -68,6 +71,9 @@ export type BoatClass = BoatState & {
 
 	-- Saving and Loading
 	Serialize: (self: BoatClass) -> BoatState,
+
+	-- Intervals
+	FishingInterval: thread,
 }
 
 local BOAT_PROMOTION_LEVELS = {
@@ -118,7 +124,7 @@ local BoatClass: BoatClass = {}
 BoatClass.__index = BoatClass
 
 -- //SECTION - Constructor
-function BoatClass:New(state: BoatState, player: Player, model: Model, currentrealm: number)
+function BoatClass:New(state: BoatState, player: Player, model: Model, currentRealm: number)
 	local instance = setmetatable({}, BoatClass)
 
 	-- Start with default stats as base
@@ -145,7 +151,11 @@ function BoatClass:New(state: BoatState, player: Player, model: Model, currentre
 	instance[BOATEnum.CurrentMaxStorage] = instance[BOATEnum.CurrentMaxStorage] or currentMaxStorage :: number
 	instance[BOATEnum.NextLvlMaxStorage] = instance[BOATEnum.NextLvlMaxStorage] or nextLvlMaxStorage :: number
 
-	instance[BOATEnum.FPS] = instance[BOATEnum.FPS] or instance:CalculateFPS() :: number
+	local currentFPS: number, nextFPS: number = instance:CalculateFPS()
+	instance[BOATEnum.CurrentFPS] = instance[BOATEnum.CurrentFPS] or currentFPS :: number
+	instance[BOATEnum.NextFPS] = instance[BOATEnum.NextFPS] or nextFPS :: number
+
+	instance[BOATEnum.FishingInterval] = nil
 
 	return instance
 end
@@ -165,6 +175,10 @@ function BoatClass:Upgrade()
 	local currentMaxStorage: number, nextLvlMaxStorage: number = self:CalculateMaxStorage()
 	self[BOATEnum.CurrentMaxStorage] = currentMaxStorage
 	self[BOATEnum.NextLvlMaxStorage] = nextLvlMaxStorage
+
+	local currentFPS: number, nextFPS: number = self:CalculateFPS()
+	self[BOATEnum.CurrentFPS] = currentFPS
+	self[BOATEnum.NextFPS] = nextFPS
 end
 
 function BoatClass:CalculateMaxStorage()
@@ -193,12 +207,12 @@ end
 function BoatClass:CalculateFPS(): number
 	local baseFPS = self:CalculateBaseFPS()
 
-	local growthRate = STARTER_STATS.GrowthRate
+	local growthRate = STARTER_STATS.GrowthRate :: number
 	local tierMultiplier = Formulas.TIER_MULTIPLIER[self[BOATEnum.Tier]]
 	local level = self[BOATEnum.Level] :: number
 
-	local fpsCalc = baseFPS * math.pow(growthRate, level) * tierMultiplier
-	local nextLvlFPS = baseFPS * math.pow(growthRate, level + 1) * tierMultiplier
+	local fpsCalc = baseFPS * math.pow(growthRate :: number, level) * tierMultiplier
+	local nextLvlFPS = baseFPS * math.pow(growthRate :: number, level + 1) * tierMultiplier
 
 	-- //TODO - handle boosts
 
@@ -242,9 +256,13 @@ function BoatClass:Purchase()
 end
 
 function BoatClass:StartFishing()
-	SetInterval(function()
+	self[BOATEnum.FishingInterval] = SetInterval(function()
 		if not self[BOATEnum.StorageFull] then self:AddFish(self[BOATEnum.FPS]) end
 	end, 1)
+end
+
+function BoatClass:StopFishing()
+	self[BOATEnum.FishingInterval] = nil
 end
 
 function BoatClass:AddFish(amount: number)
@@ -285,7 +303,8 @@ function BoatClass:Serialize(): BoatState
 		[BOATEnum.BaseFPS] = self[BOATEnum.BaseFPS],
 		[BOATEnum.BaseStorage] = self[BOATEnum.BaseStorage],
 		[BOATEnum.CurrentMaxStorage] = self[BOATEnum.CurrentMaxStorage],
-		[BOATEnum.FPS] = self[BOATEnum.FPS],
+		[BOATEnum.CurrentFPS] = self[BOATEnum.CurrentFPS],
+		[BOATEnum.NextFPS] = self[BOATEnum.NextFPS],
 		[BOATEnum.FishInStorage] = self[BOATEnum.FishInStorage],
 		[BOATEnum.Name] = self[BOATEnum.Name],
 		[BOATEnum.NextLvlMaxStorage] = self[BOATEnum.NextLvlMaxStorage],
@@ -359,6 +378,8 @@ function BoatClass:SetupPurchaseBoard()
 	pbDetails.LevelLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel") :: TextLabel
 	pbDetails.CurrentMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "CurrentMaxStorage", "TextLabel") :: TextLabel
 	pbDetails.NextMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "NextMaxStorage", "TextLabel") :: TextLabel
+	pbDetails.CurrentFPSLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "CurrentFPS", "TextLabel") :: TextLabel
+	pbDetails.NextFPSLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "NextFPS", "TextLabel") :: TextLabel
 
 	if pbDetails then
 		local upgradeStage = self[BOATEnum.UpgradeStage]
@@ -376,10 +397,15 @@ function BoatClass:SetupPurchaseBoard()
 
 		pbDetails.LevelLabel.Text = self[BOATEnum.isPurchased] and "Level: " .. level or "Purchase Boat"
 
-		-- Use instance methods for storage calculations
+		-- STORAGE STATS
 		local currentStorage, nextStorage = self:CalculateMaxStorage()
-		pbDetails.CurrentMaxStorageLabel.Text = self[BOATEnum.isPurchased] and tostring(currentStorage) or ""
-		pbDetails.NextMaxStorageLabel.Text = self[BOATEnum.isPurchased] and tostring(nextStorage) or ""
+		pbDetails.CurrentMaxStorageLabel.Text = self[BOATEnum.isPurchased] and FormatNumber(currentStorage) or ""
+		pbDetails.NextMaxStorageLabel.Text = self[BOATEnum.isPurchased] and FormatNumber(nextStorage) or ""
+
+		-- FPS STATS
+		local currentFPS, nextFPS = self:CalculateFPS()
+		pbDetails.CurrentFPSLabel.Text = self[BOATEnum.isPurchased] and FormatNumber(currentFPS) or ""
+		pbDetails.NextFPSLabel.Text = self[BOATEnum.isPurchased] and FormatNumber(nextFPS) or ""
 	end
 
 	return purchaseBoard
@@ -394,10 +420,14 @@ function BoatClass:UpdatePurchaseBoardUI()
 	pbDetails.LevelLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel") :: TextLabel
 	pbDetails.CurrentMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "CurrentMaxStorage", "TextLabel") :: TextLabel
 	pbDetails.NextMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "NextMaxStorage", "TextLabel") :: TextLabel
+	pbDetails.CurrentFPSLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "CurrentFPS", "TextLabel") :: TextLabel
+	pbDetails.NextFPSLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "NextFPS", "TextLabel") :: TextLabel
 
 	-- //TODO - use formatting helper
-	pbDetails.CurrentMaxStorageLabel.Text = isPurchased and tostring(self[BOATEnum.CurrentMaxStorage]) or ""
-	pbDetails.NextMaxStorageLabel.Text = isPurchased and tostring(self[BOATEnum.NextLvlMaxStorage]) or ""
+	pbDetails.CurrentMaxStorageLabel.Text = isPurchased and FormatNumber(self[BOATEnum.CurrentMaxStorage]) or ""
+	pbDetails.NextMaxStorageLabel.Text = isPurchased and FormatNumber(self[BOATEnum.NextLvlMaxStorage]) or ""
+	pbDetails.CurrentFPSLabel.Text = isPurchased and FormatNumber(self[BOATEnum.CurrentFPS]) or ""
+	pbDetails.NextFPSLabel.Text = isPurchased and FormatNumber(self[BOATEnum.NextFPS]) or ""
 
 	local level = self[BOATEnum.Level]
 	pbDetails.LevelLabel.Text = "Level: " .. level
