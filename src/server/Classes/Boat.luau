@@ -4,6 +4,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
+local CalculateProgress = require(ReplicatedStorage.Shared.Utils.CalculateProgress)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
@@ -63,6 +64,7 @@ export type BoatClass = BoatState & {
 	-- UI Setup (new methods)
 	Initialize: (self: BoatClass) -> (),
 	SetupPurchaseBoard: (self: BoatClass) -> Part,
+	UpdatePurchaseBoardUI: (self: BoatClass) -> (),
 	SetupProximityPrompt: (self: BoatClass, purchaseBoard: Part) -> ProximityPrompt,
 	UpdateProximityPromptUI: (self: BoatClass, proximityPrompt: ProximityPrompt) -> (),
 
@@ -258,7 +260,10 @@ end
 
 function BoatClass:StartFishing()
 	self[BOATEnum.FishingInterval] = SetInterval(function()
-		if not self[BOATEnum.StorageFull] then self:AddFish(self[BOATEnum.CurrentFPS]) end
+		if not self[BOATEnum.StorageFull] then
+			self:AddFish(self[BOATEnum.CurrentFPS])
+			self:UpdatePurchaseBoardUI()
+		end
 	end, 1)
 end
 
@@ -390,6 +395,7 @@ function BoatClass:SetupPurchaseBoard()
 	pbDetails.NextMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextMaxStorage", "TextLabel") :: TextLabel
 	pbDetails.CurrentFPSLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentFPS", "TextLabel") :: TextLabel
 	pbDetails.NextFPSLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextFPS", "TextLabel") :: TextLabel
+	pbDetails.StorageProgress = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StorageBar", "StorageProgress") :: Frame
 
 	if pbDetails then
 		local upgradeStage = self[BOATEnum.UpgradeStage]
@@ -407,15 +413,19 @@ function BoatClass:SetupPurchaseBoard()
 
 		pbDetails.LevelLabel.Text = self[BOATEnum.isPurchased] and "Level: " .. level or "Purchase Boat"
 
-		-- STORAGE STATS
+		-- STORAGE Stats
 		local currentStorage, nextStorage = self:CalculateMaxStorage()
 		pbDetails.CurrentMaxStorageLabel.Text = self[BOATEnum.isPurchased] and FormatNumber(currentStorage) or ""
 		pbDetails.NextMaxStorageLabel.Text = self[BOATEnum.isPurchased] and FormatNumber(nextStorage) or ""
 
-		-- FPS STATS
+		-- FPS Stats
 		local currentFPS, nextFPS = self:CalculateFPS()
 		pbDetails.CurrentFPSLabel.Text = self[BOATEnum.isPurchased] and FormatNumber(currentFPS) or ""
 		pbDetails.NextFPSLabel.Text = self[BOATEnum.isPurchased] and FormatNumber(nextFPS) or ""
+
+		-- Storage Progress Bar
+		local storageProgress = CalculateProgress(self[BOATEnum.FishInStorage], self[BOATEnum.CurrentMaxStorage])
+		pbDetails.StorageProgress.Size = UDim2.fromScale(1, storageProgress)
 	end
 
 	return purchaseBoard
@@ -432,12 +442,18 @@ function BoatClass:UpdatePurchaseBoardUI()
 	pbDetails.NextMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextMaxStorage", "TextLabel") :: TextLabel
 	pbDetails.CurrentFPSLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentFPS", "TextLabel") :: TextLabel
 	pbDetails.NextFPSLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextFPS", "TextLabel") :: TextLabel
+	pbDetails.StorageProgress = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StorageBar", "StorageProgress") :: Frame
 
-	-- //TODO - use formatting helper
 	pbDetails.CurrentMaxStorageLabel.Text = isPurchased and FormatNumber(self[BOATEnum.CurrentMaxStorage]) or ""
 	pbDetails.NextMaxStorageLabel.Text = isPurchased and FormatNumber(self[BOATEnum.NextLvlMaxStorage]) or ""
 	pbDetails.CurrentFPSLabel.Text = isPurchased and FormatNumber(self[BOATEnum.CurrentFPS]) or ""
 	pbDetails.NextFPSLabel.Text = isPurchased and FormatNumber(self[BOATEnum.NextFPS]) or ""
+
+	local storageProgress = CalculateProgress(self[BOATEnum.FishInStorage], self[BOATEnum.CurrentMaxStorage])
+	FFGHelpers.PrintLog("Progress", storageProgress)
+	pbDetails.StorageProgress.Size = UDim2.fromScale(1, storageProgress)
+
+	FFGHelpers.PrintLog(pbDetails.StorageProgress.Size)
 
 	local level = self[BOATEnum.Level]
 	pbDetails.LevelLabel.Text = "Level: " .. level
