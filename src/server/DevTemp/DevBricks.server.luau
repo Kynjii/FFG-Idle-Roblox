@@ -3,10 +3,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local Workspace = game:GetService("Workspace")
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
+local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local DataService = require(ServerScriptService.Server.Services.DataService)
-local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 
-local giveGoldButton = FFGHelpers.deepWait(Workspace, "DevGiveGold")
+local giveGoldButton = DeepWait(Workspace, "DevGiveGold")
 local debounce = false
 giveGoldButton.Touched:Connect(function(hit)
 	print("Touched")
@@ -25,7 +25,7 @@ giveGoldButton.Touched:Connect(function(hit)
 	end)
 end)
 
-local resetGoldButton = FFGHelpers.deepWait(Workspace, "DevResetGold")
+local resetGoldButton = DeepWait(Workspace, "DevResetGold")
 local resetDebounce = false
 resetGoldButton.Touched:Connect(function(hit)
 	if resetDebounce then return end

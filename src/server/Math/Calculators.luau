@@ -8,7 +8,7 @@ local CALCULATOR = {}
 
 CALCULATOR.MaxStorage = function(type: string, level: number, tier: number)
 	if not type or not level or not tier then
-		FFGHelpers("No type or entityState passed to MaxStorage fn")
+		FFGHelpers.PrintLog("No type or entityState passed to MaxStorage fn")
 		return
 	end
 
@@ -49,7 +49,7 @@ end
 
 CALCULATOR.GetBaseCost = function(type: string, level: number, tier: number, RealmId: number): number
 	if not type or not level or not tier then
-		FFGHelpers("No type or entityState passed to GetBaseCost fn")
+		FFGHelpers.PrintLog("No type or entityState passed to GetBaseCost fn")
 		return
 	end
 
@@ -85,7 +85,7 @@ end
 
 CALCULATOR.UpgradeCost = function(type: string, level: number, tier: number, RealmId: number, baseCost: number): number
 	if not type or not level or not tier then
-		FFGHelpers("No type or entityState passed to UpgradeCost fn")
+		FFGHelpers.PrintLog("No type or entityState passed to UpgradeCost fn")
 		return
 	end
 

@@ -5,6 +5,7 @@ local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local FFGTypes = require(ReplicatedStorage.Shared.Types.FFGTypes)
+local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 local BOATEnum = FFGEnum.ATTRIBUTES.BOAT
 
@@ -300,10 +301,10 @@ end
 function BoatClass:SetupPurchaseBoard()
 	local purchaseBoard = self[BOATEnum.BoatModel]:WaitForChild("Purchase_Board")
 	local pbDetails = {}
-	pbDetails.NameLabel = FFGHelpers.deepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel") :: TextLabel
-	pbDetails.LevelLabel = FFGHelpers.deepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel") :: TextLabel
-	pbDetails.CurrentMaxStorageLabel = FFGHelpers.deepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "CurrentMaxStorage", "TextLabel") :: TextLabel
-	pbDetails.NextMaxStorageLabel = FFGHelpers.deepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "NextMaxStorage", "TextLabel") :: TextLabel
+	pbDetails.NameLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel") :: TextLabel
+	pbDetails.LevelLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel") :: TextLabel
+	pbDetails.CurrentMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "CurrentMaxStorage", "TextLabel") :: TextLabel
+	pbDetails.NextMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "NextMaxStorage", "TextLabel") :: TextLabel
 
 	if pbDetails then
 		local upgradeStage = self[BOATEnum.UpgradeStage]
@@ -335,10 +336,10 @@ function BoatClass:UpdatePurchaseBoardUI()
 	local purchaseBoard = self[BOATEnum.BoatModel]:WaitForChild("Purchase_Board")
 
 	local pbDetails = {}
-	pbDetails.NameLabel = FFGHelpers.deepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel") :: TextLabel
-	pbDetails.LevelLabel = FFGHelpers.deepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel") :: TextLabel
-	pbDetails.CurrentMaxStorageLabel = FFGHelpers.deepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "CurrentMaxStorage", "TextLabel") :: TextLabel
-	pbDetails.NextMaxStorageLabel = FFGHelpers.deepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "NextMaxStorage", "TextLabel") :: TextLabel
+	pbDetails.NameLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel") :: TextLabel
+	pbDetails.LevelLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel") :: TextLabel
+	pbDetails.CurrentMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "CurrentMaxStorage", "TextLabel") :: TextLabel
+	pbDetails.NextMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "NextMaxStorage", "TextLabel") :: TextLabel
 
 	-- //TODO - use formatting helper
 	pbDetails.CurrentMaxStorageLabel.Text = isPurchased and tostring(self[BOATEnum.CurrentMaxStorage]) or ""

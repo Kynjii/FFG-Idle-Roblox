@@ -1,5 +1,4 @@
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local Boat = require(ServerScriptService.Server.Game.Init.SetupBoats)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
