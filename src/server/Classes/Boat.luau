@@ -156,6 +156,7 @@ function BoatClass:New(state: BoatState, player: Player, model: Model, currentRe
 	instance[BOATEnum.NextFPS] = instance[BOATEnum.NextFPS] or nextFPS :: number
 
 	instance[BOATEnum.FishingInterval] = nil
+	if instance[BOATEnum.isPurchased] and not instance[BOATEnum.StorageFull] then instance[BOATEnum.FishingInterval] = instance:StartFishing() end
 
 	return instance
 end
@@ -257,15 +258,24 @@ end
 
 function BoatClass:StartFishing()
 	self[BOATEnum.FishingInterval] = SetInterval(function()
-		if not self[BOATEnum.StorageFull] then self:AddFish(self[BOATEnum.FPS]) end
+		if not self[BOATEnum.StorageFull] then self:AddFish(self[BOATEnum.CurrentFPS]) end
 	end, 1)
 end
 
 function BoatClass:StopFishing()
-	self[BOATEnum.FishingInterval] = nil
+	if self[BOATEnum.FishingInterval] then
+		task.cancel(self[BOATEnum.FishingInterval])
+		self[BOATEnum.FishingInterval] = nil
+	end
 end
 
 function BoatClass:AddFish(amount: number)
+	FFGHelpers.PrintLog("Adding Fish", amount)
+	if self[BOATEnum.StorageFull] then
+		FFGHelpers.PrintLog("Storage is full")
+		return
+	end
+
 	self[BOATEnum.FishInStorage] += amount
 
 	if self[BOATEnum.FishInStorage] > self[BOATEnum.CurrentMaxStorage] then
