@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local ServerScriptService = game:GetService("ServerScriptService")
+local Tender = require(ServerScriptService.Server.Game.Init.SetupTenders)
 local Boat = require(ServerScriptService.Server.Game.Init.SetupBoats)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 local PlayerDataTemplate = require(ServerScriptService.Server.Modules.PlayerDataTemplate)
@@ -15,6 +16,14 @@ end
 local function SetupBoats(player)
 	if player then
 		Boat.SetupTaggedBoats(player)
+	else
+		FFGHelpers.PrintLog("No player passed during initalization")
+	end
+end
+
+local function SetupTenders(player)
+	if player then
+		Tender.SetuptaggedTenders(player)
 	else
 		FFGHelpers.PrintLog("No player passed during initalization")
 	end
@@ -40,6 +49,7 @@ local function PlayerAdded(player: Player)
 			DataService.Profiles[player] = profile
 			Initialize(player, profile)
 			SetupBoats(player)
+			SetupTenders(player)
 		else
 			profile:EndSession()
 		end

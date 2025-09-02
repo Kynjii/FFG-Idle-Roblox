@@ -109,6 +109,7 @@ function DataService.CreateNewProfileData(player: Player, profile)
 	FFGHelpers.PrintLog("Created Profile Data: ", profile)
 end
 
+-- //SECTION - BOATS
 function DataService.SaveBoatState(player: Player, boatId: string, newState): boolean
 	local profile = DataService.Profiles[player]
 	if not profile then
@@ -180,6 +181,81 @@ function DataService.LoadBoatState(player: Player)
 	FFGHelpers.PrintLog("Current boat state: ", state)
 	return state
 end
+-- //!SECTION
+
+-- //SECTION - TENDERS
+function DataService.SaveTenderState(player: Player, tenderId: string, newState): boolean
+	local profile = DataService.Profiles[player]
+	if not profile then
+		FFGHelpers.PrintLog("No profile found when attempting to save tender state for: ", player)
+		return false
+	end
+
+	-- Ensure the data structure exists
+	if not profile.Data.Realms then
+		FFGHelpers.PrintLog("No Realms data structure found")
+		return false
+	end
+
+	local currentRealm = profile.Data.CurrentRealm or 1
+	if not profile.Data.Realms[currentRealm] then
+		FFGHelpers.PrintLog("No data structure found for Realm:", currentRealm)
+		return false
+	end
+
+	-- Initialize Tenders array if it doesn't exist
+	if not profile.Data.Realms[currentRealm].Tenders then profile.Data.Realms[currentRealm].Tenders = {} end
+
+	local existingTenderIndex = nil
+	for i, tender in ipairs(profile.Data.Realms[currentRealm].Tenders) do
+		if tender[FFGEnum.ATTRIBUTES.TENDER.Id] == tenderId then
+			existingTenderIndex = i
+			break
+		end
+	end
+
+	if existingTenderIndex then
+		profile.Data.Realms[currentRealm].Tenders[existingTenderIndex] = newState
+		FFGHelpers.PrintLog("Updated existing tender at index", existingTenderIndex)
+	else
+		table.insert(profile.Data.Realms[currentRealm].Tenders, newState)
+		FFGHelpers.PrintLog("Added new tender with ID", tenderId)
+	end
+
+	FFGHelpers.PrintLog("Saved tender state for player", player.Name, "tender", tenderId)
+	return true
+end
+
+-- //TODO - Figure out with tenderstate function to use when multiple is needed
+function DataService.GetTenderState(profile)
+	if not profile or not profile.Data then return nil end
+	local currentRealm = profile.Data.CurrentRealm or 1
+
+	if not profile.Data.Realms then return nil end
+	if not profile.Data.Realms[currentRealm] then return nil end
+	if not profile.Data.Realms[currentRealm].Tenders then return nil end
+
+	return profile.Data.Realms[currentRealm].Tenders
+end
+
+function DataService.LoadTenderState(player: Player)
+	FFGHelpers.PrintLog("Attempting to load tender state for: ", player)
+	local profile = DataService.Profiles[player]
+	if not profile then
+		FFGHelpers.PrintLog("No profile found for: ", player)
+		return nil
+	end
+
+	local state = DataService.GetTenderState(profile)
+	if not state then
+		FFGHelpers.PrintLog("Unable to get TenderState for loading")
+		return nil
+	end
+
+	FFGHelpers.PrintLog("Current tender state: ", state)
+	return state
+end
+-- //!SECTION
 
 function DataService.ResetAllPlayerData(player: Player)
 	local profile = DataService.Profiles[player]

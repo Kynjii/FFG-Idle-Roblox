@@ -110,6 +110,27 @@ FFGEnum.ATTRIBUTES = {
 		["BaseStorage"] = "BaseStorage",
 		["FishingInterval"] = "FishingInterval",
 	},
+	TENDER = {
+		["Owner"] = "Owner",
+		["Tier"] = "Tier",
+		["Level"] = "Level",
+		["UpgradeStage"] = "UpgradeStage",
+		["Name"] = "Name",
+		["isPurchased"] = "isPurchased",
+		["Id"] = "Id",
+		["CurrentMaxStorage"] = "CurrentMaxStorage",
+		["NextLvlMaxStorage"] = "NextLvlMaxStorage",
+		["RealmId"] = "RealmId",
+		["MaxLevel"] = "MaxLevel",
+		["BaseCost"] = "BaseCost",
+		["UpgradeCost"] = "UpgradeCost",
+		["FishInStorage"] = "FishInStorage",
+		["TenderModel"] = "TenderModel",
+		["GrowthRate"] = "GrowthRate",
+		["CostGrowthRate"] = "CostGrowthRate",
+		["BaseStorage"] = "BaseStorage",
+		["BaseSpeed"] = "BaseSpeed",
+	},
 }
 
 FFGEnum.CURRENCY_TYPES = {
