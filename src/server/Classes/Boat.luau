@@ -145,15 +145,15 @@ local DEFAULTS: BoatProps = {
 	Name = "Unnamed Boat",
 	Level = 1,
 	MaxLevel = 100,
-	BaseCost = Formulas.BOAT.BaseCost :: number,
+	BaseCost = Formulas.BOAT.BaseCost,
 	isPurchased = false,
-	BaseStorage = Formulas.BOAT.BaseStorage :: number,
+	BaseStorage = Formulas.BOAT.BaseStorage,
 	UpgradeStage = 1,
 	FishInStorage = 0,
 	StorageFull = false,
-	BaseFPS = Formulas.BOAT.BaseFPS :: number,
-	GrowthRate = Formulas.BOAT.GrowthRate :: number,
-	CostGrowthRate = Formulas.BOAT.CostGrowthRate :: number,
+	BaseFPS = Formulas.BOAT.BaseFPS,
+	GrowthRate = Formulas.BOAT.GrowthRate,
+	CostGrowthRate = Formulas.BOAT.CostGrowthRate,
 }
 -- //!SECTION
 
@@ -544,7 +544,7 @@ end
 -- //!SECTION
 
 -- //SECTION -  Boat Utilities
-function Boat:GetName(): string
+function Boat:GetName()
 	return NAME[self.UpgradeStage]
 end
 

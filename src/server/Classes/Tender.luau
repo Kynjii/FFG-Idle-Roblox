@@ -9,64 +9,105 @@ local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 local TENDEREnum = FFGEnum.ATTRIBUTES.TENDER
 
-export type TenderState = {
+-- //SECTION - Tender Types
+export type TenderProps = {
 	Id: string,
-	Level: number,
-	Tier: number,
+	Owner: number,
 	RealmId: number,
-	BaseCost: number,
-	UpgradeCost: number?,
-	isPurchased: boolean,
-	Name: string?,
-	Owner: number?,
+	Tier: number,
+	Name: string,
+	Level: number,
 	MaxLevel: number,
+	BaseCost: number,
+	UpgradeCost: number,
+	isPurchased: boolean,
 	UpgradeStage: number,
-	CurrentMaxStorage: number?,
-	NextLvlMaxStorage: number?,
-	FishInStorage: number?,
+	BaseStorage: number,
+	CurrentMaxStorage: number,
+	NextLvlMaxStorage: number,
+	FishInStorage: number,
 	StorageFull: boolean,
+	BaseTravelSpeed: number,
+	CurrentTravelSpeed: number,
+	NextLvlTravelSpeed: number,
 	GrowthRate: number,
 	CostGrowthRate: number,
-	BaseStorage: number,
 }
 
-export type TenderClass = TenderState & {
-	-- Constructor
-	New: (self: TenderClass, state: TenderState, ownerId: number, model: Model, currentrealm: number?) -> TenderClass,
+export type TenderInstance = {
+	-- Props
+	Id: string,
+	Owner: number,
+	RealmId: number,
+	Tier: number,
+	Name: string,
+	Level: number,
+	MaxLevel: number,
+	BaseCost: number,
+	UpgradeCost: number,
+	isPurchased: boolean,
+	UpgradeStage: number,
+	BaseStorage: number,
+	CurrentMaxStorage: number,
+	NextLvlMaxStorage: number,
+	FishInStorage: number,
+	StorageFull: boolean,
+	BaseTravelSpeed: number,
+	CurrentTravelSpeed: number,
+	NextLvlTravelSpeed: number,
+	GrowthRate: number,
+	CostGrowthRate: number,
 
-	-- Core tender actions
-	Purchase: (self: TenderClass) -> (),
-	Upgrade: (self: TenderClass) -> (),
+	-- (Not-Saved to DataStore) Props
+	Model: Model,
+
+	-- Core Tender Actions
+	Purchase: (self: TenderInstance) -> (),
+	Upgrade: (self: TenderInstance) -> (),
+	IncreaseUpgradeStage: (self: TenderInstance, stage: number) -> (),
 
 	-- Calculations
-	CalculateBaseCost: (self: TenderClass) -> number,
-	CalculateUpgradeCost: (self: TenderClass) -> number,
-	GetMaxStorage: (self: TenderClass) -> number,
+	CalculateBaseCost: (self: TenderInstance) -> number,
+	CalculateUpgradeCost: (self: TenderInstance) -> number,
+	CalculateBaseStorage: (self: TenderInstance) -> number,
+	CalculateMaxStorage: (self: TenderInstance) -> (number, number),
+	CalculateBaseTravelSpeed: (self: TenderInstance) -> number,
+	CalculateTravelSpeed: (self: TenderInstance) -> (number, number),
 
-	-- Fishing
-	AddFish: (self: TenderClass, amount: number) -> (),
-	RemoveFish: (self: TenderClass, amount: number) -> (),
+	-- Travelling
+	-- //TODO - Add travelling functions
+	AddFish: (self: TenderInstance, amount: number) -> (),
+	RemoveFish: (self: TenderInstance, amount: number) -> (),
+	UpdateStorageStatus: (self: TenderInstance, status: boolean) -> (),
 
-	-- Visibility and collision
-	Hide: (self: TenderClass) -> (),
-	CannotCollide: (self: TenderClass) -> (),
-	Show: (self: TenderClass) -> (),
-	CanCollide: (self: TenderClass) -> (),
+	-- UI Setup
+	Initialize: (self: TenderInstance) -> (),
+	SetupPurchaseBoard: (self: TenderInstance) -> Part,
+	UpdatePurchaseBoardUI: (self: TenderInstance) -> (),
+	SetupProximityPrompt: (self: TenderInstance, purchaseBoard: Part) -> ProximityPrompt,
+	UpdateProximityPromptUI: (self: TenderInstance, proximityPrompt: ProximityPrompt) -> (),
 
-	-- UI Setup (new methods)
-	Initialize: (self: TenderClass) -> (),
-	SetupPurchaseBoard: (self: TenderClass) -> Part,
-	UpdatePurchaseBoardUI: (self: TenderClass) -> (),
-	SetupProximityPrompt: (self: TenderClass, purchaseBoard: Part) -> ProximityPrompt,
-	UpdateProximityPromptUI: (self: TenderClass, proximityPrompt: ProximityPrompt) -> (),
+	-- Visibility and Collision
+	Show: (self: TenderInstance) -> (),
+	Hide: (self: TenderInstance) -> (),
+	CanCollide: (self: TenderInstance) -> (),
+	CannotCollide: (self: TenderInstance) -> (),
 
 	-- Utilities
-	GetName: (self: TenderClass) -> string,
+	GetName: (self: TenderInstance) -> string,
+	CanUpgrade: (self: TenderInstance) -> boolean,
+	IsStorageFull: (self: TenderInstance) -> boolean,
 
 	-- Saving and Loading
-	Serialize: (self: TenderClass) -> TenderState,
+	Serialize: (self: TenderInstance) -> { [string]: any },
 }
 
+export type Tender = {
+	New: (props: TenderProps, player: Player, model: Model) -> TenderInstance,
+}
+-- //!SECTION
+
+-- //SECTION -  Tender Data
 local TENDER_PROMOTION_LEVELS = {
 	[1] = 1,
 	[2] = 10,
@@ -95,222 +136,181 @@ local NAME = {
 	[11] = "Little Lucy",
 }
 
-local STARTER_STATS: TenderState = {
-	[TENDEREnum.Level] = 1,
-	[TENDEREnum.MaxLevel] = 100,
-	[TENDEREnum.Tier] = 1,
-	[TENDEREnum.isPurchased] = false,
-	[TENDEREnum.UpgradeStage] = 1,
-	[TENDEREnum.BaseCost] = Formulas.TENDER.BaseCost,
-	[TENDEREnum.GrowthRate] = Formulas.TENDER.GrowthRate,
-	[TENDEREnum.CostGrowthRate] = Formulas.TENDER.CostGrowthRate,
-	[TENDEREnum.BaseStorage] = Formulas.TENDER.BaseStorage,
-	[TENDEREnum.RealmId] = 1,
-	[TENDEREnum.FishInStorage] = 0,
-	[TENDEREnum.BaseSpeed] = 5, -- secs
+local DEFAULTS: TenderProps = {
+	RealmId = 1,
+	Tier = 1,
+	Name = "Unnamed Tender",
+	Level = 1,
+	MaxLevel = 100,
+	BaseCost = Formulas.TENDER.BaseCost,
+	isPurchased = false,
+	BaseStorage = Formulas.TENDER.BaseStorage,
+	UpgradeStage = 1,
+	FishInStorage = 0,
+	StorageFull = false,
+	BaseTravelSpeed = 5, -- secs
+	GrowthRate = Formulas.TENDER.GrowthRate,
+	CostGrowthRate = Formulas.TENDER.CostGrowthRate,
 }
+-- //!SECTION
 
-local TenderClass: TenderClass = {}
-TenderClass.__index = TenderClass
+local Tender: TenderInstance = {}
+Tender.__index = Tender
 
 -- //SECTION - Constructor
-function TenderClass:New(state: TenderState, player: Player, model: Model, currentRealm: number)
-	local instance = setmetatable({}, TenderClass)
+function Tender.New(state, player: Player, model: Model)
+	local self: TenderInstance = setmetatable({}, Tender)
 
 	-- Start with default stats as base
-	for key, value in pairs(STARTER_STATS) do
-		instance[key] = value
+	for key, value in pairs(DEFAULTS) do
+		self[key] = value
 	end
 
 	-- Override with provided state values
 	if state then
 		for key, value in pairs(state) do
-			instance[key] = value
+			self[key] = value
 		end
 	end
 
-	-- Calculate derived properties after instance is set up
-	instance[TENDEREnum.Id] = instance[TENDEREnum.Id] or HttpService:GenerateGUID(false) :: string
-	instance[TENDEREnum.Owner] = instance[TENDEREnum.Owner] or player.UserId :: number
-	instance[TENDEREnum.TenderModel] = model :: Model
-	instance[TENDEREnum.Name] = instance[TENDEREnum.Name] or instance:GetName() :: string
-	instance[TENDEREnum.BaseCost] = instance[TENDEREnum.BaseCost] or instance:CalculateBaseCost() :: number
-	instance[TENDEREnum.UpgradeCost] = instance[TENDEREnum.UpgradeCost] or instance:CalculateUpgradeCost() :: number
+	-- Calculate derived properties
+	self.Id = self.Id or HttpService:GenerateGUID(false)
+	self.Owner = self.Owner or player.UserId
+	self.Model = model
+	self.Name = self:GetName()
 
-	local currentMaxStorage: number, nextLvlMaxStorage: number = instance:CalculateMaxStorage()
-	instance[TENDEREnum.CurrentMaxStorage] = instance[TENDEREnum.CurrentMaxStorage] or currentMaxStorage :: number
-	instance[TENDEREnum.NextLvlMaxStorage] = instance[TENDEREnum.NextLvlMaxStorage] or nextLvlMaxStorage :: number
+	-- Had to take this approach for type checking to work
+	if self.BaseCost == DEFAULTS.BaseCost then self.BaseCost = self:CalculateBaseCost() end
+	if not self.UpgradeCost then self:CalculateUpgradeCost() end
+
+	local curMaxStorage, nextLvlMaxStorage = self:CalculateMaxStorage()
+	self.CurrentMaxStorage = self.CurrentMaxStorage or curMaxStorage
+	self.NextLvlMaxStorage = self.NextLvlMaxStorage or nextLvlMaxStorage
 
 	-- //TODO handle BaseSpeed calculation
 
-	return instance
+	return self
 end
 -- //!SECTION
 
-function TenderClass:Upgrade()
-	self[TENDEREnum.Level] += 1
+-- //SECTION - Core Tender Actions
+function Tender:Purchase()
+	self.isPurchased = true
+end
+
+function Tender:Upgrade()
+	if not self:CanUpgrade() then return end
+
+	self.Level += 1
 	for k, v in ipairs(TENDER_PROMOTION_LEVELS) do
-		if self[TENDEREnum.Level] == v then
+		if self.Level == v then
 			self:IncreaseUpgradeStage(k)
 			break
 		end
 	end
-	self[TENDEREnum.UpgradeCost] = self:CalculateUpgradeCost()
-	self[TENDEREnum.Name] = self:GetName()
+	self.UpgradeCost = self:CalculateUpgradeCost()
 
-	local currentMaxStorage: number, nextLvlMaxStorage: number = self:CalculateMaxStorage()
-	self[TENDEREnum.CurrentMaxStorage] = currentMaxStorage
-	self[TENDEREnum.NextLvlMaxStorage] = nextLvlMaxStorage
+	local curMaxStorage, nextLvlMaxStorage = self:CalculateMaxStorage()
+	self.CurrentMaxStorage = curMaxStorage
+	self.NextLvlMaxStorage = nextLvlMaxStorage
 
-	-- //TODO - Handle the BaseSpeed upgrade
+	-- //TODO - Handle the BaseTravelSpeed upgrade
 end
 
-function TenderClass:CalculateMaxStorage()
-	local baseStorage = STARTER_STATS.BaseStorage
-	local growthRate = STARTER_STATS.GrowthRate + self[TENDEREnum.Tier] * 0.02 :: number
-	local tierMultiplier = Formulas.TIER_MULTIPLIER[self[TENDEREnum.Tier]] :: number
-	local maxStorage = baseStorage * math.pow(growthRate :: number, self[TENDEREnum.Level] :: number) * tierMultiplier :: number
-	local nextLvlMaxStorage = baseStorage * math.pow(growthRate :: number, self[TENDEREnum.Level] :: number + 1) * tierMultiplier :: number
+function Tender:IncreaseUpgradeStage(stage)
+	self.UpgradeStage = stage
+	self.Name = self:GetName()
+end
+-- //!SECTION
+
+-- //SECTION - Calculations
+function Tender:CalculateBaseCost()
+	local baseCost = self.BaseCost or DEFAULTS.BaseCost
+	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
+	local realmMultiplier = math.pow(self.RealmId :: number, 2.25) -- scaling curve
+	local base = baseCost * tierMultiplier * realmMultiplier
+
+	self.BaseCost = base
+
+	return base
+end
+
+function Tender:CalculateUpgradeCost(): number
+	local baseCost = self.BaseCost or DEFAULTS.BaseCost
+	if baseCost == DEFAULTS.BaseCost then baseCost = self:CalculateBaseCost() end
+
+	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
+	local realmMultiplier = math.pow(self.RealmId :: number, 2.25) -- scaling curve
+	local growthRate = DEFAULTS.CostGrowthRate
+	local cost = baseCost * math.pow(growthRate, self.Level :: number) * tierMultiplier * realmMultiplier
+
+	-- //TODO - handle boosts
+
+	return cost
+end
+
+function Tender:CalculateBaseStorage()
+	local baseStorage = self.BaseStorage or DEFAULTS.BaseStorage
+	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
+	local realmMultiplier = math.pow(self.RealmId :: number, 2.25) -- scaling curve
+	local base = baseStorage * tierMultiplier * realmMultiplier
+
+	self.BaseStorage = base
+
+	return base
+end
+
+function Tender:CalculateMaxStorage()
+	local baseStorage = self.BaseStorage or DEFAULTS.BaseStorage
+	if baseStorage == DEFAULTS.BaseStorage then baseStorage = self:CalculateBaseStorage() end
+
+	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier] :: number
+	local growthRate = DEFAULTS.GrowthRate + self.Tier * 0.02 :: number
+	local maxStorage = baseStorage * math.pow(growthRate :: number, self.Level :: number) * tierMultiplier :: number
+	local nextLvlMaxStorage = baseStorage * math.pow(growthRate :: number, self.Level :: number + 1) * tierMultiplier :: number
 
 	-- //TODO - handle boosts
 
 	return maxStorage, nextLvlMaxStorage
 end
 
-function TenderClass:CalculateBaseCost(): number
-	local baseCost = STARTER_STATS.BaseCost
-
-	local tierMultiplier = Formulas.TIER_MULTIPLIER[self[TENDEREnum.Tier]]
-	local realmMultiplier = math.pow(self[TENDEREnum.RealmId] :: number, 2.25) -- scaling curve
-
-	local cost = baseCost * tierMultiplier * realmMultiplier
-
-	return cost
+function Tender:CalculateBaseTravelSpeed()
+	-- //TODO - build logic
 end
 
-function TenderClass:CalculateUpgradeCost(): number
-	local baseCost = self[TENDEREnum.BaseCost] or STARTER_STATS.BaseCost
-
-	if baseCost <= 0 then
-		FFGHelpers.PrintLog("Base cost is either 0 or below, returning")
-		return
-	end
-
-	local tierMultiplier = Formulas.TIER_MULTIPLIER[self[TENDEREnum.Tier]]
-
-	local realmMultiplier = math.pow(self[TENDEREnum.RealmId] :: number, 2.25) -- scaling curve
-
-	local growthRate = STARTER_STATS.CostGrowthRate
-
-	local cost = baseCost * math.pow(growthRate, self[TENDEREnum.Level] :: number) * tierMultiplier * realmMultiplier
-
-	-- //TODO - handle boosts
-
-	return cost
-end
-
-function TenderClass:Purchase()
-	self[TENDEREnum.isPurchased] = true
-end
-
--- //TODO - Handle the travelling functions
-
-function TenderClass:AddFish(amount: number)
-	FFGHelpers.PrintLog("Adding Fish", amount)
-	if self[TENDEREnum.StorageFull] then
-		FFGHelpers.PrintLog("Storage is full")
-		return
-	end
-
-	self[TENDEREnum.FishInStorage] += amount
-
-	if self[TENDEREnum.FishInStorage] > self[TENDEREnum.CurrentMaxStorage] then
-		self[TENDEREnum.FishInStorage] = self[TENDEREnum.CurrentMaxStorage]
-		self[TENDEREnum.StorageFull] = true
-	end
-end
-
-function TenderClass:RemoveFish(amount: number)
-	-- //TODO - Handle moving the fish to pier storage
-	self[TENDEREnum.FishInStorage] = math.max(self[TENDEREnum.FishInStorage] - amount, 0)
-
-	self[TENDEREnum.StorageFull] = false
-end
-
-function TenderClass:IncreaseUpgradeStage(stage)
-	self[TENDEREnum.UpgradeStage] = stage
-end
-
-function TenderClass:GetName(): string
-	return NAME[self[TENDEREnum.UpgradeStage]]
-end
-
--- //SECTION - Loading and Saving
-function TenderClass:Serialize(): TenderState
-	return {
-		[TENDEREnum.Id] = self[TENDEREnum.Id],
-		[TENDEREnum.Owner] = self[TENDEREnum.Owner],
-		[TENDEREnum.Level] = self[TENDEREnum.Level],
-		[TENDEREnum.Tier] = self[TENDEREnum.Tier],
-		[TENDEREnum.isPurchased] = self[TENDEREnum.isPurchased],
-		[TENDEREnum.UpgradeCost] = self[TENDEREnum.UpgradeCost],
-		[TENDEREnum.UpgradeStage] = self[TENDEREnum.UpgradeStage],
-		[TENDEREnum.MaxLevel] = self[TENDEREnum.MaxLevel],
-		[TENDEREnum.BaseCost] = self[TENDEREnum.BaseCost],
-		[TENDEREnum.BaseStorage] = self[TENDEREnum.BaseStorage],
-		[TENDEREnum.CurrentMaxStorage] = self[TENDEREnum.CurrentMaxStorage],
-		[TENDEREnum.BaseSpeed] = self[TENDEREnum.BaseSpeed],
-		[TENDEREnum.CurrentSpeed] = self[TENDEREnum.CurrentSpeed],
-		[TENDEREnum.NextSpeed] = self[TENDEREnum.NextSpeed],
-		[TENDEREnum.FishInStorage] = self[TENDEREnum.FishInStorage],
-		[TENDEREnum.Name] = self[TENDEREnum.Name],
-		[TENDEREnum.NextLvlMaxStorage] = self[TENDEREnum.NextLvlMaxStorage],
-		[TENDEREnum.RealmId] = self[TENDEREnum.RealmId],
-	}
+function Tender:CalculateTravelSpeed()
+	-- //TODO - build logic
 end
 -- //!SECTION
 
--- //SECTION - Tender  Utilities
-function TenderClass:Show()
-	local model = self[TENDEREnum.TenderModel] :: Model
-	local tenderParts = model:GetChildren()
-	for _, part in pairs(tenderParts) do
-		if part.Name == "Purchase_Board" then continue end
-		if part.Transparency and part.Transparency == 1 then part.Transparency = 0 end
+-- //TODO - Handle the travelling functions
+-- //SECTION - Handle Travelling
+function Tender:AddFish(amount: number)
+	FFGHelpers.PrintLog("Adding Fish", amount)
+	self.FishInStorage += amount
+
+	if self.FishInStorage > self.CurrentMaxStorage then
+		self.FishInStorage = self.CurrentMaxStorage
+		self:UpdateStorageStatus(true)
 	end
 end
 
-function TenderClass:CanCollide()
-	local model = self[TENDEREnum.TenderModel] :: Model
-	local tenderParts = model:GetChildren()
-	for _, part in pairs(tenderParts) do
-		if part.Name == "Purchase_Board" then continue end
-		if not part.CanCollide then part.CanCollide = true end
-	end
+function Tender:RemoveFish(amount: number)
+	-- //TODO - Handle moving the fish to pier storage
+	self.FishInStorage = math.max(self.FishInStorage - amount, 0)
+
+	self:UpdateStorageStatus(false)
 end
 
-function TenderClass:CannotCollide()
-	local model = self[TENDEREnum.TenderModel] :: Model
-	local tenderParts = model:GetChildren()
-	for _, part in pairs(tenderParts) do
-		if part.Name == "Purchase_Board" then continue end
-		if part.CanCollide then part.CanCollide = false end
-	end
+function Tender:UpdateStorageStatus(status)
+	self.StorageFull = status
 end
+-- //!SECTION
 
-function TenderClass:Hide()
-	local model = self[TENDEREnum.TenderModel] :: Model
-	local tenderParts = model:GetChildren()
-	for _, part in pairs(tenderParts) do
-		if part.Name == "Purchase_Board" then continue end
-		if part.Transparency and part.Transparency == 0 then part.Transparency = 1 end
-	end
-end
-
--- //SECTION - UI Setup Methods
-function TenderClass:Initialize()
+-- //SECTION - UI Setup
+function Tender:Initialize()
 	-- Handle visibility based on purchase status
-	if not self[TENDEREnum.isPurchased] then
+	if not self.isPurchased then
 		self:Hide()
 		self:CannotCollide()
 	else
@@ -323,8 +323,8 @@ function TenderClass:Initialize()
 	if purchaseBoard then self:SetupProximityPrompt(purchaseBoard) end
 end
 
-function TenderClass:SetupPurchaseBoard()
-	local purchaseBoard = self[TENDEREnum.TenderModel]:WaitForChild("Purchase_Board")
+function Tender:SetupPurchaseBoard()
+	local purchaseBoard = self.Model:WaitForChild("Purchase_Board")
 	local pbDetails = {}
 	pbDetails.NameLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel") :: TextLabel
 	pbDetails.LevelLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel") :: TextLabel
@@ -334,25 +334,25 @@ function TenderClass:SetupPurchaseBoard()
 	pbDetails.NextSpeedLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextSpeed", "TextLabel") :: TextLabel
 
 	if pbDetails then
-		local upgradeStage = self[TENDEREnum.UpgradeStage]
-		local level = self[TENDEREnum.Level]
+		local upgradeStage = self.UpgradeStage
+		local level = self.Level
 		local qualityInfo = FFGEnum.QUALITY[upgradeStage]
 		local color = qualityInfo.Color
 		pbDetails.NameLabel.TextColor3 = color
 
-		if not self[TENDEREnum.isPurchased] then
+		if not self.isPurchased then
 			pbDetails.NameLabel.Parent.Visible = false
 		else
 			pbDetails.NameLabel.Text = self:GetName()
 			pbDetails.NameLabel.Parent.Visible = true
 		end
 
-		pbDetails.LevelLabel.Text = self[TENDEREnum.isPurchased] and "Level: " .. level or "Purchase Tender"
+		pbDetails.LevelLabel.Text = self.isPurchased and "Level: " .. level or "Purchase Tender"
 
 		-- STORAGE Stats
 		local currentStorage, nextStorage = self:CalculateMaxStorage()
-		pbDetails.CurrentMaxStorageLabel.Text = self[TENDEREnum.isPurchased] and FormatNumber(currentStorage) or ""
-		pbDetails.NextMaxStorageLabel.Text = self[TENDEREnum.isPurchased] and FormatNumber(nextStorage) or ""
+		pbDetails.CurrentMaxStorageLabel.Text = self.isPurchased and FormatNumber(currentStorage) or ""
+		pbDetails.NextMaxStorageLabel.Text = self.isPurchased and FormatNumber(nextStorage) or ""
 
 		-- //TODO - Hande updating speed
 	end
@@ -360,9 +360,9 @@ function TenderClass:SetupPurchaseBoard()
 	return purchaseBoard
 end
 
-function TenderClass:UpdatePurchaseBoardUI()
-	local isPurchased = self[TENDEREnum.isPurchased]
-	local purchaseBoard = self[TENDEREnum.TenderModel]:WaitForChild("Purchase_Board")
+function Tender:UpdatePurchaseBoardUI()
+	local isPurchased = self.isPurchased
+	local purchaseBoard = self.Model:WaitForChild("Purchase_Board")
 
 	local pbDetails = {}
 	pbDetails.NameLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel") :: TextLabel
@@ -372,44 +372,44 @@ function TenderClass:UpdatePurchaseBoardUI()
 	pbDetails.CurrentSpeedLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentSpeed", "TextLabel") :: TextLabel
 	pbDetails.NextSpeedLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextSpeed", "TextLabel") :: TextLabel
 
-	pbDetails.CurrentMaxStorageLabel.Text = isPurchased and FormatNumber(self[TENDEREnum.CurrentMaxStorage]) or ""
-	pbDetails.NextMaxStorageLabel.Text = isPurchased and FormatNumber(self[TENDEREnum.NextLvlMaxStorage]) or ""
+	pbDetails.CurrentMaxStorageLabel.Text = isPurchased and FormatNumber(self.CurrentMaxStorage) or ""
+	pbDetails.NextMaxStorageLabel.Text = isPurchased and FormatNumber(self.NextLvlMaxStorage) or ""
 	-- //TODO - Hande updating speed
 
-	local level = self[TENDEREnum.Level]
+	local level = self.Level
 	pbDetails.LevelLabel.Text = "Level: " .. level
 
-	local currentUpgradeStage = self[TENDEREnum.UpgradeStage]
+	local currentUpgradeStage = self.UpgradeStage
 
 	local qualityInfo = FFGEnum.QUALITY[currentUpgradeStage]
 	local color = qualityInfo.Color
 	pbDetails.NameLabel.TextColor3 = color
 	pbDetails.NameLabel.Text = self:GetName()
 
-	if self[TENDEREnum.isPurchased] then pbDetails.NameLabel.Parent.Visible = true end
+	if self.isPurchased then pbDetails.NameLabel.Parent.Visible = true end
 end
 
-function TenderClass:SetupProximityPrompt(purchaseBoard: Part)
+function Tender:SetupProximityPrompt(purchaseBoard: Part)
 	-- Create the proximity prompt
 	local proximityPrompt = Instance.new("ProximityPrompt", purchaseBoard)
 
 	-- Check if tender is at max level
-	if self[TENDEREnum.Level] == self[TENDEREnum.MaxLevel] then
+	if self.Level == self.MaxLevel then
 		proximityPrompt.ObjectText = "Max Level Reached"
 		proximityPrompt.ActionText = ""
 		return proximityPrompt
 	end
 
 	proximityPrompt.HoldDuration = 0
-	proximityPrompt.ObjectText = self[TENDEREnum.isPurchased] and "Upgrade Tender" or "Purchase"
-	proximityPrompt.ActionText = self[TENDEREnum.isPurchased] and "Level: " .. tostring(self[TENDEREnum.Level] + 1) or "Tier " .. self[TENDEREnum.Tier] .. " Tender"
+	proximityPrompt.ObjectText = self.isPurchased and "Upgrade Tender" or "Purchase"
+	proximityPrompt.ActionText = self.isPurchased and "Level: " .. tostring(self.Level + 1) or "Tier " .. self.Tier .. " Tender"
 
 	-- Handle proximity prompt triggered
 	proximityPrompt.Triggered:Connect(function(player)
 		-- Check max level again
-		if self[TENDEREnum.Level] == self[TENDEREnum.MaxLevel] then return end
+		if self.Level == self.MaxLevel then return end
 
-		local upgradeCost = self[TENDEREnum.isPurchased] and self[TENDEREnum.UpgradeCost] or self[TENDEREnum.BaseCost]
+		local upgradeCost = self.isPurchased and self.UpgradeCost or self.BaseCost
 
 		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, upgradeCost) then
 			FFGHelpers.PrintLog("Unable to afford upgrade, cost is: ", upgradeCost)
@@ -419,7 +419,7 @@ function TenderClass:SetupProximityPrompt(purchaseBoard: Part)
 		-- Spend the currency
 		DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, upgradeCost)
 
-		if self[TENDEREnum.isPurchased] then
+		if self.isPurchased then
 			-- Upgrade existing tender
 			self:Upgrade()
 		else
@@ -433,21 +433,101 @@ function TenderClass:SetupProximityPrompt(purchaseBoard: Part)
 		self:UpdateProximityPromptUI(proximityPrompt)
 		self:UpdatePurchaseBoardUI()
 
-		DataService.SaveTenderState(player, self[TENDEREnum.Id], self:Serialize())
+		DataService.SaveTenderState(player, self.Id, self:Serialize())
 	end)
 
 	return proximityPrompt
 end
 
-function TenderClass:UpdateProximityPromptUI(proximityPrompt: ProximityPrompt)
-	if self[TENDEREnum.Level] == self[TENDEREnum.MaxLevel] then
+function Tender:UpdateProximityPromptUI(proximityPrompt: ProximityPrompt)
+	if self.Level == self.MaxLevel then
 		proximityPrompt.ObjectText = "Max Level Reached"
 		proximityPrompt.ActionText = ""
 	else
-		proximityPrompt.ObjectText = self[TENDEREnum.isPurchased] and "Upgrade Tender" or "Purchase"
-		proximityPrompt.ActionText = self[TENDEREnum.isPurchased] and "Level: " .. tostring(self[TENDEREnum.Level] + 1) or "Tier " .. self[TENDEREnum.Tier] .. " Tender"
+		proximityPrompt.ObjectText = self.isPurchased and "Upgrade Tender" or "Purchase"
+		proximityPrompt.ActionText = self.isPurchased and "Level: " .. tostring(self.Level + 1) or "Tier " .. self.Tier .. " Tender"
 	end
 end
 -- //!SECTION
 
-return TenderClass
+-- //SECTION - Visibility and Collision
+function Tender:Show()
+	local model = self.Model :: Model
+	local tenderParts = model:GetChildren()
+	for _, part in pairs(tenderParts) do
+		if part.Name == "Purchase_Board" then continue end
+		if part.Transparency and part.Transparency == 1 then part.Transparency = 0 end
+	end
+end
+
+function Tender:Hide()
+	local model = self.Model :: Model
+	local tenderParts = model:GetChildren()
+	for _, part in pairs(tenderParts) do
+		if part.Name == "Purchase_Board" then continue end
+		if part.Transparency and part.Transparency == 0 then part.Transparency = 1 end
+	end
+end
+
+function Tender:CanCollide()
+	local model = self.Model :: Model
+	local tenderParts = model:GetChildren()
+	for _, part in pairs(tenderParts) do
+		if part.Name == "Purchase_Board" then continue end
+		if not part.CanCollide then part.CanCollide = true end
+	end
+end
+
+function Tender:CannotCollide()
+	local model = self.Model :: Model
+	local tenderParts = model:GetChildren()
+	for _, part in pairs(tenderParts) do
+		if part.Name == "Purchase_Board" then continue end
+		if part.CanCollide then part.CanCollide = false end
+	end
+end
+-- //!SECTION
+
+-- //SECTION - Tender Utilities
+function Tender:GetName()
+	return NAME[self.UpgradeStage]
+end
+
+function Tender:CanUpgrade()
+	return self.Level < self.MaxLevel
+end
+
+function Tender:IsStorageFull()
+	local status = self.FishInStorage == self.CurrentMaxStorage
+	if self.StorageFull ~= status then self:UpdateStorageStatus(status) end
+	return status
+end
+-- //!SECTION
+
+-- //SECTION - Loading and Saving
+function Tender:Serialize(): TenderProps
+	return {
+		Id = self.Id,
+		Owner = self.Owner,
+		RealmId = self.RealmId,
+		Tier = self.Tier,
+		Name = self.Name,
+		Level = self.Level,
+		MaxLevel = self.MaxLevel,
+		BaseCost = self.BaseCost,
+		UpgradeCost = self.UpgradeCost,
+		isPurchased = self.isPurchased,
+		BaseStorage = self.BaseStorage,
+		UpgradeStage = self.UpgradeStage,
+		CurrentMaxStorage = self.CurrentMaxStorage,
+		NextLvlMaxStorage = self.NextLvlMaxStorage,
+		FishInStorage = self.FishInStorage,
+		StorageFull = self.StorageFull,
+		BaseTravelSpeed = self.BaseTravelSpeed,
+		CurrentTravelSpeed = self.CurrentTravelSpeed,
+		NextLvlTravelSpeed = self.NextLvlTravelSpeed,
+	}
+end
+-- //!SECTION
+
+return Tender

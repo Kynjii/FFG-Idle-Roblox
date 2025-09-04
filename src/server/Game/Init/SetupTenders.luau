@@ -1,8 +1,11 @@
 local CollectionService = game:GetService("CollectionService")
 local ServerScriptService = game:GetService("ServerScriptService")
+local Tender = require(ServerScriptService.Server.Classes.Tender)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
-local TenderClass = require(ServerScriptService.Server.Classes.Tender)
+
+type TenderInstance = Tender.TenderInstance
+
 local taggedTenders = CollectionService:GetTagged("Tender")
 
 function SetuptaggedTenders(player)
@@ -21,7 +24,7 @@ function SetupTender(tenderModel: Model, player: Player)
 
 	local state = GetTenderState(player)
 	-- //TODO Remove hardcoded index
-	local Tender = TenderClass:New(state[1], player, tenderModel)
+	local Tender: TenderInstance = Tender.New(state[1], player, tenderModel)
 
 	Tender:Initialize()
 end
