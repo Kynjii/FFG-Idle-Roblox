@@ -4,6 +4,8 @@ local Boat = require(ServerScriptService.Server.Classes.Boat)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 
+type BoatInstance = Boat.BoatInstance
+
 local taggedBoats = CollectionService:GetTagged("Boat")
 
 function SetupTaggedBoats(player)
@@ -22,7 +24,7 @@ function SetupBoat(boatModel: Model, player: Player)
 
 	local state = GetBoatState(player)
 	-- //TODO Remove hardcoded index
-	local Boat = Boat:New(state[1], player, boatModel)
+	local Boat: BoatInstance = Boat.New(state[1], player, boatModel)
 
 	Boat:Initialize()
 end

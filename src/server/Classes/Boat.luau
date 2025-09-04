@@ -81,6 +81,7 @@ export type BoatInstance = {
 	StopFishing: (self: BoatInstance) -> (),
 	AddFish: (self: BoatInstance, amount: number) -> (),
 	RemoveFish: (self: BoatInstance, amount: number) -> (),
+	UpdateStorageStatus: (self: BoatInstance, status: boolean) -> (),
 
 	-- UI Setup
 	Initialize: (self: BoatInstance) -> (),
@@ -98,6 +99,7 @@ export type BoatInstance = {
 	-- Utilities
 	GetName: (self: BoatInstance) -> string,
 	CanUpgrade: (self: BoatInstance) -> boolean,
+	IsStorageFull: (self: BoatInstance) -> boolean,
 
 	-- Saving and Loading
 	Serialize: (self: BoatInstance) -> { [string]: any },
@@ -160,42 +162,42 @@ Boat.__index = Boat
 
 -- //SECTION - Constructor
 function Boat.New(state, player: Player, model: Model): Boat
-	local instance: BoatInstance = setmetatable({}, Boat)
+	local self: BoatInstance = setmetatable({}, Boat)
 
 	-- Start with default stats as base
 	for key, value in pairs(DEFAULTS) do
-		instance[key] = value
+		self[key] = value
 	end
 
 	-- Override with provided state values
 	if state then
 		for key, value in pairs(state) do
-			instance[key] = value
+			self[key] = value
 		end
 	end
 
 	-- Calculate derived properties
-	instance.Id = instance.Id or HttpService:GenerateGUID(false)
-	instance.Owner = instance.Owner or player.UserId
-	instance.Model = model
-	instance.Name = instance:GetName()
+	self.Id = self.Id or HttpService:GenerateGUID(false)
+	self.Owner = self.Owner or player.UserId
+	self.Model = model
+	self.Name = self:GetName()
 
 	-- Had to take this approach for type checking to work
-	if instance.BaseCost == DEFAULTS.BaseCost then instance.BaseCost = instance:CalculateBaseCost() end
-	if not instance.UpgradeCost then instance:CalculateUpgradeCost() end
+	if self.BaseCost == DEFAULTS.BaseCost then self.BaseCost = self:CalculateBaseCost() end
+	if not self.UpgradeCost then self:CalculateUpgradeCost() end
 
-	local curMaxStorage, nextLvlMaxStorage = instance:CalculateMaxStorage()
-	instance.CurrentMaxStorage = instance.CurrentMaxStorage or curMaxStorage
-	instance.NextLvlMaxStorage = instance.NextLvlMaxStorage or nextLvlMaxStorage
+	local curMaxStorage, nextLvlMaxStorage = self:CalculateMaxStorage()
+	self.CurrentMaxStorage = self.CurrentMaxStorage or curMaxStorage
+	self.NextLvlMaxStorage = self.NextLvlMaxStorage or nextLvlMaxStorage
 
-	local curFPS, nextFPS = instance:CalculateFPS()
-	instance.CurrentFPS = instance.CurrentFPS or curFPS
-	instance.NextFPS = instance.NextFPS or nextFPS
+	local curFPS, nextFPS = self:CalculateFPS()
+	self.CurrentFPS = self.CurrentFPS or curFPS
+	self.NextFPS = self.NextFPS or nextFPS
 
-	instance.FishingInterval = nil
-	if instance.isPurchased and not instance.StorageFull then instance:StartFishing() end
+	self.FishingInterval = nil
+	if self.isPurchased and not self:IsStorageFull() then self:StartFishing() end
 
-	return instance
+	return self
 end
 -- //!SECTION
 
@@ -313,7 +315,7 @@ end
 -- //SECTION - Handling Fish
 function Boat:StartFishing()
 	self.FishingInterval = SetInterval(function()
-		if not self.StorageFull then
+		if not self:IsStorageFull() then
 			self:AddFish(self.CurrentFPS)
 			self:UpdatePurchaseBoardUI()
 		end
@@ -328,24 +330,21 @@ function Boat:StopFishing()
 end
 
 function Boat:AddFish(amount: number)
-	FFGHelpers.PrintLog("Adding Fish", amount)
-	if self.StorageFull then
-		FFGHelpers.PrintLog("Storage is full")
-		return
-	end
-
 	self.FishInStorage += amount
 
 	if self.FishInStorage > self.CurrentMaxStorage then
 		self.FishInStorage = self.CurrentMaxStorage
-		self.StorageFull = true
+		self:UpdateStorageStatus(true)
 	end
 end
 
 function Boat:RemoveFish(amount: number)
 	self.FishInStorage = math.max(self.FishInStorage :: number - amount, 0)
+	self:UpdateStorageStatus(false)
+end
 
-	self.StorageFull = false
+function Boat:UpdateStorageStatus(status)
+	self.StorageFull = status
 end
 -- //!SECTION
 
@@ -429,10 +428,7 @@ function Boat:UpdatePurchaseBoardUI()
 	pbDetails.NextFPSLabel.Text = isPurchased and FormatNumber(self.NextFPS) or ""
 
 	local storageProgress = CalculateProgress(self.FishInStorage, self.CurrentMaxStorage)
-	FFGHelpers.PrintLog("Progress", storageProgress)
 	pbDetails.StorageProgress.Size = UDim2.fromScale(1, storageProgress)
-
-	FFGHelpers.PrintLog(pbDetails.StorageProgress.Size)
 
 	local level = self.Level
 	pbDetails.LevelLabel.Text = "Level: " .. level
@@ -554,6 +550,12 @@ end
 
 function Boat:CanUpgrade()
 	return self.Level < self.MaxLevel
+end
+
+function Boat:IsStorageFull()
+	local status = self.FishInStorage == self.CurrentMaxStorage
+	self:UpdateStorageStatus(status)
+	return status
 end
 -- //!SECTION
 
