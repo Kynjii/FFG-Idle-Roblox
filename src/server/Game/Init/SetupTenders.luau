@@ -1,6 +1,7 @@
 local CollectionService = game:GetService("CollectionService")
 local ServerScriptService = game:GetService("ServerScriptService")
 local Tender = require(ServerScriptService.Server.Classes.Tender)
+local BoatManager = require(ServerScriptService.Server.Managers.BoatManager)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 
@@ -27,6 +28,7 @@ function SetupTender(tenderModel: Model, player: Player)
 	local Tender: TenderInstance = Tender.New(state[1], player, tenderModel)
 
 	Tender:Initialize()
+	BoatManager.RegisterTender(tenderModel, player)
 end
 
 function GetBoosts(player: Player)
