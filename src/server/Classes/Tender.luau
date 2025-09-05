@@ -7,7 +7,6 @@ local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
-local TENDEREnum = FFGEnum.ATTRIBUTES.TENDER
 
 -- //SECTION - Tender Types
 export type TenderProps = {
@@ -275,11 +274,24 @@ function Tender:CalculateMaxStorage()
 end
 
 function Tender:CalculateBaseTravelSpeed()
-	-- //TODO - build logic
+	local baseSpeed = self.BaseTravelSpeed or DEFAULTS.BaseTravelSpeed
+	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
+	local realmMultiplier = math.pow(self.RealmId :: number, 2.25) -- scaling curve
+	local base = baseSpeed * tierMultiplier * realmMultiplier
+
+	self.BaseTravelSpeed = base
+
+	return base
 end
 
 function Tender:CalculateTravelSpeed()
-	-- //TODO - build logic
+	local baseSpeed = self.BaseTravelSpeed
+	if baseSpeed == DEFAULTS.BaseTravelSpeed then baseSpeed = self:CalculateBaseTravelSpeed() end
+
+	local travelSpeed = baseSpeed * math.pow(DEFAULTS.GrowthRate, self.Level)
+	local nextLvlTravelSpeed = baseSpeed * math.pow(DEFAULTS.GrowthRate, self.Level + 1)
+
+	return travelSpeed, nextLvlTravelSpeed
 end
 -- //!SECTION
 
@@ -296,7 +308,6 @@ function Tender:AddFish(amount: number)
 end
 
 function Tender:RemoveFish(amount: number)
-	-- //TODO - Handle moving the fish to pier storage
 	self.FishInStorage = math.max(self.FishInStorage - amount, 0)
 
 	self:UpdateStorageStatus(false)
