@@ -7,6 +7,7 @@ local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
+local TweenService = game:GetService("TweenService")
 
 -- //SECTION - Tender Types
 export type TenderProps = {
@@ -74,7 +75,7 @@ export type TenderInstance = {
 	CalculateTravelSpeed: (self: TenderInstance) -> (number, number),
 
 	-- Travelling
-	-- //TODO - Add travelling functions
+	MoveToBoat: (self: TenderInstance, amount: number) -> (),
 	AddFish: (self: TenderInstance, amount: number) -> (),
 	RemoveFish: (self: TenderInstance, amount: number) -> (),
 	UpdateStorageStatus: (self: TenderInstance, status: boolean) -> (),
@@ -297,6 +298,40 @@ end
 
 -- //TODO - Handle the travelling functions
 -- //SECTION - Handle Travelling
+function Tender:MoveToBoat(boatPos: Vector3)
+	local tenderModel = self.Model
+
+	local boatX = boatPos.X
+	local boatY = boatPos.Y
+	local boatZ = boatPos.Z
+
+	local moveGoal = {}
+	moveGoal.Position = Vector3.new(boatX, boatY, boatZ)
+
+	-- //TODO - Remove hardcoded timer of 5 seconds and use calculation
+	local tweenInfo = TweenInfo.new(5)
+	local tween = TweenService:Create(tenderModel, tweenInfo, moveGoal)
+
+	tween:Play()
+end
+
+function Tender:MoveToPort(portPos: Vector3)
+	local tenderModel = self.Model
+
+	local boatX = portPos.X
+	local boatY = portPos.Y
+	local boatZ = portPos.Z
+
+	local moveGoal = {}
+	moveGoal.Position = Vector3.new(boatX, boatY, boatZ)
+
+	-- //TODO - Remove hardcoded timer of 5 seconds and use calculation
+	local tweenInfo = TweenInfo.new(5)
+	local tween = TweenService:Create(tenderModel, tweenInfo, moveGoal)
+
+	tween:Play()
+end
+
 function Tender:AddFish(amount: number)
 	FFGHelpers.PrintLog("Adding Fish", amount)
 	self.FishInStorage += amount

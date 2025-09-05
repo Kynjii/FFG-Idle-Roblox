@@ -1,4 +1,17 @@
 local TenderManager = {}
+TenderManager.Profiles = {}
+
+function TenderManager.RegisterBoat(boatModel: Model, player: Player)
+	-- Get Attribute from the model for it's Tier
+	-- Attempt to locate the associated Tender based on Owner (player.UserId) and Tier
+	-- Add a player profile for the boat/tender similar to DataService
+end
+
+function TenderManager.RegisterTender(tenderModel: Model, player: Player)
+	-- Get Attribute from the model for it's Tier
+	-- Attempt to locate the associated Tender based on Owner (player.UserId) and Tier
+	-- Add a player profile for the boat/tender similar to DataService
+end
 
 function TenderManager.ReadyForFish(tenderState, linkedBoat)
 	-- create function to locate the correct Boat the Tender is linked to
