@@ -71,18 +71,18 @@ function TeamManager.CreateTeams()
 end
 
 function TeamManager.AssignBoatManagers(profile: ProfileData, player: Player)
-	TeamManager.BoatManagers[player] = player
+	TeamManager.BoatManagers[player] = {
+		OwnerId = player.UserId,
+	}
 	local currentRealmId = profile.CurrentRealm
 	local realmData = profile.Realms[currentRealmId]
 
 	if realmData then
 		local numOfLanes = realmData.Lanes
-		print(numOfLanes)
-		for i = 0, numOfLanes, 1 do
+		for i = 1, numOfLanes, 1 do
 			local boatManager = BoatManager.New(profile, i, player)
 			table.insert(TeamManager.BoatManagers[player], boatManager)
 		end
-		print(TeamManager.BoatManagers[player])
 	end
 end
 
