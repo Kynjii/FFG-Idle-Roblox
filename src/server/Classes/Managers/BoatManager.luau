@@ -7,6 +7,7 @@ local Tender: Tender = require(ServerScriptService.Server.Classes.Tender)
 local BoatType = require(ServerScriptService.Server.Classes.Types.BoatType)
 local TenderType = require(ServerScriptService.Server.Classes.Types.TenderType)
 local BoatManagerType = require(ServerScriptService.Server.Classes.Types.BoatManagerType)
+local SetInterval = require(ServerScriptService.Server.Modules.SetInterval)
 
 local taggedBoats = CollectionService:GetTagged("Boat")
 local taggedTenders = CollectionService:GetTagged("Tender")
@@ -70,9 +71,17 @@ function BoatManager:HandleTenderService()
 	if not self.LaneTender.isPurchased then return end
 
 	local boatPos = self.BoatModel.PrimaryPart.CFrame
-	local movedToBoat = self.LaneTender:MoveToBoat(boatPos)
+	local timeToWait = self.LaneTender:MoveToBoat(boatPos)
 
-	if movedToBoat then local movedToPort = self.LaneTender:MoveToPort() end
+	task.delay(timeToWait + 1, function()
+		local amountToLoad = math.min(self.LaneBoat.FishInStorage, self.LaneTender.CurrentMaxStorage)
+		self.LaneBoat:RemoveFish(amountToLoad)
+		self.LaneTender:AddFish(amountToLoad)
+
+		local time = self.LaneTender:MoveToPort()
+		task.wait(time)
+		print("Fish delivered:", amountToLoad)
+	end)
 end
 
 return BoatManager

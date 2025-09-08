@@ -218,30 +218,23 @@ function Tender:MoveToBoat(boatPos: CFrame)
 
 	tween:Play()
 
-	if tween.PlaybackState == Enum.PlaybackState.Completed then return true end
-
-	return false
+	return self.CurrentTravelTime
 end
 
 function Tender:MoveToPort()
 	local tenderModel = self.Model
 	local portPos = self.PortPos
 
-	local boatX = portPos.X
-	local boatY = portPos.Y
-	local boatZ = portPos.Z
-
-	local moveGoal = {}
-	moveGoal.Position = Vector3.new(boatX, boatY, boatZ)
+	local tweenGoal = {
+		CFrame = portPos,
+	}
 
 	local tweenInfo = TweenInfo.new(self.CurrentTravelTime)
-	local tween = TweenService:Create(tenderModel, tweenInfo, moveGoal)
+	local tween = TweenService:Create(tenderModel.PrimaryPart, tweenInfo, tweenGoal)
 
 	tween:Play()
 
-	if tween.PlaybackState == Enum.PlaybackState.Completed then return true end
-
-	return false
+	return self.CurrentTravelTime
 end
 
 function Tender:AddFish(amount: number)

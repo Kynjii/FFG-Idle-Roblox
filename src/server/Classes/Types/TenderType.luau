@@ -65,8 +65,8 @@ export type TenderInstance = {
 	CalculateTravelTime: (self: TenderInstance) -> (number, number),
 
 	-- Travelling
-	MoveToBoat: (self: TenderInstance, position: Vector3) -> boolean,
-	MoveToPort: (self: TenderInstance, position: Vector3) -> boolean,
+	MoveToBoat: (self: TenderInstance, position: Vector3) -> number,
+	MoveToPort: (self: TenderInstance) -> number,
 	AddFish: (self: TenderInstance, amount: number) -> boolean,
 	RemoveFish: (self: TenderInstance, amount: number) -> boolean,
 	UpdateStorageStatus: (self: TenderInstance, status: boolean) -> (),
