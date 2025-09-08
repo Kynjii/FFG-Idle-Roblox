@@ -129,7 +129,7 @@ FFGEnum.ATTRIBUTES = {
 		["GrowthRate"] = "GrowthRate",
 		["CostGrowthRate"] = "CostGrowthRate",
 		["BaseStorage"] = "BaseStorage",
-		["BaseSpeed"] = "BaseSpeed",
+		["baseTime"] = "baseTime",
 	},
 }
 

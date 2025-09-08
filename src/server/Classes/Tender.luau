@@ -57,7 +57,7 @@ local DEFAULTS: TenderProps = {
 	UpgradeStage = 1,
 	FishInStorage = 0,
 	StorageFull = false,
-	BaseTravelSpeed = 5, -- secs
+	BaseTravelTime = 5, -- secs
 	GrowthRate = Formulas.TENDER.GrowthRate,
 	CostGrowthRate = Formulas.TENDER.CostGrowthRate,
 }
@@ -92,11 +92,15 @@ function Tender.New(state, player: Player, model: Model)
 	if self.BaseCost == DEFAULTS.BaseCost then self.BaseCost = self:CalculateBaseCost() end
 	if not self.UpgradeCost then self.UpgradeCost = self:CalculateUpgradeCost() end
 
+	-- Storage calcs
 	local curMaxStorage, nextLvlMaxStorage = self:CalculateMaxStorage()
 	self.CurrentMaxStorage = self.CurrentMaxStorage or curMaxStorage
 	self.NextLvlMaxStorage = self.NextLvlMaxStorage or nextLvlMaxStorage
 
-	-- //TODO handle BaseSpeed calculation
+	-- Travel Time calcs
+	local curTravelTime, nextLvlTravelTime = self:CalculateTravelTime()
+	self.CurrentTravelTime = self.CurrentTravelTime or curTravelTime
+	self.NextLvlTravelTime = self.NextLvlTravelTime or nextLvlTravelTime
 
 	return self
 end
@@ -123,7 +127,9 @@ function Tender:Upgrade()
 	self.CurrentMaxStorage = curMaxStorage
 	self.NextLvlMaxStorage = nextLvlMaxStorage
 
-	-- //TODO - Handle the BaseTravelSpeed upgrade
+	local curTravelTime, nextLvlTravelTime = self:CalculateTravelTime()
+	self.CurrentTravelTime = curTravelTime
+	self.NextLvlTravelTime = nextLvlTravelTime
 end
 
 function Tender:IncreaseUpgradeStage(stage)
@@ -183,29 +189,16 @@ function Tender:CalculateMaxStorage()
 	return maxStorage, nextLvlMaxStorage
 end
 
-function Tender:CalculateBaseTravelSpeed()
-	local baseSpeed = self.BaseTravelSpeed or DEFAULTS.BaseTravelSpeed
-	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
-	local realmMultiplier = math.pow(self.RealmId :: number, 2.25) -- scaling curve
-	local base = baseSpeed * tierMultiplier * realmMultiplier
+function Tender:CalculateTravelTime()
+	local baseTime = self.BaseTravelTime
 
-	self.BaseTravelSpeed = base
+	local travelTime = math.max(0.5, baseTime - self.Level * 0.005)
+	local nextLvlTravelTime = travelTime - math.max(0.5, baseTime - (self.Level + 1) * 0.005)
 
-	return base
-end
-
-function Tender:CalculateTravelSpeed()
-	local baseSpeed = self.BaseTravelSpeed
-	if baseSpeed == DEFAULTS.BaseTravelSpeed then baseSpeed = self:CalculateBaseTravelSpeed() end
-
-	local travelSpeed = baseSpeed * math.pow(DEFAULTS.GrowthRate, self.Level)
-	local nextLvlTravelSpeed = baseSpeed * math.pow(DEFAULTS.GrowthRate, self.Level + 1)
-
-	return travelSpeed, nextLvlTravelSpeed
+	return travelTime, nextLvlTravelTime
 end
 -- //!SECTION
 
--- //TODO - Handle the travelling functions
 -- //SECTION - Handle Travelling
 function Tender:MoveToBoat(boatClass, boatPos: CFrame)
 	local tenderModel = self.Model
@@ -215,8 +208,7 @@ function Tender:MoveToBoat(boatClass, boatPos: CFrame)
 		CFrame = boatPos:ToWorldSpace(offset),
 	}
 
-	-- //TODO - Remove hardcoded timer of 5 seconds and use calculation
-	local tweenInfo = TweenInfo.new(5)
+	local tweenInfo = TweenInfo.new(self.CurrentTravelTime)
 	local tween = TweenService:Create(tenderModel.PrimaryPart, tweenInfo, tweenGoal)
 
 	tween:Play()
@@ -234,8 +226,7 @@ function Tender:MoveToPort(portPos: Vector3)
 	local moveGoal = {}
 	moveGoal.Position = Vector3.new(boatX, boatY, boatZ)
 
-	-- //TODO - Remove hardcoded timer of 5 seconds and use calculation
-	local tweenInfo = TweenInfo.new(5)
+	local tweenInfo = TweenInfo.new(self.CurrentTravelTime)
 	local tween = TweenService:Create(tenderModel, tweenInfo, moveGoal)
 
 	tween:Play()
@@ -264,6 +255,10 @@ end
 
 -- //SECTION - UI Setup
 function Tender:Initialize()
+	-- Setup UI components
+	local purchaseBoard = self:SetupPurchaseBoard()
+	if purchaseBoard then self:SetupProximityPrompt(purchaseBoard) end
+
 	-- Handle visibility based on purchase status
 	if not self.isPurchased then
 		self:Hide()
@@ -271,11 +266,8 @@ function Tender:Initialize()
 	else
 		self:Show()
 		self:CanCollide()
+		self:StartTenderService()
 	end
-
-	-- Setup UI components
-	local purchaseBoard = self:SetupPurchaseBoard()
-	if purchaseBoard then self:SetupProximityPrompt(purchaseBoard) end
 end
 
 function Tender:SetupPurchaseBoard()
@@ -285,8 +277,8 @@ function Tender:SetupPurchaseBoard()
 	pbDetails.LevelLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel") :: TextLabel
 	pbDetails.CurrentMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentMaxStorage", "TextLabel") :: TextLabel
 	pbDetails.NextMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextMaxStorage", "TextLabel") :: TextLabel
-	pbDetails.CurrentSpeedLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentSpeed", "TextLabel") :: TextLabel
-	pbDetails.NextSpeedLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextSpeed", "TextLabel") :: TextLabel
+	pbDetails.CurrentTravelTimeLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentTravelTime", "TextLabel") :: TextLabel
+	pbDetails.NextTravelTimeLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextTravelTime", "TextLabel") :: TextLabel
 
 	if pbDetails then
 		local upgradeStage = self.UpgradeStage
@@ -309,7 +301,9 @@ function Tender:SetupPurchaseBoard()
 		pbDetails.CurrentMaxStorageLabel.Text = self.isPurchased and FormatNumber(currentStorage) or ""
 		pbDetails.NextMaxStorageLabel.Text = self.isPurchased and FormatNumber(nextStorage) or ""
 
-		-- //TODO - Hande updating speed
+		-- TRAVEL TIME Stats
+		pbDetails.CurrentTravelTimeLabel.Text = self.isPurchased and self.CurrentTravelTime or ""
+		pbDetails.NextTravelTimeLabel.Text = self.isPurchased and self.NextLvlTravelTime or ""
 	end
 
 	return purchaseBoard
@@ -324,12 +318,12 @@ function Tender:UpdatePurchaseBoardUI()
 	pbDetails.LevelLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel") :: TextLabel
 	pbDetails.CurrentMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentMaxStorage", "TextLabel") :: TextLabel
 	pbDetails.NextMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextMaxStorage", "TextLabel") :: TextLabel
-	pbDetails.CurrentSpeedLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentSpeed", "TextLabel") :: TextLabel
-	pbDetails.NextSpeedLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextSpeed", "TextLabel") :: TextLabel
+	pbDetails.CurrentTravelTimeLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentTravelTime", "TextLabel") :: TextLabel
+	pbDetails.NextTravelTimeLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextTravelTime", "TextLabel") :: TextLabel
 
 	pbDetails.CurrentMaxStorageLabel.Text = isPurchased and FormatNumber(self.CurrentMaxStorage) or ""
 	pbDetails.NextMaxStorageLabel.Text = isPurchased and FormatNumber(self.NextLvlMaxStorage) or ""
-	-- //TODO - Hande updating speed
+	-- //TODO - Hande updating travel time
 
 	local level = self.Level
 	pbDetails.LevelLabel.Text = "Level: " .. level
@@ -481,9 +475,8 @@ function Tender:Serialize(): TenderProps
 		NextLvlMaxStorage = self.NextLvlMaxStorage,
 		FishInStorage = self.FishInStorage,
 		StorageFull = self.StorageFull,
-		BaseTravelSpeed = self.BaseTravelSpeed,
-		CurrentTravelSpeed = self.CurrentTravelSpeed,
-		NextLvlTravelSpeed = self.NextLvlTravelSpeed,
+		CurrentTravelTime = self.CurrentTravelTime,
+		NextLvlTravelTime = self.NextLvlTravelTime,
 	}
 end
 -- //!SECTION
