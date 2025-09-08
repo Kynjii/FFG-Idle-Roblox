@@ -90,7 +90,7 @@ function Tender.New(state, player: Player, model: Model)
 
 	-- Had to take this approach for type checking to work
 	if self.BaseCost == DEFAULTS.BaseCost then self.BaseCost = self:CalculateBaseCost() end
-	if not self.UpgradeCost then self:CalculateUpgradeCost() end
+	if not self.UpgradeCost then self.UpgradeCost = self:CalculateUpgradeCost() end
 
 	local curMaxStorage, nextLvlMaxStorage = self:CalculateMaxStorage()
 	self.CurrentMaxStorage = self.CurrentMaxStorage or curMaxStorage
@@ -350,29 +350,32 @@ function Tender:SetupProximityPrompt(purchaseBoard: Part)
 
 	-- Check if tender is at max level
 	if self.Level == self.MaxLevel then
-		proximityPrompt.ObjectText = "Max Level Reached"
-		proximityPrompt.ActionText = ""
+		proximityPrompt.ObjectText = "Cannot Upgrade"
+		proximityPrompt.ActionText = "Max Level Reached"
 		return proximityPrompt
 	end
 
-	proximityPrompt.HoldDuration = 0
+	proximityPrompt.HoldDuration = 0.5
 	proximityPrompt.ObjectText = self.isPurchased and "Upgrade Tender" or "Purchase"
-	proximityPrompt.ActionText = self.isPurchased and "Level: " .. tostring(self.Level + 1) or "Tier " .. self.Tier .. " Tender"
+	proximityPrompt.ActionText = self.isPurchased and "Gold:  " .. FormatNumber(self.UpgradeCost) or "Gold: " .. FormatNumber(self.BaseCost)
+
+	-- Handle not showing the prompt if the user is not the owner
+	proximityPrompt.PromptShown:Connect(function(player: Player)
+		if player.UserId ~= self.Owner then return end
+	end)
 
 	-- Handle proximity prompt triggered
 	proximityPrompt.Triggered:Connect(function(player)
 		-- Check max level again
 		if self.Level == self.MaxLevel then return end
 
-		local upgradeCost = self.isPurchased and self.UpgradeCost or self.BaseCost
-
-		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, upgradeCost) then
-			FFGHelpers.PrintLog("Unable to afford upgrade, cost is: ", upgradeCost)
+		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, self.UpgradeCost) then
+			FFGHelpers.PrintLog("Unable to afford upgrade, cost is: ", self.UpgradeCost)
 			return
 		end
 
 		-- Spend the currency
-		DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, upgradeCost)
+		DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, self.UpgradeCost)
 
 		if self.isPurchased then
 			-- Upgrade existing tender
@@ -396,11 +399,11 @@ end
 
 function Tender:UpdateProximityPromptUI(proximityPrompt: ProximityPrompt)
 	if self.Level == self.MaxLevel then
-		proximityPrompt.ObjectText = "Max Level Reached"
-		proximityPrompt.ActionText = ""
+		proximityPrompt.ObjectText = "Cannot Upgrade"
+		proximityPrompt.ActionText = "Max Level Reached"
 	else
 		proximityPrompt.ObjectText = self.isPurchased and "Upgrade Tender" or "Purchase"
-		proximityPrompt.ActionText = self.isPurchased and "Level: " .. tostring(self.Level + 1) or "Tier " .. self.Tier .. " Tender"
+		proximityPrompt.ActionText = self.isPurchased and "Gold:  " .. FormatNumber(self.UpgradeCost) or "Gold: " .. FormatNumber(self.BaseCost)
 	end
 end
 -- //!SECTION
