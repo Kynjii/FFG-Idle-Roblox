@@ -3,13 +3,17 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 local PlayerDataTemplate = require(ServerScriptService.Server.Modules.PlayerDataTemplate)
 local ProfileStore = require(ServerScriptService.Server.Libs.ProfileStore)
-local TeamManager = require(ServerScriptService.Server.Managers.TeamManager)
+local TeamManager = require(ServerScriptService.Server.Classes.Managers.TeamManager)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 
+-- //SECTION - Game Start
+-- Create Teams based on static data and kick someone if the team has more than one player
 TeamManager.CreateTeams()
 
+-- Create new Playerstore using the PlayerDataTemplate
 local PlayerStore = ProfileStore.New(FFGHelpers.GetStoreName(), PlayerDataTemplate)
 
+-- Create a replica of state so the client has access to it
 local function Initialize(player: Player, profile: typeof(PlayerStore:StartSessionAsync()))
 	DataService.AttachReplica(player, profile)
 end
@@ -47,6 +51,7 @@ for _, p in Players:GetPlayers() do
 end
 
 Players.PlayerAdded:Connect(PlayerAdded)
+
 Players.PlayerRemoving:Connect(function(player)
 	local profile = DataService.Profiles[player]
 	if profile then

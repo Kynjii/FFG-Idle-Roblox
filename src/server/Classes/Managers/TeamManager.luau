@@ -3,11 +3,13 @@ local BoatType = require(ServerScriptService.Server.Classes.Types.BoatType)
 local TenderType = require(ServerScriptService.Server.Classes.Types.TenderType)
 local Teams = game:GetService("Teams")
 local BoatManager = require(script.Parent.BoatManager)
+local BoatManagerType = require(ServerScriptService.Server.Classes.Types.BoatManagerType)
 local PlayerDataTemplate = require(ServerScriptService.Server.Modules.PlayerDataTemplate)
 
 type BoatInstance = BoatType.BoatInstance
 type Tender = TenderType.Tender
 type ProfileData = PlayerDataTemplate.ProfileData
+type BoatManager = BoatManagerType.BoatManagerInstance
 
 local TeamManager = {}
 TeamManager.Teams = {
@@ -65,6 +67,7 @@ function TeamManager.CreateTeams()
 
 		newTeam.PlayerAdded:Connect(function(player)
 			local playersOnTeam = #newTeam:GetPlayers()
+			-- //TODO - Attempt to re-assign first
 			if playersOnTeam > 1 then player:Kick("The server is full, try again.") end
 		end)
 	end
@@ -80,10 +83,15 @@ function TeamManager.AssignBoatManagers(profile: ProfileData, player: Player)
 	if realmData then
 		local numOfLanes = realmData.Lanes
 		for i = 1, numOfLanes, 1 do
-			local boatManager = BoatManager.New(profile, i, player)
+			local boatManager: BoatManager = BoatManager.New(realmData.Boats, realmData.Tenders, i, player)
+
+			if not boatManager then break end
 			table.insert(TeamManager.BoatManagers[player], boatManager)
+			boatManager:Initialize()
 		end
 	end
+
+	print(TeamManager.BoatManagers[player])
 end
 
 return TeamManager
