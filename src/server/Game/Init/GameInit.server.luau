@@ -37,6 +37,7 @@ local function PlayerAdded(player: Player)
 		if player.Parent == Players then
 			DataService.Profiles[player] = profile
 			Initialize(player, profile)
+			TeamManager.AssignTeam(player)
 			TeamManager.AssignBoatManagers(profile.Data, player)
 		else
 			profile:EndSession()

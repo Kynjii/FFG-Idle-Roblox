@@ -13,27 +13,27 @@ local TeamManager = {}
 TeamManager.Teams = {
 	[1] = {
 		Name = "Islander 1",
-		TeamColor = BrickColor.new("Bright Red"),
+		TeamColor = BrickColor.new("Bright red"),
 	},
 	[2] = {
 		Name = "Islander 2",
-		TeamColor = BrickColor.new("Really Red"),
+		TeamColor = BrickColor.new("Really red"),
 	},
 	[3] = {
 		Name = "Islander 3",
-		TeamColor = BrickColor.new("Bright Blue"),
+		TeamColor = BrickColor.new("Bright blue"),
 	},
 	[4] = {
 		Name = "Islander 4",
-		TeamColor = BrickColor.new("Really Blue"),
+		TeamColor = BrickColor.new("Really blue"),
 	},
 	[5] = {
 		Name = "Islander 5",
-		TeamColor = BrickColor.new("Earth Green"),
+		TeamColor = BrickColor.new("Earth green"),
 	},
 	[6] = {
 		Name = "Islander 6",
-		TeamColor = BrickColor.new("Dark Green"),
+		TeamColor = BrickColor.new("Dark green"),
 	},
 	[7] = {
 		Name = "Islander 7",
@@ -41,11 +41,11 @@ TeamManager.Teams = {
 	},
 	[8] = {
 		Name = "Islander 8",
-		TeamColor = BrickColor.new("New Yeller"),
+		TeamColor = BrickColor.new("New yeller"),
 	},
 	[9] = {
 		Name = "Islander 9",
-		TeamColor = BrickColor.new("Deep Orange"),
+		TeamColor = BrickColor.new("Deep orange"),
 	},
 	[10] = {
 		Name = "Islander 10",
@@ -60,13 +60,13 @@ function TeamManager.CreateTeams()
 		local newTeam = Instance.new("Team")
 		newTeam.TeamColor = team.TeamColor
 		newTeam.Name = team.Name
-		newTeam.AutoAssignable = true
+		newTeam.AutoAssignable = false
 		newTeam.Parent = Teams
 
 		newTeam.PlayerAdded:Connect(function(player)
-			local playersOnTeam = #newTeam:GetPlayers()
+			local playersOnTeam = newTeam:GetPlayers()
 			-- //TODO - Attempt to re-assign first
-			if playersOnTeam > 1 then player:Kick("The server is full, try again.") end
+			if #playersOnTeam > 1 then player:Kick("The server is full, try again.") end
 		end)
 	end
 end
@@ -86,6 +86,18 @@ function TeamManager.AssignBoatManagers(profile, player: Player)
 			if not boatManager then break end
 			table.insert(TeamManager.BoatManagers[player], boatManager)
 			boatManager:Initialize()
+		end
+	end
+end
+
+function TeamManager.AssignTeam(player: Player)
+	local teams = Teams:GetTeams()
+	for i, team in ipairs(teams) do
+		local playersOnTeam = team:GetPlayers()
+		if #playersOnTeam == 0 then
+			player.TeamColor = team.TeamColor
+			player.Neutral = false
+			return
 		end
 	end
 end
