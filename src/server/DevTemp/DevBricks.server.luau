@@ -9,7 +9,6 @@ local DataService = require(ServerScriptService.Server.Services.DataService)
 local giveGoldButton = DeepWait(Workspace, "DevGiveGold")
 local debounce = false
 giveGoldButton.Touched:Connect(function(hit)
-	print("Touched")
 	if debounce then return end
 	debounce = true
 

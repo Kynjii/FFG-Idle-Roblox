@@ -78,6 +78,7 @@ export type BoatInstance = {
 	UpdatePurchaseBoardUI: (self: BoatInstance) -> (),
 	SetupProximityPrompt: (self: BoatInstance, purchaseBoard: Part) -> ProximityPrompt,
 	UpdateProximityPromptUI: (self: BoatInstance, proximityPrompt: ProximityPrompt) -> (),
+	UpdateBillboardGUI: (self: BoatInstance) -> (),
 
 	-- Visibility and Collision
 	Show: (self: BoatInstance) -> (),

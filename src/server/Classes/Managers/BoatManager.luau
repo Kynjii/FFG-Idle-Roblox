@@ -3,15 +3,15 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Boat: Boat = require(ServerScriptService.Server.Classes.Boat)
+local PortStorage = require(ServerScriptService.Server.Classes.PortStorage)
 local Tender: Tender = require(ServerScriptService.Server.Classes.Tender)
 local BoatType = require(ServerScriptService.Server.Classes.Types.BoatType)
 local TenderType = require(ServerScriptService.Server.Classes.Types.TenderType)
 local BoatManagerType = require(ServerScriptService.Server.Classes.Types.BoatManagerType)
-local SetInterval = require(ServerScriptService.Server.Modules.SetInterval)
-local DataService = require(ServerScriptService.Server.Services.DataService)
 
 local taggedBoats = CollectionService:GetTagged("Boat")
 local taggedTenders = CollectionService:GetTagged("Tender")
+local taggedStorage = CollectionService:GetTagged("Storage")
 
 type Boat = BoatType.Boat
 type Tender = TenderType.Tender
@@ -20,17 +20,28 @@ type BoatManager = BoatManagerType.BoatManagerInstance
 local BoatManager = {} :: BoatManager
 BoatManager.__index = BoatManager
 
-function BoatManager.New(boatsArr: BoatType.BoatProps, tendersArr: TenderType.TenderProps, tier: number, player: Player)
+function BoatManager.New(realmData, tier: number, player: Player)
 	local self: BoatManager = setmetatable({}, BoatManager)
+
+	local boatsArr = realmData.Boats
+	local tendersArr = realmData.Tenders
+	local storageArr = realmData.Storages
 
 	self.Player = player
 	self.Tier = tier
+
+	-- Create Boat
 	self.BoatModel = self:FindBoatModel(player, tier) :: Model
 	if not self.BoatModel then return end
 	self.LaneBoat = Boat.New(boatsArr[tier], player, self.BoatModel)
 
+	-- Create Tender
 	self.TenderModel = self:FindTenderModel(player, tier) :: Model
 	self.LaneTender = Tender.New(tendersArr[tier], player, self.TenderModel, self.BoatModel)
+
+	-- Create Port Storage
+	self.StorageModel = self:FindStorageModel(player, tier) :: Model
+	self.LaneStorage = PortStorage.New(storageArr[tier], player, self.StorageModel)
 
 	-- Tender Travelling props
 	self.loadingTime = 1
@@ -62,9 +73,19 @@ function BoatManager:FindTenderModel(player, tier)
 	return nil
 end
 
+function BoatManager:FindStorageModel(player, tier)
+	for _, taggedStorageUnit in ipairs(taggedStorage) do
+		local taggedStorageUnitTier = taggedStorageUnit:GetAttribute("Tier")
+		if taggedStorageUnitTier == tier then return taggedStorageUnit end
+	end
+
+	return nil
+end
+
 function BoatManager:Initialize()
 	self.LaneBoat:Initialize()
 	self.LaneTender:Initialize()
+	self.LaneStorage:Initialize()
 end
 
 function BoatManager:AttachAttListeners()
@@ -128,14 +149,13 @@ function BoatManager:StartLoadingFish()
 	local storageFull = false
 	while not storageFull do
 		if self.LaneTender:IsStorageFull() then
-			print("tender storage full, setting att and returning to port")
 			self.TenderModel.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.finishedLoading, true)
 			storageFull = true
 		end
 
 		local availableStorage = self.LaneTender.CurrentMaxStorage - self.LaneTender.FishInStorage
-		-- //TODO - figure out the amount so that it takes a 10th of the max storage per tick (loadSpeed can be an upgradable prop later)
-		local amount = math.min(availableStorage, self.LaneBoat.FishInStorage)
+		local tickAmount = self.LaneTender.CurrentMaxStorage / 10
+		local amount = math.min(availableStorage, tickAmount)
 
 		self.LaneBoat:RemoveFish(amount)
 		self.LaneTender:AddFish(amount)
@@ -157,8 +177,7 @@ function BoatManager:StartUnloadingFish()
 		local amount = self.LaneTender.CurrentMaxStorage / 10
 
 		self.LaneTender:RemoveFish(amount)
-		DataService.Earn(self.Player, FFGEnum.CURRENCY_TYPES.Gold, amount)
-		print("Earned:", amount)
+		self.LaneStorage:AddFish(amount)
 
 		task.wait(1)
 	end

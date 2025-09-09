@@ -4,6 +4,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local BoatType = require(ServerScriptService.Server.Classes.Types.BoatType)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
+local Billboard = require(ServerScriptService.Server.Modules.Billboard)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local CalculateProgress = require(ReplicatedStorage.Shared.Utils.CalculateProgress)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
@@ -238,7 +239,7 @@ end
 
 function Boat:AddFish(amount: number)
 	self.FishInStorage += amount
-
+	self:UpdateBillboardGUI(amount)
 	if self.FishInStorage >= self.CurrentMaxStorage then
 		self.FishInStorage = self.CurrentMaxStorage
 		self:UpdateStorageStatus(true)
@@ -376,6 +377,7 @@ function Boat:SetupProximityPrompt(purchaseBoard: Part)
 		if self.Level == self.MaxLevel then return end
 
 		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, self.UpgradeCost) then
+			-- //TODO - Add a way to inform user they cannot afford it
 			FFGHelpers.PrintLog("Unable to afford upgrade, cost is: ", self.UpgradeCost)
 			self:UpdateProximityPromptUI(proximityPrompt)
 			return
@@ -412,6 +414,17 @@ function Boat:UpdateProximityPromptUI(proximityPrompt: ProximityPrompt)
 	else
 		proximityPrompt.ObjectText = self.isPurchased and "Upgrade Boat" or "Purchase"
 		proximityPrompt.ActionText = self.isPurchased and "Gold: " .. FormatNumber(self.UpgradeCost) or "Gold: " .. FormatNumber(self.BaseCost)
+	end
+end
+
+function Boat:UpdateBillboardGUI(amount: number)
+	local billboard: BillboardGui = self.Model.PrimaryPart.Billboard:WaitForChild("FishPopupTemplate")
+	if billboard then
+		local clone = billboard:Clone()
+		clone.Parent = self.Model.PrimaryPart.Billboard
+		clone.Adornee = self.Model.PrimaryPart
+		clone.Name = "FishPopup"
+		Billboard.Animate(clone, amount)
 	end
 end
 -- //!SECTION

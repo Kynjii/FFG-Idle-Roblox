@@ -87,6 +87,32 @@ FFGEnum.ATTRIBUTES = {
 	["finishedUnloading"] = "finishedUnloading",
 }
 
+FFGEnum.CLASS = {
+	PROPERTIES = {
+		Id = "Id",
+		Owner = "Owner",
+		RealmId = "RealmId",
+		Tier = "Tier",
+		Name = "Name",
+		Level = "Level",
+		MaxLevel = "MaxLevel",
+		BaseCost = "BaseCost",
+		UpgradeCost = "UpgradeCost",
+		isPurchased = "isPurchased",
+		BaseStorage = "BaseStorage",
+		UpgradeStage = "UpgradeStage",
+		CurrentMaxStorage = "CurrentMaxStorage",
+		NextLvlMaxStorage = "NextLvlMaxStorage",
+		FishInStorage = "FishInStorage",
+		StorageFull = "StorageFull",
+		BaseFPS = "BaseFPS",
+		CurrentFPS = "CurrentFPS",
+		NextFPS = "NextFPS",
+		CurrentTravelTime = "CurrentTravelTime",
+		NextLvlTravelTime = "NextLvlTravelTime",
+	},
+}
+
 FFGEnum.CURRENCY_TYPES = {
 	["Gold"] = "Gold",
 }

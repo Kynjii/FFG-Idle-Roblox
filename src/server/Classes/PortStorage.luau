@@ -4,71 +4,37 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
+local CalculateProgress = require(ReplicatedStorage.Shared.Utils.CalculateProgress)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
-local TweenService = game:GetService("TweenService")
-local TenderType = require(ServerScriptService.Server.Classes.Types.TenderType)
 
--- //SECTION - Tender Types
-type Tender = TenderType.Tender
-type TenderProps = TenderType.TenderProps
-type TenderInstance = TenderType.TenderInstance
+-- //SECTION - Types
+
 -- //!SECTION
 
--- //SECTION -  Tender Data
-local TENDER_PROMOTION_LEVELS = {
-	[1] = 1,
-	[2] = 10,
-	[3] = 20,
-	[4] = 30,
-	[5] = 40,
-	[6] = 50,
-	[7] = 60,
-	[8] = 70,
-	[9] = 80,
-	[10] = 90,
-	[11] = 100,
-}
-
-local NAME = {
-	[1] = "Wooden Cart-Barge",
-	[2] = "Barrel Barge",
-	[3] = "Oarsman’s Ferry",
-	[4] = "Courier Skiff",
-	[5] = "Windcloak Sloop",
-	[6] = "Seawarden’s Tender",
-	[7] = "Crate Hauler",
-	[8] = "Knight’s Courier",
-	[9] = "Harbormaster’s Crest",
-	[10] = "Starlit Barge",
-	[11] = "Little Lucy",
-}
-
-local DEFAULTS: TenderProps = {
+-- //SECTION - Data
+local DEFAULTS = {
 	RealmId = 1,
 	Tier = 1,
-	Name = "Unnamed Tender",
 	Level = 1,
 	MaxLevel = 100,
-	BaseCost = Formulas.TENDER.BaseCost,
-	isPurchased = false,
-	BaseStorage = Formulas.TENDER.BaseStorage,
-	UpgradeStage = 1,
+	BaseCost = Formulas.BOAT.BaseCost,
+	isPurchased = true,
+	BaseStorage = Formulas.BOAT.BaseStorage,
 	FishInStorage = 0,
 	StorageFull = false,
-	BaseTravelTime = 5, -- secs
-	GrowthRate = Formulas.TENDER.GrowthRate,
-	CostGrowthRate = Formulas.TENDER.CostGrowthRate,
+	GrowthRate = Formulas.BOAT.GrowthRate,
+	CostGrowthRate = Formulas.BOAT.CostGrowthRate,
 }
 -- //!SECTION
 
-local Tender: TenderInstance = {}
-Tender.__index = Tender
+local PortStorage = {}
+PortStorage.__index = PortStorage
 
 -- //SECTION - Constructor
-function Tender.New(state, player: Player, model: Model)
-	local self: TenderInstance = setmetatable({}, Tender)
+function PortStorage.New(state, player: Player, model: Model)
+	local self = setmetatable({}, PortStorage)
 
 	-- Start with default stats as base
 	for key, value in pairs(DEFAULTS) do
@@ -86,65 +52,79 @@ function Tender.New(state, player: Player, model: Model)
 	self.Id = self.Id or HttpService:GenerateGUID(false)
 	self.Owner = self.Owner or player.UserId
 	self.Model = model
-	self.PortPos = model.PrimaryPart.CFrame
-	self.Name = self:GetName()
 
 	-- Had to take this approach for type checking to work
 	if self.BaseCost == DEFAULTS.BaseCost then self.BaseCost = self:CalculateBaseCost() end
 	if not self.UpgradeCost then self.UpgradeCost = self:CalculateUpgradeCost() end
 
-	-- Apply attributes
-	if self.isPurchased then self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.isPurchased, self.isPurchased) end
-
-	-- Storage calcs
 	local curMaxStorage, nextLvlMaxStorage = self:CalculateMaxStorage()
 	self.CurrentMaxStorage = self.CurrentMaxStorage or curMaxStorage
 	self.NextLvlMaxStorage = self.NextLvlMaxStorage or nextLvlMaxStorage
-
-	-- Travel Time calcs
-	local curTravelTime, nextLvlTravelTime = self:CalculateTravelTime()
-	self.CurrentTravelTime = self.CurrentTravelTime or curTravelTime
-	self.NextLvlTravelTime = self.NextLvlTravelTime or nextLvlTravelTime
 
 	return self
 end
 -- //!SECTION
 
--- //SECTION - Core Tender Actions
-function Tender:Purchase()
+-- //SECTION - Core Actions
+function PortStorage:Purchase()
 	self.isPurchased = true
-	self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.isPurchased, true)
 end
 
-function Tender:Upgrade()
+function PortStorage:Upgrade()
 	if not self:CanUpgrade() then return end
 
 	self.Level += 1
-	for k, v in ipairs(TENDER_PROMOTION_LEVELS) do
-		if self.Level == v then
-			self:IncreaseUpgradeStage(k)
-			break
-		end
-	end
 	self.UpgradeCost = self:CalculateUpgradeCost()
 
 	local curMaxStorage, nextLvlMaxStorage = self:CalculateMaxStorage()
 	self.CurrentMaxStorage = curMaxStorage
 	self.NextLvlMaxStorage = nextLvlMaxStorage
-
-	local curTravelTime, nextLvlTravelTime = self:CalculateTravelTime()
-	self.CurrentTravelTime = curTravelTime
-	self.NextLvlTravelTime = nextLvlTravelTime
 end
 
-function Tender:IncreaseUpgradeStage(stage)
-	self.UpgradeStage = stage
-	self.Name = self:GetName()
+function PortStorage:AddFish(amount: number)
+	self.FishInStorage += amount
+	if self.FishInStorage >= self.CurrentMaxStorage then
+		self.FishInStorage = self.CurrentMaxStorage
+		self:UpdateStorageStatus(true)
+	end
+
+	self:UpdatePurchaseBoardUI()
+	self:UpdateFishModel()
+end
+
+function PortStorage:RemoveFish(amount: number)
+	self.FishInStorage = math.max(self.FishInStorage :: number - amount, 0)
+	self:UpdateStorageStatus(false)
+
+	self:UpdatePurchaseBoardUI()
+	self:UpdateFishModel()
+end
+
+function PortStorage:UpdateFishModel()
+	local max = 9
+	local modelBase = DeepWait(self.Model, "FishInStorage", "Base") :: UnionOperation
+
+	if modelBase.Size.Y >= max then return end
+
+	local amount = 0.9
+	local originalCF = modelBase.CFrame
+
+	-- Grow Y
+	modelBase.Size = Vector3.new(modelBase.Size.X, math.min(modelBase.Size.Y + amount, max), modelBase.Size.Z)
+
+	-- Reposition so the bottom stays put (grow upward)
+	-- Move up by half of the increase (world up)
+	local upDelta = amount / 2
+
+	-- Preserve original orientation while changing position:
+	-- (cf - cf.Position) extracts rotation; CFrame.new(newPos) sets position.
+	local newPos = originalCF.Position + Vector3.new(0, upDelta, 0)
+	modelBase.CFrame = CFrame.new(newPos) * (originalCF - originalCF.Position)
 end
 -- //!SECTION
 
 -- //SECTION - Calculations
-function Tender:CalculateBaseCost()
+function PortStorage:CalculateBaseCost()
 	local baseCost = self.BaseCost or DEFAULTS.BaseCost
 	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
 	local realmMultiplier = math.pow(self.RealmId :: number, 2.25) -- scaling curve
@@ -155,7 +135,7 @@ function Tender:CalculateBaseCost()
 	return base
 end
 
-function Tender:CalculateUpgradeCost(): number
+function PortStorage:CalculateUpgradeCost()
 	local baseCost = self.BaseCost or DEFAULTS.BaseCost
 	if baseCost == DEFAULTS.BaseCost then baseCost = self:CalculateBaseCost() end
 
@@ -169,7 +149,7 @@ function Tender:CalculateUpgradeCost(): number
 	return cost
 end
 
-function Tender:CalculateBaseStorage()
+function PortStorage:CalculateBaseStorage()
 	local baseStorage = self.BaseStorage or DEFAULTS.BaseStorage
 	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
 	local realmMultiplier = math.pow(self.RealmId :: number, 2.25) -- scaling curve
@@ -180,7 +160,7 @@ function Tender:CalculateBaseStorage()
 	return base
 end
 
-function Tender:CalculateMaxStorage()
+function PortStorage:CalculateMaxStorage()
 	local baseStorage = self.BaseStorage or DEFAULTS.BaseStorage
 	if baseStorage == DEFAULTS.BaseStorage then baseStorage = self:CalculateBaseStorage() end
 
@@ -193,82 +173,10 @@ function Tender:CalculateMaxStorage()
 
 	return maxStorage, nextLvlMaxStorage
 end
-
-function Tender:CalculateTravelTime()
-	local baseTime = self.BaseTravelTime
-
-	local travelTime = math.max(0.5, baseTime - self.Level * 0.005)
-	local nextLvlTravelTime = travelTime - math.max(0.5, baseTime - (self.Level + 1) * 0.005)
-
-	return travelTime, nextLvlTravelTime
-end
--- //!SECTION
-
--- //SECTION - Handle Travelling
-function Tender:MoveToBoat(boatPos: CFrame)
-	local tenderModel = self.Model
-
-	local offset = CFrame.new(0, -12, 0)
-	local tweenGoal = {
-		CFrame = boatPos:ToWorldSpace(offset),
-	}
-
-	local tweenInfo = TweenInfo.new(self.CurrentTravelTime)
-	local tween = TweenService:Create(tenderModel.PrimaryPart, tweenInfo, tweenGoal)
-
-	tween.Completed:Connect(function(playbackState)
-		self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.atBoat, true)
-	end)
-
-	tween:Play()
-end
-
-function Tender:MoveToPort()
-	self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.atBoat, false)
-
-	local tenderModel = self.Model
-	local portPos = self.PortPos
-
-	local tweenGoal = {
-		CFrame = portPos,
-	}
-
-	local tweenInfo = TweenInfo.new(self.CurrentTravelTime)
-	local tween = TweenService:Create(tenderModel.PrimaryPart, tweenInfo, tweenGoal)
-
-	tween.Completed:Connect(function(playbackState)
-		self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.atPort, true)
-	end)
-
-	tween:Play()
-end
-
-function Tender:AddFish(amount: number)
-	self.FishInStorage += amount
-
-	if self.FishInStorage >= self.CurrentMaxStorage then
-		self.FishInStorage = self.CurrentMaxStorage
-		self:UpdateStorageStatus(true)
-	end
-end
-
-function Tender:RemoveFish(amount: number)
-	self.FishInStorage = math.max(self.FishInStorage - amount, 0)
-
-	self:UpdateStorageStatus(false)
-end
-
-function Tender:UpdateStorageStatus(status)
-	self.StorageFull = status
-end
 -- //!SECTION
 
 -- //SECTION - UI Setup
-function Tender:Initialize()
-	-- Setup UI components
-	local purchaseBoard = self:SetupPurchaseBoard()
-	if purchaseBoard then self:SetupProximityPrompt(purchaseBoard) end
-
+function PortStorage:Initialize()
 	-- Handle visibility based on purchase status
 	if not self.isPurchased then
 		self:Hide()
@@ -277,81 +185,67 @@ function Tender:Initialize()
 		self:Show()
 		self:CanCollide()
 	end
+
+	-- Setup UI components
+	local purchaseBoard = self:SetupPurchaseBoard()
+	if purchaseBoard then self:SetupProximityPrompt(purchaseBoard) end
+
+	-- Setup Sell Prompt (temp)
+	-- //TODO - Replace so the player can remove the fish into their own backpack
+	self:SetupFishRemovalPrompt()
 end
 
-function Tender:SetupPurchaseBoard()
+function PortStorage:SetupPurchaseBoard()
 	local purchaseBoard = self.Model:WaitForChild("Purchase_Board")
 	local pbDetails = {}
-	pbDetails.NameLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel") :: TextLabel
 	pbDetails.LevelLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel") :: TextLabel
 	pbDetails.CurrentMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentMaxStorage", "TextLabel") :: TextLabel
 	pbDetails.NextMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextMaxStorage", "TextLabel") :: TextLabel
-	pbDetails.CurrentTravelTimeLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentTravelTime", "TextLabel") :: TextLabel
-	pbDetails.NextTravelTimeLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextTravelTime", "TextLabel") :: TextLabel
+	pbDetails.StorageProgress = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StorageBar", "StorageProgress") :: Frame
 
 	if pbDetails then
-		local upgradeStage = self.UpgradeStage
 		local level = self.Level
-		local qualityInfo = FFGEnum.QUALITY[upgradeStage]
-		local color = qualityInfo.Color
-		pbDetails.NameLabel.TextColor3 = color
 
-		if not self.isPurchased then
-			pbDetails.NameLabel.Parent.Visible = false
-		else
-			pbDetails.NameLabel.Text = self:GetName()
-			pbDetails.NameLabel.Parent.Visible = true
-		end
-
-		pbDetails.LevelLabel.Text = self.isPurchased and "Level: " .. level or "Purchase Tender"
+		pbDetails.LevelLabel.Text = self.isPurchased and "Level: " .. level or "Purchase Boat"
 
 		-- STORAGE Stats
 		local currentStorage, nextStorage = self:CalculateMaxStorage()
 		pbDetails.CurrentMaxStorageLabel.Text = self.isPurchased and FormatNumber(currentStorage) or ""
 		pbDetails.NextMaxStorageLabel.Text = self.isPurchased and FormatNumber(nextStorage) or ""
 
-		-- TRAVEL TIME Stats
-		pbDetails.CurrentTravelTimeLabel.Text = self.isPurchased and self.CurrentTravelTime or ""
-		pbDetails.NextTravelTimeLabel.Text = self.isPurchased and self.NextLvlTravelTime or ""
+		-- Storage Progress Bar
+		local storageProgress = CalculateProgress(self.FishInStorage, self.CurrentMaxStorage)
+		pbDetails.StorageProgress.Size = UDim2.fromScale(1, storageProgress)
 	end
 
 	return purchaseBoard
 end
 
-function Tender:UpdatePurchaseBoardUI()
+function PortStorage:UpdatePurchaseBoardUI()
 	local isPurchased = self.isPurchased
 	local purchaseBoard = self.Model:WaitForChild("Purchase_Board")
 
 	local pbDetails = {}
-	pbDetails.NameLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel") :: TextLabel
 	pbDetails.LevelLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel") :: TextLabel
 	pbDetails.CurrentMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentMaxStorage", "TextLabel") :: TextLabel
 	pbDetails.NextMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextMaxStorage", "TextLabel") :: TextLabel
-	pbDetails.CurrentTravelTimeLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentTravelTime", "TextLabel") :: TextLabel
-	pbDetails.NextTravelTimeLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextTravelTime", "TextLabel") :: TextLabel
+	pbDetails.StorageProgress = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StorageBar", "StorageProgress") :: Frame
 
 	pbDetails.CurrentMaxStorageLabel.Text = isPurchased and FormatNumber(self.CurrentMaxStorage) or ""
 	pbDetails.NextMaxStorageLabel.Text = isPurchased and FormatNumber(self.NextLvlMaxStorage) or ""
-	-- //TODO - Hande updating travel time
+
+	local storageProgress = CalculateProgress(self.FishInStorage, self.CurrentMaxStorage)
+	pbDetails.StorageProgress.Size = UDim2.fromScale(1, storageProgress)
 
 	local level = self.Level
 	pbDetails.LevelLabel.Text = "Level: " .. level
-
-	local currentUpgradeStage = self.UpgradeStage
-
-	local qualityInfo = FFGEnum.QUALITY[currentUpgradeStage]
-	local color = qualityInfo.Color
-	pbDetails.NameLabel.TextColor3 = color
-	pbDetails.NameLabel.Text = self:GetName()
-
-	if self.isPurchased then pbDetails.NameLabel.Parent.Visible = true end
 end
 
-function Tender:SetupProximityPrompt(purchaseBoard: Part)
+function PortStorage:SetupProximityPrompt(purchaseBoard: Part)
 	-- Create the proximity prompt
 	local proximityPrompt = Instance.new("ProximityPrompt", purchaseBoard)
 
-	-- Check if tender is at max level
+	-- Check if storage is at max level
 	if self.Level == self.MaxLevel then
 		proximityPrompt.ObjectText = "Cannot Upgrade"
 		proximityPrompt.ActionText = "Max Level Reached"
@@ -359,7 +253,7 @@ function Tender:SetupProximityPrompt(purchaseBoard: Part)
 	end
 
 	proximityPrompt.HoldDuration = 0.5
-	proximityPrompt.ObjectText = self.isPurchased and "Upgrade Tender" or "Purchase"
+	proximityPrompt.ObjectText = self.isPurchased and "Upgrade Storage" or "Purchase"
 	proximityPrompt.ActionText = self.isPurchased and "Gold: " .. FormatNumber(self.UpgradeCost) or "Gold: " .. FormatNumber(self.BaseCost)
 
 	-- Handle not showing the prompt if the user is not the owner
@@ -369,12 +263,16 @@ function Tender:SetupProximityPrompt(purchaseBoard: Part)
 
 	-- Handle proximity prompt triggered
 	proximityPrompt.Triggered:Connect(function(player)
+		-- Another safety check
+		if player.UserId ~= self.Owner then return end
+
 		-- Check max level again
 		if self.Level == self.MaxLevel then return end
 
 		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, self.UpgradeCost) then
-			-- //TODO - Show the message to the user
+			-- //TODO - Show user the message
 			FFGHelpers.PrintLog("Unable to afford upgrade, cost is: ", self.UpgradeCost)
+			self:UpdateProximityPromptUI(proximityPrompt)
 			return
 		end
 
@@ -382,10 +280,10 @@ function Tender:SetupProximityPrompt(purchaseBoard: Part)
 		DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, self.UpgradeCost)
 
 		if self.isPurchased then
-			-- Upgrade existing tender
+			-- Upgrade existing
 			self:Upgrade()
 		else
-			-- Purchase tender
+			-- Purchase
 			self:Purchase()
 			self:Show()
 			self:CanCollide()
@@ -395,100 +293,139 @@ function Tender:SetupProximityPrompt(purchaseBoard: Part)
 		self:UpdateProximityPromptUI(proximityPrompt)
 		self:UpdatePurchaseBoardUI()
 
-		DataService.SaveTenderState(player, self.Id, self:Serialize())
+		DataService.SaveBoatState(player, self.Id, self:Serialize())
 	end)
 
 	return proximityPrompt
 end
 
-function Tender:UpdateProximityPromptUI(proximityPrompt: ProximityPrompt)
+function PortStorage:SetupFishRemovalPrompt()
+	-- Create the proximity prompt
+	local parent = self.Model
+	local proximityPrompt = Instance.new("ProximityPrompt", parent)
+
+	-- -- Check if storage is empty
+	-- if self.FishInStorage <= 0 then return end
+
+	proximityPrompt.HoldDuration = 0.5
+	proximityPrompt.ObjectText = ""
+	proximityPrompt.ActionText = "Take Fish"
+	proximityPrompt.UIOffset = Vector2.new(-100, 0)
+
+	-- Handle not showing the prompt if the user is not the owner
+	proximityPrompt.PromptShown:Connect(function(player: Player)
+		if player.UserId ~= self.Owner then return end
+	end)
+
+	-- Handle proximity prompt triggered
+	proximityPrompt.Triggered:Connect(function(player)
+		-- Another safety check
+		if player.UserId ~= self.Owner then return end
+
+		-- //TODO - Remove dummy data
+		local MOCK_DATA = {
+			PlayerInventorySize = 50,
+			AvailableInventorySpace = 50,
+		}
+
+		-- Remove the Fish
+		local amount = math.min(self.FishInStorage, MOCK_DATA.AvailableInventorySpace)
+		if amount == 0 then return end
+
+		self:RemoveFish(amount)
+
+		-- Spend the currency
+		DataService.Earn(player, FFGEnum.CURRENCY_TYPES.Gold, amount * 2)
+
+		-- Save State
+		DataService.SaveStorageState(player, self.Id, self:Serialize())
+	end)
+end
+
+function PortStorage:UpdateProximityPromptUI(proximityPrompt: ProximityPrompt)
 	if self.Level == self.MaxLevel then
 		proximityPrompt.ObjectText = "Cannot Upgrade"
 		proximityPrompt.ActionText = "Max Level Reached"
 	else
-		proximityPrompt.ObjectText = self.isPurchased and "Upgrade Tender" or "Purchase"
+		proximityPrompt.ObjectText = self.isPurchased and "Upgrade Boat" or "Purchase"
 		proximityPrompt.ActionText = self.isPurchased and "Gold: " .. FormatNumber(self.UpgradeCost) or "Gold: " .. FormatNumber(self.BaseCost)
 	end
 end
 -- //!SECTION
 
 -- //SECTION - Visibility and Collision
-function Tender:Show()
+function PortStorage:Show()
 	local model = self.Model :: Model
-	local tenderParts = model:GetChildren()
-	for _, part in pairs(tenderParts) do
-		if part.Name == "Purchase_Board" then continue end
+	local boatParts = model:GetChildren()
+	for _, part in pairs(boatParts) do
+		if part.Name == "Purchase_Board" or part.Name == "FishInStorage" then continue end
 		if part.Transparency and part.Transparency == 1 then part.Transparency = 0 end
 	end
 end
 
-function Tender:Hide()
+function PortStorage:Hide()
 	local model = self.Model :: Model
-	local tenderParts = model:GetChildren()
-	for _, part in pairs(tenderParts) do
-		if part.Name == "Purchase_Board" then continue end
+	local boatParts = model:GetChildren()
+	for _, part in pairs(boatParts) do
+		if part.Name == "Purchase_Board" or part.Name == "FishInStorage" then continue end
 		if part.Transparency and part.Transparency == 0 then part.Transparency = 1 end
 	end
 end
 
-function Tender:CanCollide()
+function PortStorage:CanCollide()
 	local model = self.Model :: Model
-	local tenderParts = model:GetChildren()
-	for _, part in pairs(tenderParts) do
-		if part.Name == "Purchase_Board" then continue end
+	local boatParts = model:GetChildren()
+	for _, part in pairs(boatParts) do
+		if part.Name == "Purchase_Board" or part.Name == "FishInStorage" then continue end
 		if not part.CanCollide then part.CanCollide = true end
 	end
 end
 
-function Tender:CannotCollide()
+function PortStorage:CannotCollide()
 	local model = self.Model :: Model
-	local tenderParts = model:GetChildren()
-	for _, part in pairs(tenderParts) do
-		if part.Name == "Purchase_Board" then continue end
+	local boatParts = model:GetChildren()
+	for _, part in pairs(boatParts) do
+		if part.Name == "Purchase_Board" or part.Name == "FishInStorage" then continue end
 		if part.CanCollide then part.CanCollide = false end
 	end
 end
 -- //!SECTION
 
--- //SECTION - Tender Utilities
-function Tender:GetName()
-	return NAME[self.UpgradeStage]
-end
-
-function Tender:CanUpgrade()
+-- //SECTION -  Boat Utilities
+function PortStorage:CanUpgrade()
 	return self.Level < self.MaxLevel
 end
 
-function Tender:IsStorageFull()
-	local status = self.FishInStorage >= self.CurrentMaxStorage
+function PortStorage:IsStorageFull()
+	local status = self.FishInStorage == self.CurrentMaxStorage
 	if self.StorageFull ~= status then self:UpdateStorageStatus(status) end
 	return status
+end
+
+function PortStorage:UpdateStorageStatus(status)
+	self.StorageFull = status
 end
 -- //!SECTION
 
 -- //SECTION - Loading and Saving
-function Tender:Serialize(): TenderProps
+function PortStorage:Serialize()
 	return {
 		Id = self.Id,
 		Owner = self.Owner,
 		RealmId = self.RealmId,
 		Tier = self.Tier,
-		Name = self.Name,
 		Level = self.Level,
 		MaxLevel = self.MaxLevel,
 		BaseCost = self.BaseCost,
 		UpgradeCost = self.UpgradeCost,
 		isPurchased = self.isPurchased,
 		BaseStorage = self.BaseStorage,
-		UpgradeStage = self.UpgradeStage,
 		CurrentMaxStorage = self.CurrentMaxStorage,
 		NextLvlMaxStorage = self.NextLvlMaxStorage,
 		FishInStorage = self.FishInStorage,
 		StorageFull = self.StorageFull,
-		CurrentTravelTime = self.CurrentTravelTime,
-		NextLvlTravelTime = self.NextLvlTravelTime,
 	}
 end
 -- //!SECTION
 
-return Tender
+return PortStorage

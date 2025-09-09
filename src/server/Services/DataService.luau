@@ -134,7 +134,7 @@ function DataService.SaveBoatState(player: Player, boatId: string, newState): bo
 
 	local existingBoatIndex = nil
 	for i, boat in ipairs(profile.Data.Realms[currentRealm].Boats) do
-		if boat[FFGEnum.ATTRIBUTES.BOAT.Id] == boatId then
+		if boat[FFGEnum.CLASS.PROPERTIES.Id] == boatId then
 			existingBoatIndex = i
 			break
 		end
@@ -206,17 +206,17 @@ function DataService.SaveTenderState(player: Player, tenderId: string, newState)
 	-- Initialize Tenders array if it doesn't exist
 	if not profile.Data.Realms[currentRealm].Tenders then profile.Data.Realms[currentRealm].Tenders = {} end
 
-	local existingTenderIndex = nil
+	local existingStorageIndex = nil
 	for i, tender in ipairs(profile.Data.Realms[currentRealm].Tenders) do
-		if tender[FFGEnum.ATTRIBUTES.TENDER.Id] == tenderId then
-			existingTenderIndex = i
+		if tender[FFGEnum.CLASS.PROPERTIES.Id] == tenderId then
+			existingStorageIndex = i
 			break
 		end
 	end
 
-	if existingTenderIndex then
-		profile.Data.Realms[currentRealm].Tenders[existingTenderIndex] = newState
-		FFGHelpers.PrintLog("Updated existing tender at index", existingTenderIndex)
+	if existingStorageIndex then
+		profile.Data.Realms[currentRealm].Tenders[existingStorageIndex] = newState
+		FFGHelpers.PrintLog("Updated existing tender at index", existingStorageIndex)
 	else
 		table.insert(profile.Data.Realms[currentRealm].Tenders, newState)
 		FFGHelpers.PrintLog("Added new tender with ID", tenderId)
@@ -254,6 +254,50 @@ function DataService.LoadTenderState(player: Player)
 
 	FFGHelpers.PrintLog("Current tender state: ", state)
 	return state
+end
+-- //!SECTION
+
+-- //SECTION - STORAGE UNITS
+function DataService.SaveStorageState(player: Player, storageId: string, newState): boolean
+	local profile = DataService.Profiles[player]
+	if not profile then
+		FFGHelpers.PrintLog("No profile found when attempting to save tender state for: ", player)
+		return false
+	end
+
+	-- Ensure the data structure exists
+	if not profile.Data.Realms then
+		FFGHelpers.PrintLog("No Realms data structure found")
+		return false
+	end
+
+	local currentRealm = profile.Data.CurrentRealm or 1
+	if not profile.Data.Realms[currentRealm] then
+		FFGHelpers.PrintLog("No data structure found for Realm:", currentRealm)
+		return false
+	end
+
+	-- Initialize Storage array if it doesn't exist
+	if not profile.Data.Realms[currentRealm].Storages then profile.Data.Realms[currentRealm].Storages = {} end
+
+	local existingStorageIndex = nil
+	for i, storage in ipairs(profile.Data.Realms[currentRealm].Storages) do
+		if storage[FFGEnum.CLASS.PROPERTIES.Id] == storageId then
+			existingStorageIndex = i
+			break
+		end
+	end
+
+	if existingStorageIndex then
+		profile.Data.Realms[currentRealm].Storages[existingStorageIndex] = newState
+		FFGHelpers.PrintLog("Updated existing tender at index", existingStorageIndex)
+	else
+		table.insert(profile.Data.Realms[currentRealm].Storages, newState)
+		FFGHelpers.PrintLog("Added new tender with ID", storageId)
+	end
+
+	FFGHelpers.PrintLog("Saved tender state for player", player.Name, "tender", storageId)
+	return true
 end
 -- //!SECTION
 
