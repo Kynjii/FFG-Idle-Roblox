@@ -54,6 +54,10 @@ end
 Players.PlayerAdded:Connect(PlayerAdded)
 
 Players.PlayerRemoving:Connect(function(player)
+	pcall(function()
+		TeamManager.CleanupPlayer(player.UserId)
+	end)
+
 	local profile = DataService.Profiles[player]
 	if profile then
 		profile:EndSession()

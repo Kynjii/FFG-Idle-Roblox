@@ -177,7 +177,14 @@ function BoatManager:StartUnloadingFish()
 		task.wait(1)
 	end
 end
+-- //!SECTION
 
+-- //SECTION - Cleanup
+function BoatManager:Destroy()
+	self.LaneBoat:Destroy()
+	self.LaneTender:Destroy()
+	self.LaneStorage:Destroy()
+end
 -- //!SECTION
 
 return BoatManager

@@ -71,21 +71,18 @@ function TeamManager.CreateTeams()
 end
 
 function TeamManager.AssignBoatManagers(profile, player: Player)
-	TeamManager.BoatManagers[player] = {
-		OwnerId = player.UserId,
-	}
+	TeamManager.BoatManagers[player.UserId] = TeamManager.BoatManagers[player.UserId] or { OwnerId = player.UserId }
 	local currentRealmId = profile.CurrentRealm
 	local realmData = profile.Realms[currentRealmId]
 
-	if realmData then
-		local numOfLanes = realmData.Lanes
-		for i = 1, numOfLanes, 1 do
-			local boatManager: BoatManager = BoatManager.New(realmData, i, player)
+	if not realmData then return end
 
-			if not boatManager then break end
-			table.insert(TeamManager.BoatManagers[player], boatManager)
-			boatManager:Initialize()
-		end
+	for lane = 1, realmData.Lanes do
+		local boatManager: BoatManager = BoatManager.New(realmData, lane, player)
+		if not boatManager then break end
+
+		table.insert(TeamManager.BoatManagers[player.UserId], boatManager)
+		boatManager:Initialize()
 	end
 end
 
@@ -99,6 +96,23 @@ function TeamManager.AssignTeam(player: Player)
 			return
 		end
 	end
+end
+
+function TeamManager.CleanupPlayer(userId: number)
+	local list = TeamManager.BoatManagers[userId]
+	if not list then return end
+
+	for i = #list, 1, -1 do
+		local manager = list[i]
+		if typeof(manager) == "table" and manager.Destroy then
+			local ok, err = pcall(function()
+				manager:Destroy()
+			end)
+			if not ok then warn("[TeamManager] Manager destroy error:", err) end
+		end
+		list[i] = nil
+	end
+	TeamManager.BoatManagers[userId] = nil
 end
 
 return TeamManager
