@@ -324,7 +324,23 @@ function Tender:HideProgressBar()
 end
 
 function Tender:UpdateProgressBar()
-	ProgressBar.Update(self.ProgressBar, self.FishInStorage, self.CurrentMaxStorage)
+	if self.ProgressTween then
+		pcall(function()
+			self.ProgressTween:Cancel()
+		end)
+		self.ProgressTween = nil
+	end
+
+	local tween = ProgressBar.Update(self.ProgressBar, self.FishInStorage, self.CurrentMaxStorage)
+	self.ProgressTween = tween
+
+	tween.Completed:Once(function()
+		if self.ProgressTween == tween then self.ProgressTween = nil end
+
+		pcall(function()
+			tween:Destroy()
+		end)
+	end)
 end
 -- //!SECTION
 

@@ -56,6 +56,8 @@ function PortStorage.New(state, player: Player, model: Model)
 	self.Tier = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.Tier) or DEFAULTS.Tier
 	self.Player = player
 
+	self.FishModel = DeepWait(self.Model, "FishInStorage", "Base") :: UnionOperation
+
 	-- Had to take this approach for type checking to work
 	if self.BaseCost == DEFAULTS.BaseCost then self.BaseCost = self:CalculateBaseCost() end
 	if not self.UpgradeCost then self.UpgradeCost = self:CalculateUpgradeCost() end
@@ -106,20 +108,19 @@ function PortStorage:RemoveFish(amount: number)
 end
 
 function PortStorage:UpdateFishModel()
-	local max = 9
-	local modelBase = DeepWait(self.Model, "FishInStorage", "Base") :: UnionOperation
+	local maxHeight = 9
+	local modelBase = self.FishModel
+	if modelBase.Size.Y >= maxHeight then return end
 
-	if modelBase.Size.Y >= max then return end
-
-	local amount = 0.9
+	local currentAmount: number = self.FishInStorage
 	local originalCF = modelBase.CFrame
 
-	-- Grow Y
-	modelBase.Size = Vector3.new(modelBase.Size.X, math.min(modelBase.Size.Y + amount, max), modelBase.Size.Z)
+	-- Grow/Shrink Y
+	modelBase.Size = Vector3.new(modelBase.Size.X, math.min(modelBase.Size.Y + currentAmount, maxHeight), modelBase.Size.Z)
 
 	-- Reposition so the bottom stays put (grow upward)
 	-- Move up by half of the increase (world up)
-	local upDelta = amount / 2
+	local upDelta = currentAmount / 2
 
 	-- Preserve original orientation while changing position:
 	-- (cf - cf.Position) extracts rotation; CFrame.new(newPos) sets position.
