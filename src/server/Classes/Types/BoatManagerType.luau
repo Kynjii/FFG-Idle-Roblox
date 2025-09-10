@@ -14,6 +14,7 @@ export type BoatManagerInstance = {
 	LaneStorageModel: Model,
 	LaneStorage: { [string]: any },
 	Player: Player,
+	TeamId: number,
 
 	-- Main Actions
 	FindBoatModel: (self: BoatManagerInstance, player: Player, tier: number) -> Model | nil,
@@ -36,7 +37,7 @@ export type BoatManagerInstance = {
 }
 
 export type BoatManager = {
-	New: (realmData: { [string]: any }, player: Player, model: Model) -> BoatManagerInstance,
+	New: (realmData: { [string]: any }, tier: number, player: Player, teamId: number) -> BoatManagerInstance,
 }
 
 return BoatManagerType

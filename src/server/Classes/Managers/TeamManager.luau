@@ -70,7 +70,7 @@ function TeamManager.CreateTeams()
 	end
 end
 
-function TeamManager.AssignBoatManagers(profile, player: Player)
+function TeamManager.AssignBoatManagers(profile, player: Player, teamId: number)
 	TeamManager.BoatManagers[player.UserId] = TeamManager.BoatManagers[player.UserId] or { OwnerId = player.UserId }
 	local currentRealmId = profile.CurrentRealm
 	local realmData = profile.Realms[currentRealmId]
@@ -78,7 +78,7 @@ function TeamManager.AssignBoatManagers(profile, player: Player)
 	if not realmData then return end
 
 	for lane = 1, realmData.Lanes do
-		local boatManager: BoatManager = BoatManager.New(realmData, lane, player)
+		local boatManager: BoatManager = BoatManager.New(realmData, lane, player, teamId)
 		if not boatManager then break end
 
 		table.insert(TeamManager.BoatManagers[player.UserId], boatManager)
@@ -93,9 +93,11 @@ function TeamManager.AssignTeam(player: Player)
 		if #playersOnTeam == 0 then
 			player.TeamColor = team.TeamColor
 			player.Neutral = false
-			return
+			return i
 		end
 	end
+
+	return nil
 end
 
 function TeamManager.CleanupPlayer(userId: number)

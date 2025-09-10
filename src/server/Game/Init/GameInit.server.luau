@@ -37,8 +37,12 @@ local function PlayerAdded(player: Player)
 		if player.Parent == Players then
 			DataService.Profiles[player] = profile
 			Initialize(player, profile)
-			TeamManager.AssignTeam(player)
-			TeamManager.AssignBoatManagers(profile.Data, player)
+			local teamId = TeamManager.AssignTeam(player)
+			if not teamId then
+				player:Kick("Server is full, try again")
+				return
+			end
+			TeamManager.AssignBoatManagers(profile.Data, player, teamId)
 		else
 			profile:EndSession()
 		end

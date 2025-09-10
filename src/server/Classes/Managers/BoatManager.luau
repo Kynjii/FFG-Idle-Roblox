@@ -20,7 +20,7 @@ type BoatManager = BoatManagerType.BoatManagerInstance
 local BoatManager = {} :: BoatManager
 BoatManager.__index = BoatManager
 
-function BoatManager.New(realmData, tier: number, player: Player)
+function BoatManager.New(realmData, tier: number, player: Player, teamId: number)
 	local self: BoatManager = setmetatable({}, BoatManager)
 
 	local boatsArr = realmData.Boats
@@ -29,18 +29,19 @@ function BoatManager.New(realmData, tier: number, player: Player)
 
 	self.Player = player
 	self.Tier = tier
+	self.TeamId = teamId
 
 	-- Create Boat
-	self.BoatModel = self:FindBoatModel(player, tier) :: Model
+	self.BoatModel = self:FindBoatModel() :: Model
 	if not self.BoatModel then return end
 	self.LaneBoat = Boat.New(boatsArr[tier], player, self.BoatModel)
 
 	-- Create Tender
-	self.TenderModel = self:FindTenderModel(player, tier) :: Model
+	self.TenderModel = self:FindTenderModel() :: Model
 	self.LaneTender = Tender.New(tendersArr[tier], player, self.TenderModel, self.BoatModel)
 
 	-- Create Port Storage
-	self.StorageModel = self:FindStorageModel(player, tier) :: Model
+	self.StorageModel = self:FindStorageModel() :: Model
 	self.LaneStorage = PortStorage.New(storageArr[tier], player, self.StorageModel)
 
 	-- Tender Travelling props
@@ -54,28 +55,31 @@ function BoatManager.New(realmData, tier: number, player: Player)
 	return self
 end
 
-function BoatManager:FindBoatModel(player, tier)
+function BoatManager:FindBoatModel()
 	for _, taggedBoat in ipairs(taggedBoats) do
-		local taggedBoatTier = taggedBoat:GetAttribute("Tier")
-		if taggedBoatTier == tier then return taggedBoat end
+		local taggedBoatTier = taggedBoat:GetAttribute(FFGEnum.ATTRIBUTES.Tier)
+		local taggedBoatTeamId = taggedBoat:GetAttribute(FFGEnum.ATTRIBUTES.TeamId)
+		if taggedBoatTeamId == self.TeamId and taggedBoatTier == self.Tier then return taggedBoat end
 	end
 
 	return nil
 end
 
-function BoatManager:FindTenderModel(player, tier)
+function BoatManager:FindTenderModel()
 	for _, taggedTender in ipairs(taggedTenders) do
-		local taggedTenderTier = taggedTender:GetAttribute("Tier")
-		if taggedTenderTier == tier then return taggedTender end
+		local taggedTenderTier = taggedTender:GetAttribute(FFGEnum.ATTRIBUTES.Tier)
+		local taggedTenderTeamId = taggedTender:GetAttribute(FFGEnum.ATTRIBUTES.TeamId)
+		if taggedTenderTeamId == self.TeamId and taggedTenderTier == self.Tier then return taggedTender end
 	end
 
 	return nil
 end
 
-function BoatManager:FindStorageModel(player, tier)
+function BoatManager:FindStorageModel()
 	for _, taggedStorageUnit in ipairs(taggedStorage) do
-		local taggedStorageUnitTier = taggedStorageUnit:GetAttribute("Tier")
-		if taggedStorageUnitTier == tier then return taggedStorageUnit end
+		local taggedStorageUnitTier = taggedStorageUnit:GetAttribute(FFGEnum.ATTRIBUTES.Tier)
+		local taggedStorageUnitTeamId = taggedStorageUnit:GetAttribute(FFGEnum.ATTRIBUTES.TeamId)
+		if taggedStorageUnitTeamId == self.TeamId and taggedStorageUnitTier == self.Tier then return taggedStorageUnit end
 	end
 
 	return nil
