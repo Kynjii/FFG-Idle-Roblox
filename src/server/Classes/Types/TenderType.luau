@@ -99,14 +99,12 @@ export type TenderInstance = {
 	CanUpgrade: (self: TenderInstance) -> boolean,
 	IsStorageFull: (self: TenderInstance) -> boolean,
 
-	-- Cleaner Service
-	_cleaner: (any) -> any,
-
 	-- Saving and Loading
 	Serialize: (self: TenderInstance) -> { [string]: any },
 	Save: (self: TenderInstance) -> (),
 
 	-- Cleanup
+	ClearAllAttributes: (self: TenderInstance, instance: Instance) -> (),
 	Destroy: (self: TenderInstance) -> (),
 }
 

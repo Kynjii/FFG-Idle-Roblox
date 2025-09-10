@@ -516,13 +516,23 @@ end
 -- //!SECTION
 
 -- //SECTION - Cleanup
+function Boat:ClearAllAttributes(instance: Instance)
+	for name, _ in pairs(instance:GetAttributes()) do
+		instance:SetAttribute(name, nil)
+	end
+end
+
 function Boat:Destroy()
 	pcall(function()
 		self:Save()
 	end)
 
-	self._cleaner:clean()
-	self._cleaner = nil
+	self:ClearAllAttributes(self.Model.PrimaryPart)
+
+	if self._cleaner then
+		self._cleaner:clean()
+		self._cleaner = nil
+	end
 
 	self.Player = nil
 	self.Model = nil

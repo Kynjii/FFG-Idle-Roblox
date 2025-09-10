@@ -99,6 +99,7 @@ export type BoatInstance = {
 	Save: (self: BoatInstance) -> (),
 
 	-- Cleanup
+	ClearAllAttributes: (self: BoatInstance, instance: Instance) -> (),
 	Destroy: (self: BoatInstance) -> (),
 }
 

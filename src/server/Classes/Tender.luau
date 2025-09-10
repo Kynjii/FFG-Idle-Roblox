@@ -558,6 +558,12 @@ end
 -- //!SECTION
 
 -- //SECTION - Cleanup
+function Tender:ClearAllAttributes(instance: Instance)
+	for name, _ in pairs(instance:GetAttributes()) do
+		instance:SetAttribute(name, nil)
+	end
+end
+
 function Tender:Destroy()
 	pcall(function()
 		self:Save()
@@ -569,12 +575,16 @@ function Tender:Destroy()
 		end)
 		self.MoveTween = nil
 	end
+
 	if self.ProgressTween then
 		pcall(function()
 			self.ProgressTween:Cancel()
 		end)
 		self.ProgressTween = nil
 	end
+
+	self:ClearAllAttributes(self.Model.PrimaryPart)
+
 	if self._cleaner then
 		self._cleaner:clean()
 		self._cleaner = nil
