@@ -8,39 +8,10 @@ local CalculateProgress = require(ReplicatedStorage.Shared.Utils.CalculateProgre
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
+local CleanerService = require(ServerScriptService.Server.Services.CleanerService)
 
 -- //SECTION - Types
 
--- //!SECTION
-
--- //SECTION - Cleaner Service
-local function _newCleaner()
-	local t = {}
-	function t:add(v)
-		t[#t + 1] = v
-		return v
-	end
-	function t:clean()
-		for i = #t, 1, -1 do
-			local v = t[i]
-			if typeof(v) == "RBXScriptConnection" then
-				v:Disconnect()
-			elseif typeof(v) == "thread" then
-				task.cancel(v)
-			elseif typeof(v) == "Instance" then
-				if v.ClassName == "Tween" then pcall(function()
-					v:Cancel()
-				end) end
-				v:Destroy()
-			elseif type(v) == "function" then
-				pcall(v)
-			end
-			t[i] = nil
-		end
-	end
-
-	return t
-end
 -- //!SECTION
 
 -- //SECTION - Data
@@ -92,7 +63,7 @@ function PortStorage.New(state, player: Player, model: Model)
 	self.CurrentMaxStorage = self.CurrentMaxStorage or curMaxStorage
 	self.NextLvlMaxStorage = self.NextLvlMaxStorage or nextLvlMaxStorage
 
-	self._cleaner = _newCleaner()
+	self._cleaner = CleanerService.new()
 
 	return self
 end
@@ -291,17 +262,10 @@ function PortStorage:SetupProximityPrompt(purchaseBoard: Part)
 	proximityPrompt.ObjectText = self.isPurchased and "Upgrade Storage" or "Purchase"
 	proximityPrompt.ActionText = self.isPurchased and "Gold: " .. FormatNumber(self.UpgradeCost) or "Gold: " .. FormatNumber(self.BaseCost)
 
-	-- Handle not showing the prompt if the user is not the owner
-	proximityPrompt.PromptShown:Connect(function(player: Player)
-		if player.UserId ~= self.Owner then
-			proximityPrompt.Enabled = false
-		else
-			proximityPrompt.Enabled = true
-		end
-	end)
-
 	-- Handle proximity prompt triggered
 	proximityPrompt.Triggered:Connect(function(player)
+		if player.UserId ~= self.Owner then return end
+
 		-- Check max level again
 		if self.Level == self.MaxLevel then return end
 
@@ -458,6 +422,16 @@ function PortStorage:Serialize()
 		FishInStorage = self.FishInStorage,
 		StorageFull = self.StorageFull,
 	}
+end
+-- //!SECTION
+
+-- //SECTION - Cleanup
+function PortStorage:Destroy()
+	self._cleaner:clean()
+	self._cleaner = nil
+
+	self.Player = nil
+	self.Model = nil
 end
 -- //!SECTION
 

@@ -10,41 +10,12 @@ local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 local TweenService = game:GetService("TweenService")
 local TenderType = require(ServerScriptService.Server.Classes.Types.TenderType)
 local ProgressBar = require(ServerScriptService.Server.Modules.ProgressBar)
+local CleanerService = require(ServerScriptService.Server.Services.CleanerService)
 
 -- //SECTION - Tender Types
 type Tender = TenderType.Tender
 type TenderProps = TenderType.TenderProps
 type TenderInstance = TenderType.TenderInstance
--- //!SECTION
-
--- //SECTION - Cleaner Service
-local function _newCleaner()
-	local t = {}
-	function t:add(v)
-		t[#t + 1] = v
-		return v
-	end
-	function t:clean()
-		for i = #t, 1, -1 do
-			local v = t[i]
-			if typeof(v) == "RBXScriptConnection" then
-				v:Disconnect()
-			elseif typeof(v) == "thread" then
-				task.cancel(v)
-			elseif typeof(v) == "Instance" then
-				if v.ClassName == "Tween" then pcall(function()
-					v:Cancel()
-				end) end
-				v:Destroy()
-			elseif type(v) == "function" then
-				pcall(v)
-			end
-			t[i] = nil
-		end
-	end
-
-	return t
-end
 -- //!SECTION
 
 -- //SECTION -  Tender Data
@@ -147,7 +118,7 @@ function Tender.New(state, player: Player, model: Model)
 	self.ProgressTween = nil
 	self.MoveTween = nil
 
-	self._cleaner = _newCleaner()
+	self._cleaner = CleanerService.new()
 
 	return self
 end
@@ -307,7 +278,7 @@ function Tender:MoveToPort()
 
 	self._cleaner:add(tween.Completed:Once(function(playbackState)
 		self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.atPort, true)
-		if self.ProgressTween == tween then self.ProgressTween = nil end
+		if self.MoveTween == tween then self.MoveTween = nil end
 	end))
 
 	tween:Play()
@@ -458,17 +429,10 @@ function Tender:SetupProximityPrompt(purchaseBoard: Part)
 	proximityPrompt.ObjectText = self.isPurchased and "Upgrade Tender" or "Purchase"
 	proximityPrompt.ActionText = self.isPurchased and "Gold: " .. FormatNumber(self.UpgradeCost) or "Gold: " .. FormatNumber(self.BaseCost)
 
-	-- Handle not showing the prompt if the user is not the owner
-	self._cleaner:add(proximityPrompt.PromptShown:Connect(function(player: Player)
-		if player.UserId ~= self.Owner then
-			proximityPrompt.Enabled = false
-		else
-			proximityPrompt.Enabled = true
-		end
-	end))
-
 	-- Handle proximity prompt triggered
 	self._cleaner:add(proximityPrompt.Triggered:Connect(function(player)
+		if player.UserId ~= self.Owner then return end
+
 		-- Check max level again
 		if self.Level == self.MaxLevel then return end
 
@@ -591,6 +555,31 @@ end
 function Tender:Save()
 	DataService.SaveTenderState(self.Player, self.Id, self:Serialize())
 end
+-- //!SECTION
+
+-- //SECTION - Cleanup
+function Tender:Destroy()
+	if self.MoveTween then
+		pcall(function()
+			self.MoveTween:Cancel()
+		end)
+		self.MoveTween = nil
+	end
+	if self.ProgressTween then
+		pcall(function()
+			self.ProgressTween:Cancel()
+		end)
+		self.ProgressTween = nil
+	end
+	if self._cleaner then
+		self._cleaner:clean()
+		self._cleaner = nil
+	end
+
+	self.Player = nil
+	self.Model = nil
+end
+
 -- //!SECTION
 
 return Tender

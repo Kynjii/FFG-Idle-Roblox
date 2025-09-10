@@ -105,6 +105,9 @@ export type TenderInstance = {
 	-- Saving and Loading
 	Serialize: (self: TenderInstance) -> { [string]: any },
 	Save: (self: TenderInstance) -> (),
+
+	-- Cleanup
+	Destroy: (self: TenderInstance) -> (),
 }
 
 export type Tender = {

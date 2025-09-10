@@ -11,41 +11,12 @@ local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 local SetInterval = require(ServerScriptService.Server.Modules.SetInterval)
+local CleanerService = require(ServerScriptService.Server.Services.CleanerService)
 
 -- //SECTION - Boat Types
 type Boat = BoatType.Boat
 type BoatProps = BoatType.BoatProps
 type BoatInstance = BoatType.BoatInstance
--- //!SECTION
-
--- //SECTION - Cleaner Service
-local function _newCleaner()
-	local t = {}
-	function t:add(v)
-		t[#t + 1] = v
-		return v
-	end
-	function t:clean()
-		for i = #t, 1, -1 do
-			local v = t[i]
-			if typeof(v) == "RBXScriptConnection" then
-				v:Disconnect()
-			elseif typeof(v) == "thread" then
-				task.cancel(v)
-			elseif typeof(v) == "Instance" then
-				if v.ClassName == "Tween" then pcall(function()
-					v:Cancel()
-				end) end
-				v:Destroy()
-			elseif type(v) == "function" then
-				pcall(v)
-			end
-			t[i] = nil
-		end
-	end
-
-	return t
-end
 -- //!SECTION
 
 -- //SECTION - Boat Data
@@ -137,7 +108,7 @@ function Boat.New(state, player: Player, model: Model): Boat
 	self.FishingInterval = nil
 	if self.isPurchased and not self:IsStorageFull() then self:StartFishing() end
 
-	self._cleaner = _newCleaner()
+	self._cleaner = CleanerService.new()
 
 	return self
 end
@@ -267,7 +238,7 @@ function Boat:StartFishing()
 			self:UpdatePurchaseBoardUI()
 		end
 	end, 1)
-	self._cleaner(self.FishingInterval)
+	self._cleaner:add(self.FishingInterval)
 end
 
 function Boat:AddFish(amount: number)
@@ -402,17 +373,10 @@ function Boat:SetupProximityPrompt(purchaseBoard: Part)
 	proximityPrompt.ObjectText = self.isPurchased and "Upgrade Boat" or "Purchase"
 	proximityPrompt.ActionText = self.isPurchased and "Gold: " .. FormatNumber(self.UpgradeCost) or "Gold: " .. FormatNumber(self.BaseCost)
 
-	-- Handle not showing the prompt if the user is not the owner
-	self._cleaner:add(proximityPrompt.PromptShown:Connect(function(player: Player)
-		if player.UserId ~= self.Owner then
-			proximityPrompt.Enabled = false
-		else
-			proximityPrompt.Enabled = true
-		end
-	end))
-
 	-- Handle proximity prompt triggered
 	self._cleaner:add(proximityPrompt.Triggered:Connect(function(player)
+		if player.UserId ~= self.Owner then return end
+
 		-- Check max level again
 		if self.Level == self.MaxLevel then return end
 
@@ -548,6 +512,16 @@ end
 
 function Boat:Save()
 	DataService.SaveBoatState(self.Player, self.Id, self:Serialize())
+end
+-- //!SECTION
+
+-- //SECTION - Cleanup
+function Boat:Destroy()
+	self._cleaner:clean()
+	self._cleaner = nil
+
+	self.Player = nil
+	self.Model = nil
 end
 -- //!SECTION
 
