@@ -93,9 +93,9 @@ function Tender.New(state, player: Player, model: Model)
 	self.Tier = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.Tier) or DEFAULTS.Tier
 	self.Player = player
 
-	-- Had to take this approach for type checking to work
-	if self.BaseCost == DEFAULTS.BaseCost then self:CalculateBaseCost() end
-	if not self.UpgradeCost then self.UpgradeCost = self:CalculateUpgradeCost() end
+	self.BaseCost = self:CalculateBaseCost()
+	self.UpgradeCost = self:CalculateUpgradeCost()
+	self.BaseStorage = self:CalculateBaseStorage()
 
 	-- Apply attributes for BoatManager
 	if self.isPurchased then self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.isPurchased, self.isPurchased) end
@@ -164,7 +164,7 @@ end
 
 -- //SECTION - Calculations
 function Tender:CalculateBaseCost()
-	local baseCost = self.BaseCost or DEFAULTS.BaseCost
+	local baseCost = DEFAULTS.BaseCost
 	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
 	local realmMultiplier = math.pow(self.RealmId :: number, 2.25) -- scaling curve
 	local base = baseCost * tierMultiplier * realmMultiplier
@@ -556,7 +556,7 @@ end
 
 function Tender:ShowUpgradeStageUpgrade()
 	local threshold = TENDER_PROMOTION_LEVELS[self.UpgradeStage + 1] - 1
-	if self.UpgradeStage == 1 then return false end
+	if self.Level < 9 then return false end
 	if self.Level == threshold then
 		return true
 	else

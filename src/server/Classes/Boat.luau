@@ -93,9 +93,10 @@ function Boat.New(state, player: Player, model: Model): Boat
 	self.Tier = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.Tier) or DEFAULTS.Tier
 	self.Player = player
 
-	-- Had to take this approach for type checking to work
-	if self.BaseCost == DEFAULTS.BaseCost then self:CalculateBaseCost() end
-	if not self.UpgradeCost then self.UpgradeCost = self:CalculateUpgradeCost() end
+	self.BaseCost = self:CalculateBaseCost()
+	self.UpgradeCost = self:CalculateUpgradeCost()
+	self.BaseStorage = self:CalculateBaseStorage()
+	self.BaseFPS = self:CalculateBaseFPS()
 
 	local curMaxStorage, nextLvlMaxStorage = self:CalculateMaxStorage()
 	self.CurrentMaxStorage = self.CurrentMaxStorage or curMaxStorage
@@ -154,7 +155,7 @@ end
 
 -- //SECTION - Calculations
 function Boat:CalculateBaseCost()
-	local baseCost = self.BaseCost or DEFAULTS.BaseCost
+	local baseCost = DEFAULTS.BaseCost
 	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
 	local realmMultiplier = math.pow(self.RealmId :: number, 2.25) -- scaling curve
 	local base = baseCost * tierMultiplier * realmMultiplier
@@ -181,7 +182,7 @@ function Boat:CalculateUpgradeCost()
 end
 
 function Boat:CalculateBaseStorage()
-	local baseStorage = self.BaseStorage or DEFAULTS.BaseStorage
+	local baseStorage = DEFAULTS.BaseStorage
 	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
 	local realmMultiplier = math.pow(self.RealmId :: number, 2.25) -- scaling curve
 	local base = baseStorage * tierMultiplier * realmMultiplier
@@ -206,7 +207,7 @@ function Boat:CalculateMaxStorage()
 end
 
 function Boat:CalculateBaseFPS()
-	local baseFPS = self.BaseFPS or DEFAULTS.BaseFPS
+	local baseFPS = DEFAULTS.BaseFPS
 	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
 	local realmMultiplier = math.pow(self.RealmId :: number, 2.25) -- scaling curve
 	local base = baseFPS * tierMultiplier * realmMultiplier
@@ -226,6 +227,8 @@ function Boat:CalculateFPS()
 
 	local fpsCalc = baseFPS * math.pow(growthRate, level) * tierMultiplier
 	local nextLvlFPS = baseFPS * math.pow(growthRate, level + 1) * tierMultiplier
+
+	if self:ShowUpgradeStageUpgrade() then nextLvlFPS = baseFPS * math.pow(growthRate, level + 2) * tierMultiplier end
 
 	-- //TODO - handle boosts
 
@@ -495,7 +498,7 @@ end
 
 function Boat:ShowUpgradeStageUpgrade()
 	local threshold = BOAT_PROMOTION_LEVELS[self.UpgradeStage + 1] - 1
-	if self.UpgradeStage == 1 then return false end
+	if self.Level < 9 then return false end
 	if self.Level == threshold then
 		return true
 	else
