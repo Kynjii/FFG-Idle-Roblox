@@ -98,6 +98,7 @@ export type TenderInstance = {
 	GetName: (self: TenderInstance) -> string,
 	CanUpgrade: (self: TenderInstance) -> boolean,
 	IsStorageFull: (self: TenderInstance) -> boolean,
+	ShowUpgradeStageUpgrade: (self: TenderInstance) -> boolean,
 
 	-- Saving and Loading
 	Serialize: (self: TenderInstance) -> { [string]: any },

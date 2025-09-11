@@ -59,7 +59,7 @@ local DEFAULTS: TenderProps = {
 	UpgradeStage = 1,
 	FishInStorage = 0,
 	StorageFull = false,
-	BaseTravelTime = 5, -- secs
+	BaseTravelTime = 10, -- secs
 	GrowthRate = Formulas.TENDER.GrowthRate,
 	CostGrowthRate = Formulas.TENDER.CostGrowthRate,
 }
@@ -148,16 +148,16 @@ function Tender:Upgrade()
 	self.CurrentMaxStorage = curMaxStorage
 	self.NextLvlMaxStorage = nextLvlMaxStorage
 
-	local curTravelTime, nextLvlTravelTime = self:CalculateTravelTime()
-	self.CurrentTravelTime = curTravelTime
-	self.NextLvlTravelTime = nextLvlTravelTime
-
 	self:Save()
 end
 
 function Tender:IncreaseUpgradeStage(stage)
 	self.UpgradeStage = stage
 	self.Name = self:GetName()
+
+	local curTravelTime, nextLvlTravelTime = self:CalculateTravelTime()
+	self.CurrentTravelTime = curTravelTime
+	self.NextLvlTravelTime = nextLvlTravelTime
 end
 -- //!SECTION
 
@@ -217,8 +217,13 @@ end
 function Tender:CalculateTravelTime()
 	local baseTime = self.BaseTravelTime
 
-	local travelTime = math.max(0.5, baseTime - self.Level * 0.005)
-	local nextLvlTravelTime = math.max(0.5, baseTime - (self.Level + 1) * 0.005)
+	local travelTime = math.max(1, (baseTime - self.UpgradeStage) + 1)
+	local nextLvlTravelTime = math.max(1, (baseTime - self.UpgradeStage) + 1)
+
+	if self.UpgradeStage == 1 then
+		travelTime = 10
+		nextLvlTravelTime = 9
+	end
 
 	return travelTime, nextLvlTravelTime
 end
@@ -393,7 +398,7 @@ function Tender:SetupPurchaseBoard()
 
 		-- TRAVEL TIME Stats
 		pbDetails.CurrentTravelTimeLabel.Text = self.isPurchased and self.CurrentTravelTime or ""
-		pbDetails.NextTravelTimeLabel.Text = self.isPurchased and self.NextLvlTravelTime or ""
+		if self.UpgradeStage > 1 then pbDetails.NextTravelTimeLabel.Text = self.isPurchased and self.NextLvlTravelTime or "" end
 	end
 
 	return purchaseBoard
@@ -413,7 +418,16 @@ function Tender:UpdatePurchaseBoardUI()
 
 	pbDetails.CurrentMaxStorageLabel.Text = isPurchased and FormatNumber(self.CurrentMaxStorage) or ""
 	pbDetails.NextMaxStorageLabel.Text = isPurchased and FormatNumber(self.NextLvlMaxStorage) or ""
-	-- //TODO - Hande updating travel time
+
+	pbDetails.CurrentTravelTimeLabel.Text = isPurchased and FormatNumber(self.CurrentTravelTime) or ""
+
+	local showUpgradeStageUpgrade = self:ShowUpgradeStageUpgrade()
+	if showUpgradeStageUpgrade then
+		pbDetails.NextTravelTimeLabel.Text = isPurchased and FormatNumber(self.NextLvlTravelTime)
+		pbDetails.NextTravelTimeLabel.Visible = true
+	else
+		pbDetails.NextTravelTimeLabel.Visible = false
+	end
 
 	local level = self.Level
 	pbDetails.LevelLabel.Text = "Level: " .. level
@@ -539,6 +553,16 @@ function Tender:IsStorageFull()
 	local status = self.FishInStorage >= self.CurrentMaxStorage
 	if self.StorageFull ~= status then self:UpdateStorageStatus(status) end
 	return status
+end
+
+function Tender:ShowUpgradeStageUpgrade()
+	local threshold = TENDER_PROMOTION_LEVELS[self.UpgradeStage + 1] - 1
+
+	if self.Level == threshold then
+		return true
+	else
+		return false
+	end
 end
 -- //!SECTION
 
