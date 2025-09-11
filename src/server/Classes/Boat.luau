@@ -1,6 +1,7 @@
 local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local BoatType = require(ServerScriptService.Server.Classes.Types.BoatType)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
@@ -155,14 +156,8 @@ end
 
 -- //SECTION - Calculations
 function Boat:CalculateBaseCost()
-	local baseCost = DEFAULTS.BaseCost
-	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
-	local realmMultiplier = math.pow(self.RealmId, 2.25) -- scaling curve
-	local base = baseCost * tierMultiplier * realmMultiplier
-
+	local base = ClassCalculators.CalculateBaseCost(DEFAULTS.BaseCost, self.Tier, self.RealmId)
 	self.BaseCost = base
-
-	return base
 end
 
 function Boat:CalculateUpgradeCost()
