@@ -138,16 +138,17 @@ function Boat:Upgrade()
 	self.CurrentMaxStorage = curMaxStorage
 	self.NextLvlMaxStorage = nextLvlMaxStorage
 
-	local curFPS, nextFPS = self:CalculateFPS()
-	self.CurrentFPS = curFPS
-	self.NextFPS = nextFPS
-
 	self:Save()
 end
 
 function Boat:IncreaseUpgradeStage(stage)
 	self.UpgradeStage = stage
 	self.Name = self:GetName()
+
+	-- Tiered Upgrades
+	local curFPS, nextFPS = self:CalculateFPS()
+	self.CurrentFPS = curFPS
+	self.NextFPS = nextFPS
 end
 -- //!SECTION
 
@@ -219,12 +220,12 @@ function Boat:CalculateFPS()
 	local baseFPS = self.BaseFPS or DEFAULTS.BaseFPS
 	if baseFPS == DEFAULTS.BaseFPS then baseFPS = self:CalculateBaseFPS() end
 
-	local growthRate = DEFAULTS.GrowthRate :: number
+	local growthRate = DEFAULTS.GrowthRate
 	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
-	local level = self.Level :: number
+	local level = self.Level
 
-	local fpsCalc = baseFPS * math.pow(growthRate :: number, level) * tierMultiplier
-	local nextLvlFPS = baseFPS * math.pow(growthRate :: number, level + 1) * tierMultiplier
+	local fpsCalc = baseFPS * math.pow(growthRate, level) * tierMultiplier
+	local nextLvlFPS = baseFPS * math.pow(growthRate, level + 1) * tierMultiplier
 
 	-- //TODO - handle boosts
 
@@ -245,7 +246,7 @@ end
 
 function Boat:AddFish(amount: number)
 	self.FishInStorage += amount
-	self:UpdateBillboardGUI(amount)
+	self:ShowFishPopUp(amount)
 	if self.FishInStorage >= self.CurrentMaxStorage then
 		self.FishInStorage = self.CurrentMaxStorage
 		self:UpdateStorageStatus(true)
@@ -316,7 +317,7 @@ function Boat:SetupPurchaseBoard()
 		-- FPS Stats
 		local currentFPS, nextFPS = self:CalculateFPS()
 		pbDetails.CurrentFPSLabel.Text = self.isPurchased and FormatNumber(currentFPS) or ""
-		pbDetails.NextFPSLabel.Text = self.isPurchased and FormatNumber(nextFPS) or ""
+		if self:ShowUpgradeStageUpgrade() then pbDetails.NextFPSLabel.Text = self.isPurchased and FormatNumber(nextFPS) or "" end
 
 		-- Storage Progress Bar
 		local storageProgress = CalculateProgress(self.FishInStorage, self.CurrentMaxStorage)
@@ -342,7 +343,14 @@ function Boat:UpdatePurchaseBoardUI()
 	pbDetails.CurrentMaxStorageLabel.Text = isPurchased and FormatNumber(self.CurrentMaxStorage) or ""
 	pbDetails.NextMaxStorageLabel.Text = isPurchased and FormatNumber(self.NextLvlMaxStorage) or ""
 	pbDetails.CurrentFPSLabel.Text = isPurchased and FormatNumber(self.CurrentFPS) or ""
-	pbDetails.NextFPSLabel.Text = isPurchased and FormatNumber(self.NextFPS) or ""
+
+	local showUpgradeStageUpgrade = self:ShowUpgradeStageUpgrade()
+	if showUpgradeStageUpgrade then
+		pbDetails.NextFPSLabel.Text = isPurchased and FormatNumber(self.NextFPS) or ""
+		pbDetails.NextFPSLabel.Visible = true
+	else
+		pbDetails.NextFPSLabel.Visible = false
+	end
 
 	local storageProgress = CalculateProgress(self.FishInStorage, self.CurrentMaxStorage)
 	pbDetails.StorageProgress.Size = UDim2.fromScale(1, storageProgress)
@@ -383,7 +391,6 @@ function Boat:SetupProximityPrompt(purchaseBoard: Part)
 		if self.Level == self.MaxLevel then return end
 
 		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, self.UpgradeCost) then
-			-- //TODO - Add a way to inform user they cannot afford it
 			FFGHelpers.PrintLog("Unable to afford upgrade, cost is: ", self.UpgradeCost)
 			self:UpdateProximityPromptUI(proximityPrompt)
 			return
@@ -421,7 +428,7 @@ function Boat:UpdateProximityPromptUI(proximityPrompt: ProximityPrompt)
 	end
 end
 
-function Boat:UpdateBillboardGUI(amount: number)
+function Boat:ShowFishPopUp(amount: number)
 	local billboard: BillboardGui = self.Model.PrimaryPart.Billboard:WaitForChild("FishPopupTemplate")
 	if billboard then
 		local clone = billboard:Clone()
@@ -484,6 +491,16 @@ function Boat:IsStorageFull()
 	local status = self.FishInStorage == self.CurrentMaxStorage
 	if self.StorageFull ~= status then self:UpdateStorageStatus(status) end
 	return status
+end
+
+function Boat:ShowUpgradeStageUpgrade()
+	local threshold = BOAT_PROMOTION_LEVELS[self.UpgradeStage + 1] - 1
+	if self.UpgradeStage == 1 then return false end
+	if self.Level == threshold then
+		return true
+	else
+		return false
+	end
 end
 -- //!SECTION
 

@@ -78,7 +78,7 @@ export type BoatInstance = {
 	UpdatePurchaseBoardUI: (self: BoatInstance) -> (),
 	SetupProximityPrompt: (self: BoatInstance, purchaseBoard: Part) -> ProximityPrompt,
 	UpdateProximityPromptUI: (self: BoatInstance, proximityPrompt: ProximityPrompt) -> (),
-	UpdateBillboardGUI: (self: BoatInstance) -> (),
+	ShowFishPopUp: (self: BoatInstance) -> (),
 
 	-- Visibility and Collision
 	Show: (self: BoatInstance) -> (),
@@ -90,6 +90,7 @@ export type BoatInstance = {
 	GetName: (self: BoatInstance) -> string,
 	CanUpgrade: (self: BoatInstance) -> boolean,
 	IsStorageFull: (self: BoatInstance) -> boolean,
+	ShowUpgradeStageUpgrade: (self: BoatInstance) -> boolean,
 
 	-- Cleaner Service
 	_cleaner: (any) -> any,

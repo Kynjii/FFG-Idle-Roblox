@@ -155,6 +155,7 @@ function Tender:IncreaseUpgradeStage(stage)
 	self.UpgradeStage = stage
 	self.Name = self:GetName()
 
+	-- Tiered Upgrades
 	local curTravelTime, nextLvlTravelTime = self:CalculateTravelTime()
 	self.CurrentTravelTime = curTravelTime
 	self.NextLvlTravelTime = nextLvlTravelTime
@@ -398,7 +399,7 @@ function Tender:SetupPurchaseBoard()
 
 		-- TRAVEL TIME Stats
 		pbDetails.CurrentTravelTimeLabel.Text = self.isPurchased and self.CurrentTravelTime or ""
-		if self.UpgradeStage > 1 then pbDetails.NextTravelTimeLabel.Text = self.isPurchased and self.NextLvlTravelTime or "" end
+		if self:ShowUpgradeStageUpgrade() then pbDetails.NextTravelTimeLabel.Text = self.isPurchased and self.NextLvlTravelTime or "" end
 	end
 
 	return purchaseBoard
@@ -418,7 +419,6 @@ function Tender:UpdatePurchaseBoardUI()
 
 	pbDetails.CurrentMaxStorageLabel.Text = isPurchased and FormatNumber(self.CurrentMaxStorage) or ""
 	pbDetails.NextMaxStorageLabel.Text = isPurchased and FormatNumber(self.NextLvlMaxStorage) or ""
-
 	pbDetails.CurrentTravelTimeLabel.Text = isPurchased and FormatNumber(self.CurrentTravelTime) or ""
 
 	local showUpgradeStageUpgrade = self:ShowUpgradeStageUpgrade()
@@ -465,7 +465,6 @@ function Tender:SetupProximityPrompt(purchaseBoard: Part)
 		if self.Level == self.MaxLevel then return end
 
 		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, self.UpgradeCost) then
-			-- //TODO - Show the message to the user
 			FFGHelpers.PrintLog("Unable to afford upgrade, cost is: ", self.UpgradeCost)
 			return
 		end
@@ -557,7 +556,7 @@ end
 
 function Tender:ShowUpgradeStageUpgrade()
 	local threshold = TENDER_PROMOTION_LEVELS[self.UpgradeStage + 1] - 1
-
+	if self.UpgradeStage == 1 then return false end
 	if self.Level == threshold then
 		return true
 	else
