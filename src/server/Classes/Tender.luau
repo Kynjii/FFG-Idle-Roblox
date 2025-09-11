@@ -139,6 +139,9 @@ function Tender:Upgrade()
 	for k, v in ipairs(TENDER_PROMOTION_LEVELS) do
 		if self.Level == v then
 			self:IncreaseUpgradeStage(k)
+
+			local curTravelTime, nextLvlTravelTime = self:CalculateTravelTime()
+			self.CurrentTravelTime, self.NextLvlTravelTime = curTravelTime, nextLvlTravelTime
 			break
 		end
 	end
@@ -147,9 +150,6 @@ function Tender:Upgrade()
 
 	local curMaxStorage, nextLvlMaxStorage = self:CalculateMaxStorage()
 	self.CurrentMaxStorage, self.NextLvlMaxStorage = curMaxStorage, nextLvlMaxStorage
-
-	local curTravelTime, nextLvlTravelTime = self:CalculateTravelTime()
-	self.CurrentTravelTime, self.NextLvlTravelTime = curTravelTime, nextLvlTravelTime
 
 	self:Save()
 end
@@ -210,7 +210,7 @@ function Tender:CalculateTravelTime()
 	local baseTime = self.BaseTravelTime
 
 	local travelTime = math.max(1, (baseTime - self.UpgradeStage) + 1)
-	local nextLvlTravelTime = math.max(1, (baseTime - self.UpgradeStage) + 1)
+	local nextLvlTravelTime = math.max(1, (baseTime - self.UpgradeStage))
 
 	if self.UpgradeStage == 1 then
 		travelTime = 10

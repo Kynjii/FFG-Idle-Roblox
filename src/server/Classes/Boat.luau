@@ -130,6 +130,9 @@ function Boat:Upgrade()
 	for k, v in ipairs(BOAT_PROMOTION_LEVELS) do
 		if self.Level == v then
 			self:IncreaseUpgradeStage(k)
+
+			local curFPS, nextFPS = self:CalculateFPS()
+			self.CurrentFPS, self.NextFPS = curFPS, nextFPS
 			break
 		end
 	end
@@ -138,9 +141,6 @@ function Boat:Upgrade()
 
 	local curMaxStorage, nextLvlMaxStorage = self:CalculateMaxStorage()
 	self.CurrentMaxStorage, self.NextLvlMaxStorage = curMaxStorage, nextLvlMaxStorage
-
-	local curFPS, nextFPS = self:CalculateFPS()
-	self.CurrentFPS, self.NextFPS = curFPS, nextFPS
 
 	self:Save()
 end
@@ -213,10 +213,9 @@ function Boat:CalculateFPS()
 	if baseFPS == DEFAULTS.BaseFPS then baseFPS = self:CalculateBaseFPS() end
 
 	local growthRate = DEFAULTS.GrowthRate
-	local level = self.Level
 
-	local fpsCalc = baseFPS * math.pow(growthRate, level)
-	local nextLvlFPS = baseFPS * math.pow(growthRate, level + 1)
+	local fpsCalc = baseFPS * math.pow(growthRate, self.UpgradeStage)
+	local nextLvlFPS = baseFPS * math.pow(growthRate, self.UpgradeStage + 1)
 
 	return fpsCalc, nextLvlFPS
 end
@@ -332,7 +331,7 @@ function Boat:UpdatePurchaseBoardUI()
 	pbDetails.CurrentMaxStorageLabel.Text = isPurchased and FormatNumber(self.CurrentMaxStorage) or ""
 	pbDetails.NextMaxStorageLabel.Text = isPurchased and FormatNumber(self.NextLvlMaxStorage) or ""
 	pbDetails.CurrentFPSLabel.Text = isPurchased and FormatNumber(self.CurrentFPS) or ""
-
+	print(self.NextFPS)
 	local showUpgradeStageUpgrade = self:ShowUpgradeStageUpgrade()
 	if showUpgradeStageUpgrade then
 		pbDetails.NextFPSLabel.Text = isPurchased and FormatNumber(self.NextFPS) or ""
