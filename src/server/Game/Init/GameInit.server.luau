@@ -4,6 +4,7 @@ local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 local PlayerDataTemplate = require(ServerScriptService.Server.Modules.PlayerDataTemplate)
 local ProfileStore = require(ServerScriptService.Server.Libs.ProfileStore)
 local TeamManager = require(ServerScriptService.Server.Classes.Managers.TeamManager)
+local MusicManager = require(ServerScriptService.Server.Music.MusicManager)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 
 -- //SECTION - Game Start
@@ -72,3 +73,6 @@ Players.PlayerRemoving:Connect(function(player)
 	end
 	DataService.DetachReplica(player)
 end)
+
+-- Start music
+MusicManager.LoadMusic()
