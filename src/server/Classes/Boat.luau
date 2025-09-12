@@ -336,14 +336,14 @@ function Boat:SetupProximityPrompt(purchaseBoard: Part)
 		-- Check max level again
 		if self.Level == self.MaxLevel then return end
 
-		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, self.UpgradeCost) then
-			FFGHelpers.PrintLog("Unable to afford upgrade, cost is: ", self.UpgradeCost)
+		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, not self.isPurchased and self.BaseCost or self.UpgradeCost) then
+			FFGHelpers.PrintLog("Unable to afford upgrade, cost is: ", not self.isPurchased and self.BaseCost or self.UpgradeCost)
 			self:UpdateProximityPromptUI(proximityPrompt)
 			return
 		end
 
 		-- Spend the currency
-		DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, self.UpgradeCost)
+		DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, not self.isPurchased and self.BaseCost or self.UpgradeCost)
 
 		if self.isPurchased then
 			-- Upgrade existing boat

@@ -31,6 +31,6 @@ return {
 		},
 	},
 	Currencies = {
-		Gold = 250,
+		Gold = 300,
 	},
 }

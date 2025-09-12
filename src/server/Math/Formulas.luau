@@ -84,16 +84,16 @@ local FORMULAS = {
 
 	BOAT = {
 		BaseCost = 100,
-		BaseStorage = 800,
+		BaseStorage = 80,
 		BaseFPS = 10,
 	},
 	TENDER = {
 		BaseCost = 100,
-		BaseStorage = 480,
+		BaseStorage = 48,
 	},
 	STORAGE = {
 		BaseCost = 100,
-		BaseStorage = 8000,
+		BaseStorage = 400,
 	},
 	TIER_MULTIPLIER = {
 		[1] = 1,

@@ -247,14 +247,14 @@ function PortStorage:SetupProximityPrompt(purchaseBoard: Part)
 		-- Check max level again
 		if self.Level == self.MaxLevel then return end
 
-		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, self.UpgradeCost) then
-			FFGHelpers.PrintLog("Unable to afford upgrade, cost is: ", self.UpgradeCost)
+		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, not self.isPurchased and self.BaseCost or self.UpgradeCost) then
+			FFGHelpers.PrintLog("Unable to afford upgrade, cost is: ", not self.isPurchased and self.BaseCost or self.UpgradeCost)
 			self:UpdateProximityPromptUI(proximityPrompt)
 			return
 		end
 
 		-- Spend the currency
-		DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, self.UpgradeCost)
+		DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, not self.isPurchased and self.BaseCost or self.UpgradeCost)
 
 		if self.isPurchased then
 			-- Upgrade existing
@@ -326,7 +326,7 @@ function PortStorage:Show()
 	local model = self.Model :: Model
 	local boatParts = model:GetChildren()
 	for _, part in pairs(boatParts) do
-		if part.Name == "Purchase_Board" or part.Name == "FishInStorage" then continue end
+		if part.Name == "Purchase_Board" or part.Name == "FishInStorage" or part.Name == "ProximityPrompt" then continue end
 		if part.Transparency and part.Transparency == 1 then part.Transparency = 0 end
 	end
 end
@@ -335,7 +335,7 @@ function PortStorage:Hide()
 	local model = self.Model :: Model
 	local boatParts = model:GetChildren()
 	for _, part in pairs(boatParts) do
-		if part.Name == "Purchase_Board" or part.Name == "FishInStorage" then continue end
+		if part.Name == "Purchase_Board" or part.Name == "FishInStorage" or part.Name == "ProximityPrompt" then continue end
 		if part.Transparency and part.Transparency == 0 then part.Transparency = 1 end
 	end
 end
@@ -344,7 +344,7 @@ function PortStorage:CanCollide()
 	local model = self.Model :: Model
 	local boatParts = model:GetChildren()
 	for _, part in pairs(boatParts) do
-		if part.Name == "Purchase_Board" or part.Name == "FishInStorage" then continue end
+		if part.Name == "Purchase_Board" or part.Name == "FishInStorage" or part.Name == "ProximityPrompt" then continue end
 		if not part.CanCollide then part.CanCollide = true end
 	end
 end
@@ -353,7 +353,7 @@ function PortStorage:CannotCollide()
 	local model = self.Model :: Model
 	local boatParts = model:GetChildren()
 	for _, part in pairs(boatParts) do
-		if part.Name == "Purchase_Board" or part.Name == "FishInStorage" then continue end
+		if part.Name == "Purchase_Board" or part.Name == "FishInStorage" or part.Name == "ProximityPrompt" then continue end
 		if part.CanCollide then part.CanCollide = false end
 	end
 end
