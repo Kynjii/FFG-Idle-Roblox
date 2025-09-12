@@ -22,9 +22,9 @@ local DEFAULTS = {
 	Tier = 1,
 	Level = 1,
 	MaxLevel = 100,
-	BaseCost = Formulas.BOAT.BaseCost,
-	isPurchased = true,
-	BaseStorage = Formulas.BOAT.BaseStorage,
+	BaseCost = Formulas.STORAGE.BaseCost,
+	isPurchased = false,
+	BaseStorage = Formulas.STORAGE.BaseStorage,
 	FishInStorage = 0,
 	StorageFull = false,
 }
@@ -56,18 +56,14 @@ function PortStorage.New(state, player: Player, model: Model)
 	self.Tier = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.Tier) or DEFAULTS.Tier
 	self.Player = player
 
+	self.BaseCost = self:CalculateBaseCost()
+	self.UpgradeCost = self:CalculateUpgradeCost()
+	self.BaseStorage = self:CalculateBaseStorage()
+	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
+
 	-- Tweens
 	self.ProgressTween = nil
-
 	self.FishModel = DeepWait(self.Model, "FishInStorage", "Base") :: UnionOperation
-
-	-- Had to take this approach for type checking to work
-	if self.BaseCost == DEFAULTS.BaseCost then self.BaseCost = self:CalculateBaseCost() end
-	if not self.UpgradeCost then self.UpgradeCost = self:CalculateUpgradeCost() end
-
-	local curMaxStorage, nextLvlMaxStorage = self:CalculateMaxStorage()
-	self.CurrentMaxStorage = curMaxStorage
-	self.NextLvlMaxStorage = nextLvlMaxStorage
 
 	self._cleaner = CleanerService.new()
 
@@ -78,6 +74,8 @@ end
 -- //SECTION - Core Actions
 function PortStorage:Purchase()
 	self.isPurchased = true
+
+	self:Save()
 end
 
 function PortStorage:Upgrade()
@@ -86,9 +84,10 @@ function PortStorage:Upgrade()
 	self.Level += 1
 	self.UpgradeCost = self:CalculateUpgradeCost()
 
-	local curMaxStorage, nextLvlMaxStorage = self:CalculateMaxStorage()
-	self.CurrentMaxStorage = curMaxStorage
-	self.NextLvlMaxStorage = nextLvlMaxStorage
+	self.UpgradeCost = self:CalculateUpgradeCost()
+	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
+
+	self:Save()
 end
 
 function PortStorage:AddFish(amount: number)
@@ -155,9 +154,7 @@ function PortStorage:CalculateMaxStorage()
 	local baseStorage = self.BaseStorage or DEFAULTS.BaseStorage
 	if baseStorage == DEFAULTS.BaseStorage then baseStorage = self:CalculateBaseStorage() end
 
-	local maxStorage, nextLvlMaxStorage = ClassCalculators.CalculateMaxStorage(baseStorage, self.Level)
-
-	return maxStorage, nextLvlMaxStorage
+	return ClassCalculators.CalculateMaxStorage(baseStorage, self.Level)
 end
 -- //!SECTION
 

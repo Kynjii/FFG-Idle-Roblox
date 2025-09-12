@@ -82,21 +82,15 @@ function Boat.New(state, player: Player, model: Model): Boat
 	self.UpgradeCost = self:CalculateUpgradeCost()
 	self.BaseStorage = self:CalculateBaseStorage()
 	self.BaseFPS = self:CalculateBaseFPS()
+	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
+	self.CurrentFPS, self.NextFPS = self:CalculateFPS()
 
-	local curMaxStorage, nextLvlMaxStorage = self:CalculateMaxStorage()
-	self.CurrentMaxStorage = self.CurrentMaxStorage or curMaxStorage
-	self.NextLvlMaxStorage = self.NextLvlMaxStorage or nextLvlMaxStorage
-
-	local curFPS, nextFPS = self:CalculateFPS()
-	self.CurrentFPS = curFPS
-	self.NextFPS = nextFPS
+	self._cleaner = CleanerService.new()
 
 	self.FishingInterval = nil
 	if self.isPurchased and not self:IsStorageFull() then task.delay(1, function()
 		self:StartFishing()
 	end) end
-
-	self._cleaner = CleanerService.new()
 
 	return self
 end
@@ -118,16 +112,13 @@ function Boat:Upgrade()
 		if self.Level == v then
 			self:IncreaseUpgradeStage(k)
 
-			local curFPS, nextFPS = self:CalculateFPS()
-			self.CurrentFPS, self.NextFPS = curFPS, nextFPS
+			self.CurrentFPS, self.NextFPS = self:CalculateFPS()
 			break
 		end
 	end
 
 	self.UpgradeCost = self:CalculateUpgradeCost()
-
-	local curMaxStorage, nextLvlMaxStorage = self:CalculateMaxStorage()
-	self.CurrentMaxStorage, self.NextLvlMaxStorage = curMaxStorage, nextLvlMaxStorage
+	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
 
 	self:Save()
 end
@@ -168,9 +159,7 @@ function Boat:CalculateMaxStorage()
 	local baseStorage = self.BaseStorage or DEFAULTS.BaseStorage
 	if baseStorage == DEFAULTS.BaseStorage then baseStorage = self:CalculateBaseStorage() end
 
-	local maxStorage, nextLvlMaxStorage = ClassCalculators.CalculateMaxStorage(baseStorage, self.Level)
-
-	return maxStorage, nextLvlMaxStorage
+	return ClassCalculators.CalculateMaxStorage(baseStorage, self.Level)
 end
 
 function Boat:CalculateBaseFPS()
@@ -184,9 +173,7 @@ function Boat:CalculateFPS()
 	local baseFPS = self.BaseFPS or DEFAULTS.BaseFPS
 	if baseFPS == DEFAULTS.BaseFPS then baseFPS = self:CalculateBaseFPS() end
 
-	local fpsCalc, nextLvlFPS = ClassCalculators.CalculateFPS(baseFPS, self.UpgradeStage)
-
-	return fpsCalc, nextLvlFPS
+	return ClassCalculators.CalculateFPS(baseFPS, self.UpgradeStage)
 end
 -- //!SECTION
 

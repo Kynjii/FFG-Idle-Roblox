@@ -8,6 +8,7 @@ local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 local TweenService = game:GetService("TweenService")
+local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local TenderType = require(ServerScriptService.Server.Classes.Types.TenderType)
 local ProgressBar = require(ServerScriptService.Server.Modules.ProgressBar)
 local CleanerService = require(ServerScriptService.Server.Services.CleanerService)
@@ -19,20 +20,6 @@ type TenderInstance = TenderType.TenderInstance
 -- //!SECTION
 
 -- //SECTION -  Tender Data
-local TENDER_PROMOTION_LEVELS = {
-	[1] = 1,
-	[2] = 10,
-	[3] = 20,
-	[4] = 30,
-	[5] = 40,
-	[6] = 50,
-	[7] = 60,
-	[8] = 70,
-	[9] = 80,
-	[10] = 90,
-	[11] = 100,
-}
-
 local NAME = {
 	[1] = "Wooden Cart-Barge",
 	[2] = "Barrel Barge",
@@ -60,8 +47,6 @@ local DEFAULTS: TenderProps = {
 	FishInStorage = 0,
 	StorageFull = false,
 	BaseTravelTime = 10, -- secs
-	GrowthRate = Formulas.TENDER.GrowthRate,
-	CostGrowthRate = Formulas.TENDER.CostGrowthRate,
 }
 -- //!SECTION
 
@@ -101,14 +86,10 @@ function Tender.New(state, player, model)
 	if self.isPurchased then self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.isPurchased, self.isPurchased) end
 
 	-- Storage calcs
-	local curMaxStorage, nextLvlMaxStorage = self:CalculateMaxStorage()
-	self.CurrentMaxStorage = self.CurrentMaxStorage or curMaxStorage
-	self.NextLvlMaxStorage = self.NextLvlMaxStorage or nextLvlMaxStorage
+	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
 
 	-- Travel Time calcs
-	local curTravelTime, nextLvlTravelTime = self:CalculateTravelTime()
-	self.CurrentTravelTime = self.CurrentTravelTime or curTravelTime
-	self.NextLvlTravelTime = self.NextLvlTravelTime or nextLvlTravelTime
+	self.CurrentTravelTime, self.NextLvlTravelTime = self:CalculateTravelTime()
 
 	-- Progress Bars
 	self.BillBoard = DeepWait(self.Model, "Base", "Billboard", "BillboardGui")
@@ -136,20 +117,17 @@ function Tender:Upgrade()
 	if not self:CanUpgrade() then return end
 
 	self.Level += 1
-	for k, v in ipairs(TENDER_PROMOTION_LEVELS) do
+	for k, v in ipairs(Formulas.PROMO_LEVEL) do
 		if self.Level == v then
 			self:IncreaseUpgradeStage(k)
 
-			local curTravelTime, nextLvlTravelTime = self:CalculateTravelTime()
-			self.CurrentTravelTime, self.NextLvlTravelTime = curTravelTime, nextLvlTravelTime
+			self.CurrentTravelTime, self.NextLvlTravelTime = self:CalculateTravelTime()
 			break
 		end
 	end
 
 	self.UpgradeCost = self:CalculateUpgradeCost()
-
-	local curMaxStorage, nextLvlMaxStorage = self:CalculateMaxStorage()
-	self.CurrentMaxStorage, self.NextLvlMaxStorage = curMaxStorage, nextLvlMaxStorage
+	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
 
 	self:Save()
 end
@@ -162,11 +140,7 @@ end
 
 -- //SECTION - Calculations
 function Tender:CalculateBaseCost()
-	local baseCost = DEFAULTS.BaseCost
-	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
-	local realmMultiplier = math.pow(self.RealmId, 2.25) -- scaling curve
-	local base = baseCost * tierMultiplier * realmMultiplier
-
+	local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, self.Tier, self.RealmId)
 	self.BaseCost = base
 
 	return base
@@ -176,8 +150,7 @@ function Tender:CalculateUpgradeCost()
 	local baseCost = self.BaseCost or DEFAULTS.BaseCost
 	if baseCost == DEFAULTS.BaseCost then baseCost = self:CalculateBaseCost() end
 
-	local growthRate = DEFAULTS.CostGrowthRate
-	local cost = baseCost * math.pow(growthRate, self.Level)
+	local cost = ClassCalculators.CalculateUpgradeCost(baseCost, self.Level)
 
 	self.UpgradeCost = cost
 
@@ -185,11 +158,7 @@ function Tender:CalculateUpgradeCost()
 end
 
 function Tender:CalculateBaseStorage()
-	local baseStorage = DEFAULTS.BaseStorage
-	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
-	local realmMultiplier = math.pow(self.RealmId, 2.25)
-	local base = baseStorage * tierMultiplier * realmMultiplier
-
+	local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseStorage, self.Tier, self.RealmId)
 	self.BaseStorage = base
 
 	return base
@@ -199,25 +168,11 @@ function Tender:CalculateMaxStorage()
 	local baseStorage = self.BaseStorage or DEFAULTS.BaseStorage
 	if baseStorage == DEFAULTS.BaseStorage then baseStorage = self:CalculateBaseStorage() end
 
-	local growthRate = DEFAULTS.GrowthRate + self.Tier * 0.02
-	local maxStorage = baseStorage * math.pow(growthRate, self.Level)
-	local nextLvlMaxStorage = baseStorage * math.pow(growthRate, self.Level + 1)
-
-	return maxStorage, nextLvlMaxStorage
+	return ClassCalculators.CalculateMaxStorage(baseStorage, self.Level)
 end
 
 function Tender:CalculateTravelTime()
-	local baseTime = self.BaseTravelTime
-
-	local travelTime = math.max(1, (baseTime - self.UpgradeStage) + 1)
-	local nextLvlTravelTime = math.max(1, (baseTime - self.UpgradeStage))
-
-	if self.UpgradeStage == 1 then
-		travelTime = 10
-		nextLvlTravelTime = 9
-	end
-
-	return travelTime, nextLvlTravelTime
+	return ClassCalculators.CalculateTravelTime(self.BaseTravelTime, self.UpgradeStage)
 end
 -- //!SECTION
 
@@ -546,7 +501,7 @@ function Tender:IsStorageFull()
 end
 
 function Tender:ShowUpgradeStageUpgrade()
-	local threshold = TENDER_PROMOTION_LEVELS[self.UpgradeStage + 1] - 1
+	local threshold = Formulas.PROMO_LEVEL[self.UpgradeStage + 1] - 1
 	if self.Level < 9 then return false end
 	if self.Level == threshold then
 		return true

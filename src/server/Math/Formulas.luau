@@ -84,12 +84,16 @@ local FORMULAS = {
 
 	BOAT = {
 		BaseCost = 100,
-		BaseStorage = 100,
+		BaseStorage = 800,
 		BaseFPS = 10,
 	},
 	TENDER = {
 		BaseCost = 100,
-		BaseStorage = 95,
+		BaseStorage = 480,
+	},
+	STORAGE = {
+		BaseCost = 100,
+		BaseStorage = 8000,
 	},
 	TIER_MULTIPLIER = {
 		[1] = 1,
@@ -112,12 +116,11 @@ end
 FORMULAS.STAGE_COUNT = STAGE_COUNT
 FORMULAS.STAGE_EARN_MULT = STAGE_EARN_MULT
 
--- Optional: allow hot-reload tuning in Studio without restart.
+-- Allow hot-reload tuning in Studio without restart.
 function FORMULAS.Rebuild()
 	FORMULAS.EARN_MULT = buildMultipliers(FORMULAS.EARN_RATE, FORMULAS.EARN_BONUS)
 	FORMULAS.COST_MULT = buildMultipliers(FORMULAS.COST_RATE, nil)
 
-	-- Rebuild stage tables as well
 	FORMULAS.STAGE_COUNT = #FORMULAS.PROMO_LEVEL
 	local stageMult = table.create(FORMULAS.STAGE_COUNT, 1)
 	for s = 1, FORMULAS.STAGE_COUNT do
