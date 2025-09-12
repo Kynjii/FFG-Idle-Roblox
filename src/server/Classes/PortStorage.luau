@@ -27,8 +27,6 @@ local DEFAULTS = {
 	BaseStorage = Formulas.BOAT.BaseStorage,
 	FishInStorage = 0,
 	StorageFull = false,
-	GrowthRate = Formulas.BOAT.GrowthRate,
-	CostGrowthRate = Formulas.BOAT.CostGrowthRate,
 }
 -- //!SECTION
 
@@ -68,8 +66,8 @@ function PortStorage.New(state, player: Player, model: Model)
 	if not self.UpgradeCost then self.UpgradeCost = self:CalculateUpgradeCost() end
 
 	local curMaxStorage, nextLvlMaxStorage = self:CalculateMaxStorage()
-	self.CurrentMaxStorage = self.CurrentMaxStorage or curMaxStorage
-	self.NextLvlMaxStorage = self.NextLvlMaxStorage or nextLvlMaxStorage
+	self.CurrentMaxStorage = curMaxStorage
+	self.NextLvlMaxStorage = nextLvlMaxStorage
 
 	self._cleaner = CleanerService.new()
 
