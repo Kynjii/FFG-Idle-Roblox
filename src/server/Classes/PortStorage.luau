@@ -1,6 +1,7 @@
 local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
@@ -128,11 +129,7 @@ end
 
 -- //SECTION - Calculations
 function PortStorage:CalculateBaseCost()
-	local baseCost = self.BaseCost or DEFAULTS.BaseCost
-	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
-	local realmMultiplier = math.pow(self.RealmId :: number, 2.25) -- scaling curve
-	local base = baseCost * tierMultiplier * realmMultiplier
-
+	local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, self.Tier, self.RealmId)
 	self.BaseCost = base
 
 	return base
@@ -142,24 +139,15 @@ function PortStorage:CalculateUpgradeCost()
 	local baseCost = self.BaseCost or DEFAULTS.BaseCost
 	if baseCost == DEFAULTS.BaseCost then baseCost = self:CalculateBaseCost() end
 
-	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
-	local realmMultiplier = math.pow(self.RealmId :: number, 2.25) -- scaling curve
-	local growthRate = DEFAULTS.CostGrowthRate
-	local cost = baseCost * math.pow(growthRate, self.Level :: number) * tierMultiplier * realmMultiplier
+	local cost = ClassCalculators.CalculateUpgradeCost(baseCost, self.Level)
 
 	self.UpgradeCost = cost
-
-	-- //TODO - handle boosts
 
 	return cost
 end
 
 function PortStorage:CalculateBaseStorage()
-	local baseStorage = self.BaseStorage or DEFAULTS.BaseStorage
-	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
-	local realmMultiplier = math.pow(self.RealmId :: number, 2.25) -- scaling curve
-	local base = baseStorage * tierMultiplier * realmMultiplier
-
+	local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseStorage, self.Tier, self.RealmId)
 	self.BaseStorage = base
 
 	return base
@@ -169,12 +157,7 @@ function PortStorage:CalculateMaxStorage()
 	local baseStorage = self.BaseStorage or DEFAULTS.BaseStorage
 	if baseStorage == DEFAULTS.BaseStorage then baseStorage = self:CalculateBaseStorage() end
 
-	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier] :: number
-	local growthRate = DEFAULTS.GrowthRate + self.Tier * 0.02 :: number
-	local maxStorage = baseStorage * math.pow(growthRate :: number, self.Level :: number) * tierMultiplier :: number
-	local nextLvlMaxStorage = baseStorage * math.pow(growthRate :: number, self.Level :: number + 1) * tierMultiplier :: number
-
-	-- //TODO - handle boosts
+	local maxStorage, nextLvlMaxStorage = ClassCalculators.CalculateMaxStorage(baseStorage, self.Level)
 
 	return maxStorage, nextLvlMaxStorage
 end

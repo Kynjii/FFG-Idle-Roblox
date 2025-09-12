@@ -3,13 +3,51 @@ local Formulas = require(ServerScriptService.Server.Math.Formulas)
 
 local ClassCalculator = {}
 
-function ClassCalculator.CalculateBaseCost(baseValue: number, tier: number, realmNum: number)
-	local baseCost = baseValue
-	local tierMultiplier = Formulas.TIER_MULTIPLIER[tier]
-	local realmMultiplier = math.pow(realmNum, 2.25) -- scaling curve
-	local base = baseCost * tierMultiplier * realmMultiplier
+local function clampLevel(level: number)
+	level = tonumber(level) or 1
+	return math.clamp(level, 1, Formulas.MAX_LEVEL or 100)
+end
 
-	return base
+local function clampStage(s)
+	s = tonumber(s) or 1
+	return math.clamp(s, 1, Formulas.STAGE_COUNT or 1)
+end
+
+-- //SECTION - Boats
+function ClassCalculator.CalculateBaseValue(baseValue: number, tier: number, realmNum: number)
+	local tierMultiplier = Formulas.TIER_MULTIPLIER[tier] or 1
+	local realmMultiplier = (realmNum and math.pow(realmNum, 2.25)) or 1
+	return baseValue * tierMultiplier * realmMultiplier
+end
+
+function ClassCalculator.CalculateUpgradeCost(baseValue: number, level: number)
+	level = clampLevel(level)
+	local mult = (Formulas.COST_MULT and Formulas.COST_MULT[level]) or 1
+	return baseValue * mult
+end
+
+function ClassCalculator.CalculateMaxStorage(baseValue: number, level: number)
+	local lvl = clampLevel(level)
+	local nextLvl = clampLevel(level + 1)
+
+	local earnNow = (Formulas.EARN_MULT and Formulas.EARN_MULT[lvl]) or 1
+	local earnNext = (Formulas.EARN_MULT and Formulas.EARN_MULT[nextLvl]) or earnNow
+
+	local maxStorage = baseValue * earnNow
+	local nextLvlStorage = baseValue * earnNext
+	return maxStorage, nextLvlStorage
+end
+
+function ClassCalculator.CalculateFPS(baseFPS: number, upgradeStage: number)
+	local sNow = clampStage(upgradeStage)
+	local sNext = clampStage(upgradeStage + 1)
+
+	local multNow = (Formulas.STAGE_EARN_MULT and Formulas.STAGE_EARN_MULT[sNow]) or 1
+	local multNext = (Formulas.STAGE_EARN_MULT and Formulas.STAGE_EARN_MULT[sNext]) or multNow
+
+	local fpsNow = baseFPS * multNow
+	local fpsNext = baseFPS * multNext
+	return fpsNow, fpsNext
 end
 
 return ClassCalculator

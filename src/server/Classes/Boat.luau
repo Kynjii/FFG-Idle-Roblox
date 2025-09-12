@@ -21,20 +21,6 @@ type BoatInstance = BoatType.BoatInstance
 -- //!SECTION
 
 -- //SECTION - Boat Data
-local BOAT_PROMOTION_LEVELS = {
-	[1] = 1,
-	[2] = 10,
-	[3] = 20,
-	[4] = 30,
-	[5] = 40,
-	[6] = 50,
-	[7] = 60,
-	[8] = 70,
-	[9] = 80,
-	[10] = 90,
-	[11] = 100,
-}
-
 local NAME = {
 	[1] = "Driftwood Skiff",
 	[2] = "Netting Dory",
@@ -62,8 +48,6 @@ local DEFAULTS: BoatProps = {
 	FishInStorage = 0,
 	StorageFull = false,
 	BaseFPS = Formulas.BOAT.BaseFPS,
-	GrowthRate = Formulas.BOAT.GrowthRate,
-	CostGrowthRate = Formulas.BOAT.CostGrowthRate,
 }
 -- //!SECTION
 
@@ -104,8 +88,8 @@ function Boat.New(state, player: Player, model: Model): Boat
 	self.NextLvlMaxStorage = self.NextLvlMaxStorage or nextLvlMaxStorage
 
 	local curFPS, nextFPS = self:CalculateFPS()
-	self.CurrentFPS = self.CurrentFPS or curFPS
-	self.NextFPS = self.NextFPS or nextFPS
+	self.CurrentFPS = curFPS
+	self.NextFPS = nextFPS
 
 	self.FishingInterval = nil
 	if self.isPurchased and not self:IsStorageFull() then task.delay(1, function()
@@ -130,7 +114,7 @@ function Boat:Upgrade()
 	if not self:CanUpgrade() then return end
 
 	self.Level += 1
-	for k, v in ipairs(BOAT_PROMOTION_LEVELS) do
+	for k, v in ipairs(Formulas.PROMO_LEVEL) do
 		if self.Level == v then
 			self:IncreaseUpgradeStage(k)
 
@@ -156,7 +140,7 @@ end
 
 -- //SECTION - Calculations
 function Boat:CalculateBaseCost()
-	local base = ClassCalculators.CalculateBaseCost(DEFAULTS.BaseCost, self.Tier, self.RealmId)
+	local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, self.Tier, self.RealmId)
 	self.BaseCost = base
 
 	return base
@@ -166,8 +150,7 @@ function Boat:CalculateUpgradeCost()
 	local baseCost = self.BaseCost or DEFAULTS.BaseCost
 	if baseCost == DEFAULTS.BaseCost then baseCost = self:CalculateBaseCost() end
 
-	local growthRate = DEFAULTS.CostGrowthRate
-	local cost = baseCost * math.pow(growthRate, self.Level)
+	local cost = ClassCalculators.CalculateUpgradeCost(baseCost, self.Level)
 
 	self.UpgradeCost = cost
 
@@ -175,11 +158,7 @@ function Boat:CalculateUpgradeCost()
 end
 
 function Boat:CalculateBaseStorage()
-	local baseStorage = DEFAULTS.BaseStorage
-	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
-	local realmMultiplier = math.pow(self.RealmId, 2.25)
-	local base = baseStorage * tierMultiplier * realmMultiplier
-
+	local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseStorage, self.Tier, self.RealmId)
 	self.BaseStorage = base
 
 	return base
@@ -189,19 +168,13 @@ function Boat:CalculateMaxStorage()
 	local baseStorage = self.BaseStorage or DEFAULTS.BaseStorage
 	if baseStorage == DEFAULTS.BaseStorage then baseStorage = self:CalculateBaseStorage() end
 
-	local growthRate = DEFAULTS.GrowthRate + self.Tier * 0.02
-	local maxStorage = baseStorage * math.pow(growthRate, self.Level)
-	local nextLvlMaxStorage = baseStorage * math.pow(growthRate, self.Level + 1)
+	local maxStorage, nextLvlMaxStorage = ClassCalculators.CalculateMaxStorage(baseStorage, self.Level)
 
 	return maxStorage, nextLvlMaxStorage
 end
 
 function Boat:CalculateBaseFPS()
-	local baseFPS = DEFAULTS.BaseFPS
-	local tierMultiplier = Formulas.TIER_MULTIPLIER[self.Tier]
-	local realmMultiplier = math.pow(self.RealmId, 2.25)
-	local base = baseFPS * tierMultiplier * realmMultiplier
-
+	local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseFPS, self.Tier, self.RealmId)
 	self.BaseFPS = base
 
 	return base
@@ -211,10 +184,7 @@ function Boat:CalculateFPS()
 	local baseFPS = self.BaseFPS or DEFAULTS.BaseFPS
 	if baseFPS == DEFAULTS.BaseFPS then baseFPS = self:CalculateBaseFPS() end
 
-	local growthRate = DEFAULTS.GrowthRate
-
-	local fpsCalc = baseFPS * math.pow(growthRate, self.UpgradeStage)
-	local nextLvlFPS = baseFPS * math.pow(growthRate, self.UpgradeStage + 1)
+	local fpsCalc, nextLvlFPS = ClassCalculators.CalculateFPS(baseFPS, self.UpgradeStage)
 
 	return fpsCalc, nextLvlFPS
 end
@@ -305,9 +275,8 @@ function Boat:SetupPurchaseBoard()
 		pbDetails.NextMaxStorageLabel.Text = self.isPurchased and FormatNumber(nextStorage) or ""
 
 		-- FPS Stats
-		local currentFPS, nextFPS = self:CalculateFPS()
-		pbDetails.CurrentFPSLabel.Text = self.isPurchased and FormatNumber(currentFPS) or ""
-		if self:ShowUpgradeStageUpgrade() then pbDetails.NextFPSLabel.Text = self.isPurchased and FormatNumber(nextFPS) or "" end
+		pbDetails.CurrentFPSLabel.Text = self.isPurchased and FormatNumber(self.CurrentFPS) or ""
+		if self:ShowUpgradeStageUpgrade() then pbDetails.NextFPSLabel.Text = self.isPurchased and FormatNumber(self.NextFPS) or "" end
 
 		-- Storage Progress Bar
 		local storageProgress = CalculateProgress(self.FishInStorage, self.CurrentMaxStorage)
@@ -484,13 +453,9 @@ function Boat:IsStorageFull()
 end
 
 function Boat:ShowUpgradeStageUpgrade()
-	local threshold = BOAT_PROMOTION_LEVELS[self.UpgradeStage + 1] - 1
-	if self.Level < 9 then return false end
-	if self.Level == threshold then
-		return true
-	else
-		return false
-	end
+	local nextStart = Formulas.PROMO_LEVEL[self.UpgradeStage + 1]
+	if not nextStart then return false end
+	return self.Level == (nextStart - 1)
 end
 -- //!SECTION
 
