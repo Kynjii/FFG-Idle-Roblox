@@ -56,6 +56,9 @@ export type TenderInstance = {
 	Player: Player,
 	ProgressTween: Tween | nil,
 	MoveTween: Tween | nil,
+	Animations: { [string]: Animation },
+	VisualModels: { [string]: Model },
+	CurrentVisualModel: Model | nil,
 
 	-- Core Tender Actions
 	Purchase: (self: TenderInstance) -> (),
@@ -102,6 +105,11 @@ export type TenderInstance = {
 
 	-- Animation
 	StartAnimation: (self: TenderInstance) -> (),
+
+	-- Models
+	UpdateVisualModel: (self: TenderInstance) -> (),
+	GetVisualModels: (self: TenderInstance) -> { [string]: Model },
+	RemovePreviousVisualModel: (self: TenderInstance) -> (),
 
 	-- Saving and Loading
 	Serialize: (self: TenderInstance) -> { [string]: any },

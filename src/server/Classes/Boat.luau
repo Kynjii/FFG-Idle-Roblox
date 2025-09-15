@@ -6,13 +6,14 @@ local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.Clas
 local BoatType = require(ServerScriptService.Server.Classes.Types.BoatType)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
-local PopUp = require(ServerScriptService.Server.Modules.PopUp)
+local PopUp = require(ServerScriptService.Server.Modules.Tweens.PopUp)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local CalculateProgress = require(ReplicatedStorage.Shared.Utils.CalculateProgress)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 local SetInterval = require(ServerScriptService.Server.Modules.SetInterval)
+local FadeEffect = require(ServerScriptService.Server.Modules.Tweens.FadeEffect)
 local CleanerService = require(ServerScriptService.Server.Services.CleanerService)
 
 -- //SECTION - Boat Types
@@ -399,35 +400,38 @@ end
 
 -- //SECTION - Visibility and Collision
 function Boat:Show()
-	local model = self.Model.Boat
-	local boatParts = model:GetChildren()
-	for _, part in pairs(boatParts) do
-		if part:IsA("Part") then
-			if part.Name ~= "Base" or part.Name ~= "VisualRoot" then
-				if part.Transparency and part.Transparency == 1 then part.Transparency = 0 end
+	local root = self.Model.Boat.VisualRoot
+	local visualModel = root:GetChildren()
+	if visualModel then
+		local boatParts = visualModel[1]:GetChildren()
+		for _, part in pairs(boatParts) do
+			if part:IsA("Part") then
+				if part.Transparency and part.Transparency == 1 then FadeEffect.In(part) end
 			end
 		end
 	end
 end
 
 function Boat:Hide()
-	local model = self.Model.Boat
-	local boatParts = model:GetChildren()
-	for _, part in pairs(boatParts) do
-		if part:IsA("Part") then
-			if part.Name ~= "Base" or part.Name ~= "VisualRoot" then
-				if part.Transparency and part.Transparency == 0 then part.Transparency = 1 end
+	local root = self.Model.Boat.VisualRoot
+	local visualModel = root:GetChildren()
+	if visualModel then
+		local boatParts = visualModel[1]:GetChildren()
+		for _, part in pairs(boatParts) do
+			if part:IsA("Part") then
+				if part.Transparency and part.Transparency == 0 then FadeEffect.Out(part) end
 			end
 		end
 	end
 end
 
 function Boat:CanCollide()
-	local model = self.Model.Boat
-	local boatParts = model:GetChildren()
-	for _, part in pairs(boatParts) do
-		if part:IsA("Part") then
-			if part.Name ~= "Base" or part.Name ~= "VisualRoot" then
+	local root = self.Model.Boat.VisualRoot
+	local visualModel = root:GetChildren()
+	if visualModel then
+		local boatParts = visualModel[1]:GetChildren()
+		for _, part in pairs(boatParts) do
+			if part:IsA("Part") then
 				if not part.CanCollide then part.CanCollide = true end
 			end
 		end
@@ -435,11 +439,12 @@ function Boat:CanCollide()
 end
 
 function Boat:CannotCollide()
-	local model = self.Model.Boat
-	local boatParts = model:GetChildren()
-	for _, part in pairs(boatParts) do
-		if part:IsA("Part") then
-			if part.Name ~= "Base" or part.Name ~= "VisualRoot" then
+	local root = self.Model.Boat.VisualRoot
+	local visualModel = root:GetChildren()
+	if visualModel then
+		local boatParts = visualModel[1]:GetChildren()
+		for _, part in pairs(boatParts) do
+			if part:IsA("Part") then
 				if part.CanCollide then part.CanCollide = false end
 			end
 		end
@@ -536,8 +541,9 @@ function Boat:UpdateVisualModel()
 			weld.Parent = part
 			weld.Part0 = part
 			weld.Part1 = self.VisualRoot
-			part.Transparency = 0
 			part.Anchored = false
+
+			FadeEffect.In(part)
 		end
 	end
 

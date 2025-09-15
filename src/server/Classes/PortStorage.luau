@@ -9,7 +9,7 @@ local CalculateProgress = require(ReplicatedStorage.Shared.Utils.CalculateProgre
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
-local ResizeFromEdge = require(ServerScriptService.Server.Modules.ResizeFromEdge)
+local ResizeFromEdge = require(ServerScriptService.Server.Modules.Tweens.ResizeFromEdge)
 local CleanerService = require(ServerScriptService.Server.Services.CleanerService)
 
 -- //SECTION - Types

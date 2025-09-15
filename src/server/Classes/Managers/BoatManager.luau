@@ -145,7 +145,7 @@ end
 function BoatManager:StartTenderCycle()
 	self:ResetTravellingAttributes()
 
-	local boatPos = self.BoatModel.PrimaryPart.CFrame
+	local boatPos = self.BoatModel.PrimaryPart.CFrame * CFrame.new(0, -15, 0)
 	self.LaneTender:MoveToBoat(boatPos)
 end
 

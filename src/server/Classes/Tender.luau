@@ -11,7 +11,8 @@ local TweenService = game:GetService("TweenService")
 local Animator = require(ServerScriptService.Server.Classes.Modules.Animator)
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local TenderType = require(ServerScriptService.Server.Classes.Types.TenderType)
-local ProgressBar = require(ServerScriptService.Server.Modules.ProgressBar)
+local ProgressBar = require(ServerScriptService.Server.Modules.Tweens.ProgressBar)
+local FadeEffect = require(ServerScriptService.Server.Modules.Tweens.FadeEffect)
 local CleanerService = require(ServerScriptService.Server.Services.CleanerService)
 
 -- //SECTION - Tender Types
@@ -459,35 +460,38 @@ end
 
 -- //SECTION - Visibility and Collision
 function Tender:Show()
-	local model = self.Model.Tender :: Model
-	local tenderParts = model:GetChildren()
-	for _, part in pairs(tenderParts) do
-		if part:IsA("Part") then
-			if part.Name ~= "Base" or part.Name ~= "VisualRoot" then
-				if part.Transparency and part.Transparency == 1 then part.Transparency = 0 end
+	local root = self.Model.Tender.VisualRoot
+	local visualModel = root:GetChildren()
+	if visualModel then
+		local tenderParts = visualModel[1]:GetChildren()
+		for _, part in pairs(tenderParts) do
+			if part:IsA("Part") then
+				if part.Transparency and part.Transparency == 1 then FadeEffect.In(part) end
 			end
 		end
 	end
 end
 
 function Tender:Hide()
-	local model = self.Model.Tender :: Model
-	local tenderParts = model:GetChildren()
-	for _, part in pairs(tenderParts) do
-		if part:IsA("Part") then
-			if part.Name ~= "Base" or part.Name ~= "VisualRoot" then
-				if part.Transparency and part.Transparency == 0 then part.Transparency = 1 end
+	local root = self.Model.Tender.VisualRoot
+	local visualModel = root:GetChildren()
+	if visualModel then
+		local tenderParts = visualModel[1]:GetChildren()
+		for _, part in pairs(tenderParts) do
+			if part:IsA("Part") then
+				if part.Transparency and part.Transparency == 0 then FadeEffect.Out(part) end
 			end
 		end
 	end
 end
 
 function Tender:CanCollide()
-	local model = self.Model.Tender :: Model
-	local tenderParts = model:GetChildren()
-	for _, part in pairs(tenderParts) do
-		if part:IsA("Part") then
-			if part.Name ~= "Base" or part.Name ~= "VisualRoot" then
+	local root = self.Model.Tender.VisualRoot
+	local visualModel = root:GetChildren()
+	if visualModel then
+		local tenderParts = visualModel[1]:GetChildren()
+		for _, part in pairs(tenderParts) do
+			if part:IsA("Part") then
 				if not part.CanCollide then part.CanCollide = true end
 			end
 		end
@@ -495,11 +499,12 @@ function Tender:CanCollide()
 end
 
 function Tender:CannotCollide()
-	local model = self.Model.Tender :: Model
-	local tenderParts = model:GetChildren()
-	for _, part in pairs(tenderParts) do
-		if part:IsA("Part") then
-			if part.Name ~= "Base" or part.Name ~= "VisualRoot" then
+	local root = self.Model.Tender.VisualRoot
+	local visualModel = root:GetChildren()
+	if visualModel then
+		local tenderParts = visualModel[1]:GetChildren()
+		for _, part in pairs(tenderParts) do
+			if part:IsA("Part") then
 				if part.CanCollide then part.CanCollide = false end
 			end
 		end
@@ -599,8 +604,9 @@ function Tender:UpdateVisualModel()
 			weld.Parent = part
 			weld.Part0 = part
 			weld.Part1 = self.VisualRoot
-			part.Transparency = 0
 			part.Anchored = false
+
+			FadeEffect.In(part)
 		end
 	end
 
