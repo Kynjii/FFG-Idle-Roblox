@@ -1,6 +1,7 @@
 local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local Animator = require(ServerScriptService.Server.Classes.Modules.Animator)
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local BoatType = require(ServerScriptService.Server.Classes.Types.BoatType)
 local DataService = require(ServerScriptService.Server.Services.DataService)
@@ -49,6 +50,10 @@ local DEFAULTS: BoatProps = {
 	StorageFull = false,
 	BaseFPS = Formulas.BOAT.BaseFPS,
 }
+
+local ANIMATIONS = {
+	WaterBob = "WaterBob",
+}
 -- //!SECTION
 
 local Boat = {} :: BoatInstance
@@ -91,6 +96,8 @@ function Boat.New(state, player: Player, model: Model): Boat
 	if self.isPurchased and not self:IsStorageFull() then task.delay(1, function()
 		self:StartFishing()
 	end) end
+
+	self:StartAnimation()
 
 	return self
 end
@@ -386,38 +393,42 @@ end
 
 -- //SECTION - Visibility and Collision
 function Boat:Show()
-	local model = self.Model
+	local model = self.Model.Boat
 	local boatParts = model:GetChildren()
 	for _, part in pairs(boatParts) do
-		if part.Name == "Purchase_Board" then continue end
-		if part.Transparency and part.Transparency == 1 then part.Transparency = 0 end
+		if part:IsA("Part") then
+			if part.Transparency and part.Transparency == 1 then part.Transparency = 0 end
+		end
 	end
 end
 
 function Boat:Hide()
-	local model = self.Model
+	local model = self.Model.Boat
 	local boatParts = model:GetChildren()
 	for _, part in pairs(boatParts) do
-		if part.Name == "Purchase_Board" then continue end
-		if part.Transparency and part.Transparency == 0 then part.Transparency = 1 end
+		if part:IsA("Part") then
+			if part.Transparency and part.Transparency == 0 then part.Transparency = 1 end
+		end
 	end
 end
 
 function Boat:CanCollide()
-	local model = self.Model
+	local model = self.Model.Boat
 	local boatParts = model:GetChildren()
 	for _, part in pairs(boatParts) do
-		if part.Name == "Purchase_Board" then continue end
-		if not part.CanCollide then part.CanCollide = true end
+		if part:IsA("Part") then
+			if not part.CanCollide then part.CanCollide = true end
+		end
 	end
 end
 
 function Boat:CannotCollide()
-	local model = self.Model
+	local model = self.Model.Boat
 	local boatParts = model:GetChildren()
 	for _, part in pairs(boatParts) do
-		if part.Name == "Purchase_Board" then continue end
-		if part.CanCollide then part.CanCollide = false end
+		if part:IsA("Part") then
+			if part.CanCollide then part.CanCollide = false end
+		end
 	end
 end
 -- //!SECTION
@@ -474,10 +485,23 @@ function Boat:Save()
 end
 -- //!SECTION
 
+-- //SECTION - Animations
+function Boat:StartAnimation()
+	local animator: Animator = DeepWait(self.Model, "Boat", "AnimationController", "Animator")
+	local animation: Animation = Animator.GetAnimation(ANIMATIONS.WaterBob)
+
+	local animationTrack: AnimationTrack = self._cleaner:add(animator:LoadAnimation(animation))
+	animationTrack.Looped = true
+
+	task.wait(math.random(0.5, 1.5))
+	animationTrack:Play()
+end
+-- //!SECTION
+
 -- //SECTION - Cleanup
 function Boat:ClearAllAttributes(instance: Instance)
 	for name, _ in pairs(instance:GetAttributes()) do
-		instance:SetAttribute(name, nil)
+		if not string.find(name, "^RBX_") then instance:SetAttribute(name, nil) end
 	end
 end
 

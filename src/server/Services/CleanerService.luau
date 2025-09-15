@@ -7,6 +7,7 @@ function Cleaner.new()
 		_threads = {},
 		_tweens = {},
 		_cancels = {},
+		_animations = {},
 	}, Cleaner)
 end
 
@@ -17,8 +18,12 @@ function Cleaner:add(x)
 		self._connections[#self._connections + 1] = x
 	elseif t == "thread" then
 		self._threads[#self._threads + 1] = x
-	elseif t == "Instance" and x.ClassName == "Tween" then
-		self._tweens[#self._tweens + 1] = x
+	elseif t == "Instance" then
+		if x.ClassName == "Tween" then
+			self._tweens[#self._tweens + 1] = x
+		elseif x.ClassName == "AnimationTrack" then
+			self._animations[#self._animations + 1] = x
+		end
 	elseif type(x) == "function" then
 		self._cancels[#self._cancels + 1] = x
 	end
@@ -54,6 +59,14 @@ function Cleaner:clean()
 	for i = #self._cancels, 1, -1 do
 		pcall(self._cancels[i])
 		self._cancels[i] = nil
+	end
+	-- Animation Tracks
+	for i = #self._animations, 1, -1 do
+		local at = self._animations[i]
+		pcall(function()
+			at:Stop()
+		end)
+		self._animations[i] = nil
 	end
 end
 

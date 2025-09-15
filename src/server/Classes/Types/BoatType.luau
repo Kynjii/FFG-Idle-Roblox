@@ -52,6 +52,7 @@ export type BoatInstance = {
 	Model: Model,
 	FishingInterval: thread,
 	Player: Player,
+	Animations: { [string]: Animation },
 
 	-- Core Boat Actions
 	Purchase: (self: BoatInstance) -> (),
@@ -91,6 +92,9 @@ export type BoatInstance = {
 	CanUpgrade: (self: BoatInstance) -> boolean,
 	IsStorageFull: (self: BoatInstance) -> boolean,
 	ShowUpgradeStageUpgrade: (self: BoatInstance) -> boolean,
+
+	-- Animations
+	StartAnimation: (self: BoatInstance) -> (),
 
 	-- Cleaner Service
 	_cleaner: (any) -> any,

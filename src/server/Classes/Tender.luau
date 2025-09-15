@@ -8,6 +8,7 @@ local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 local TweenService = game:GetService("TweenService")
+local Animator = require(ServerScriptService.Server.Classes.Modules.Animator)
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local TenderType = require(ServerScriptService.Server.Classes.Types.TenderType)
 local ProgressBar = require(ServerScriptService.Server.Modules.ProgressBar)
@@ -47,6 +48,10 @@ local DEFAULTS: TenderProps = {
 	FishInStorage = 0,
 	StorageFull = false,
 	BaseTravelTime = 10, -- secs
+}
+
+local ANIMATIONS = {
+	WaterBob = "WaterBob",
 }
 -- //!SECTION
 
@@ -92,7 +97,7 @@ function Tender.New(state, player, model)
 	self.CurrentTravelTime, self.NextLvlTravelTime = self:CalculateTravelTime()
 
 	-- Progress Bars
-	self.BillBoard = DeepWait(self.Model, "Base", "Billboard", "BillboardGui")
+	self.BillBoard = DeepWait(self.Model, "Tender", "Base", "Billboard", "BillboardGui")
 	self.ProgressBar = DeepWait(self.BillBoard, "ProgressBarBG", "ProgressBar")
 
 	-- Tweens
@@ -100,6 +105,8 @@ function Tender.New(state, player, model)
 	self.MoveTween = nil
 
 	self._cleaner = CleanerService.new()
+
+	self:StartAnimation()
 
 	return self
 end
@@ -446,38 +453,42 @@ end
 
 -- //SECTION - Visibility and Collision
 function Tender:Show()
-	local model = self.Model :: Model
+	local model = self.Model.Tender :: Model
 	local tenderParts = model:GetChildren()
 	for _, part in pairs(tenderParts) do
-		if part.Name == "Purchase_Board" then continue end
-		if part.Transparency and part.Transparency == 1 then part.Transparency = 0 end
+		if part:IsA("Part") then
+			if part.Transparency and part.Transparency == 1 then part.Transparency = 0 end
+		end
 	end
 end
 
 function Tender:Hide()
-	local model = self.Model :: Model
+	local model = self.Model.Tender :: Model
 	local tenderParts = model:GetChildren()
 	for _, part in pairs(tenderParts) do
-		if part.Name == "Purchase_Board" then continue end
-		if part.Transparency and part.Transparency == 0 then part.Transparency = 1 end
+		if part:IsA("Part") then
+			if part.Transparency and part.Transparency == 0 then part.Transparency = 1 end
+		end
 	end
 end
 
 function Tender:CanCollide()
-	local model = self.Model :: Model
+	local model = self.Model.Tender :: Model
 	local tenderParts = model:GetChildren()
 	for _, part in pairs(tenderParts) do
-		if part.Name == "Purchase_Board" then continue end
-		if not part.CanCollide then part.CanCollide = true end
+		if part:IsA("Part") then
+			if not part.CanCollide then part.CanCollide = true end
+		end
 	end
 end
 
 function Tender:CannotCollide()
-	local model = self.Model :: Model
+	local model = self.Model.Tender :: Model
 	local tenderParts = model:GetChildren()
 	for _, part in pairs(tenderParts) do
-		if part.Name == "Purchase_Board" then continue end
-		if part.CanCollide then part.CanCollide = false end
+		if part:IsA("Part") then
+			if part.CanCollide then part.CanCollide = false end
+		end
 	end
 end
 -- //!SECTION
@@ -534,6 +545,19 @@ end
 
 function Tender:Save()
 	DataService.SaveTenderState(self.Player, self.Id, self:Serialize())
+end
+-- //!SECTION
+
+-- //SECTION - Animations
+function Tender:StartAnimation()
+	local animator: Animator = DeepWait(self.Model, "Tender", "AnimationController", "Animator")
+	local animation: Animation = Animator.GetAnimation(ANIMATIONS.WaterBob)
+
+	local animationTrack: AnimationTrack = self._cleaner:add(animator:LoadAnimation(animation))
+	animationTrack.Looped = true
+
+	task.wait(math.random(0.5, 1.5))
+	animationTrack:Play()
 end
 -- //!SECTION
 

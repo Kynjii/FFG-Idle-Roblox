@@ -100,6 +100,9 @@ export type TenderInstance = {
 	IsStorageFull: (self: TenderInstance) -> boolean,
 	ShowUpgradeStageUpgrade: (self: TenderInstance) -> boolean,
 
+	-- Animation
+	StartAnimation: (self: TenderInstance) -> (),
+
 	-- Saving and Loading
 	Serialize: (self: TenderInstance) -> { [string]: any },
 	Save: (self: TenderInstance) -> (),
