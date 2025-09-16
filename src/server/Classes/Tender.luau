@@ -14,6 +14,7 @@ local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.Class
 local TenderType = require(ServerScriptService.Server.Classes.Types.TenderType)
 local ProgressBar = require(ServerScriptService.Server.Modules.Tweens.ProgressBar)
 local FadeEffect = require(ServerScriptService.Server.Modules.Tweens.FadeEffect)
+local PopUp = require(ServerScriptService.Server.Modules.Tweens.PopUp)
 local CleanerService = require(ServerScriptService.Server.Services.CleanerService)
 
 -- //SECTION - Tender Types
@@ -259,6 +260,8 @@ function Tender:AddFish(amount)
 
 	self.FishInStorage += math.max(amount)
 
+	self:ShowFishPopUp(amount)
+
 	if self.FishInStorage >= self.CurrentMaxStorage then
 		self.FishInStorage = self.CurrentMaxStorage
 		self:UpdateStorageStatus(true)
@@ -455,6 +458,17 @@ function Tender:UpdateProximityPromptUI(proximityPrompt: ProximityPrompt)
 	else
 		proximityPrompt.ObjectText = self.isPurchased and "Upgrade Tender" or "Purchase"
 		proximityPrompt.ActionText = self.isPurchased and "Gold: " .. FormatNumber(self.UpgradeCost) or "Gold: " .. FormatNumber(self.BaseCost)
+	end
+end
+
+function Tender:ShowFishPopUp(amount)
+	local billboard: BillboardGui = self.Model.PrimaryPart.Billboard:WaitForChild("BoatPopupTemplate")
+	if billboard then
+		local clone = billboard:Clone()
+		clone.Parent = self.Model.PrimaryPart.Billboard
+		clone.Adornee = self.Model.PrimaryPart
+		clone.Name = "Popup_Clone"
+		PopUp.Animate(clone, amount, clone.Boat)
 	end
 end
 -- //!SECTION

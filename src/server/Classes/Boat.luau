@@ -391,7 +391,7 @@ function Boat:ShowFishPopUp(amount)
 		local clone = billboard:Clone()
 		clone.Parent = self.Model.PrimaryPart.Billboard
 		clone.Adornee = self.Model.PrimaryPart
-		clone.Name = "FishPopup_Clone"
+		clone.Name = "Popup_Clone"
 		PopUp.Animate(clone, amount, clone.Fish)
 	end
 end
