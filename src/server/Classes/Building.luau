@@ -169,7 +169,7 @@ function Building:SetupPurchaseBoard()
 			pbDetails.NameLabel.Parent.Visible = true
 		end
 
-		pbDetails.LevelLabel.Text = self.isPurchased and "Level: " .. self.Level or "Purchase Building"
+		pbDetails.LevelLabel.Text = self.isPurchased and "Lvl: " .. self.Level or "Purchase Building"
 	end
 
 	return purchaseBoard
@@ -183,7 +183,7 @@ function Building:UpdatePurchaseBoardUI()
 	pbDetails.LevelLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel") :: TextLabel
 
 	local level = self.Level
-	pbDetails.LevelLabel.Text = "Level: " .. level
+	pbDetails.LevelLabel.Text = "Lvl: " .. level
 
 	local qualityInfo = FFGEnum.QUALITY[self.UpgradeStage]
 	local color = qualityInfo.Color

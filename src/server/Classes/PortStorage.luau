@@ -218,7 +218,7 @@ function PortStorage:SetupPurchaseBoard()
 
 		local level = self.Level
 
-		pbDetails.LevelLabel.Text = self.isPurchased and "Level: " .. level or "Purchase Storage"
+		pbDetails.LevelLabel.Text = self.isPurchased and "Lvl: " .. level or "Purchase Storage"
 
 		-- STORAGE Stats
 		local currentStorage, nextStorage = self:CalculateMaxStorage()
@@ -250,7 +250,7 @@ function PortStorage:UpdatePurchaseBoardUI()
 	local storageProgress = CalculateProgress(self.FishInStorage, self.CurrentMaxStorage)
 	pbDetails.StorageProgress.Size = UDim2.fromScale(1, storageProgress)
 
-	pbDetails.LevelLabel.Text = "Level: " .. self.Level
+	pbDetails.LevelLabel.Text = "Lvl: " .. self.Level
 
 	local qualityInfo = FFGEnum.QUALITY[self.UpgradeStage]
 	local color = qualityInfo.Color

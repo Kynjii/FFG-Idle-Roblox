@@ -265,7 +265,7 @@ function Boat:SetupPurchaseBoard()
 			pbDetails.NameLabel.Parent.Visible = true
 		end
 
-		pbDetails.LevelLabel.Text = self.isPurchased and "Level: " .. self.Level or "Purchase Boat"
+		pbDetails.LevelLabel.Text = self.isPurchased and "Lvl: " .. self.Level or "Purchase Boat"
 
 		-- STORAGE Stats
 		local currentStorage, nextStorage = self:CalculateMaxStorage()
@@ -313,7 +313,7 @@ function Boat:UpdatePurchaseBoardUI()
 	pbDetails.StorageProgress.Size = UDim2.fromScale(1, storageProgress)
 
 	local level = self.Level
-	pbDetails.LevelLabel.Text = "Level: " .. level
+	pbDetails.LevelLabel.Text = "Lvl: " .. level
 
 	local currentUpgradeStage = self.UpgradeStage
 

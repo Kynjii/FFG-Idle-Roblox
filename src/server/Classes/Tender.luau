@@ -354,7 +354,7 @@ function Tender:SetupPurchaseBoard()
 			pbDetails.NameLabel.Parent.Visible = true
 		end
 
-		pbDetails.LevelLabel.Text = self.isPurchased and "Level: " .. level or "Purchase Tender"
+		pbDetails.LevelLabel.Text = self.isPurchased and "Lvl: " .. level or "Purchase Tender"
 
 		-- STORAGE Stats
 		local currentStorage, nextStorage = self:CalculateMaxStorage()
@@ -393,7 +393,7 @@ function Tender:UpdatePurchaseBoardUI()
 		pbDetails.NextTravelTimeLabel.Visible = false
 	end
 
-	pbDetails.LevelLabel.Text = "Level: " .. self.Level
+	pbDetails.LevelLabel.Text = "Lvl: " .. self.Level
 
 	local qualityInfo = FFGEnum.QUALITY[self.UpgradeStage]
 	local color = qualityInfo.Color

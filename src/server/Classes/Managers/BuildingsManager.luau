@@ -18,11 +18,9 @@ function BuildingsManager.New(realmData, player: Player, teamId: number)
 	self.TeamId = teamId
 
 	self.BuildingModels = self:FindBuildingModels()
-	print(self.BuildingModels)
 
 	local buildingsArr = realmData.Buildings
 	self.Buildings = self:CreateBuildings(buildingsArr)
-	print(self.Buildings)
 
 	return self
 end
