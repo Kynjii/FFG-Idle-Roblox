@@ -7,6 +7,7 @@ return {
 			Boats = {},
 			Tenders = {},
 			Storages = {},
+			Buildings = {},
 		},
 		[2] = {
 			Lanes = 6,
@@ -14,6 +15,7 @@ return {
 			Boats = {},
 			Tenders = {},
 			Storages = {},
+			Buildings = {},
 		},
 		[3] = {
 			Lanes = 6,
@@ -21,6 +23,7 @@ return {
 			Boats = {},
 			Tenders = {},
 			Storages = {},
+			Buildings = {},
 		},
 		[4] = {
 			Lanes = 6,
@@ -28,6 +31,7 @@ return {
 			Boats = {},
 			Tenders = {},
 			Storages = {},
+			Buildings = {},
 		},
 	},
 	Currencies = {

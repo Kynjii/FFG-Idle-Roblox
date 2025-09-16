@@ -2,9 +2,12 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local BoatType = require(ServerScriptService.Server.Classes.Types.BoatType)
 local TenderType = require(ServerScriptService.Server.Classes.Types.TenderType)
 local Teams = game:GetService("Teams")
+local BuildingsManagerType = require(ServerScriptService.Server.Classes.Types.BuildingsManagerType)
+local BuildingsManager = require(script.Parent.BuildingsManager)
 local ChainManager = require(script.Parent.ChainManager)
 local ChainManagerType = require(ServerScriptService.Server.Classes.Types.ChainManagerType)
 
+type BuildingsManager = BuildingsManagerType.BuildingsManager
 type BoatInstance = BoatType.BoatInstance
 type Tender = TenderType.Tender
 type ChainManager = ChainManagerType.ChainManagerInstance
@@ -54,6 +57,7 @@ TeamManager.Teams = {
 }
 
 TeamManager.ChainManagers = {}
+TeamManager.BuildingsManager = {}
 
 function TeamManager.CreateTeams()
 	for i, team in ipairs(TeamManager.Teams) do
@@ -86,6 +90,20 @@ function TeamManager.AssignChainManagers(profile, player: Player, teamId: number
 	end
 end
 
+function TeamManager.AssignBuildingsManager(profile, player: Player, teamId: number)
+	TeamManager.BuildingsManager[player.UserId] = TeamManager.BuildingsManager[player.UserId] or { OwnerId = player.UserId }
+	local currentRealmId = profile.CurrentRealm
+	local realmData = profile.Realms[currentRealmId]
+
+	if not realmData then return end
+
+	local BuildingsManager: BuildingsManager = BuildingsManager.New(realmData, player, teamId)
+	if not BuildingsManager then return end
+
+	table.insert(TeamManager.BuildingsManager[player.UserId], BuildingsManager)
+	BuildingsManager:Initialize()
+end
+
 function TeamManager.AssignTeam(player: Player)
 	local teams = Teams:GetTeams()
 	for i, team in ipairs(teams) do
@@ -101,20 +119,33 @@ function TeamManager.AssignTeam(player: Player)
 end
 
 function TeamManager.CleanupPlayer(userId: number)
-	local list = TeamManager.ChainManagers[userId]
-	if not list then return end
+	local chainList = TeamManager.ChainManagers[userId]
+	local buildingList = TeamManager.BuildingsManager[userId]
+	if not chainList or not buildingList then return end
 
-	for i = #list, 1, -1 do
-		local manager = list[i]
+	for i = #chainList, 1, -1 do
+		local manager = chainList[i]
 		if typeof(manager) == "table" and manager.Destroy then
 			local ok, err = pcall(function()
 				manager:Destroy()
 			end)
-			if not ok then warn("[TeamManager] Manager destroy error:", err) end
+			if not ok then warn("[TeamManager] ChainManager destroy error:", err) end
 		end
-		list[i] = nil
+		chainList[i] = nil
 	end
 	TeamManager.ChainManagers[userId] = nil
+
+	for i = #buildingList, 1, -1 do
+		local manager = buildingList[i]
+		if typeof(manager) == "table" and manager.Destroy then
+			local ok, err = pcall(function()
+				manager:Destroy()
+			end)
+			if not ok then warn("[TeamManager] BuildingManager destroy error:", err) end
+		end
+		buildingList[i] = nil
+	end
+	TeamManager.BuildingsManager[userId] = nil
 end
 
 return TeamManager

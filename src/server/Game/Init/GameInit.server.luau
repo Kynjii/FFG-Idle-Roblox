@@ -45,6 +45,7 @@ local function PlayerAdded(player: Player)
 				return
 			end
 			TeamManager.AssignChainManagers(profile.Data, player, teamId)
+			TeamManager.AssignBuildingsManager(profile.Data, player, teamId)
 		else
 			profile:EndSession()
 		end

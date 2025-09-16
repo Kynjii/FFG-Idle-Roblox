@@ -95,6 +95,9 @@ local FORMULAS = {
 		BaseCost = 100,
 		BaseStorage = 400,
 	},
+	BUILDING = {
+		BaseCost = 100,
+	},
 	TIER_MULTIPLIER = {
 		[1] = 1,
 		[2] = 10,

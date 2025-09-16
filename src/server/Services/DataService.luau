@@ -151,36 +151,6 @@ function DataService.SaveBoatState(player: Player, boatId: string, newState): bo
 	FFGHelpers.PrintLog("Saved boat state for player", player.Name, "boat", boatId)
 	return true
 end
-
--- //TODO - Figure out with boatstate function to use when multiple is needed
-function DataService.GetBoatState(profile)
-	if not profile or not profile.Data then return nil end
-	local currentRealm = profile.Data.CurrentRealm or 1
-
-	if not profile.Data.Realms then return nil end
-	if not profile.Data.Realms[currentRealm] then return nil end
-	if not profile.Data.Realms[currentRealm].Boats then return nil end
-
-	return profile.Data.Realms[currentRealm].Boats
-end
-
-function DataService.LoadBoatState(player: Player)
-	FFGHelpers.PrintLog("Attempting to load boat state for: ", player)
-	local profile = DataService.Profiles[player]
-	if not profile then
-		FFGHelpers.PrintLog("No profile found for: ", player)
-		return nil
-	end
-
-	local state = DataService.GetBoatState(profile)
-	if not state then
-		FFGHelpers.PrintLog("Unable to get BoatState for loading")
-		return nil
-	end
-
-	FFGHelpers.PrintLog("Current boat state: ", state)
-	return state
-end
 -- //!SECTION
 
 -- //SECTION - TENDERS
@@ -225,36 +195,6 @@ function DataService.SaveTenderState(player: Player, tenderId: string, newState)
 	FFGHelpers.PrintLog("Saved tender state for player", player.Name, "tender", tenderId)
 	return true
 end
-
--- //TODO - Figure out with tenderstate function to use when multiple is needed
-function DataService.GetTenderState(profile)
-	if not profile or not profile.Data then return nil end
-	local currentRealm = profile.Data.CurrentRealm or 1
-
-	if not profile.Data.Realms then return nil end
-	if not profile.Data.Realms[currentRealm] then return nil end
-	if not profile.Data.Realms[currentRealm].Tenders then return nil end
-
-	return profile.Data.Realms[currentRealm].Tenders
-end
-
-function DataService.LoadTenderState(player: Player)
-	FFGHelpers.PrintLog("Attempting to load tender state for: ", player)
-	local profile = DataService.Profiles[player]
-	if not profile then
-		FFGHelpers.PrintLog("No profile found for: ", player)
-		return nil
-	end
-
-	local state = DataService.GetTenderState(profile)
-	if not state then
-		FFGHelpers.PrintLog("Unable to get TenderState for loading")
-		return nil
-	end
-
-	FFGHelpers.PrintLog("Current tender state: ", state)
-	return state
-end
 -- //!SECTION
 
 -- //SECTION - STORAGE UNITS
@@ -297,6 +237,50 @@ function DataService.SaveStorageState(player: Player, storageId: string, newStat
 	end
 
 	FFGHelpers.PrintLog("Saved tender state for player", player.Name, "tender", storageId)
+	return true
+end
+-- //!SECTION
+
+-- //SECTION - BUILDINGS
+function DataService.SaveBuildingState(player: Player, buildingId: string, newState): boolean
+	local profile = DataService.Profiles[player]
+	if not profile then
+		FFGHelpers.PrintLog("No profile found when attempting to save building state for: ", player)
+		return false
+	end
+
+	-- Ensure the data structure exists
+	if not profile.Data.Realms then
+		FFGHelpers.PrintLog("No Realms data structure found")
+		return false
+	end
+
+	local currentRealm = profile.Data.CurrentRealm or 1
+	if not profile.Data.Realms[currentRealm] then
+		FFGHelpers.PrintLog("No data structure found for Realm:", currentRealm)
+		return false
+	end
+
+	-- Initialize Buildings array if it doesn't exist
+	if not profile.Data.Realms[currentRealm].Buildings then profile.Data.Realms[currentRealm].Buildings = {} end
+
+	local existingBuildingIndex = nil
+	for i, building in ipairs(profile.Data.Realms[currentRealm].Buildings) do
+		if building[FFGEnum.CLASS.PROPERTIES.Id] == buildingId then
+			existingBuildingIndex = i
+			break
+		end
+	end
+
+	if existingBuildingIndex then
+		profile.Data.Realms[currentRealm].Buildings[existingBuildingIndex] = newState
+		FFGHelpers.PrintLog("Updated existing building at index", existingBuildingIndex)
+	else
+		table.insert(profile.Data.Realms[currentRealm].Buildings, newState)
+		FFGHelpers.PrintLog("Added new building with ID", buildingId)
+	end
+
+	FFGHelpers.PrintLog("Saved building state for player", player.Name, "building", buildingId)
 	return true
 end
 -- //!SECTION

@@ -87,6 +87,7 @@ FFGEnum.ATTRIBUTES = {
 	finishedUnloading = "finishedUnloading",
 	Tier = "Tier",
 	TeamId = "TeamId",
+	BuildingId = "BuildingId",
 }
 
 FFGEnum.CLASS = {

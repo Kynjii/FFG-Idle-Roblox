@@ -44,9 +44,6 @@ function ChainManager.New(realmData, tier: number, player: Player, teamId: numbe
 	self.StorageModel = self:FindStorageModel() :: Model
 	self.LaneStorage = PortStorage.New(storageArr[tier], player, self.StorageModel)
 
-	-- Tender Travelling props
-	self.loadingTime = 1
-
 	-- Attach listeners to handle the Tender Travelling Cycle
 	self:AttachAttListeners()
 
