@@ -206,8 +206,7 @@ end
 function Boat:AddFish(amount)
 	self.FishInStorage += amount
 
-	local isAdd = true
-	self:ShowFishPopUp(amount, isAdd)
+	self:ShowFishPopUp(amount)
 	if self.FishInStorage >= self.CurrentMaxStorage then
 		self.FishInStorage = self.CurrentMaxStorage
 		self:UpdateStorageStatus(true)
@@ -218,7 +217,6 @@ end
 
 function Boat:RemoveFish(amount)
 	self.FishInStorage -= amount
-	self:ShowFishPopUp(amount)
 	self:UpdateStorageStatus(false)
 	self:Save()
 end
@@ -387,14 +385,14 @@ function Boat:UpdateProximityPromptUI(proximityPrompt: ProximityPrompt)
 	end
 end
 
-function Boat:ShowFishPopUp(amount, isAdd)
+function Boat:ShowFishPopUp(amount)
 	local billboard: BillboardGui = self.Model.PrimaryPart.Billboard:WaitForChild("FishPopupTemplate")
 	if billboard then
 		local clone = billboard:Clone()
 		clone.Parent = self.Model.PrimaryPart.Billboard
 		clone.Adornee = self.Model.PrimaryPart
-		clone.Name = "FishPopup"
-		PopUp.Animate(clone, amount, isAdd)
+		clone.Name = "FishPopup_Clone"
+		PopUp.Animate(clone, amount, clone.Fish)
 	end
 end
 -- //!SECTION

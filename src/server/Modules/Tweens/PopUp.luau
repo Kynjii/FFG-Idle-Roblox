@@ -7,20 +7,14 @@ local DEFAULTS = {
 	Duration = 1,
 }
 
-function PopUp.Animate(billboard: BillboardGui, textValue: number, isAdd: boolean)
+function PopUp.Animate(billboard: BillboardGui, textValue: number, imageLabel: ImageLabel)
 	if billboard and textValue then
-		local image = billboard:WaitForChild("ImageLabel")
+		local image = imageLabel
 		local text: TextLabel = billboard:WaitForChild("TextLabel")
 
-		if isAdd then
-			billboard.StudsOffsetWorldSpace = Vector3.new(5, 0, 10)
-			text.Text = "+" .. FormatNumber(textValue)
-			text.TextColor3 = Color3.fromRGB(0, 255, 0)
-		else
-			billboard.StudsOffsetWorldSpace = Vector3.new(-5, 0, 10)
-			text.Text = "-" .. FormatNumber(textValue)
-			text.TextColor3 = Color3.fromRGB(255, 0, 0)
-		end
+		billboard.StudsOffsetWorldSpace = Vector3.new(0, 0, 10)
+		text.Text = "+" .. FormatNumber(textValue)
+		text.TextColor3 = Color3.fromRGB(0, 255, 0)
 
 		PopUp.AnimateBillboard(billboard)
 		if image then PopUp.AnimateImageLabel(image) end

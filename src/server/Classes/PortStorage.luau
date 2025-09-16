@@ -218,7 +218,7 @@ function PortStorage:SetupPurchaseBoard()
 
 		local level = self.Level
 
-		pbDetails.LevelLabel.Text = self.isPurchased and "Level: " .. level or "Purchase Boat"
+		pbDetails.LevelLabel.Text = self.isPurchased and "Level: " .. level or "Purchase Storage"
 
 		-- STORAGE Stats
 		local currentStorage, nextStorage = self:CalculateMaxStorage()
@@ -355,22 +355,22 @@ end
 
 -- //SECTION - Visibility and Collision
 function PortStorage:Show()
-	ClassVisualizer.Show(self.Model.FishInStorage.Base)
+	ClassVisualizer.Show(self.Model.FishInStorage)
 	ClassVisualizer.Show(self.Model.Storage)
 end
 
 function PortStorage:Hide()
-	ClassVisualizer.Hide(self.Model.FishInStorage.Base)
+	ClassVisualizer.Hide(self.Model.FishInStorage)
 	ClassVisualizer.Hide(self.Model.Storage)
 end
 
 function PortStorage:CanCollide()
-	ClassVisualizer.CanCollide(self.Model.FishInStorage.Base)
+	ClassVisualizer.CanCollide(self.Model.FishInStorage)
 	ClassVisualizer.CanCollide(self.Model.Storage)
 end
 
 function PortStorage:CannotCollide()
-	ClassVisualizer.CannotCollide(self.Model.FishInStorage.Base)
+	ClassVisualizer.CannotCollide(self.Model.FishInStorage)
 	ClassVisualizer.CannotCollide(self.Model.Storage)
 end
 -- //!SECTION
