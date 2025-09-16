@@ -508,7 +508,7 @@ function Boat:UpdateVisualModel()
 			weld.Part1 = self.VisualRoot
 			part.Anchored = false
 
-			FadeEffect.In(part)
+			if self.isPurchased then FadeEffect.In(part) end
 		end
 	end
 
@@ -538,6 +538,7 @@ end
 
 function Boat:Destroy()
 	self:Hide()
+	self:CannotCollide()
 
 	pcall(function()
 		self:Save()

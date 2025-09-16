@@ -11,6 +11,7 @@ local CalculateProgress = require(ReplicatedStorage.Shared.Utils.CalculateProgre
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
+local FadeEffect = require(ServerScriptService.Server.Modules.Tweens.FadeEffect)
 local ResizeFromEdge = require(ServerScriptService.Server.Modules.Tweens.ResizeFromEdge)
 local CleanerService = require(ServerScriptService.Server.Services.CleanerService)
 
@@ -29,6 +30,7 @@ local DEFAULTS: StorageProps = {
 	BaseCost = Formulas.STORAGE.BaseCost,
 	isPurchased = false,
 	BaseStorage = Formulas.STORAGE.BaseStorage,
+	UpgradeStage = 1,
 	FishInStorage = 0,
 	StorageFull = false,
 }
@@ -57,6 +59,7 @@ function PortStorage.New(state, player: Player, model: Model): Storage
 	self.Id = self.Id or HttpService:GenerateGUID(false)
 	self.Owner = self.Owner or player.UserId
 	self.Model = model
+	self.VisualRoot = DeepWait(model, "Storage", "VisualRoot")
 	self.Tier = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.Tier) or DEFAULTS.Tier
 	self.Player = player
 
@@ -65,11 +68,16 @@ function PortStorage.New(state, player: Player, model: Model): Storage
 	self.BaseStorage = self:CalculateBaseStorage()
 	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
 
+	self.VisualModels = self:GetVisualModels()
+	self.CurrentVisualModel = nil
+
 	-- Tweens
 	self.ProgressTween = nil
 	self.FishModel = DeepWait(self.Model, "FishInStorage", "Base") :: UnionOperation
 
 	self._cleaner = CleanerService.new()
+
+	self:UpdateVisualModel()
 
 	return self
 end
@@ -79,6 +87,7 @@ end
 function PortStorage:Purchase()
 	self.isPurchased = true
 
+	self:UpdateVisualModel()
 	self:Save()
 end
 
@@ -86,12 +95,22 @@ function PortStorage:Upgrade()
 	if not self:CanUpgrade() then return end
 
 	self.Level += 1
-	self.UpgradeCost = self:CalculateUpgradeCost()
+	for k, v in ipairs(Formulas.PROMO_LEVEL) do
+		if self.Level == v then
+			self:IncreaseUpgradeStage(k)
+			self:UpdateVisualModel()
+			break
+		end
+	end
 
 	self.UpgradeCost = self:CalculateUpgradeCost()
 	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
 
 	self:Save()
+end
+
+function PortStorage:IncreaseUpgradeStage(stage)
+	self.UpgradeStage = stage
 end
 
 function PortStorage:AddFish(amount: number)
@@ -186,12 +205,17 @@ end
 function PortStorage:SetupPurchaseBoard()
 	local purchaseBoard = self.Model:WaitForChild("Purchase_Board")
 	local pbDetails = {}
+	pbDetails.NameLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel") :: TextLabel
 	pbDetails.LevelLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel") :: TextLabel
 	pbDetails.CurrentMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentMaxStorage", "TextLabel") :: TextLabel
 	pbDetails.NextMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextMaxStorage", "TextLabel") :: TextLabel
 	pbDetails.StorageProgress = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StorageBar", "StorageProgress") :: Frame
 
 	if pbDetails then
+		local qualityInfo = FFGEnum.QUALITY[self.UpgradeStage]
+		local color = qualityInfo.Color
+		pbDetails.NameLabel.TextColor3 = color
+
 		local level = self.Level
 
 		pbDetails.LevelLabel.Text = self.isPurchased and "Level: " .. level or "Purchase Boat"
@@ -214,6 +238,7 @@ function PortStorage:UpdatePurchaseBoardUI()
 	local purchaseBoard = self.Model:WaitForChild("Purchase_Board")
 
 	local pbDetails = {}
+	pbDetails.NameLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel") :: TextLabel
 	pbDetails.LevelLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel") :: TextLabel
 	pbDetails.CurrentMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentMaxStorage", "TextLabel") :: TextLabel
 	pbDetails.NextMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextMaxStorage", "TextLabel") :: TextLabel
@@ -226,6 +251,10 @@ function PortStorage:UpdatePurchaseBoardUI()
 	pbDetails.StorageProgress.Size = UDim2.fromScale(1, storageProgress)
 
 	pbDetails.LevelLabel.Text = "Level: " .. self.Level
+
+	local qualityInfo = FFGEnum.QUALITY[self.UpgradeStage]
+	local color = qualityInfo.Color
+	pbDetails.NameLabel.TextColor3 = color
 end
 
 function PortStorage:SetupProximityPrompt(purchaseBoard: Part)
@@ -326,22 +355,22 @@ end
 
 -- //SECTION - Visibility and Collision
 function PortStorage:Show()
-	ClassVisualizer.Show(self.Model.FishInStorage:GetChildren()[1])
+	ClassVisualizer.Show(self.Model.FishInStorage.Base)
 	ClassVisualizer.Show(self.Model.Storage)
 end
 
 function PortStorage:Hide()
-	ClassVisualizer.Hide(self.Model.FishInStorage:GetChildren()[1])
+	ClassVisualizer.Hide(self.Model.FishInStorage.Base)
 	ClassVisualizer.Hide(self.Model.Storage)
 end
 
 function PortStorage:CanCollide()
-	ClassVisualizer.CanCollide(self.Model.FishInStorage:GetChildren()[1])
+	ClassVisualizer.CanCollide(self.Model.FishInStorage.Base)
 	ClassVisualizer.CanCollide(self.Model.Storage)
 end
 
 function PortStorage:CannotCollide()
-	ClassVisualizer.CannotCollide(self.Model.FishInStorage:GetChildren()[1])
+	ClassVisualizer.CannotCollide(self.Model.FishInStorage.Base)
 	ClassVisualizer.CannotCollide(self.Model.Storage)
 end
 -- //!SECTION
@@ -387,8 +416,58 @@ function PortStorage:Save()
 end
 -- //!SECTION
 
+-- //SECTION - Visual Models
+function PortStorage:GetVisualModels()
+	local modelsFolder = DeepWait(game.Workspace, "Storage", "VisualStages")
+	local models = modelsFolder:GetChildren()
+
+	local templateModels: { [number]: Model } = {}
+	for i, model in ipairs(models) do
+		templateModels[tonumber(model.Name)] = model
+	end
+
+	return templateModels
+end
+
+function PortStorage:RemovePreviousVisualModel()
+	local visualModel = self.CurrentVisualModel
+	if not visualModel then return end
+
+	visualModel:Destroy()
+	self.CurrentVisualModel = nil
+end
+
+function PortStorage:UpdateVisualModel()
+	self:RemovePreviousVisualModel()
+
+	local templateModel = self.VisualModels[self.UpgradeStage]
+	local updatedModel = templateModel:Clone()
+
+	updatedModel.Name = templateModel.Name .. "_Clone"
+	updatedModel.Parent = self.VisualRoot
+	updatedModel:PivotTo(self.VisualRoot.CFrame)
+
+	for _, part in pairs(updatedModel:GetChildren()) do
+		if part:IsA("BasePart") then
+			local weld = Instance.new("WeldConstraint")
+			weld.Parent = part
+			weld.Part0 = part
+			weld.Part1 = self.VisualRoot
+			part.Anchored = false
+
+			if self.isPurchased then FadeEffect.In(part) end
+		end
+	end
+
+	self.CurrentVisualModel = updatedModel
+end
+-- //!SECTION
+
 -- //SECTION - Cleanup
 function PortStorage:Destroy()
+	self:Hide()
+	self:CannotCollide()
+
 	pcall(function()
 		self:Save()
 	end)

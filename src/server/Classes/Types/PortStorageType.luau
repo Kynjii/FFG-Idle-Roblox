@@ -89,6 +89,10 @@ export type StorageInstance = {
 	GetVisualModels: (self: StorageInstance) -> { [string]: Model },
 	RemovePreviousVisualModel: (self: StorageInstance) -> (),
 
+	-- Tweens
+	ProgressTween: Tween | nil,
+	FishModel: UnionOperation,
+
 	-- Cleaner Service
 	_cleaner: (any) -> any,
 
