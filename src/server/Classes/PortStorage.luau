@@ -68,6 +68,8 @@ function PortStorage.New(state, player: Player, model: Model): Storage
 	self.BaseStorage = self:CalculateBaseStorage()
 	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
 
+	self.TakeFishPrompt = nil
+
 	self.VisualModels = self:GetVisualModels()
 	self.CurrentVisualModel = nil
 
@@ -87,6 +89,7 @@ end
 function PortStorage:Purchase()
 	self.isPurchased = true
 
+	self.TakeFishPrompt = self:SetupFishRemovalPrompt()
 	self:UpdateVisualModel()
 	self:Save()
 end
@@ -195,10 +198,7 @@ function PortStorage:Initialize()
 	-- Setup UI components
 	local purchaseBoard = self:SetupPurchaseBoard()
 	if purchaseBoard then self:SetupProximityPrompt(purchaseBoard) end
-
-	-- Setup Sell Prompt (temp)
-	-- //TODO - Replace so the player can remove the fish into their own backpack
-	self:SetupFishRemovalPrompt()
+	if self.isPurchased then self.TakeFishPrompt = self:SetupFishRemovalPrompt() end
 	self:UpdateFishModel()
 end
 
@@ -272,6 +272,11 @@ function PortStorage:SetupProximityPrompt(purchaseBoard: Part)
 	proximityPrompt.MaxActivationDistance = 5
 	proximityPrompt.ObjectText = self.isPurchased and "Upgrade Storage" or "Purchase"
 	proximityPrompt.ActionText = self.isPurchased and "Gold: " .. FormatNumber(self.UpgradeCost) or "Gold: " .. FormatNumber(self.BaseCost)
+
+	-- Handle not showing the prompt if the user is not the owner
+	proximityPrompt.PromptShown:Connect(function(player: Player)
+		if player.UserId ~= self.Owner then return end
+	end)
 
 	-- Handle proximity prompt triggered
 	proximityPrompt.Triggered:Connect(function(player)

@@ -419,6 +419,11 @@ function Tender:SetupProximityPrompt(purchaseBoard: Part)
 	proximityPrompt.ObjectText = self.isPurchased and "Upgrade Tender" or "Purchase"
 	proximityPrompt.ActionText = self.isPurchased and "Gold: " .. FormatNumber(self.UpgradeCost) or "Gold: " .. FormatNumber(self.BaseCost)
 
+	-- Handle not showing the prompt if the user is not the owner
+	proximityPrompt.PromptShown:Connect(function(player: Player)
+		if player.UserId ~= self.Owner then return end
+	end)
+
 	-- Handle proximity prompt triggered
 	self._cleaner:add(proximityPrompt.Triggered:Connect(function(player)
 		if player.UserId ~= self.Owner then return end

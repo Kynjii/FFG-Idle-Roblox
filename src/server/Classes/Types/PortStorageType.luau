@@ -48,6 +48,7 @@ export type StorageInstance = {
 	Player: Player,
 	VisualModels: { [string]: Model },
 	CurrentVisualModel: Model | nil,
+	TakeFishPrompt: ProximityPrompt,
 
 	-- Core Boat Actions
 	Purchase: (self: StorageInstance) -> (),
@@ -71,6 +72,7 @@ export type StorageInstance = {
 	UpdatePurchaseBoardUI: (self: StorageInstance) -> (),
 	SetupProximityPrompt: (self: StorageInstance, purchaseBoard: Part) -> ProximityPrompt,
 	UpdateProximityPromptUI: (self: StorageInstance, proximityPrompt: ProximityPrompt) -> (),
+	SetupFishRemovalPrompt: (self: StorageInstance) -> (),
 
 	-- Visibility and Collision
 	Show: (self: StorageInstance) -> (),

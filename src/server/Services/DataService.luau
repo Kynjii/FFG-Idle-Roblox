@@ -337,7 +337,6 @@ function DataService.GetBuffState(player: Player, buffNames: { string })
 
 	local buffs = {}
 	for k, v in pairs(buffNames) do
-		print(k, v)
 		buffs[k] = profile.Data.Realms[currentRealm].Buffs[k] or nil
 	end
 

@@ -6,7 +6,7 @@ function ClassVisualizer.Show(root: Model)
 	local modelParts = root:GetChildren()
 	for _, part in pairs(modelParts) do
 		if part:IsA("Part") or part:IsA("UnionOperation") then
-			if part.Transparency and part.Transparency == 1 then FadeEffect.In(part) end
+			if part.Transparency and part.Transparency > 0.1 then FadeEffect.In(part) end
 		end
 	end
 end
@@ -15,7 +15,7 @@ function ClassVisualizer.Hide(root: Model | Part)
 	local modelParts = root:GetChildren()
 	for _, part in pairs(modelParts) do
 		if part:IsA("Part") or part:IsA("UnionOperation") then
-			if part.Transparency and part.Transparency == 0 then FadeEffect.Out(part) end
+			if part.Transparency and part.Transparency < 1 then FadeEffect.Out(part) end
 		end
 	end
 end
