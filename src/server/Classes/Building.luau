@@ -17,17 +17,19 @@ local CleanerService = require(ServerScriptService.Server.Services.CleanerServic
 
 -- //SECTION - Building Data
 local NAME = {
-	[1] = "Market 1",
-	[2] = "Market 2",
-	[3] = "Market 3",
-	[4] = "Market 4",
-	[5] = "Market 5",
-	[6] = "Market 6",
-	[7] = "Market 7",
-	[8] = "Ironhook Galley",
-	[9] = "Mariner’s Galleon",
-	[10] = "Wyrmcatcher",
-	[11] = "The Flynnrunner",
+	Market = {
+		[1] = "Market 1",
+		[2] = "Market 2",
+		[3] = "Market 3",
+		[4] = "Market 4",
+		[5] = "Market 5",
+		[6] = "Market 6",
+		[7] = "Market 7",
+		[8] = "Market 8",
+		[9] = "Market 9",
+		[10] = "Market 10",
+		[11] = "Market 11",
+	},
 }
 
 local DEFAULTS = {
@@ -66,9 +68,10 @@ function Building.New(state, player: Player, model: Model)
 	self.Owner = self.Owner or player.UserId
 	self.Model = model
 	self.VisualRoot = DeepWait(model, "Building", "VisualRoot")
-	self.Name = self:GetName()
 	self.Tier = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.Tier) or DEFAULTS.Tier
 	self.BuildingId = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.BuildingId)
+	self.BuildingName = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.BuildingName)
+	self.Name = self:GetName()
 	self.Player = player
 
 	self.BaseCost = self:CalculateBaseCost()
@@ -274,7 +277,7 @@ end
 
 -- //SECTION -  Building Utilities
 function Building:GetName()
-	return NAME[self.UpgradeStage]
+	return NAME[self.BuildingName][self.UpgradeStage]
 end
 
 function Building:CanUpgrade()
@@ -307,7 +310,7 @@ end
 
 -- //SECTION - Visual Models
 function Building:GetVisualModels()
-	local modelsFolder = DeepWait(game.Workspace, "Buildings", "VisualStages")
+	local modelsFolder = DeepWait(game.Workspace, "Buildings", "VisualStages", self.BuildingName)
 	local models = modelsFolder:GetChildren()
 
 	local templateModels: { [number]: Model } = {}

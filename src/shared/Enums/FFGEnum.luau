@@ -88,6 +88,7 @@ FFGEnum.ATTRIBUTES = {
 	Tier = "Tier",
 	TeamId = "TeamId",
 	BuildingId = "BuildingId",
+	BuildingName = "BuildingName",
 }
 
 FFGEnum.CLASS = {
