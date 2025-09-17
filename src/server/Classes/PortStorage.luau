@@ -316,7 +316,7 @@ end
 
 function PortStorage:SetupFishRemovalPrompt()
 	-- Create the proximity prompt
-	local parent = self.Model
+	local parent = self.Model.Storage.Panel
 	local proximityPrompt = Instance.new("ProximityPrompt", parent)
 
 	proximityPrompt.HoldDuration = 0.5

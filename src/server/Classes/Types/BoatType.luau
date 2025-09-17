@@ -1,3 +1,5 @@
+local ServerScriptService = game:GetService("ServerScriptService")
+local Buffs = require(ServerScriptService.Server.Math.Buffs)
 local BoatType = {}
 
 export type BoatProps = {
@@ -56,7 +58,7 @@ export type BoatInstance = {
 	Animations: { [string]: Animation },
 	VisualModels: { [string]: Model },
 	CurrentVisualModel: Model | nil,
-	Buffs: { [string]: any },
+	Buffs: { [string]: Buffs.BuffState },
 
 	-- Core Boat Actions
 	Purchase: (self: BoatInstance) -> (),

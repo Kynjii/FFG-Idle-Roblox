@@ -109,12 +109,11 @@ function Building.New(state, player: Player, model: Model, realmBuffs: { [string
 
 	self.BaseCost = self:CalculateBaseCost()
 	self.UpgradeCost = self:CalculateUpgradeCost()
-	self.Boosts = {}
 
 	self.VisualModels = self:GetVisualModels()
 	self.CurrentVisualModel = nil
 
-	self.BuildingBuff = realmBuffs[BUILDING_BUFFS[self.BuildingName]] or Buffs.Formulas[BUILDING_BUFFS[self.BuildingName]]
+	self.BuildingBuff = realmBuffs[BUILDING_BUFFS[self.BuildingName]] or Buffs.Formulas[BUILDING_BUFFS[self.BuildingName]] :: Buffs.BuffState
 	self.BuildingBuff.CurrentValue = Buffs.CalculateBuffValue(self.UpgradeStage, self.BuildingBuff)
 
 	self._cleaner = CleanerService.new()
@@ -196,6 +195,7 @@ function Building:SetupPurchaseBoard()
 	local pbDetails = {}
 	pbDetails.NameLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel") :: TextLabel
 	pbDetails.LevelLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel") :: TextLabel
+	pbDetails.BuffLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "Buff", "TextLabel") :: TextLabel
 
 	if pbDetails then
 		local qualityInfo = FFGEnum.QUALITY[self.UpgradeStage]
@@ -211,6 +211,8 @@ function Building:SetupPurchaseBoard()
 
 		pbDetails.LevelLabel.Text = self.isPurchased and "Lvl: " .. self.Level or "Purchase " .. self.Name
 		pbDetails.LevelLabel.TextXAlignment = "Center"
+
+		pbDetails.BuffLabel.Text = self.BuildingBuff and "+" .. (self.BuildingBuff.CurrentValue * 100) .. "%"
 	end
 
 	return purchaseBoard
@@ -222,6 +224,7 @@ function Building:UpdatePurchaseBoardUI()
 	local pbDetails = {}
 	pbDetails.NameLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel") :: TextLabel
 	pbDetails.LevelLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel") :: TextLabel
+	pbDetails.BuffLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "Buff", "TextLabel") :: TextLabel
 
 	local level = self.Level
 	pbDetails.LevelLabel.Text = "Lvl: " .. level
@@ -230,6 +233,8 @@ function Building:UpdatePurchaseBoardUI()
 	local color = qualityInfo.Color
 	pbDetails.NameLabel.TextColor3 = color
 	pbDetails.NameLabel.Text = self:GetName()
+
+	pbDetails.BuffLabel.Text = self.BuildingBuff and "+" .. (self.BuildingBuff.CurrentValue * 100) .. "%"
 
 	if self.isPurchased then pbDetails.NameLabel.Parent.Visible = true end
 end

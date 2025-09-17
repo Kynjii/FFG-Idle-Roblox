@@ -26,7 +26,7 @@ function ClassCalculator.CalculateUpgradeCost(baseValue: number, level: number)
 	return baseValue * mult
 end
 
-function ClassCalculator.CalculateMaxStorage(baseValue: number, level: number)
+function ClassCalculator.CalculateMaxStorage(baseValue: number, level: number, percentBuffValue: number?)
 	local lvl = clampLevel(level)
 	local nextLvl = clampLevel(level + 1)
 
@@ -35,10 +35,20 @@ function ClassCalculator.CalculateMaxStorage(baseValue: number, level: number)
 
 	local maxStorage = baseValue * earnNow
 	local nextLvlStorage = baseValue * earnNext
+	print("before buffs:", maxStorage, nextLvlStorage)
+	if percentBuffValue then
+		local buffedValue = percentBuffValue * maxStorage
+		local buffedNxtvalue = percentBuffValue * nextLvlStorage
+		maxStorage += buffedValue
+		nextLvlStorage += buffedNxtvalue
+
+		print("after buffs:", maxStorage, nextLvlStorage)
+	end
+
 	return maxStorage, nextLvlStorage
 end
 
-function ClassCalculator.CalculateFPS(baseFPS: number, upgradeStage: number)
+function ClassCalculator.CalculateFPS(baseFPS: number, upgradeStage: number, percentBuffValue: number?)
 	local sNow = clampStage(upgradeStage)
 	local sNext = clampStage(upgradeStage + 1)
 
@@ -47,6 +57,16 @@ function ClassCalculator.CalculateFPS(baseFPS: number, upgradeStage: number)
 
 	local fpsNow = baseFPS * multNow
 	local fpsNext = baseFPS * multNext
+	print("before buffs:", fpsNow, fpsNext)
+	if percentBuffValue then
+		local buffedValue = percentBuffValue * fpsNow
+		local buffedNxtvalue = percentBuffValue * fpsNext
+		fpsNow += buffedValue
+		fpsNext += buffedNxtvalue
+
+		print("after buffs:", fpsNow, fpsNext)
+	end
+
 	return fpsNow, fpsNext
 end
 

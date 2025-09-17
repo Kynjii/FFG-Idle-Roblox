@@ -22,6 +22,7 @@ local CleanerService = require(ServerScriptService.Server.Services.CleanerServic
 type Boat = BoatType.Boat
 type BoatProps = BoatType.BoatProps
 type BoatInstance = BoatType.BoatInstance
+type BuffState = Buffs.BuffState
 -- //!SECTION
 
 -- //SECTION - Boat Data
@@ -92,14 +93,14 @@ function Boat.New(state, player: Player, model: Model): Boat
 	self.Tier = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.Tier) or DEFAULTS.Tier
 	self.Player = player
 
+	self.Buffs = self:GetBuffs()
+
 	self.BaseCost = self:CalculateBaseCost()
 	self.UpgradeCost = self:CalculateUpgradeCost()
 	self.BaseStorage = self:CalculateBaseStorage()
 	self.BaseFPS = self:CalculateBaseFPS()
 	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
 	self.CurrentFPS, self.NextFPS = self:CalculateFPS()
-
-	self.Buffs = self:GetBuffs()
 
 	self.VisualModels = self:GetVisualModels()
 	self.CurrentVisualModel = nil
@@ -193,8 +194,9 @@ end
 function Boat:CalculateMaxStorage()
 	local baseStorage = self.BaseStorage or DEFAULTS.BaseStorage
 	if baseStorage == DEFAULTS.BaseStorage then baseStorage = self:CalculateBaseStorage() end
+	local storagePercentBuff = self.Buffs[BOAT_BUFFS.BoatStorage_Percent] and self.Buffs[BOAT_BUFFS.BoatStorage_Percent].CurrentValue or nil
 
-	return ClassCalculators.CalculateMaxStorage(baseStorage, self.Level)
+	return ClassCalculators.CalculateMaxStorage(baseStorage, self.Level, storagePercentBuff)
 end
 
 function Boat:CalculateBaseFPS()
@@ -207,8 +209,9 @@ end
 function Boat:CalculateFPS()
 	local baseFPS = self.BaseFPS or DEFAULTS.BaseFPS
 	if baseFPS == DEFAULTS.BaseFPS then baseFPS = self:CalculateBaseFPS() end
+	local fpsPercentBuff = self.Buffs[BOAT_BUFFS.FPS_Percent] and self.Buffs[BOAT_BUFFS.FPS_Percent].CurrentValue or nil
 
-	return ClassCalculators.CalculateFPS(baseFPS, self.UpgradeStage)
+	return ClassCalculators.CalculateFPS(baseFPS, self.UpgradeStage, fpsPercentBuff)
 end
 -- //!SECTION
 
