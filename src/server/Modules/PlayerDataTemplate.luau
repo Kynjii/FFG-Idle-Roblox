@@ -1,5 +1,6 @@
 return {
 	CurrentRealm = 1,
+	GlobalBuffs = {},
 	Realms = {
 		[1] = {
 			Lanes = 6,
@@ -8,6 +9,7 @@ return {
 			Tenders = {},
 			Storages = {},
 			Buildings = {},
+			Buffs = {},
 		},
 		[2] = {
 			Lanes = 6,
@@ -16,6 +18,7 @@ return {
 			Tenders = {},
 			Storages = {},
 			Buildings = {},
+			Buffs = {},
 		},
 		[3] = {
 			Lanes = 6,
@@ -24,6 +27,7 @@ return {
 			Tenders = {},
 			Storages = {},
 			Buildings = {},
+			Buffs = {},
 		},
 		[4] = {
 			Lanes = 6,
@@ -32,6 +36,7 @@ return {
 			Tenders = {},
 			Storages = {},
 			Buildings = {},
+			Buffs = {},
 		},
 	},
 	Currencies = {

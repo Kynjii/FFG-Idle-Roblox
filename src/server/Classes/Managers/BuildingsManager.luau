@@ -20,7 +20,8 @@ function BuildingsManager.New(realmData, player: Player, teamId: number)
 	self.BuildingModels = self:FindBuildingModels()
 
 	local buildingsArr = realmData.Buildings
-	self.Buildings = self:CreateBuildings(buildingsArr)
+	local realmBuffs = realmData.Buffs
+	self.Buildings = self:CreateBuildings(buildingsArr, realmBuffs)
 
 	return self
 end
@@ -35,11 +36,11 @@ function BuildingsManager:FindBuildingModels()
 	return buildings
 end
 
-function BuildingsManager:CreateBuildings(buildingsData)
+function BuildingsManager:CreateBuildings(buildingsData, realmBuffs)
 	local buildings = {}
 
 	for i = 1, #self.BuildingModels do
-		buildings[i] = Building.New(buildingsData[i] or nil, self.Player, self.BuildingModels[i])
+		buildings[i] = Building.New(buildingsData[i] or nil, self.Player, self.BuildingModels[i], realmBuffs)
 	end
 
 	return buildings

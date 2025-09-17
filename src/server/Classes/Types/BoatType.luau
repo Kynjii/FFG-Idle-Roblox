@@ -56,6 +56,7 @@ export type BoatInstance = {
 	Animations: { [string]: Animation },
 	VisualModels: { [string]: Model },
 	CurrentVisualModel: Model | nil,
+	Buffs: { [string]: any },
 
 	-- Core Boat Actions
 	Purchase: (self: BoatInstance) -> (),
@@ -83,6 +84,10 @@ export type BoatInstance = {
 	SetupProximityPrompt: (self: BoatInstance, purchaseBoard: Part) -> ProximityPrompt,
 	UpdateProximityPromptUI: (self: BoatInstance, proximityPrompt: ProximityPrompt) -> (),
 	ShowFishPopUp: (self: BoatInstance) -> (),
+
+	-- Buffs
+	GetBuffs: (self: BoatInstance) -> { [string]: any },
+	UpdateBuffs: (self: BoatInstance) -> (),
 
 	-- Visibility and Collision
 	Show: (self: BoatInstance) -> (),

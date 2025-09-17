@@ -1,12 +1,10 @@
 local MAX_LEVEL = 100
 
--- Promotion start levels (stage 1 begins at 1, stage 2 at 10, etc.)
 local PROMO_LEVEL = { 1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 }
 
--- Per-level multipliers INSIDE each stage
 -- Early stages: earnings > costs
 -- Later stages: costs > earnings
-local EARN_RATE = { 1.25, 1.16, 1.12, 1.10, 1.08, 1.08, 1.07, 1.06, 1.05, 1.05 } -- FPS / Storage
+local EARN_RATE = { 1.25, 1.16, 1.12, 1.10, 1.08, 1.08, 1.07, 1.06, 1.05, 1.05 } -- FPS / Storage etc.
 local COST_RATE = { 1.14, 1.16, 1.18, 1.19, 1.20, 1.21, 1.22, 1.23, 1.24, 1.25 } -- Upgrade Cost
 
 -- One-time bonus when ENTERING a stage (by stage index after the bump).

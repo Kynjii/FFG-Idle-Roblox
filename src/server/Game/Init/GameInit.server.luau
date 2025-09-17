@@ -44,8 +44,8 @@ local function PlayerAdded(player: Player)
 				player:Kick("Server is full, try again")
 				return
 			end
-			TeamManager.AssignChainManagers(profile.Data, player, teamId)
 			TeamManager.AssignBuildingsManager(profile.Data, player, teamId)
+			TeamManager.AssignChainManagers(profile.Data, player, teamId)
 		else
 			profile:EndSession()
 		end

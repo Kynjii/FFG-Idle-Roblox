@@ -2,36 +2,6 @@ local FFGEnum = {}
 
 FFGEnum.FONT = Enum.Font.FredokaOne
 
-FFGEnum.QUALITY_PROMOTION_LEVELS = {
-	[1] = 9,
-	[2] = 24,
-	[3] = 49,
-	[4] = 99,
-	[5] = 149,
-	[6] = 199,
-	[7] = 249,
-	[8] = 349,
-	[9] = 449,
-	[10] = 549,
-	[11] = 700,
-}
-
-FFGEnum.TENDER = {
-	NAME = {
-		[1] = "Wooden Cart-Barge",
-		[2] = "Barrel Barge",
-		[3] = "Oarsman’s Ferry",
-		[4] = "Courier Skiff",
-		[5] = "Windcloak Sloop",
-		[6] = "Seawarden’s Tender",
-		[7] = "Crate Hauler",
-		[8] = "Knight’s Courier",
-		[9] = "Harbormaster’s Crest",
-		[10] = "Starlit Barge",
-		[11] = "Little Lucy",
-	},
-}
-
 FFGEnum.QUALITY = {
 	[1] = {
 		Label = "Common",
@@ -121,9 +91,45 @@ FFGEnum.CURRENCY_TYPES = {
 	["Gold"] = "Gold",
 }
 
-FFGEnum.ENTITIES = {
-	["Boat"] = "Boat",
-	["Tender"] = "Tender",
+FFGEnum.BUFFS = {
+	FISH = {
+		Fish_Percent = "Fish_Percent",
+		Fish_Multi = "Fish_Multi",
+	},
+	STORAGE = {
+		Boat_Percent = "BoatStorage_Percent",
+		Tender_Percent = "TenderStorage_Percent",
+		Port_Percent = "PortStorage_Percent",
+		Helper_Percent = "HelperStorage_Percent",
+		Caravan_Percent = "CaravanStorage_Percent",
+	},
+	TRAVEL_TIME = {
+		Helper_Percent = "HelperTravelTime_Percent",
+		Caravan_Percent = "CaravanTravelTime_Percent",
+	},
+	LOAD_TIME = {
+		Tender_Percent = "TenderLoadTime_Percent",
+		Helper_Percent = "HelperLoadTime_Percent",
+	},
+	FPS = {
+		FPS_Percent = "FPS_Percent",
+	},
+	GOLD = {
+		PassiveGold_Percent = "PassiveGold_Percent",
+		Gold_Multi = "Gold_Multi",
+	},
+	DURATION = {
+		Permanent = "Permanent",
+		Temporary = "Temporary",
+	},
+	SCOPE = {
+		Boat = "Boat",
+		Tender = "Tender",
+		PortStorage = "PortStorage",
+		Helper = "Helper",
+		Building = "Building",
+		Global = "Global",
+	},
 }
 
 return FFGEnum

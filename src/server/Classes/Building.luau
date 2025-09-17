@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
+local Buffs = require(ServerScriptService.Server.Math.Buffs)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
@@ -58,6 +59,12 @@ local NAME = {
 	},
 }
 
+local BUILDING_BUFFS = {
+	Market = FFGEnum.BUFFS.FISH.Fish_Percent,
+	BoatStorageUpgrader = FFGEnum.BUFFS.STORAGE.Boat_Percent,
+	BoatFPSUpgrader = FFGEnum.BUFFS.FPS.FPS_Percent,
+}
+
 local DEFAULTS = {
 	RealmId = 1,
 	Tier = 1,
@@ -74,7 +81,7 @@ local Building = {}
 Building.__index = Building
 
 -- //SECTION - Constructor
-function Building.New(state, player: Player, model: Model)
+function Building.New(state, player: Player, model: Model, realmBuffs: { [string]: number })
 	local self = setmetatable({}, Building)
 
 	-- Start with default stats as base
@@ -107,6 +114,9 @@ function Building.New(state, player: Player, model: Model)
 	self.VisualModels = self:GetVisualModels()
 	self.CurrentVisualModel = nil
 
+	self.BuildingBuff = realmBuffs[BUILDING_BUFFS[self.BuildingName]] or Buffs.Formulas[BUILDING_BUFFS[self.BuildingName]]
+	self.BuildingBuff.CurrentValue = Buffs.CalculateBuffValue(self.UpgradeStage, self.BuildingBuff)
+
 	self._cleaner = CleanerService.new()
 
 	self:UpdateVisualModel()
@@ -135,6 +145,7 @@ function Building:Upgrade()
 		end
 	end
 
+	self:UpdateBuffValue()
 	self:Save()
 end
 
@@ -302,6 +313,12 @@ function Building:CannotCollide()
 end
 -- //!SECTION
 
+-- //SECTION - Buffs
+function Building:UpdateBuffValue()
+	self.BuildingBuff.CurrentValue = Buffs.CalculateBuffValue(self.UpgradeStage, self.BuildingBuff)
+end
+-- //!SECTION
+
 -- //SECTION -  Building Utilities
 function Building:GetName()
 	return NAME[self.BuildingName][self.UpgradeStage]
@@ -326,12 +343,13 @@ function Building:Serialize()
 		UpgradeCost = self.UpgradeCost,
 		isPurchased = self.isPurchased,
 		UpgradeStage = self.UpgradeStage,
-		Boosts = self.Boosts,
 	}
 end
 
 function Building:Save()
 	DataService.SaveBuildingState(self.Player, self.Id, self:Serialize())
+
+	if self.isPurchased then DataService.SaveBuffState(self.Player, self.BuildingBuff) end
 end
 -- //!SECTION
 

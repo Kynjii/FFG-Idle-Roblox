@@ -5,6 +5,7 @@ local Animator = require(ServerScriptService.Server.Classes.Modules.Animator)
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
 local BoatType = require(ServerScriptService.Server.Classes.Types.BoatType)
+local Buffs = require(ServerScriptService.Server.Math.Buffs)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
 local PopUp = require(ServerScriptService.Server.Modules.Tweens.PopUp)
@@ -56,6 +57,11 @@ local DEFAULTS: BoatProps = {
 local ANIMATIONS = {
 	WaterBob = "WaterBob",
 }
+
+local BOAT_BUFFS = {
+	BoatStorage_Percent = FFGEnum.BUFFS.STORAGE.Boat_Percent,
+	FPS_Percent = FFGEnum.BUFFS.FPS.FPS_Percent,
+}
 -- //!SECTION
 
 local Boat = {} :: BoatInstance
@@ -93,6 +99,8 @@ function Boat.New(state, player: Player, model: Model): Boat
 	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
 	self.CurrentFPS, self.NextFPS = self:CalculateFPS()
 
+	self.Buffs = self:GetBuffs()
+
 	self.VisualModels = self:GetVisualModels()
 	self.CurrentVisualModel = nil
 
@@ -110,11 +118,22 @@ function Boat.New(state, player: Player, model: Model): Boat
 end
 -- //!SECTION
 
+-- //SECTION - Buffs
+function Boat:GetBuffs()
+	return Buffs.GetBuffs(self.Player, BOAT_BUFFS)
+end
+
+function Boat:UpdateBuffs()
+	self.Buffs = self:GetBuffs()
+end
+-- //!SECTION
+
 -- //SECTION - Core Boat Actions
 function Boat:Purchase()
 	self.isPurchased = true
 	self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.isPurchased, true)
 
+	self:UpdateBuffs()
 	self:UpdateVisualModel()
 	self:Save()
 end
@@ -132,6 +151,7 @@ function Boat:Upgrade()
 		end
 	end
 
+	self:UpdateBuffs()
 	self.UpgradeCost = self:CalculateUpgradeCost()
 	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
 
@@ -465,6 +485,8 @@ end
 
 function Boat:Save()
 	DataService.SaveBoatState(self.Player, self.Id, self:Serialize())
+
+	print(self.Buffs)
 end
 -- //!SECTION
 

@@ -285,6 +285,66 @@ function DataService.SaveBuildingState(player: Player, buildingId: string, newSt
 end
 -- //!SECTION
 
+-- //SECTION - BUFFS
+function DataService.SaveBuffState(player: Player, newState: { [string]: number }): boolean
+	local profile = DataService.Profiles[player]
+	if not profile then
+		FFGHelpers.PrintLog("No profile found when attempting to save buff state for: ", player)
+		return false
+	end
+
+	-- Ensure the data structure exists
+	if not profile.Data.Realms then
+		FFGHelpers.PrintLog("No Realms data structure found")
+		return false
+	end
+
+	local currentRealm = profile.Data.CurrentRealm or 1
+	if not profile.Data.Realms[currentRealm] then
+		FFGHelpers.PrintLog("No data structure found for Realm:", currentRealm)
+		return false
+	end
+
+	-- Initialize Buffs array if it doesn't exist
+	if not profile.Data.Realms[currentRealm].Buffs then profile.Data.Realms[currentRealm].Buffs = {} end
+
+	profile.Data.Realms[currentRealm].Buffs[newState.Name] = newState
+
+	FFGHelpers.PrintLog("Saved buff state for player", player.Name, profile.Data.Realms[currentRealm].Buffs)
+	return true
+end
+
+function DataService.GetBuffState(player: Player, buffNames: { string })
+	local profile = DataService.Profiles[player]
+	if not profile then
+		FFGHelpers.PrintLog("No profile found when attempting to get buff state for: ", player)
+		return false
+	end
+
+	-- Ensure the data structure exists
+	if not profile.Data.Realms then
+		FFGHelpers.PrintLog("No Realms data structure found")
+		return false
+	end
+
+	local currentRealm = profile.Data.CurrentRealm or 1
+	if not profile.Data.Realms[currentRealm] then
+		FFGHelpers.PrintLog("No data structure found for Realm:", currentRealm)
+		return false
+	end
+
+	if not profile.Data.Realms[currentRealm].Buffs then return false end
+
+	local buffs = {}
+	for k, v in pairs(buffNames) do
+		print(k, v)
+		buffs[k] = profile.Data.Realms[currentRealm].Buffs[k] or nil
+	end
+
+	return buffs
+end
+-- //!SECTION
+
 function DataService.ResetAllPlayerData(player: Player)
 	local profile = DataService.Profiles[player]
 	if not profile then
