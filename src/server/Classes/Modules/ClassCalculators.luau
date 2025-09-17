@@ -35,14 +35,12 @@ function ClassCalculator.CalculateMaxStorage(baseValue: number, level: number, p
 
 	local maxStorage = baseValue * earnNow
 	local nextLvlStorage = baseValue * earnNext
-	print("before buffs:", maxStorage, nextLvlStorage)
+
 	if percentBuffValue then
 		local buffedValue = percentBuffValue * maxStorage
 		local buffedNxtvalue = percentBuffValue * nextLvlStorage
 		maxStorage += buffedValue
 		nextLvlStorage += buffedNxtvalue
-
-		print("after buffs:", maxStorage, nextLvlStorage)
 	end
 
 	return maxStorage, nextLvlStorage
@@ -57,14 +55,12 @@ function ClassCalculator.CalculateFPS(baseFPS: number, upgradeStage: number, per
 
 	local fpsNow = baseFPS * multNow
 	local fpsNext = baseFPS * multNext
-	print("before buffs:", fpsNow, fpsNext)
+
 	if percentBuffValue then
 		local buffedValue = percentBuffValue * fpsNow
 		local buffedNxtvalue = percentBuffValue * fpsNext
 		fpsNow += buffedValue
 		fpsNext += buffedNxtvalue
-
-		print("after buffs:", fpsNow, fpsNext)
 	end
 
 	return fpsNow, fpsNext
