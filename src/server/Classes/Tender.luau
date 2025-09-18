@@ -294,8 +294,6 @@ function Tender:AddFish(amount)
 
 	self.FishInStorage += math.max(amount)
 
-	print("fishinstorage:", self.FishInStorage)
-
 	self:ShowFishPopUp(amount)
 
 	if self.FishInStorage >= self.CurrentMaxStorage then
