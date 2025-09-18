@@ -292,7 +292,7 @@ function Tender:AddFish(amount)
 		return
 	end
 
-	self.FishInStorage += math.max(amount)
+	self.FishInStorage += amount
 
 	self:ShowFishPopUp(amount)
 
