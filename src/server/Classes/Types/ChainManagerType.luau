@@ -28,6 +28,9 @@ export type ChainManagerInstance = {
 	-- Attribute listeners
 	AttachAttListeners: (self: ChainManagerInstance) -> (),
 
+	-- Building Events
+	HandleBuildingEvent: (self: ChainManagerInstance) -> (),
+
 	-- Handling Tender Service
 	StartTenderCycle: (self: ChainManagerInstance) -> (),
 	StartLoadingFish: (self: ChainManagerInstance) -> (),

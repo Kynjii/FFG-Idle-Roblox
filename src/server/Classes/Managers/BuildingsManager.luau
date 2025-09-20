@@ -18,11 +18,9 @@ function BuildingsManager.New(realmData, player: Player, teamId: number)
 	self.TeamId = teamId
 
 	self.BuildingModels = self:FindBuildingModels()
-
 	local buildingsArr = realmData.Buildings
 	local realmBuffs = realmData.Buffs
 	self.Buildings = self:CreateBuildings(buildingsArr, realmBuffs)
-
 	return self
 end
 
@@ -30,31 +28,31 @@ function BuildingsManager:FindBuildingModels()
 	local buildings = {}
 	for _, taggedBuilding in ipairs(taggedBuildings) do
 		local taggedBuildingTeamId = taggedBuilding:GetAttribute(FFGEnum.ATTRIBUTES.TeamId)
-		if taggedBuildingTeamId == self.TeamId then buildings[#buildings + 1] = taggedBuilding end
+		local buildingName = taggedBuilding:GetAttribute(FFGEnum.ATTRIBUTES.BuildingName)
+		if taggedBuildingTeamId == self.TeamId then buildings[buildingName] = taggedBuilding end
 	end
-
 	return buildings
 end
 
 function BuildingsManager:CreateBuildings(buildingsData, realmBuffs)
 	local buildings = {}
 
-	for i = 1, #self.BuildingModels do
-		buildings[i] = Building.New(buildingsData[i] or nil, self.Player, self.BuildingModels[i], realmBuffs)
+	for k, v in pairs(self.BuildingModels) do
+		buildings[k] = Building.New(buildingsData[k] or nil, self.Player, self.BuildingModels[k], realmBuffs)
 	end
 
 	return buildings
 end
 
 function BuildingsManager:Initialize()
-	for _, building in ipairs(self.Buildings) do
+	for k, building in pairs(self.Buildings) do
 		building:Initialize()
 	end
 end
 
 -- //SECTION - Cleanup
 function BuildingsManager:Destroy()
-	for _, building in ipairs(self.Buildings) do
+	for k, building in pairs(self.Buildings) do
 		building:Destroy()
 	end
 end

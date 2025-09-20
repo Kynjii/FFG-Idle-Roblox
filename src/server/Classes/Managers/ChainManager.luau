@@ -3,11 +3,12 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Boat: Boat = require(ServerScriptService.Server.Classes.Boat)
-local PortStorage = require(ServerScriptService.Server.Classes.PortStorage)
+local PortStorage: PortStorageType = require(ServerScriptService.Server.Classes.PortStorage)
 local Tender: Tender = require(ServerScriptService.Server.Classes.Tender)
 local BoatType = require(ServerScriptService.Server.Classes.Types.BoatType)
 local TenderType = require(ServerScriptService.Server.Classes.Types.TenderType)
 local ChainManagerType = require(ServerScriptService.Server.Classes.Types.ChainManagerType)
+local PortStorageType = require(ServerScriptService.Server.Classes.Types.PortStorageType)
 
 local taggedBoats = CollectionService:GetTagged("Boat")
 local taggedTenders = CollectionService:GetTagged("Tender")
@@ -15,6 +16,7 @@ local taggedStorage = CollectionService:GetTagged("Storage")
 
 type Boat = BoatType.Boat
 type Tender = TenderType.Tender
+type PortStorageType = PortStorageType.Storage
 type ChainManager = ChainManagerType.ChainManagerInstance
 
 local ChainManager = {} :: ChainManager
@@ -46,6 +48,10 @@ function ChainManager.New(realmData, tier: number, player: Player, teamId: numbe
 	self.LaneStorage = PortStorage.New(storageArr[tier], player, self.StorageModel)
 
 	-- Attach listeners to handle the Tender Travelling Cycle
+	self.Signals = {
+		PurchasedEvent = nil,
+		UpgradedEvent = nil,
+	}
 	self:AttachAttListeners()
 
 	if self.LaneTender.isPurchased then self:StartTenderCycle() end
@@ -132,11 +138,35 @@ function ChainManager:AttachAttListeners()
 	end)
 
 	for _, building in ipairs(self.Buildings) do
-		building.BuildingPurchased:Connect(function()
-			print("Building purchased", building)
+		self.Signals.PurchasedEvent = building.Purchased:Connect(function(building)
+			self:HandleBuildingEvent(building)
+		end)
+		self.Signals.UpgradedEvent = building.Upgraded:Connect(function(building)
+			self:HandleBuildingEvent(building)
 		end)
 	end
 end
+
+-- //SECTION - Handle Building Events
+function ChainManager:HandleBuildingEvent(building)
+	if building.Owner ~= self.Player.UserId then return end
+
+	local actions = {
+		[FFGEnum.BUFFS.SCOPE.Boat] = function()
+			self.LaneBoat:RecalculateAll()
+		end,
+		Tender = function()
+			self.LaneTender:UpdatePurchaseBoardUI()
+		end,
+		PortStorage = function()
+			self.LaneStorage:UpdatePurchaseBoardUI()
+		end,
+	}
+	local scope = building.BuildingBuff.Scope or {}
+	local action = actions[scope]
+	if action then action() end
+end
+-- //!SECTION
 
 -- //SECTION - Tender Travelling Cycle Functions used by the AttListeners
 function ChainManager:ResetTravellingAttributes()
@@ -260,6 +290,10 @@ function ChainManager:Destroy()
 	self.LaneBoat:Destroy()
 	self.LaneTender:Destroy()
 	self.LaneStorage:Destroy()
+
+	for k, v in pairs(self.Signals) do
+		if v.Connected then v:Destroy() end
+	end
 end
 -- //!SECTION
 

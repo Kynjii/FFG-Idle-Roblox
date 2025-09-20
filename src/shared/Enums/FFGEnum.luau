@@ -84,6 +84,8 @@ FFGEnum.CLASS = {
 		NextFPS = "NextFPS",
 		CurrentTravelTime = "CurrentTravelTime",
 		NextLvlTravelTime = "NextLvlTravelTime",
+		BuildingId = "BuildingId",
+		BuildingName = "BuildingName",
 	},
 }
 

@@ -145,10 +145,10 @@ function Building.New(state, player: Player, model: Model, realmBuffs: { [string
 	self.BuildingBuff = realmBuffs[BUILDING_BUFFS[self.BuildingName]] or Buffs.Formulas[BUILDING_BUFFS[self.BuildingName]] :: Buffs.BuffState
 	self.BuildingBuff.CurrentValue = Buffs.CalculateBuffValue(self.UpgradeStage, self.BuildingBuff)
 
-	self.BuildingUpgraded = Signal.new()
-	self.BuildingPurchased = Signal.new()
-
 	self._cleaner = CleanerService.new()
+
+	self.Upgraded = self._cleaner:add(Signal.new())
+	self.Purchased = self._cleaner:add(Signal.new())
 
 	self:UpdateVisualModel()
 
@@ -160,9 +160,10 @@ end
 function Building:Purchase()
 	self.isPurchased = true
 
-	self.BuildingPurchased:Fire(self)
 	self:UpdateVisualModel()
 	self:Save()
+
+	self.Purchased:Fire(self)
 end
 
 function Building:Upgrade()
@@ -173,13 +174,16 @@ function Building:Upgrade()
 		if self.Level == v then
 			self:IncreaseUpgradeStage(k)
 			self:UpdateVisualModel()
+			self:UpdateBuffValue()
 			break
 		end
 	end
 
-	self:UpdateBuffValue()
-	self:UpdatePurchaseBoardUI()
 	self:Save()
+
+	self.UpgradeCost = self:CalculateUpgradeCost()
+	self:UpdatePurchaseBoardUI()
+	self.Upgraded:Fire(self)
 end
 
 function Building:IncreaseUpgradeStage(stage)
@@ -382,13 +386,15 @@ function Building:Serialize()
 		UpgradeCost = self.UpgradeCost,
 		isPurchased = self.isPurchased,
 		UpgradeStage = self.UpgradeStage,
+		BuildingId = self.BuildingId,
+		BuildingName = self.BuildingName,
 	}
 end
 
 function Building:Save()
-	DataService.SaveBuildingState(self.Player, self.Id, self:Serialize())
-
 	if self.isPurchased then DataService.SaveBuffState(self.Player, self.BuildingBuff) end
+
+	DataService.SaveBuildingState(self.Player, self.BuildingName, self:Serialize())
 end
 -- //!SECTION
 

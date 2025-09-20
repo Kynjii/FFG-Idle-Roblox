@@ -72,6 +72,7 @@ export type BoatInstance = {
 	CalculateMaxStorage: (self: BoatInstance) -> (number, number),
 	CalculateBaseFPS: (self: BoatInstance) -> number,
 	CalculateFPS: (self: BoatInstance) -> (number, number),
+	RecalculateAll: (self: BoatInstance) -> (),
 
 	-- Fishing
 	StartFishing: (self: BoatInstance) -> (),

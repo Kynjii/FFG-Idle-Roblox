@@ -12,48 +12,48 @@ export type BuffState = {
 }
 
 local GROWTH_RATES = {
-	Multiplier = { 1.08, 1.07, 1.06, 1.05, 1.04, 1.03, 1.03, 1.02, 1.02, 1.02 },
-	Production = { 2.2, 1.8, 1.7, 1.6, 1.5, 1.4, 1.3, 1.2, 1.1, 1.08 },
-	QoL = { 1.18, 1.15, 1.12, 1.10, 1.08, 1.07, 1.06, 1.05, 1.04, 1.03 },
-	Loop = { 1.14, 1.12, 1.10, 1.08, 1.07, 1.06, 1.05, 1.04, 1.03, 1.03 },
+	Multiplier = { 1.08, 1.07, 1.06, 1.05, 1.04, 1.03, 1.03, 1.02, 1.02, 1.02, 1.02 },
+	Production = { 2.2, 1.8, 1.7, 1.6, 1.5, 1.4, 1.3, 1.2, 1.1, 1.08, 1.02 },
+	QoL = { 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5 },
+	Loop = { 1.14, 1.12, 1.10, 1.08, 1.07, 1.06, 1.05, 1.04, 1.03, 1.03, 1.02 },
 }
 
 Buffs.Formulas = {
 	-- FISH
-	Fish_Percent = { Name = "Fish_Percent", BaseValue = 0.04, Type = "Production" },
-	Fish_Multi = { Name = "Fish_Multi", BaseValue = 1.15, Type = "Multiplier" },
+	Fish_Percent = { Name = "Fish_Percent", BaseValue = 0.04, Type = "Production", Scope = "Helper" },
+	Fish_Multi = { Name = "Fish_Multi", BaseValue = 1.15, Type = "Multiplier", Scope = "Helper" },
 
 	-- STORAGE
-	BoatStorage_Percent = { Name = "BoatStorage_Percent", BaseValue = 0.08, Type = "QoL" },
-	TenderStorage_Percent = { Name = "TenderStorage_Percent", BaseValue = 0.08, Type = "QoL" },
-	PortStorage_Percent = { Name = "PortStorage_Percent", BaseValue = 0.08, Type = "QoL" },
-	HelperStorage_Percent = { Name = "HelperStorage_Percent", BaseValue = 0.08, Type = "QoL" },
-	CaravanStorage_Percent = { Name = "CaravanStorage_Percent", BaseValue = 0.08, Type = "QoL" },
+	BoatStorage_Percent = { Name = "BoatStorage_Percent", BaseValue = 0.08, Type = "QoL", Scope = "Boat" },
+	TenderStorage_Percent = { Name = "TenderStorage_Percent", BaseValue = 0.08, Type = "QoL", Scope = "Tender" },
+	PortStorage_Percent = { Name = "PortStorage_Percent", BaseValue = 0.08, Type = "QoL", Scope = "PortStorage" },
+	HelperStorage_Percent = { Name = "HelperStorage_Percent", BaseValue = 0.08, Type = "QoL", Scope = "Helper" },
+	CaravanStorage_Percent = { Name = "CaravanStorage_Percent", BaseValue = 0.08, Type = "QoL", Scope = "Caravan" },
 
 	-- TRAVEL TIME
-	HelperTravelTime_Percent = { Name = "HelperTravelTime_Percent", BaseValue = 0.03, Type = "Loop" },
-	CaravanTravelTime_Percent = { Name = "CaravanTravelTime_Percent", BaseValue = 0.03, Type = "Loop" },
-	TenderTravelTime_Percent = { Name = "TenderTravelTime_Percent", BaseValue = 0.03, Type = "Loop" },
+	HelperTravelTime_Percent = { Name = "HelperTravelTime_Percent", BaseValue = 0.03, Type = "Loop", Scope = "Helper" },
+	CaravanTravelTime_Percent = { Name = "CaravanTravelTime_Percent", BaseValue = 0.03, Type = "Loop", Scope = "Caravan" },
+	TenderTravelTime_Percent = { Name = "TenderTravelTime_Percent", BaseValue = 0.03, Type = "Loop", Scope = "Tender" },
 
 	-- LOAD TIME
-	TenderLoadTime_Percent = { Name = "TenderLoadTime_Percent", BaseValue = 0.03, Type = "Loop" },
-	HelperLoadTime_Percent = { Name = "HelperLoadTime_Percent", BaseValue = 0.03, Type = "Loop" },
+	TenderLoadTime_Percent = { Name = "TenderLoadTime_Percent", BaseValue = 0.03, Type = "Loop", Scope = "Tender" },
+	HelperLoadTime_Percent = { Name = "HelperLoadTime_Percent", BaseValue = 0.03, Type = "Loop", Scope = "Helper" },
 
 	-- FPS
-	FPS_Percent = { Name = "FPS_Percent", BaseValue = 0.05, Type = "Production" },
+	FPS_Percent = { Name = "FPS_Percent", BaseValue = 0.05, Type = "Production", Scope = "Boat" },
 
 	-- GOLD
-	PassiveGold_Percent = { Name = "PassiveGold_Percent", BaseValue = 0.03, Type = "Production" },
-	Gold_Multi = { Name = "Gold_Multi", BaseValue = 1.15, Type = "Multiplier" },
+	PassiveGold_Percent = { Name = "PassiveGold_Percent", BaseValue = 0.03, Type = "Production", Scope = "Realm" },
+	Gold_Multi = { Name = "Gold_Multi", BaseValue = 1.15, Type = "Multiplier", Scope = "Global" },
 
 	-- COSTS
-	UpgradeCost_Percent = { Name = "UpgradeCost_Percent", BaseValue = 0.04, Type = "Loop" },
+	UpgradeCost_Percent = { Name = "UpgradeCost_Percent", BaseValue = 0.04, Type = "Loop", Scope = "Global" },
 }
 
 function Buffs.CalculateBuffValue(stage: number, buffState: BuffState): number
 	local growthRate = GROWTH_RATES[buffState.Type][stage]
-
-	return FormatNumber(buffState.BaseValue * growthRate)
+	local value = buffState.BaseValue * growthRate
+	return FormatNumber(value)
 end
 
 function Buffs.GetBuffs(player: Player, buffNames: { string })

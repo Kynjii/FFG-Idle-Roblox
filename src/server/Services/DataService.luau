@@ -264,23 +264,9 @@ function DataService.SaveBuildingState(player: Player, buildingId: string, newSt
 	-- Initialize Buildings array if it doesn't exist
 	if not profile.Data.Realms[currentRealm].Buildings then profile.Data.Realms[currentRealm].Buildings = {} end
 
-	local existingBuildingIndex = nil
-	for i, building in ipairs(profile.Data.Realms[currentRealm].Buildings) do
-		if building[FFGEnum.CLASS.PROPERTIES.Id] == buildingId then
-			existingBuildingIndex = i
-			break
-		end
-	end
+	profile.Data.Realms[currentRealm].Buildings[buildingId] = newState
+	FFGHelpers.PrintLog("Updated existing building", profile.Data.Realms[currentRealm].Buildings[buildingId])
 
-	if existingBuildingIndex then
-		profile.Data.Realms[currentRealm].Buildings[existingBuildingIndex] = newState
-		FFGHelpers.PrintLog("Updated existing building at index", existingBuildingIndex)
-	else
-		table.insert(profile.Data.Realms[currentRealm].Buildings, newState)
-		FFGHelpers.PrintLog("Added new building with ID", buildingId)
-	end
-
-	FFGHelpers.PrintLog("Saved building state for player", player.Name, "building", buildingId)
 	return true
 end
 -- //!SECTION
