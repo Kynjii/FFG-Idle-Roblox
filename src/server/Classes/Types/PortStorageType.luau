@@ -1,3 +1,5 @@
+local ServerScriptService = game:GetService("ServerScriptService")
+local Buffs = require(ServerScriptService.Server.Math.Buffs)
 local PortStorageType = {}
 
 export type StorageProps = {
@@ -49,6 +51,7 @@ export type StorageInstance = {
 	VisualModels: { [string]: Model },
 	CurrentVisualModel: Model | nil,
 	TakeFishPrompt: ProximityPrompt,
+	Buffs: { [string]: Buffs.BuffState },
 
 	-- Core Boat Actions
 	Purchase: (self: StorageInstance) -> (),
@@ -60,11 +63,16 @@ export type StorageInstance = {
 	CalculateUpgradeCost: (self: StorageInstance) -> number,
 	CalculateBaseStorage: (self: StorageInstance) -> number,
 	CalculateMaxStorage: (self: StorageInstance) -> (number, number),
+	RecalculateAll: (self: StorageInstance) -> (),
 
 	-- Storage Actions
 	AddFish: (self: StorageInstance, amount: number) -> (),
 	RemoveFish: (self: StorageInstance, amount: number) -> (),
 	UpdateStorageStatus: (self: StorageInstance, status: boolean) -> (),
+
+	-- Buffs
+	GetBuffs: (self: StorageInstance) -> { [string]: Buffs.BuffState },
+	UpdateBuffs: (self: StorageInstance) -> (),
 
 	-- UI Setup
 	Initialize: (self: StorageInstance) -> (),

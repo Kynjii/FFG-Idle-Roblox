@@ -4,6 +4,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
 local PortStorageType = require(ServerScriptService.Server.Classes.Types.PortStorageType)
+local Buffs = require(ServerScriptService.Server.Math.Buffs)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
@@ -33,6 +34,10 @@ local DEFAULTS: StorageProps = {
 	UpgradeStage = 1,
 	FishInStorage = 0,
 	StorageFull = false,
+}
+
+local PORTSTORAGE_BUFFS = {
+	PortStorage_Percent = FFGEnum.BUFFS.STORAGE.Port_Percent,
 }
 -- //!SECTION
 
@@ -68,6 +73,7 @@ function PortStorage.New(state, player: Player, model: Model): Storage
 	self.BaseStorage = self:CalculateBaseStorage()
 	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
 
+	self.Buffs = self:GetBuffs()
 	self.TakeFishPrompt = nil
 
 	self.VisualModels = self:GetVisualModels()
@@ -85,11 +91,31 @@ function PortStorage.New(state, player: Player, model: Model): Storage
 end
 -- //!SECTION
 
+-- //SECTION - Buffs
+function Tender:GetBuffs()
+	return Buffs.GetBuffs(self.Player, PORTSTORAGE_BUFFS)
+end
+
+function Tender:UpdateBuffs()
+	self.Buffs = self:GetBuffs()
+end
+
+function PortStorage:RecalculateAll()
+	self:UpdateBuffs()
+
+	self.UpgradeCost = self:CalculateUpgradeCost()
+	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
+
+	self:UpdatePurchaseBoardUI()
+end
+-- //!SECTION
+
 -- //SECTION - Core Actions
 function PortStorage:Purchase()
 	self.isPurchased = true
 
 	self.TakeFishPrompt = self:SetupFishRemovalPrompt()
+	self:UpdateBuffs()
 	self:UpdateVisualModel()
 	self:Save()
 end
@@ -106,6 +132,7 @@ function PortStorage:Upgrade()
 		end
 	end
 
+	self:UpdateBuffs()
 	self.UpgradeCost = self:CalculateUpgradeCost()
 	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
 
@@ -179,8 +206,9 @@ end
 function PortStorage:CalculateMaxStorage()
 	local baseStorage = self.BaseStorage or DEFAULTS.BaseStorage
 	if baseStorage == DEFAULTS.BaseStorage then baseStorage = self:CalculateBaseStorage() end
+	local storagePercentBuff = self.Buffs[PORTSTORAGE_BUFFS.PortStorage_Percent] and self.Buffs[PORTSTORAGE_BUFFS.PortStorage_Percent].CurrentValue or nil
 
-	return ClassCalculators.CalculateMaxStorage(baseStorage, self.Level)
+	return ClassCalculators.CalculateMaxStorage(baseStorage, self.Level, storagePercentBuff)
 end
 -- //!SECTION
 

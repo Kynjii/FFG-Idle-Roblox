@@ -89,7 +89,7 @@ export type BoatInstance = {
 	ShowFishPopUp: (self: BoatInstance) -> (),
 
 	-- Buffs
-	GetBuffs: (self: BoatInstance) -> { [string]: any },
+	GetBuffs: (self: BoatInstance) -> { [string]: Buffs.BuffState },
 	UpdateBuffs: (self: BoatInstance) -> (),
 
 	-- Visibility and Collision

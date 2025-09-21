@@ -76,6 +76,7 @@ export type TenderInstance = {
 	CalculateMaxStorage: (self: TenderInstance) -> (number, number),
 	CalculateTravelTime: (self: TenderInstance) -> number,
 	CalculateLoadTime: (self: TenderInstance) -> number,
+	RecalculateAll: (self: TenderInstance) -> (),
 
 	-- Travelling
 	MoveToBoat: (self: TenderInstance, position: Vector3) -> (),
@@ -88,7 +89,7 @@ export type TenderInstance = {
 	AttachAttListeners: (self: TenderInstance) -> (),
 
 	-- Buffs
-	GetBuffs: (self: TenderInstance) -> { [string]: any },
+	GetBuffs: (self: TenderInstance) -> { [string]: Buffs.BuffState },
 	UpdateBuffs: (self: TenderInstance) -> (),
 
 	-- Setup

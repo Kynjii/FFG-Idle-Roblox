@@ -142,9 +142,7 @@ end
 function Boat:RecalculateAll()
 	self:UpdateBuffs()
 
-	self.BaseCost = self:CalculateBaseCost()
 	self.UpgradeCost = self:CalculateUpgradeCost()
-	self.BaseStorage = self:CalculateBaseStorage()
 	self.BaseFPS = self:CalculateBaseFPS()
 	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
 	self.CurrentFPS, self.NextFPS = self:CalculateFPS()

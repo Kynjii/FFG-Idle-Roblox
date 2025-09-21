@@ -142,6 +142,17 @@ end
 function Tender:UpdateBuffs()
 	self.Buffs = self:GetBuffs()
 end
+
+function Tender:RecalculateAll()
+	self:UpdateBuffs()
+
+	self.UpgradeCost = self:CalculateUpgradeCost()
+	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
+	self.LoadTime = self:CalculateLoadTime()
+	self.CurrentTravelTime = self:CalculateTravelTime()
+
+	self:UpdatePurchaseBoardUI()
+end
 -- //!SECTION
 
 -- //SECTION - Core Tender Actions

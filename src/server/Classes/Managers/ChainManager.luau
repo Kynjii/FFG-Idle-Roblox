@@ -155,11 +155,12 @@ function ChainManager:HandleBuildingEvent(building)
 		[FFGEnum.BUFFS.SCOPE.Boat] = function()
 			self.LaneBoat:RecalculateAll()
 		end,
-		Tender = function()
-			self.LaneTender:UpdatePurchaseBoardUI()
+		-- //TODO - Handle Tender and Storage
+		[FFGEnum.BUFFS.SCOPE.Tender] = function()
+			self.LaneTender:RecalculateAll()
 		end,
-		PortStorage = function()
-			self.LaneStorage:UpdatePurchaseBoardUI()
+		[FFGEnum.BUFFS.SCOPE.PortStorage] = function()
+			self.LaneStorage:RecalculateAll()
 		end,
 	}
 	local scope = building.BuildingBuff.Scope or {}
