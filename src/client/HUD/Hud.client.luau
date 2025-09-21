@@ -30,22 +30,24 @@ end
 
 local realmBuffLabels = {}
 
-local function setRealmBuff(name: string, buffValue)
+local function setRealmBuff(name: string, buff)
+	if not buff.CurrentValue then return end
 	local buffLabel: TextLabel
 
 	if realmBuffLabels[name] then
 		buffLabel = realmBuffLabels[name]
 	else
-		buffLabel = RealmBuffsTemplate:Clone()
+		buffLabel = RealmBuffsTemplate:Clone() :: TextLabel
 		buffLabel.Name = name .. "_LabelClone"
 		buffLabel.Parent = RealmBuffsTemplate.Parent
-		buffLabel.Active = true
+		buffLabel.Visible = true
 		realmBuffLabels[name] = buffLabel
 	end
 
-	current[name] = buffValue
+	current[name] = buff and buff.CurrentValue or ""
 	buffLabel.Font = FFGEnum.FONT
-	buffLabel.Text = FormatNumber(buffValue)
+	local value = buff.CurrentValue * 100
+	buffLabel.Text = FormatNumber(value) .. "%" .. " " .. buff.Label
 end
 
 Replica.OnNew("PlayerState", function(replica)
@@ -60,7 +62,7 @@ Replica.OnNew("PlayerState", function(replica)
 
 	if data.RealmBuffs then
 		for k, buff in pairs(data.RealmBuffs) do
-			if buff.CurrentValue then setRealmBuff(k, buff.CurrentValue) end
+			if buff.CurrentValue then setRealmBuff(k, buff) end
 		end
 	end
 
@@ -79,7 +81,7 @@ Replica.OnNew("PlayerState", function(replica)
 		if subscribed[key] then return end
 		subscribed[key] = true
 		replica:OnSet({ "RealmBuffs", key }, function(v)
-			setRealmBuff(key, v.CurrentValue)
+			setRealmBuff(key, v)
 		end)
 	end
 
