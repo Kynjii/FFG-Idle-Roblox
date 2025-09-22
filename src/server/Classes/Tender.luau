@@ -41,6 +41,8 @@ local NAME = {
 	[11] = "Little Lucy",
 }
 
+local DESCRIPTION = "A Supply Vessel, it transports caught Fish back to Port over time."
+
 local DEFAULTS: TenderProps = {
 	Entity = FFGEnum.CLASS.ENTITY_NAME.Tender,
 	RealmId = 1,
@@ -90,6 +92,7 @@ function Tender.New(state, player, model)
 
 	-- Calculate derived properties
 	self.Id = self.Id or HttpService:GenerateGUID(false)
+	self.Description = DESCRIPTION
 	self.Owner = self.Owner or player.UserId
 	self.Model = model
 	self.Entity = self.Entity or DEFAULTS.Entity

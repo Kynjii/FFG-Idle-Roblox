@@ -63,6 +63,7 @@ export type BoatInstance = {
 	Buffs: { [string]: Buffs.BuffState },
 	PurchaseBoard: Model,
 	PBDetails: { [string]: TextLabel | Frame },
+	Description: string,
 
 	-- Core Boat Actions
 	Purchase: (self: BoatInstance) -> (),

@@ -40,6 +40,8 @@ local NAME = {
 	[11] = "The Flynnrunner",
 }
 
+local DESCRIPTION = "A Fishing Boat, it passively collects Fish every second (FPS)."
+
 local DEFAULTS: BoatProps = {
 	Entity = FFGEnum.CLASS.ENTITY_NAME.Boat,
 	RealmId = 1,
@@ -87,6 +89,7 @@ function Boat.New(state, player: Player, model: Model): Boat
 
 	-- Calculate derived properties
 	self.Id = self.Id or HttpService:GenerateGUID(false)
+	self.Description = DESCRIPTION
 	self.Owner = self.Owner or player.UserId
 	self.Model = model
 	self.Entity = self.Entity or DEFAULTS.Entity

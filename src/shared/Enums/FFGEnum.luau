@@ -91,6 +91,7 @@ FFGEnum.CLASS = {
 		Boat = "Boat",
 		Tender = "Tender",
 		PortStorage = "PortStorage",
+		Building = "Building",
 	},
 }
 

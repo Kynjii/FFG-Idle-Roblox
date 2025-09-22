@@ -37,6 +37,8 @@ local NAME = {
 	[11] = "The Crown’s Keep",
 }
 
+local DESCRIPTION = "A Harbor Storehouse, it holds the Fish delivered by your Tender."
+
 local DEFAULTS: StorageProps = {
 	Entity = FFGEnum.CLASS.ENTITY_NAME.PortStorage,
 	RealmId = 1,
@@ -77,6 +79,7 @@ function PortStorage.New(state, player: Player, model: Model): Storage
 
 	-- Calculate derived properties
 	self.Id = self.Id or HttpService:GenerateGUID(false)
+	self.Description = DESCRIPTION
 	self.Entity = self.Entity or DEFAULTS.Entity
 	self.Owner = self.Owner or player.UserId
 	self.Model = model

@@ -66,6 +66,7 @@ export type TenderInstance = {
 	Buffs: { [string]: Buffs.BuffState },
 	LoadTime: number?,
 	PBDetails: { [string]: TextLabel | Frame },
+	Description: string,
 
 	-- Core Tender Actions
 	Purchase: (self: TenderInstance) -> (),

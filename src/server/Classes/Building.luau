@@ -4,6 +4,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Signal = require(ReplicatedStorage.Packages.Signal)
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
+local PurchaseBoard = require(ServerScriptService.Server.Classes.Modules.PurchaseBoard)
 local Buffs = require(ServerScriptService.Server.Math.Buffs)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
@@ -20,7 +21,7 @@ local CleanerService = require(ServerScriptService.Server.Services.CleanerServic
 -- //SECTION - Building Data
 local NAME = {
 	Market = {
-		[1] = "Market",
+		[1] = "Fish Stall",
 		[2] = "Fish Cart",
 		[3] = "Fishmonger’s Hut",
 		[4] = "Wharf Stand",
@@ -33,7 +34,7 @@ local NAME = {
 		[11] = "Oceanfront City Market",
 	},
 	BoatStorageUpgrader = {
-		[1] = "Boat Storage Upgrader",
+		[1] = "Wooden Crates",
 		[2] = "Carpenter’s Shack",
 		[3] = "Timber Workshop",
 		[4] = "Dockside Workshop",
@@ -46,7 +47,7 @@ local NAME = {
 		[11] = "Royal Shipyard",
 	},
 	BoatFPSUpgrader = {
-		[1] = "Boat FPS Upgrader",
+		[1] = "Fishing Nets",
 		[2] = "Rope Weaver’s Corner",
 		[3] = "Netting Shed",
 		[4] = "Spinner’s Workshop",
@@ -59,7 +60,7 @@ local NAME = {
 		[11] = "Oceanic Guild of Nets",
 	},
 	TenderTTUpgrader = {
-		[1] = "Tender TT Upgrader",
+		[1] = "Dockside Map Table",
 		[2] = "Wayfinder’s Stand",
 		[3] = "Courier’s Hut",
 		[4] = "Pilot’s Booth",
@@ -72,7 +73,7 @@ local NAME = {
 		[11] = "Royal Admiralty Relay",
 	},
 	TenderLoadUpgrader = {
-		[1] = "Tender Load Upgrader",
+		[1] = "Dockside Pulley",
 		[2] = "Porter’s Table",
 		[3] = "Stevedore’s Stall",
 		[4] = "Hoistman’s Shed",
@@ -85,18 +86,27 @@ local NAME = {
 		[11] = "Royal Cargo Works",
 	},
 	TenderStorageUpgrader = {
-		[1] = "Porter’s Table",
-		[2] = "Stevedore’s Stall",
-		[3] = "Hoistman’s Shed",
-		[4] = "Capstan House",
-		[5] = "Winchwright’s Workshop",
-		[6] = "Block-and-Tackle Hall",
-		[7] = "Wharf Loading Yard",
-		[8] = "Dockmaster’s Office",
-		[9] = "Porters’ Guildhall",
-		[10] = "Grand Hoistworks",
-		[11] = "Royal Cargo Works",
+		[1] = "Fish Baskets",
+		[2] = "Fish Crate Pile",
+		[3] = "Cold Cellar",
+		[4] = "Timber Storehouse",
+		[5] = "Stone Granary",
+		[6] = "Dockside Warehouse",
+		[7] = "Harbor Strongroom",
+		[8] = "Seafarer’s Vault",
+		[9] = "Maritime Storehall",
+		[10] = "Grand Harbor Depot",
+		[11] = "Royal Maritime Vault",
 	},
+}
+
+local DESCRIPTION = {
+	Market = "Earn Gold by selling your Fish here — more Gold means more upgrades!",
+	BoatStorageUpgrader = "Carry more Fish at once by making your Boat Storage bigger.",
+	BoatFPSUpgrader = "Catch Fish faster every second with stronger nets on your Boat.",
+	TenderTTUpgrader = "Send Fish back quicker — your Tender sails faster to Port.",
+	TenderLoadUpgrader = "Load and unload Fish faster so your Tender spends less time at Port and more time sailing!",
+	TenderStorageUpgrader = "Keep even more Fish safe with bigger storage on your Tender.",
 }
 
 local BUILDING_BUFFS = {
@@ -109,6 +119,7 @@ local BUILDING_BUFFS = {
 }
 
 local DEFAULTS = {
+	Entity = FFGEnum.CLASS.ENTITY_NAME.Building,
 	RealmId = 1,
 	Tier = 1,
 	Name = "Unnamed Building",
@@ -143,10 +154,12 @@ function Building.New(state, player: Player, model: Model, realmBuffs: { [string
 	self.Id = self.Id or HttpService:GenerateGUID(false)
 	self.Owner = self.Owner or player.UserId
 	self.Model = model
+	self.Entity = self.Entity or DEFAULTS.Entity
 	self.VisualRoot = DeepWait(model, "Building", "VisualRoot")
 	self.Tier = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.Tier) or DEFAULTS.Tier
 	self.BuildingId = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.BuildingId)
 	self.BuildingName = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.BuildingName)
+	self.Description = DESCRIPTION[self.BuildingName]
 	self.Name = self:GetName()
 	self.Player = player
 
@@ -158,6 +171,8 @@ function Building.New(state, player: Player, model: Model, realmBuffs: { [string
 
 	self.BuildingBuff = realmBuffs[BUILDING_BUFFS[self.BuildingName]]
 	self.BuildingBuff.CurrentValue = self.isPurchased and Buffs.CalculateBuffValue(self.UpgradeStage, self.BuildingBuff) or nil
+
+	self.PurchaseBoard, self.PBDetails = self:SetupPurchaseBoard()
 
 	self._cleaner = CleanerService.new()
 
@@ -245,65 +260,12 @@ end
 
 function Building:SetupPurchaseBoard()
 	local purchaseBoard = self.Model:WaitForChild("Purchase_Board")
-	local pbDetails = {}
-	pbDetails.NameLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel") :: TextLabel
-	pbDetails.LevelLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel") :: TextLabel
-	pbDetails.BuffLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "Buff", "TextLabel") :: TextLabel
 
-	if pbDetails then
-		local qualityInfo = FFGEnum.QUALITY[self.UpgradeStage]
-		local color = qualityInfo.Color
-		pbDetails.NameLabel.TextColor3 = color
-
-		if not self.isPurchased then
-			pbDetails.NameLabel.Parent.Visible = false
-		else
-			pbDetails.NameLabel.Text = self:GetName()
-			pbDetails.NameLabel.Parent.Visible = true
-		end
-
-		pbDetails.LevelLabel.Text = self.isPurchased and "Lvl: " .. self.Level or "Purchase " .. self.Name
-		pbDetails.LevelLabel.TextXAlignment = "Center"
-
-		if self.isPurchased and self.BuildingBuff then
-			local isPlus = self.BuildingBuff.IsPlus
-			if isPlus then
-				pbDetails.BuffLabel.Text = "+" .. (self.BuildingBuff.CurrentValue * 100) .. "%" .. " " .. self.BuildingBuff.Label
-			else
-				pbDetails.BuffLabel.Text = "-" .. (self.BuildingBuff.CurrentValue * 100) .. "%" .. " " .. self.BuildingBuff.Label
-			end
-		end
-	end
-
-	return purchaseBoard
+	return PurchaseBoard.CreatePB(purchaseBoard, self)
 end
 
 function Building:UpdatePurchaseBoardUI()
-	local purchaseBoard = self.Model:WaitForChild("Purchase_Board")
-
-	local pbDetails = {}
-	pbDetails.NameLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Name", "TextLabel") :: TextLabel
-	pbDetails.LevelLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "Header", "Level", "TextLabel") :: TextLabel
-	pbDetails.BuffLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "Buff", "TextLabel") :: TextLabel
-
-	local level = self.Level
-	pbDetails.LevelLabel.Text = "Lvl: " .. level
-
-	local qualityInfo = FFGEnum.QUALITY[self.UpgradeStage]
-	local color = qualityInfo.Color
-	pbDetails.NameLabel.TextColor3 = color
-	pbDetails.NameLabel.Text = self:GetName()
-
-	if self.isPurchased and self.BuildingBuff then
-		local isPlus = self.BuildingBuff.IsPlus
-		if isPlus then
-			pbDetails.BuffLabel.Text = "+" .. (self.BuildingBuff.CurrentValue * 100) .. "%" .. " " .. self.BuildingBuff.Label
-		else
-			pbDetails.BuffLabel.Text = "-" .. (self.BuildingBuff.CurrentValue * 100) .. "%" .. " " .. self.BuildingBuff.Label
-		end
-	end
-
-	if self.isPurchased then pbDetails.NameLabel.Parent.Visible = true end
+	PurchaseBoard.UpdatePB(self)
 end
 
 function Building:SetupProximityPrompt(purchaseBoard: Part)
@@ -404,6 +366,7 @@ end
 -- //SECTION - Loading and Saving
 function Building:Serialize()
 	return {
+		Entity = self.Entity,
 		Id = self.Id,
 		Owner = self.Owner,
 		RealmId = self.RealmId,
