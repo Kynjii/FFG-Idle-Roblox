@@ -91,7 +91,7 @@ local FORMULAS = {
 	},
 	STORAGE = {
 		BaseCost = 100,
-		BaseStorage = 400,
+		BaseStorage = 150,
 	},
 	BUILDING = {
 		BaseCost = 100,

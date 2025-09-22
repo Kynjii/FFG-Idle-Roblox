@@ -173,6 +173,7 @@ end
 -- //SECTION - Core Building Actions
 function Building:Purchase()
 	self.isPurchased = true
+	self.BuildingBuff.CurrentValue = Buffs.CalculateBuffValue(self.UpgradeStage, self.BuildingBuff)
 
 	self:UpdateVisualModel()
 	self:Save()
@@ -264,7 +265,14 @@ function Building:SetupPurchaseBoard()
 		pbDetails.LevelLabel.Text = self.isPurchased and "Lvl: " .. self.Level or "Purchase " .. self.Name
 		pbDetails.LevelLabel.TextXAlignment = "Center"
 
-		if self.isPurchased and self.BuildingBuff then pbDetails.BuffLabel.Text = "+" .. (self.BuildingBuff.CurrentValue * 100) .. "%" .. " " .. self.BuildingBuff.Name end
+		if self.isPurchased and self.BuildingBuff then
+			local isPlus = self.BuildingBuff.IsPlus
+			if isPlus then
+				pbDetails.BuffLabel.Text = "+" .. (self.BuildingBuff.CurrentValue * 100) .. "%" .. " " .. self.BuildingBuff.Label
+			else
+				pbDetails.BuffLabel.Text = "-" .. (self.BuildingBuff.CurrentValue * 100) .. "%" .. " " .. self.BuildingBuff.Label
+			end
+		end
 	end
 
 	return purchaseBoard
@@ -286,7 +294,14 @@ function Building:UpdatePurchaseBoardUI()
 	pbDetails.NameLabel.TextColor3 = color
 	pbDetails.NameLabel.Text = self:GetName()
 
-	if self.isPurchased and self.BuildingBuff then pbDetails.BuffLabel.Text = "+" .. (self.BuildingBuff.CurrentValue * 100) .. "%" .. " " .. self.BuildingBuff.Name end
+	if self.isPurchased and self.BuildingBuff then
+		local isPlus = self.BuildingBuff.IsPlus
+		if isPlus then
+			pbDetails.BuffLabel.Text = "+" .. (self.BuildingBuff.CurrentValue * 100) .. "%" .. " " .. self.BuildingBuff.Label
+		else
+			pbDetails.BuffLabel.Text = "-" .. (self.BuildingBuff.CurrentValue * 100) .. "%" .. " " .. self.BuildingBuff.Label
+		end
+	end
 
 	if self.isPurchased then pbDetails.NameLabel.Parent.Visible = true end
 end

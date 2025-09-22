@@ -155,7 +155,6 @@ function ChainManager:HandleBuildingEvent(building)
 		[FFGEnum.BUFFS.SCOPE.Boat] = function()
 			self.LaneBoat:RecalculateAll()
 		end,
-		-- //TODO - Handle Tender and Storage
 		[FFGEnum.BUFFS.SCOPE.Tender] = function()
 			self.LaneTender:RecalculateAll()
 		end,

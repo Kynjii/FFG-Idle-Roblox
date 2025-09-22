@@ -312,7 +312,6 @@ end
 
 function DataService.GetBuffState(player: Player, buffNames: { string })
 	local profile = DataService.Profiles[player]
-	print("Dataservice Get:", profile, buffNames)
 	if not profile then
 		FFGHelpers.PrintLog("No profile found when attempting to get buff state for: ", player)
 		return false

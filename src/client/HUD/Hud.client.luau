@@ -57,7 +57,13 @@ local function setRealmBuff(name: string, buff)
 	current[name] = buff and buff.CurrentValue or ""
 	buffLabel.Font = FFGEnum.FONT
 	local value = buff.CurrentValue * 100
-	buffLabel.Text = FormatNumber(value) .. "%" .. " " .. buff.Label
+	local isPlus = buff.IsPlus
+	if isPlus then
+		buffLabel.Text = "+" .. FormatNumber(value) .. "%" .. " " .. buff.Label
+	else
+		buffLabel.Text = "-" .. FormatNumber(value) .. "%" .. " " .. buff.Label
+	end
+	buffLabel.Text = "+" .. FormatNumber(value) .. "%" .. " " .. buff.Label
 	buffLabel.TextSize = buffLabel.AbsoluteSize.Y / 2
 end
 

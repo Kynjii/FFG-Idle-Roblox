@@ -10,10 +10,10 @@ local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
 local PopUp = require(ServerScriptService.Server.Modules.Tweens.PopUp)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
+local Events = require(ReplicatedStorage.Shared.Events.Events)
 local CalculateProgress = require(ReplicatedStorage.Shared.Utils.CalculateProgress)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
-local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 local SetInterval = require(ServerScriptService.Server.Modules.SetInterval)
 local FadeEffect = require(ServerScriptService.Server.Modules.Tweens.FadeEffect)
 local CleanerService = require(ServerScriptService.Server.Services.CleanerService)
@@ -376,7 +376,7 @@ function Boat:SetupProximityPrompt(purchaseBoard: Part)
 		if self.Level == self.MaxLevel then return end
 
 		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, not self.isPurchased and self.BaseCost or self.UpgradeCost) then
-			FFGHelpers.PrintLog("Unable to afford upgrade, cost is: ", not self.isPurchased and self.BaseCost or self.UpgradeCost)
+			Events.FireEvent(Events.RemoteNames.WarningMsg, self.Player, "Not enough gold!")
 			self:UpdateProximityPromptUI(proximityPrompt)
 			return
 		end

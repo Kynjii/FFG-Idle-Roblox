@@ -1,5 +1,7 @@
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local Events = require(ReplicatedStorage.Shared.Events.Events)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 local PlayerDataTemplate = require(ServerScriptService.Server.Modules.PlayerDataTemplate)
 local ProfileStore = require(ServerScriptService.Server.Libs.ProfileStore)
@@ -9,6 +11,10 @@ local MusicManager = require(ServerScriptService.Server.Music.MusicManager)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 
 -- //SECTION - Game Start
+
+-- Create Remotes
+Events.InitOnServer()
+
 -- Create Teams based on static data and kick someone if the team has more than one player
 TeamManager.CreateTeams()
 
