@@ -53,6 +53,7 @@ function PB.CreatePB(pbModel: Model, class: BoatType.BoatInstance | TenderType.T
 			levelLabelParent.Visible = false
 		else
 			levelLabelParent.Visible = true
+			pbDetails.LevelLabel.Visible = true
 			pbDetails.LevelLabel.Text = class.IsPurchased and "Lvl: " .. class.Level
 		end
 
@@ -98,7 +99,11 @@ end
 
 function PB.UpdatePB(class: BoatType.BoatInstance | TenderType.TenderInstance | PortStorageType.StorageInstance)
 	--  Default
-	if class.isPurchased then class.PBDetails.LevelLabel.Text = "Lvl: " .. class.Level end
+	local levelLabelParent: Frame = class.PBDetails.LevelLabel.Parent
+	if class.isPurchased then
+		levelLabelParent.Visible = true
+		class.PBDetails.LevelLabel.Text = "Lvl: " .. class.Level
+	end
 
 	local currentUpgradeStage = class.UpgradeStage
 	local qualityInfo = FFGEnum.QUALITY[currentUpgradeStage]

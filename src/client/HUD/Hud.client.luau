@@ -63,7 +63,6 @@ local function setRealmBuff(name: string, buff)
 	else
 		buffLabel.Text = "-" .. FormatNumber(value) .. "%" .. " " .. buff.Label
 	end
-	buffLabel.Text = "+" .. FormatNumber(value) .. "%" .. " " .. buff.Label
 	buffLabel.TextSize = buffLabel.AbsoluteSize.Y / 2
 end
 
