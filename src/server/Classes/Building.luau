@@ -84,6 +84,19 @@ local NAME = {
 		[10] = "Grand Hoistworks",
 		[11] = "Royal Cargo Works",
 	},
+	TenderStorageUpgrader = {
+		[1] = "Porter’s Table",
+		[2] = "Stevedore’s Stall",
+		[3] = "Hoistman’s Shed",
+		[4] = "Capstan House",
+		[5] = "Winchwright’s Workshop",
+		[6] = "Block-and-Tackle Hall",
+		[7] = "Wharf Loading Yard",
+		[8] = "Dockmaster’s Office",
+		[9] = "Porters’ Guildhall",
+		[10] = "Grand Hoistworks",
+		[11] = "Royal Cargo Works",
+	},
 }
 
 local BUILDING_BUFFS = {
@@ -92,6 +105,7 @@ local BUILDING_BUFFS = {
 	BoatFPSUpgrader = FFGEnum.BUFFS.FPS.FPS_Percent,
 	TenderTTUpgrader = FFGEnum.BUFFS.TRAVEL_TIME.Tender_Percent,
 	TenderLoadUpgrader = FFGEnum.BUFFS.LOAD_TIME.Tender_Percent,
+	TenderStorageUpgrader = FFGEnum.BUFFS.STORAGE.Tender_Percent,
 }
 
 local DEFAULTS = {
@@ -142,8 +156,8 @@ function Building.New(state, player: Player, model: Model, realmBuffs: { [string
 	self.VisualModels = self:GetVisualModels()
 	self.CurrentVisualModel = nil
 
-	self.BuildingBuff = realmBuffs[BUILDING_BUFFS[self.BuildingName]] or Buffs.Formulas[BUILDING_BUFFS[self.BuildingName]] :: Buffs.BuffState
-	self.BuildingBuff.CurrentValue = Buffs.CalculateBuffValue(self.UpgradeStage, self.BuildingBuff)
+	self.BuildingBuff = realmBuffs[BUILDING_BUFFS[self.BuildingName]]
+	self.BuildingBuff.CurrentValue = self.isPurchased and Buffs.CalculateBuffValue(self.UpgradeStage, self.BuildingBuff) or nil
 
 	self._cleaner = CleanerService.new()
 

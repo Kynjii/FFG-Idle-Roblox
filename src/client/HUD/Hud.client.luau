@@ -9,23 +9,33 @@ Replica.RequestData()
 local player = Players.LocalPlayer
 local hud = DeepWait(player, "PlayerGui", "HUD")
 
-local labels = {
-	Gold = DeepWait(hud, "Currencies", "Gold", "TextLabel"),
-}
-
 local current = {
 	Gold = 0,
 }
 
-local RealmBuffsTemplate = DeepWait(hud, "RealmBuffs", "Buffs", "BuffContainer", "BuffTextLabelTemplate")
+local currencyTemplate = DeepWait(hud, "Currencies", "Currency", "CurrencyContainer", "CurrencyTextLabelTemplate")
+local realmBuffsTemplate = DeepWait(hud, "RealmBuffs", "Buffs", "BuffContainer", "BuffTextLabelTemplate")
+
+local currencyLabels = {}
 
 local function setCurrency(name: string, v: number)
-	local label = labels[name]
-	if not label then return end
-	current[name] = v
+	if not v then return end
+	local currencyLabel: TextLabel
 
-	label.Font = FFGEnum.FONT
-	label.Text = FormatNumber(v)
+	if currencyLabels[name] then
+		currencyLabel = currencyLabels[name]
+	else
+		currencyLabel = currencyTemplate:Clone() :: TextLabel
+		currencyLabel.Name = name .. "_LabelClone"
+		currencyLabel.Parent = currencyTemplate.Parent
+		currencyLabel.Visible = true
+		currencyLabels[name] = currencyLabel
+	end
+
+	current[name] = v or 0
+	currencyLabel.Font = FFGEnum.FONT
+	currencyLabel.Text = FormatNumber(v)
+	currencyLabel.TextSize = currencyLabel.AbsoluteSize.Y / 2
 end
 
 local realmBuffLabels = {}
@@ -37,9 +47,9 @@ local function setRealmBuff(name: string, buff)
 	if realmBuffLabels[name] then
 		buffLabel = realmBuffLabels[name]
 	else
-		buffLabel = RealmBuffsTemplate:Clone() :: TextLabel
+		buffLabel = realmBuffsTemplate:Clone() :: TextLabel
 		buffLabel.Name = name .. "_LabelClone"
-		buffLabel.Parent = RealmBuffsTemplate.Parent
+		buffLabel.Parent = realmBuffsTemplate.Parent
 		buffLabel.Visible = true
 		realmBuffLabels[name] = buffLabel
 	end
@@ -48,6 +58,7 @@ local function setRealmBuff(name: string, buff)
 	buffLabel.Font = FFGEnum.FONT
 	local value = buff.CurrentValue * 100
 	buffLabel.Text = FormatNumber(value) .. "%" .. " " .. buff.Label
+	buffLabel.TextSize = buffLabel.AbsoluteSize.Y / 2
 end
 
 Replica.OnNew("PlayerState", function(replica)
@@ -85,11 +96,6 @@ Replica.OnNew("PlayerState", function(replica)
 		end)
 	end
 
-	-- Subscribe currencies
-	for key in pairs(labels) do
-		subscribeCurrency(key)
-	end
-
 	-- Subscribe realm buffs
 	if data.RealmBuffs then
 		for key in pairs(data.RealmBuffs) do
@@ -97,16 +103,10 @@ Replica.OnNew("PlayerState", function(replica)
 		end
 	end
 
-	-- Also subscribe for any currencies that arrived in the initial snapshot
+	-- Subscribe currencies
 	if data.Currencies then
 		for key in pairs(data.Currencies) do
 			subscribeCurrency(key)
-		end
-	end
-
-	if data.RealmBuffs then
-		for key in pairs(data.RealmBuffs) do
-			subscribeRealmBuffs(key)
 		end
 	end
 end)
