@@ -2,10 +2,10 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local BoatType = require(ServerScriptService.Server.Classes.Types.Classes.BoatType)
 local TenderType = require(ServerScriptService.Server.Classes.Types.Classes.TenderType)
 local Teams = game:GetService("Teams")
-local BuildingsManagerType = require(ServerScriptService.Server.Classes.Types.BuildingsManagerType)
 local BuildingsManager = require(script.Parent.BuildingsManager)
 local ChainManager = require(script.Parent.ChainManager)
-local ChainManagerType = require(ServerScriptService.Server.Classes.Types.ChainManagerType)
+local BuildingsManagerType = require(ServerScriptService.Server.Classes.Types.Managers.BuildingsManagerType)
+local ChainManagerType = require(ServerScriptService.Server.Classes.Types.Managers.ChainManagerType)
 
 type BuildingsManager = BuildingsManagerType.BuildingsManager
 type BoatInstance = BoatType.BoatInstance

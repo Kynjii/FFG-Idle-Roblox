@@ -2,7 +2,7 @@ local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local Building = require(ServerScriptService.Server.Classes.Building)
-local BuildingsManagerType = require(ServerScriptService.Server.Classes.Types.BuildingsManagerType)
+local BuildingsManagerType = require(ServerScriptService.Server.Classes.Types.Managers.BuildingsManagerType)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local taggedBuildings = CollectionService:GetTagged("Building")
 

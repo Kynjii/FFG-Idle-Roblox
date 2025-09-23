@@ -7,7 +7,7 @@ local PortStorage: PortStorageType = require(ServerScriptService.Server.Classes.
 local Tender: Tender = require(ServerScriptService.Server.Classes.Tender)
 local BoatType = require(ServerScriptService.Server.Classes.Types.Classes.BoatType)
 local TenderType = require(ServerScriptService.Server.Classes.Types.Classes.TenderType)
-local ChainManagerType = require(ServerScriptService.Server.Classes.Types.ChainManagerType)
+local ChainManagerType = require(ServerScriptService.Server.Classes.Types.Managers.ChainManagerType)
 local PortStorageType = require(ServerScriptService.Server.Classes.Types.Classes.PortStorageType)
 
 local taggedBoats = CollectionService:GetTagged("Boat")
