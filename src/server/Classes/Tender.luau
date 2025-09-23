@@ -123,7 +123,7 @@ function Tender.New(state, player, model)
 	self.BillBoard = DeepWait(self.Model, "Tender", "Base", "Billboard", "BillboardGui")
 	self.ProgressBar = DeepWait(self.BillBoard, "ProgressBarBG", "ProgressBar")
 
-	self.PurchaseBoard, self.PBDetails = self:SetupPurchaseBoard()
+	self.PurchaseBoard, self.PBDetails = nil
 
 	-- Tweens
 	self.ProgressTween = nil
@@ -375,6 +375,7 @@ function Tender:Initialize()
 	end
 
 	-- Setup UI components
+	self.PurchaseBoard, self.PBDetails = self:SetupPurchaseBoard()
 	if self.PurchaseBoard then self:SetupProximityPrompt(self.PurchaseBoard) end
 
 	-- Apply attributes for ChainManager
@@ -392,7 +393,6 @@ function Tender:UpdatePurchaseBoardUI()
 end
 
 function Tender:SetupProximityPrompt(purchaseBoard: Model)
-	print(purchaseBoard)
 	local proximityPrompt = self._cleaner:add(Instance.new("ProximityPrompt", purchaseBoard))
 
 	return ProximityPrompt.CreatePP(proximityPrompt, self)

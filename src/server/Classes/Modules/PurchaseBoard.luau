@@ -27,13 +27,14 @@ function PB.CreatePB(pbModel: Model, class: BoatType.BoatInstance | TenderType.T
 	end
 
 	-- Tender
-	if class.Entity == FFGEnum.CLASS.ENTITY_NAME.Tender then pbDetails.CurrentTravelTimeLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentTravelTime", "TextLabel") :: TextLabel end
+	if class.Entity == FFGEnum.CLASS.ENTITY_NAME.Tender then
+		pbDetails.CurrentTravelTimeLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentTravelTime", "TextLabel") :: TextLabel
+		pbDetails.CurrentLoadTimeLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentLoadTime", "TextLabel") :: TextLabel
+	end
 
 	-- Non-Building
 	if class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Building then
-		-- Non-Tender
-		if class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Tender then pbDetails.StorageProgress = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StorageBar", "StorageProgress") :: Frame end
-
+		pbDetails.StorageProgress = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StorageBar", "StorageProgress") :: Frame
 		pbDetails.CurrentMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "CurrentMaxStorage", "TextLabel") :: TextLabel
 		pbDetails.NextMaxStorageLabel = DeepWait(purchaseBoard, "SurfaceGui", "Main", "DetailsContainer", "StatsContainer", "NextMaxStorage", "TextLabel") :: TextLabel
 	end
@@ -50,12 +51,12 @@ function PB.CreatePB(pbModel: Model, class: BoatType.BoatInstance | TenderType.T
 		pbDetails.NameLabel.Text = class:GetName()
 
 		local levelLabelParent: Frame = pbDetails.LevelLabel.Parent
-		if not class.IsPurchased then
+		if not class.isPurchased then
 			levelLabelParent.Visible = false
 		else
 			levelLabelParent.Visible = true
 			pbDetails.LevelLabel.Visible = true
-			pbDetails.LevelLabel.Text = class.IsPurchased and "Lvl: " .. class.Level
+			pbDetails.LevelLabel.Text = class.isPurchased and "Lvl: " .. class.Level
 		end
 
 		pbDetails.Description.Text = class.Description or ""
@@ -63,25 +64,22 @@ function PB.CreatePB(pbModel: Model, class: BoatType.BoatInstance | TenderType.T
 
 		-- Non-Building
 		if class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Building then
-			-- Non-Tender
-			if class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Tender then
-				local storageProgress = CalculateProgress(class.FishInStorage, class.CurrentMaxStorage)
-				pbDetails.StorageProgress.Size = UDim2.fromScale(1, storageProgress)
-			end
+			local storageProgress = CalculateProgress(class.FishInStorage, class.CurrentMaxStorage)
+			pbDetails.StorageProgress.Size = UDim2.fromScale(1, storageProgress)
 
 			-- STORAGE Stats
-			local currentStorage, nextStorage = class:CalculateMaxStorage()
-			pbDetails.CurrentMaxStorageLabel.Text = class.IsPurchased and "Storage: " .. FormatNumber(currentStorage) or ""
-			pbDetails.NextMaxStorageLabel.Text = class.IsPurchased and "Next Lvl Storage: " .. FormatNumber(nextStorage) or ""
+			pbDetails.CurrentMaxStorageLabel.Text = class.isPurchased and "Storage: " .. FormatNumber(class.CurrentMaxStorage) or ""
+			pbDetails.NextMaxStorageLabel.Text = class.isPurchased and "Next Lvl Storage: " .. FormatNumber(class.NextLvlMaxStorage) or ""
 		end
 
 		if class.Entity == FFGEnum.CLASS.ENTITY_NAME.Boat then
 			-- FPS Stats
-			pbDetails.CurrentFPSLabel.Text = class.IsPurchased and "FPS: " .. FormatNumber(class.CurrentFPS) or ""
-			pbDetails.NextFPSLabel.Text = class.IsPurchased and "Next Lvl FPS: " .. FormatNumber(class.NextFPS) or ""
+			pbDetails.CurrentFPSLabel.Text = class.isPurchased and "FPS: " .. FormatNumber(class.CurrentFPS) or ""
+			pbDetails.NextFPSLabel.Text = class.isPurchased and "Next Lvl FPS: " .. FormatNumber(class.NextFPS) or ""
 		elseif class.Entity == FFGEnum.CLASS.ENTITY_NAME.Tender then
 			-- TRAVEL TIME Stats
-			pbDetails.CurrentTravelTimeLabel.Text = class.isPurchased and "Travel Time: " .. class.CurrentTravelTime .. "secs" or ""
+			pbDetails.CurrentTravelTimeLabel.Text = class.isPurchased and "Travel Time: " .. FormatNumber(class.CurrentTravelTime) .. " secs" or ""
+			pbDetails.CurrentLoadTimeLabel.Text = class.isPurchased and "Load Time: " .. FormatNumber(class.LoadTime) .. " secs" or ""
 		elseif class.Entity == FFGEnum.CLASS.ENTITY_NAME.Building then
 			if class.isPurchased and class.BuildingBuff then
 				local isPlus = class.BuildingBuff.IsPlus
@@ -119,7 +117,10 @@ function PB.UpdatePB(class: BoatType.BoatInstance | TenderType.TenderInstance | 
 	end
 
 	-- Tender
-	if class.Entity == FFGEnum.CLASS.ENTITY_NAME.Tender then class.PBDetails.CurrentTravelTimeLabel.Text = class.isPurchased and "Travel Time: " .. class.CurrentTravelTime .. "secs" or "" end
+	if class.Entity == FFGEnum.CLASS.ENTITY_NAME.Tender then
+		class.PBDetails.CurrentTravelTimeLabel.Text = class.isPurchased and "Travel Time: " .. FormatNumber(class.CurrentTravelTime) .. " secs" or ""
+		class.PBDetails.CurrentLoadTimeLabel.Text = class.isPurchased and "Load Time: " .. FormatNumber(class.LoadTime) .. "secs" or ""
+	end
 
 	-- Non-Building
 	if class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Building then
@@ -141,11 +142,8 @@ function PB.UpdatePB(class: BoatType.BoatInstance | TenderType.TenderInstance | 
 		end
 	end
 
-	local updateProgressBar = class.Entity == FFGEnum.CLASS.ENTITY_NAME.Boat or class.Entity == FFGEnum.CLASS.ENTITY_NAME.PortStorage
-	if updateProgressBar then
-		local storageProgress = CalculateProgress(class.FishInStorage, class.CurrentMaxStorage)
-		class.PBDetails.StorageProgress.Size = UDim2.fromScale(1, storageProgress)
-	end
+	local storageProgress = CalculateProgress(class.FishInStorage, class.CurrentMaxStorage)
+	class.PBDetails.StorageProgress.Size = UDim2.fromScale(1, storageProgress)
 
 	if class.isPurchased then class.PBDetails.NameLabel.Parent.Visible = true end
 end
