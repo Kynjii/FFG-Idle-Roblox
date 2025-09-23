@@ -70,9 +70,14 @@ function ClassCalculator.CalculateTravelTime(baseValue: number, percentBuffValue
 	local travelTime = math.max(1, baseValue)
 
 	if percentBuffValue then
-		local buffedValue = percentBuffValue * travelTime
+		-- Clamp the buff to maximum 95% reduction
+		local clampedBuffValue = math.min(percentBuffValue, 0.95)
+		local buffedValue = clampedBuffValue * travelTime
 		travelTime -= buffedValue
 	end
+
+	-- Ensure minimum travel time (5% of original)
+	travelTime = math.max(travelTime, baseValue * 0.05)
 
 	return travelTime
 end
@@ -81,9 +86,14 @@ function ClassCalculator.CalculateLoadTime(baseValue: number, percentBuffValue: 
 	local loadTime = baseValue
 
 	if percentBuffValue then
-		local buffedValue = percentBuffValue * loadTime
+		-- Clamp the buff to maximum 95% reduction
+		local clampedBuffValue = math.min(percentBuffValue, 0.95)
+		local buffedValue = clampedBuffValue * loadTime
 		loadTime -= buffedValue
 	end
+
+	-- Ensure minimum load time (5% of original)
+	loadTime = math.max(loadTime, baseValue * 0.05)
 
 	return loadTime
 end

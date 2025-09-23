@@ -242,7 +242,7 @@ function ChainManager:StartUnloadingFish()
 	end
 
 	-- Snapshot unload duration at start, capacity stays dynamic.
-	local rawUnload = tender.UnloadTime or 10
+	local rawUnload = tender.LoadTime or 10
 	local unloadDuration = math.clamp(rawUnload, 0.5, math.huge)
 	local startTime = os.clock()
 

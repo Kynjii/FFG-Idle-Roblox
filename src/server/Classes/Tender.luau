@@ -110,9 +110,6 @@ function Tender.New(state, player, model)
 	self.VisualModels = self:GetVisualModels()
 	self.CurrentVisualModel = nil
 
-	-- Apply attributes for ChainManager
-	if self.isPurchased then self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.isPurchased, self.isPurchased) end
-
 	-- Storage calcs
 	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
 
@@ -151,7 +148,6 @@ function Tender:UpdateBuffs()
 end
 
 function Tender:RecalculateAll()
-	print("Updating Tender")
 	self:UpdateBuffs()
 
 	self.UpgradeCost = self:CalculateUpgradeCost()
@@ -241,7 +237,7 @@ end
 
 function Tender:CalculateLoadTime()
 	local loadTimeBuff = self.Buffs[TENDER_BUFFS.TenderLoadTime_Percent] and self.Buffs[TENDER_BUFFS.TenderLoadTime_Percent].CurrentValue or nil
-	return ClassCalculators.CalculateLoadTime(DEFAULTS.BaseTravelTime, loadTimeBuff)
+	return ClassCalculators.CalculateLoadTime(DEFAULTS.BaseLoadTime, loadTimeBuff)
 end
 -- //!SECTION
 
@@ -369,10 +365,6 @@ end
 
 -- //SECTION - UI Setup
 function Tender:Initialize()
-	-- Setup UI components
-	local purchaseBoard = self:SetupPurchaseBoard()
-	if purchaseBoard then self:SetupProximityPrompt(purchaseBoard) end
-
 	-- Handle visibility based on purchase status
 	if not self.isPurchased then
 		self:Hide()
@@ -381,6 +373,12 @@ function Tender:Initialize()
 		self:Show()
 		self:CanCollide()
 	end
+
+	-- Setup UI components
+	if self.PurchaseBoard then self:SetupProximityPrompt(self.PurchaseBoard) end
+
+	-- Apply attributes for ChainManager
+	if self.isPurchased then self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.isPurchased, self.isPurchased) end
 end
 
 function Tender:SetupPurchaseBoard()
@@ -393,7 +391,8 @@ function Tender:UpdatePurchaseBoardUI()
 	PurchaseBoard.UpdatePB(self)
 end
 
-function Tender:SetupProximityPrompt(purchaseBoard: Part)
+function Tender:SetupProximityPrompt(purchaseBoard: Model)
+	print(purchaseBoard)
 	local proximityPrompt = self._cleaner:add(Instance.new("ProximityPrompt", purchaseBoard))
 
 	return ProximityPrompt.CreatePP(proximityPrompt, self)

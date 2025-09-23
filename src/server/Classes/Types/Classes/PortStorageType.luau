@@ -54,6 +54,7 @@ export type StorageInstance = {
 	CurrentVisualModel: Model | nil,
 	TakeFishPrompt: ProximityPrompt,
 	Buffs: { Buffs.BuffState },
+	PurchaseBoard: Model,
 	PBDetails: { [string]: TextLabel | Frame },
 	Description: string,
 

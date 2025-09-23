@@ -257,8 +257,7 @@ function Building:Initialize()
 	end
 
 	-- Setup UI components
-	local purchaseBoard = self:SetupPurchaseBoard()
-	if purchaseBoard then self:SetupProximityPrompt(purchaseBoard) end
+	if self.PurchaseBoard then self:SetupProximityPrompt(self.PurchaseBoard) end
 end
 
 function Building:SetupPurchaseBoard()

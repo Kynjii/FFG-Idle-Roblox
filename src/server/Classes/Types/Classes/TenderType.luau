@@ -25,6 +25,7 @@ export type TenderProps = {
 	NextLvlTravelTime: number,
 	GrowthRate: number,
 	CostGrowthRate: number,
+	BaseLoadTime: number,
 }
 
 export type TenderInstance = {
@@ -65,6 +66,7 @@ export type TenderInstance = {
 	CurrentVisualModel: Model | nil,
 	Buffs: { Buffs.BuffState },
 	LoadTime: number?,
+	PurchaseBoard: Model,
 	PBDetails: { [string]: TextLabel | Frame },
 	Description: string,
 

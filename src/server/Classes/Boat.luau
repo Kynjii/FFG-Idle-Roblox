@@ -114,9 +114,6 @@ function Boat.New(state, player: Player, model: Model): Boat
 	self._cleaner = CleanerService.new()
 
 	self.FishingInterval = nil
-	if self.isPurchased and not self:IsStorageFull() then task.delay(1, function()
-		self:StartFishing()
-	end) end
 
 	self:UpdateVisualModel()
 	self:StartAnimation()
@@ -282,6 +279,10 @@ function Boat:Initialize()
 
 	-- Setup UI components
 	if self.PurchaseBoard then self:SetupProximityPrompt(self.PurchaseBoard) end
+
+	if self.isPurchased and not self:IsStorageFull() then task.delay(1, function()
+		self:StartFishing()
+	end) end
 end
 
 function Boat:SetupPurchaseBoard()

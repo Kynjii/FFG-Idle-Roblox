@@ -246,8 +246,7 @@ function PortStorage:Initialize()
 	end
 
 	-- Setup UI components
-	local purchaseBoard = self:SetupPurchaseBoard()
-	if purchaseBoard then self:SetupProximityPrompt(purchaseBoard) end
+	if self.PurchaseBoard then self:SetupProximityPrompt(self.PurchaseBoard) end
 	if self.isPurchased then self.TakeFishPrompt = self:SetupFishRemovalPrompt() end
 	self:UpdateFishModel()
 end
