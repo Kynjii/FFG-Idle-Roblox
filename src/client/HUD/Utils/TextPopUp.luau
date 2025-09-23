@@ -3,10 +3,6 @@ local TweenService = game:GetService("TweenService")
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local TextPopUp = {}
 
-local DEFAULTS = {
-	Duration = 1,
-}
-
 local labels = {
 	RedWarning = "RedWarning",
 }
