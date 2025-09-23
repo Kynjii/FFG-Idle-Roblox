@@ -280,7 +280,7 @@ function Boat:Initialize()
 	-- Setup UI components
 	if self.PurchaseBoard then self:SetupProximityPrompt(self.PurchaseBoard) end
 
-	if self.isPurchased and not self:IsStorageFull() then task.delay(1, function()
+	if self.isPurchased then task.delay(1, function()
 		self:StartFishing()
 	end) end
 end

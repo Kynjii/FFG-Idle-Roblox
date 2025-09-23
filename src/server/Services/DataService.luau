@@ -12,8 +12,6 @@ DataService.Profiles = {}
 DataService.Replicas = {}
 
 function DataService.AttachReplica(player: Player, profile)
-	FFGHelpers.PrintLog("Attaching Replica for: ", player)
-
 	local currencies = {}
 	local buffs = {}
 
@@ -33,14 +31,13 @@ function DataService.AttachReplica(player: Player, profile)
 			RealmBuffs = buffs,
 		},
 	})
-	FFGHelpers.PrintLog("New Replica is: ", replica)
+
 	replica:Subscribe(player)
 	DataService.Replicas[player] = replica
 	return replica
 end
 
 function DataService.DetachReplica(player: Player)
-	FFGHelpers.PrintLog("Detaching Replica for: ", player)
 	local replica = DataService.Replicas[player]
 	if replica then
 		replica:Destroy()
@@ -100,8 +97,6 @@ function DataService.ClearProfileData(player: Player, profile)
 	end
 
 	profile.Data = nil
-
-	FFGHelpers.PrintLog("Cleared Profile Data: ", profile)
 end
 
 function DataService.CreateNewProfileData(player: Player, profile)
@@ -112,8 +107,6 @@ function DataService.CreateNewProfileData(player: Player, profile)
 
 	local resetDataTemplate = TableUtil.Copy(PlayerDataTemplate, true)
 	profile.Data = resetDataTemplate
-
-	FFGHelpers.PrintLog("Created Profile Data: ", profile)
 end
 
 -- //SECTION - BOATS
@@ -149,13 +142,10 @@ function DataService.SaveBoatState(player: Player, boatId: string, newState): bo
 
 	if existingBoatIndex then
 		profile.Data.Realms[currentRealm].Boats[existingBoatIndex] = newState
-		FFGHelpers.PrintLog("Updated existing boat at index", existingBoatIndex)
 	else
 		table.insert(profile.Data.Realms[currentRealm].Boats, newState)
-		FFGHelpers.PrintLog("Added new boat with ID", boatId)
 	end
 
-	FFGHelpers.PrintLog("Saved boat state for player", player.Name, "boat", boatId)
 	return true
 end
 -- //!SECTION
@@ -193,13 +183,10 @@ function DataService.SaveTenderState(player: Player, tenderId: string, newState)
 
 	if existingStorageIndex then
 		profile.Data.Realms[currentRealm].Tenders[existingStorageIndex] = newState
-		FFGHelpers.PrintLog("Updated existing tender at index", existingStorageIndex)
 	else
 		table.insert(profile.Data.Realms[currentRealm].Tenders, newState)
-		FFGHelpers.PrintLog("Added new tender with ID", tenderId)
 	end
 
-	FFGHelpers.PrintLog("Saved tender state for player", player.Name, "tender", tenderId)
 	return true
 end
 -- //!SECTION
@@ -237,13 +224,10 @@ function DataService.SaveStorageState(player: Player, storageId: string, newStat
 
 	if existingStorageIndex then
 		profile.Data.Realms[currentRealm].Storages[existingStorageIndex] = newState
-		FFGHelpers.PrintLog("Updated existing tender at index", existingStorageIndex)
 	else
 		table.insert(profile.Data.Realms[currentRealm].Storages, newState)
-		FFGHelpers.PrintLog("Added new tender with ID", storageId)
 	end
 
-	FFGHelpers.PrintLog("Saved tender state for player", player.Name, "tender", storageId)
 	return true
 end
 -- //!SECTION
@@ -272,7 +256,6 @@ function DataService.SaveBuildingState(player: Player, buildingId: string, newSt
 	if not profile.Data.Realms[currentRealm].Buildings then profile.Data.Realms[currentRealm].Buildings = {} end
 
 	profile.Data.Realms[currentRealm].Buildings[buildingId] = newState
-	FFGHelpers.PrintLog("Updated existing building", profile.Data.Realms[currentRealm].Buildings[buildingId])
 
 	return true
 end
@@ -306,7 +289,6 @@ function DataService.SaveBuffState(player: Player, newState: { [string]: number 
 	local replica = DataService.Replicas[player]
 	if replica then replica:Set({ "RealmBuffs", newState.Name }, newState) end
 
-	FFGHelpers.PrintLog("Saved buff state for player", player.Name, profile.Data.Realms[currentRealm].Buffs)
 	return true
 end
 
