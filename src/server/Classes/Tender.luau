@@ -151,6 +151,7 @@ function Tender:UpdateBuffs()
 end
 
 function Tender:RecalculateAll()
+	print("Updating Tender")
 	self:UpdateBuffs()
 
 	self.UpgradeCost = self:CalculateUpgradeCost()
