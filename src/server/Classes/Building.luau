@@ -4,6 +4,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Signal = require(ReplicatedStorage.Packages.Signal)
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
+local ProximityPrompt = require(ServerScriptService.Server.Classes.Modules.ProximityPrompt)
 local PurchaseBoard = require(ServerScriptService.Server.Classes.Modules.PurchaseBoard)
 local Buffs = require(ServerScriptService.Server.Math.Buffs)
 local DataService = require(ServerScriptService.Server.Services.DataService)
@@ -269,63 +270,13 @@ function Building:UpdatePurchaseBoardUI()
 end
 
 function Building:SetupProximityPrompt(purchaseBoard: Part)
-	-- Create the proximity prompt
 	local proximityPrompt: ProximityPrompt = self._cleaner:add(Instance.new("ProximityPrompt", purchaseBoard))
 
-	-- Check if Building is at max level
-	if self.Level == self.MaxLevel then
-		proximityPrompt.ObjectText = "Cannot Upgrade"
-		proximityPrompt.ActionText = "Max Level Reached"
-		return proximityPrompt
-	end
-
-	proximityPrompt.HoldDuration = 0.5
-	proximityPrompt.MaxActivationDistance = 5
-	proximityPrompt.ObjectText = self.isPurchased and "Upgrade " .. self.Name or "Purchase"
-	proximityPrompt.ActionText = self.isPurchased and "Gold: " .. FormatNumber(self.UpgradeCost) or "Gold: " .. FormatNumber(self.BaseCost)
-
-	-- Handle proximity prompt triggered
-	self._cleaner:add(proximityPrompt.Triggered:Connect(function(player)
-		if player.UserId ~= self.Owner then return end
-
-		-- Check max level again
-		if self.Level == self.MaxLevel then return end
-
-		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, not self.isPurchased and self.BaseCost or self.UpgradeCost) then
-			Events.FireEvent(Events.RemoteNames.WarningMsg, self.Player, "Not enough gold!")
-			self:UpdateProximityPromptUI(proximityPrompt)
-			return
-		end
-
-		-- Spend the currency
-		DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, not self.isPurchased and self.BaseCost or self.UpgradeCost)
-
-		if self.isPurchased then
-			-- Upgrade existing Building
-			self:Upgrade()
-		else
-			-- Purchase Building
-			self:Purchase()
-			self:Show()
-			self:CanCollide()
-		end
-
-		-- Update UIs
-		self:UpdateProximityPromptUI(proximityPrompt)
-		self:UpdatePurchaseBoardUI()
-	end))
-
-	return proximityPrompt
+	ProximityPrompt.CreatePP(proximityPrompt, self)
 end
 
 function Building:UpdateProximityPromptUI(proximityPrompt: ProximityPrompt)
-	if self.Level == self.MaxLevel then
-		proximityPrompt.ObjectText = "Cannot Upgrade"
-		proximityPrompt.ActionText = "Max Level Reached"
-	else
-		proximityPrompt.ObjectText = self.isPurchased and "Upgrade Building" or "Purchase"
-		proximityPrompt.ActionText = self.isPurchased and "Gold: " .. FormatNumber(self.UpgradeCost) or "Gold: " .. FormatNumber(self.BaseCost)
-	end
+	ProximityPrompt.UpdatePP(proximityPrompt, self)
 end
 -- //!SECTION
 
