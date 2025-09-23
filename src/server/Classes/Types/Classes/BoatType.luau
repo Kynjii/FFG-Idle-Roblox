@@ -60,7 +60,7 @@ export type BoatInstance = {
 	Animations: { [string]: Animation },
 	VisualModels: { [string]: Model },
 	CurrentVisualModel: Model | nil,
-	Buffs: { [string]: Buffs.BuffState },
+	Buffs: { Buffs.BuffState },
 	PurchaseBoard: Model,
 	PBDetails: { [string]: TextLabel | Frame },
 	Description: string,
@@ -94,7 +94,7 @@ export type BoatInstance = {
 	ShowFishPopUp: (self: BoatInstance) -> (),
 
 	-- Buffs
-	GetBuffs: (self: BoatInstance) -> { [string]: Buffs.BuffState },
+	GetBuffs: (self: BoatInstance) -> { Buffs.BuffState },
 	UpdateBuffs: (self: BoatInstance) -> (),
 
 	-- Visibility and Collision

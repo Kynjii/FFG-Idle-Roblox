@@ -53,7 +53,7 @@ export type StorageInstance = {
 	VisualModels: { [string]: Model },
 	CurrentVisualModel: Model | nil,
 	TakeFishPrompt: ProximityPrompt,
-	Buffs: { [string]: Buffs.BuffState },
+	Buffs: { Buffs.BuffState },
 	PBDetails: { [string]: TextLabel | Frame },
 	Description: string,
 
@@ -75,7 +75,7 @@ export type StorageInstance = {
 	UpdateStorageStatus: (self: StorageInstance, status: boolean) -> (),
 
 	-- Buffs
-	GetBuffs: (self: StorageInstance) -> { [string]: Buffs.BuffState },
+	GetBuffs: (self: StorageInstance) -> { Buffs.BuffState },
 	UpdateBuffs: (self: StorageInstance) -> (),
 
 	-- UI Setup

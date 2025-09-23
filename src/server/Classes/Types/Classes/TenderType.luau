@@ -63,7 +63,7 @@ export type TenderInstance = {
 	Animations: { [string]: Animation },
 	VisualModels: { [string]: Model },
 	CurrentVisualModel: Model | nil,
-	Buffs: { [string]: Buffs.BuffState },
+	Buffs: { Buffs.BuffState },
 	LoadTime: number?,
 	PBDetails: { [string]: TextLabel | Frame },
 	Description: string,
@@ -93,7 +93,7 @@ export type TenderInstance = {
 	AttachAttListeners: (self: TenderInstance) -> (),
 
 	-- Buffs
-	GetBuffs: (self: TenderInstance) -> { [string]: Buffs.BuffState },
+	GetBuffs: (self: TenderInstance) -> { Buffs.BuffState },
 	UpdateBuffs: (self: TenderInstance) -> (),
 
 	-- Setup

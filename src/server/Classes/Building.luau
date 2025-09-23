@@ -6,6 +6,7 @@ local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.Clas
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
 local ProximityPrompt = require(ServerScriptService.Server.Classes.Modules.ProximityPrompt)
 local PurchaseBoard = require(ServerScriptService.Server.Classes.Modules.PurchaseBoard)
+local BuildingType = require(ServerScriptService.Server.Classes.Types.Classes.BuildingType)
 local Buffs = require(ServerScriptService.Server.Math.Buffs)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
@@ -15,6 +16,9 @@ local FadeEffect = require(ServerScriptService.Server.Modules.Tweens.FadeEffect)
 local CleanerService = require(ServerScriptService.Server.Services.CleanerService)
 
 -- //SECTION - Building Types
+type Building = BuildingType.Building
+type BuildingProps = BuildingType.BuildingProps
+type BuildingInstance = BuildingType.BuildingInstance
 -- //!SECTION
 
 -- //SECTION - Building Data
@@ -117,7 +121,7 @@ local BUILDING_BUFFS = {
 	TenderStorageUpgrader = FFGEnum.BUFFS.STORAGE.Tender_Percent,
 }
 
-local DEFAULTS = {
+local DEFAULTS: BuildingProps = {
 	Entity = FFGEnum.CLASS.ENTITY_NAME.Building,
 	RealmId = 1,
 	Tier = 1,
@@ -130,12 +134,12 @@ local DEFAULTS = {
 }
 -- //!SECTION
 
-local Building = {}
+local Building = {} :: BuildingInstance
 Building.__index = Building
 
 -- //SECTION - Constructor
-function Building.New(state, player: Player, model: Model, realmBuffs: { [string]: number })
-	local self = setmetatable({}, Building)
+function Building.New(state, player: Player, model: Model, realmBuffs: { [string]: number }): Building
+	local self: BuildingInstance = setmetatable({}, Building)
 
 	-- Start with default stats as base
 	for key, value in pairs(DEFAULTS) do
