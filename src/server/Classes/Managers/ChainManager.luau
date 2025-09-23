@@ -47,12 +47,11 @@ function ChainManager.New(realmData, tier: number, player: Player, teamId: numbe
 	self.StorageModel = self:FindStorageModel() :: Model
 	self.LaneStorage = PortStorage.New(storageArr[tier], player, self.StorageModel)
 
-	-- Attach listeners to handle the Tender Travelling Cycle
+	-- Attach listeners
 	self.Signals = {
 		PurchasedEvent = nil,
 		UpgradedEvent = nil,
 	}
-	self:AttachAttListeners()
 
 	if self.LaneTender.isPurchased then self:StartTenderCycle() end
 
@@ -93,6 +92,8 @@ function ChainManager:Initialize()
 	self.LaneBoat:Initialize()
 	self.LaneTender:Initialize()
 	self.LaneStorage:Initialize()
+
+	self:AttachAttListeners()
 end
 
 function ChainManager:AttachAttListeners()
@@ -137,7 +138,7 @@ function ChainManager:AttachAttListeners()
 		end
 	end)
 
-	for _, building in ipairs(self.Buildings) do
+	for _, building in pairs(self.Buildings) do
 		self.Signals.PurchasedEvent = building.Purchased:Connect(function(building)
 			self:HandleBuildingEvent(building)
 		end)
