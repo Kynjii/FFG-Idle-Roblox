@@ -1,6 +1,6 @@
 local realmBuffs = {
 	-- FISH
-	Fish_Percent = { Unlocked = false, Name = "Fish_Percent", Label = "Fish Value", BaseValue = 0.04, Type = "Production", Scope = "Helper", IsPlus = true },
+	Fish_Percent = { Unlocked = false, Name = "Fish_Percent", Label = "Fish Value", BaseValue = 0.05, Type = "Production", Scope = "Helper", IsPlus = true },
 	Fish_Multi = { Unlocked = false, Name = "Fish_Multi", Label = "Fish Value", BaseValue = 1.15, Type = "Multiplier", Scope = "Helper", IsPlus = true },
 
 	-- STORAGE
@@ -11,9 +11,9 @@ local realmBuffs = {
 	CaravanStorage_Percent = { Unlocked = false, Name = "CaravanStorage_Percent", Label = "Caravan Storage", BaseValue = 0.08, Type = "QoL", Scope = "Caravan", IsPlus = true },
 
 	-- TRAVEL TIME
-	HelperTravelTime_Percent = { Unlocked = false, Name = "HelperTravelTime_Percent", Label = "Helper Travel Times", BaseValue = 0.03, Type = "Loop", Scope = "Helper", IsPlus = false },
-	CaravanTravelTime_Percent = { Unlocked = false, Name = "CaravanTravelTime_Percent", Label = "Caravan Travel Times", BaseValue = 0.03, Type = "Loop", Scope = "Caravan", IsPlus = false },
-	TenderTravelTime_Percent = { Unlocked = false, Name = "TenderTravelTime_Percent", Label = "Tender Travel Times", BaseValue = 0.03, Type = "Loop", Scope = "Tender", IsPlus = false },
+	HelperTravelTime_Percent = { Unlocked = false, Name = "HelperTravelTime_Percent", Label = "Helper Travel Times", BaseValue = 0.06, Type = "Loop", Scope = "Helper", IsPlus = false },
+	CaravanTravelTime_Percent = { Unlocked = false, Name = "CaravanTravelTime_Percent", Label = "Caravan Travel Times", BaseValue = 0.06, Type = "Loop", Scope = "Caravan", IsPlus = false },
+	TenderTravelTime_Percent = { Unlocked = false, Name = "TenderTravelTime_Percent", Label = "Tender Travel Times", BaseValue = 0.06, Type = "Loop", Scope = "Tender", IsPlus = false },
 
 	-- LOAD TIME
 	TenderLoadTime_Percent = { Unlocked = false, Name = "TenderLoadTime_Percent", Label = "Tender Load Times", BaseValue = 0.03, Type = "Loop", Scope = "Tender", IsPlus = false },
