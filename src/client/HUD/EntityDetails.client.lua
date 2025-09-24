@@ -4,11 +4,28 @@ local Events = require(ReplicatedStorage.Shared.Events.Events)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 
 local player = Players.LocalPlayer
+local entityDetailsUI: Frame = DeepWait(player.PlayerGui, "EntityDetails", "DetailsContainer")
 
 local entityDetails = Events.GetRemote(Events.RemoteNames.OpenEntityDetails)
 if entityDetails then entityDetails.OnClientEvent:Connect(function(data)
 	if data then
-		local entityDetailsUI: Frame = DeepWait(player.PlayerGui.EntityDetails.DetailsContainer)
 		entityDetailsUI.Visible = true
+
+		handleClosingEntityDetailsUI()
 	end
 end) end
+
+function handleClosingEntityDetailsUI()
+	local character = player.Character.PrimaryPart
+	local originalPosition = character.CFrame.Position
+
+	while true do
+		local distance = player:DistanceFromCharacter(originalPosition)
+		if distance >= 8 then
+			entityDetailsUI.Visible = false
+			break
+		end
+
+		task.wait(0.5)
+	end
+end
