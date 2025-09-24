@@ -267,10 +267,6 @@ function PortStorage:SetupProximityPrompt(purchaseBoard: Part)
 	ProximityPrompt.CreatePP(proximityPrompt, self)
 end
 
-function PortStorage:UpdateProximityPromptUI(proximityPrompt: ProximityPrompt)
-	ProximityPrompt.UpdatePP(proximityPrompt, self)
-end
-
 function PortStorage:SetupFishRemovalPrompt()
 	-- Create the proximity prompt
 	local parent = self.Model.Storage.Panel

@@ -398,10 +398,6 @@ function Tender:SetupProximityPrompt(purchaseBoard: Model)
 	return ProximityPrompt.CreatePP(proximityPrompt, self)
 end
 
-function Tender:UpdateProximityPromptUI(proximityPrompt: ProximityPrompt)
-	ProximityPrompt.UpdatePP(proximityPrompt, self)
-end
-
 function Tender:ShowFishPopUp(amount)
 	local billboard: BillboardGui = self.Model.PrimaryPart.Billboard:WaitForChild("BoatPopupTemplate")
 	if billboard then

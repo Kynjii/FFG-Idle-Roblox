@@ -103,7 +103,6 @@ export type TenderInstance = {
 	SetupPurchaseBoard: (self: TenderInstance) -> Model,
 	UpdatePurchaseBoardUI: (self: TenderInstance) -> (),
 	SetupProximityPrompt: (self: TenderInstance, purchaseBoard: Part) -> ProximityPrompt,
-	UpdateProximityPromptUI: (self: TenderInstance, proximityPrompt: ProximityPrompt) -> (),
 	ShowFishPopUp: (self: TenderInstance) -> (),
 
 	-- Visibility and Collision

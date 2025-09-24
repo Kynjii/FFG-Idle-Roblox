@@ -290,10 +290,6 @@ function Building:SetupProximityPrompt(purchaseBoard: Part)
 
 	ProximityPrompt.CreatePP(proximityPrompt, self)
 end
-
-function Building:UpdateProximityPromptUI(proximityPrompt: ProximityPrompt)
-	ProximityPrompt.UpdatePP(proximityPrompt, self)
-end
 -- //!SECTION
 
 -- //SECTION - Visibility and Collision

@@ -5,6 +5,8 @@ local Events = {}
 
 Events.RemoteNames = {
 	WarningMsg = "WarningMsg",
+	OpenEntityDetails = "OpenEntityDetails",
+	CloseEntityDetails = "CloseEntityDetails",
 }
 
 local FOLDER_NAME = "Events"

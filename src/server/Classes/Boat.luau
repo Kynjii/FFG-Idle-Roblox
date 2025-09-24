@@ -301,10 +301,6 @@ function Boat:SetupProximityPrompt(purchaseBoard: Part)
 	return ProximityPrompt.CreatePP(proximityPrompt, self)
 end
 
-function Boat:UpdateProximityPromptUI(proximityPrompt: ProximityPrompt)
-	ProximityPrompt.UpdatePP(proximityPrompt, self)
-end
-
 function Boat:ShowFishPopUp(amount)
 	local billboard: BillboardGui = self.Model.PrimaryPart.Billboard:WaitForChild("FishPopupTemplate")
 	if billboard then

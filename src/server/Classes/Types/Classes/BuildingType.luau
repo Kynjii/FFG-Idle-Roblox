@@ -75,7 +75,6 @@ export type BuildingInstance = {
 	SetupPurchaseBoard: (self: BuildingInstance) -> Model,
 	UpdatePurchaseBoardUI: (self: BuildingInstance) -> (),
 	SetupProximityPrompt: (self: BuildingInstance, purchaseBoard: Part) -> ProximityPrompt,
-	UpdateProximityPromptUI: (self: BuildingInstance, proximityPrompt: ProximityPrompt) -> (),
 
 	-- Visibility and Collision
 	Show: (self: BuildingInstance) -> (),

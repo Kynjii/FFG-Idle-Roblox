@@ -17,51 +17,43 @@ function PP.CreatePP(proximityPrompt: ProximityPrompt, class: BoatType.BoatInsta
 		return proximityPrompt
 	end
 
-	proximityPrompt.HoldDuration = 0.5
+	proximityPrompt.HoldDuration = 0
 	proximityPrompt.MaxActivationDistance = 5
-	proximityPrompt.ObjectText = class.isPurchased and "Upgrade Boat" or "Purchase"
-	proximityPrompt.ActionText = class.isPurchased and "Gold: " .. FormatNumber(class.UpgradeCost) or "Gold: " .. FormatNumber(class.BaseCost)
+	proximityPrompt.ObjectText = "Open"
+	proximityPrompt.ActionText = class.Entity .. " Details"
 
 	class._cleaner:add(proximityPrompt.Triggered:Connect(function(player)
 		if player.UserId ~= class.Owner then return end
 		if class.Level == class.MaxLevel then return end
 
-		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, not class.isPurchased and class.BaseCost or class.UpgradeCost) then
-			Events.FireEvent(Events.RemoteNames.WarningMsg, class.Player, "Not enough gold!")
-			class:UpdateProximityPromptUI(proximityPrompt)
-			return
-		end
+		Events.FireEvent(Events.RemoteNames.OpenEntityDetails, class.Player, class)
 
-		DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, not class.isPurchased and class.BaseCost or class.UpgradeCost)
+		-- if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, not class.isPurchased and class.BaseCost or class.UpgradeCost) then
+		-- 	Events.FireEvent(Events.RemoteNames.WarningMsg, class.Player, "Not enough gold!")
+		-- 	class:UpdateProximityPromptUI(proximityPrompt)
+		-- 	return
+		-- end
 
-		if class.isPurchased then
-			class:Upgrade()
-		else
-			class:Purchase()
-			class:Show()
-			class:CanCollide()
+		-- DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, not class.isPurchased and class.BaseCost or class.UpgradeCost)
 
-			if class.Entity == FFGEnum.CLASS.ENTITY_NAME.Boat then class:StartFishing() end
-		end
+		-- if class.isPurchased then
+		-- 	class:Upgrade()
+		-- else
+		-- 	class:Purchase()
+		-- 	class:Show()
+		-- 	class:CanCollide()
 
-		-- Update UIs
-		class:UpdateProximityPromptUI(proximityPrompt)
-		class:UpdatePurchaseBoardUI()
+		-- 	if class.Entity == FFGEnum.CLASS.ENTITY_NAME.Boat then class:StartFishing() end
+		-- end
 
-		class:Save()
+		-- -- Update UIs
+		-- class:UpdateProximityPromptUI(proximityPrompt)
+		-- class:UpdatePurchaseBoardUI()
+
+		-- class:Save()
 	end))
 
 	return proximityPrompt
-end
-
-function PP.UpdatePP(proximityPrompt: ProximityPrompt, class: BoatType.BoatInstance | TenderType.TenderInstance | PortStorageType.StorageInstance)
-	if class.Level == class.MaxLevel then
-		proximityPrompt.ObjectText = "Cannot Upgrade"
-		proximityPrompt.ActionText = "Max Level Reached"
-	else
-		proximityPrompt.ObjectText = class.isPurchased and "Upgrade" or "Purchase"
-		proximityPrompt.ActionText = class.isPurchased and "Gold: " .. FormatNumber(class.UpgradeCost) or "Gold: " .. FormatNumber(class.BaseCost)
-	end
 end
 
 return PP
