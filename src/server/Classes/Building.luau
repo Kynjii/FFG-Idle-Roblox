@@ -101,15 +101,29 @@ local NAME = {
 		[10] = "Grand Harbor Depot",
 		[11] = "Royal Maritime Vault",
 	},
+	PortStorageUpgrader = {
+		[1] = "Fish Barrels",
+		[2] = "Cargo Shed",
+		[3] = "Timber Warehouse",
+		[4] = "Stone Storehouse",
+		[5] = "Harbor Granary",
+		[6] = "Dockside Depot",
+		[7] = "Maritime Warehouse",
+		[8] = "Harbor Stronghold",
+		[9] = "Port Granary Hall",
+		[10] = "Grand Maritime Depot",
+		[11] = "Royal Port Storehouse",
+	},
 }
 
 local DESCRIPTION = {
-	Market = "Earn Gold by selling your Fish here — more Gold means more upgrades!",
-	BoatStorageUpgrader = "Carry more Fish at once by making your Boat Storage bigger.",
-	BoatFPSUpgrader = "Catch Fish faster every second with stronger nets on your Boat.",
-	TenderTTUpgrader = "Send Fish back quicker — your Tender sails faster to Port.",
-	TenderLoadUpgrader = "Load and unload Fish faster so your Tender spends less time at Port and more time sailing!",
-	TenderStorageUpgrader = "Keep even more Fish safe with bigger storage on your Tender.",
+	Market = "Increases the value of Fish",
+	BoatStorageUpgrader = "Increases Boat Storage",
+	BoatFPSUpgrader = "Increases FPS",
+	TenderTTUpgrader = "Increases Travel Time for your Tender",
+	TenderLoadUpgrader = "Increases Load Times for your Tender",
+	TenderStorageUpgrader = "Increases Tender Storage",
+	PortStorageUpgrader = "Increases Port Storage",
 }
 
 local BUILDING_BUFFS = {
@@ -119,6 +133,7 @@ local BUILDING_BUFFS = {
 	TenderTTUpgrader = FFGEnum.BUFFS.TRAVEL_TIME.Tender_Percent,
 	TenderLoadUpgrader = FFGEnum.BUFFS.LOAD_TIME.Tender_Percent,
 	TenderStorageUpgrader = FFGEnum.BUFFS.STORAGE.Tender_Percent,
+	PortStorageUpgrader = FFGEnum.BUFFS.STORAGE.Port_Percent,
 }
 
 local DEFAULTS: BuildingProps = {

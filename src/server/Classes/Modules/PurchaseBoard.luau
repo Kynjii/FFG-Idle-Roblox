@@ -126,6 +126,9 @@ function PB.UpdatePB(class: BoatType.BoatInstance | TenderType.TenderInstance | 
 	if class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Building then
 		class.PBDetails.CurrentMaxStorageLabel.Text = class.isPurchased and "Storage: " .. FormatNumber(class.CurrentMaxStorage) or ""
 		class.PBDetails.NextMaxStorageLabel.Text = class.isPurchased and "Next Lvl Storage: " .. FormatNumber(class.NextLvlMaxStorage) or ""
+
+		local storageProgress = CalculateProgress(class.FishInStorage, class.CurrentMaxStorage)
+		class.PBDetails.StorageProgress.Size = UDim2.fromScale(1, storageProgress)
 	end
 
 	-- Building
@@ -141,9 +144,6 @@ function PB.UpdatePB(class: BoatType.BoatInstance | TenderType.TenderInstance | 
 			class.PBDetails.BuffLabel.TextColor3 = Color3.fromHex("#55ff00")
 		end
 	end
-
-	local storageProgress = CalculateProgress(class.FishInStorage, class.CurrentMaxStorage)
-	class.PBDetails.StorageProgress.Size = UDim2.fromScale(1, storageProgress)
 
 	if class.isPurchased then class.PBDetails.NameLabel.Parent.Visible = true end
 end
