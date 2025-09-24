@@ -1,22 +1,14 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
-local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local BoatType = require(ServerScriptService.Server.Classes.Types.Classes.BoatType)
+local BuildingType = require(ServerScriptService.Server.Classes.Types.Classes.BuildingType)
 local PortStorageType = require(ServerScriptService.Server.Classes.Types.Classes.PortStorageType)
 local TenderType = require(ServerScriptService.Server.Classes.Types.Classes.TenderType)
-local DataService = require(ServerScriptService.Server.Services.DataService)
 
 local PP = {}
 
-function PP.CreatePP(proximityPrompt: ProximityPrompt, class: BoatType.BoatInstance | TenderType.TenderInstance | PortStorageType.StorageInstance)
-	if class.Level == class.MaxLevel then
-		proximityPrompt.ObjectText = "Cannot Upgrade"
-		proximityPrompt.ActionText = "Max Level Reached"
-		return proximityPrompt
-	end
-
+function PP.CreatePP(proximityPrompt: ProximityPrompt, class: BoatType.BoatInstance | TenderType.TenderInstance | PortStorageType.StorageInstance | BuildingType.BuildingInstance)
 	proximityPrompt.HoldDuration = 0
 	proximityPrompt.MaxActivationDistance = 5
 	proximityPrompt.ObjectText = "Open"

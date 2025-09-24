@@ -38,12 +38,14 @@ function Events.GetRemote(name: string): RemoteEvent?
 	return folder:WaitForChild(name, 5) :: RemoteEvent
 end
 
-function Events.FireEvent(name: string, player: Player, msg: string)
+function Events.FireEvent(name: string, player: Player, data: string)
 	assert(RunService:IsServer(), "FireEvent must be called from the server")
 	local folder = ReplicatedStorage:FindFirstChild(FOLDER_NAME)
 	local ev = folder and folder:FindFirstChild(name)
 	if ev and ev:IsA("RemoteEvent") then
-		ev:FireClient(player, msg)
+		local safeData = data
+		if type(data) == "table" then safeData = data:Serialize() end
+		ev:FireClient(player, safeData)
 		return true
 	else
 		warn(("RemoteEvent %q not found under ReplicatedStorage/%s"):format(name, FOLDER_NAME))
