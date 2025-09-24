@@ -1,5 +1,5 @@
-local ServerScriptService = game:GetService("ServerScriptService")
-local Buffs = require(ServerScriptService.Server.Math.Buffs)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local BuffType = require(ReplicatedStorage.Shared.Types.BuffType)
 local PortStorageType = {}
 
 export type StorageProps = {
@@ -22,6 +22,7 @@ export type StorageProps = {
 	StorageFull: boolean,
 	GrowthRate: number,
 	CostGrowthRate: number,
+	Description: string,
 }
 
 export type StorageInstance = {
@@ -45,6 +46,7 @@ export type StorageInstance = {
 	GrowthRate: number,
 	CostGrowthRate: number,
 	Entity: string,
+	Description: string,
 
 	-- (Not-Saved to DataStore) Props
 	Model: Model,
@@ -53,10 +55,8 @@ export type StorageInstance = {
 	VisualModels: { [string]: Model },
 	CurrentVisualModel: Model | nil,
 	TakeFishPrompt: ProximityPrompt,
-	Buffs: { Buffs.BuffState },
+	Buffs: { BuffType.BuffState },
 	PurchaseBoard: Model,
-	PBDetails: { [string]: TextLabel | Frame },
-	Description: string,
 
 	-- Core Boat Actions
 	Purchase: (self: StorageInstance) -> (),
@@ -76,7 +76,7 @@ export type StorageInstance = {
 	UpdateStorageStatus: (self: StorageInstance, status: boolean) -> (),
 
 	-- Buffs
-	GetBuffs: (self: StorageInstance) -> { Buffs.BuffState },
+	GetBuffs: (self: StorageInstance) -> { BuffType.BuffState },
 	UpdateBuffs: (self: StorageInstance) -> (),
 
 	-- UI Setup

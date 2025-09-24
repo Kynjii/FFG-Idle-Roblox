@@ -1,7 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ServerScriptService = game:GetService("ServerScriptService")
 local Signal = require(ReplicatedStorage.Packages.Signal)
-local Buffs = require(ServerScriptService.Server.Math.Buffs)
+local BuffType = require(ReplicatedStorage.Shared.Types.BuffType)
 local BuildingType = {}
 
 export type BuildingProps = {
@@ -27,6 +26,7 @@ export type BuildingProps = {
 	NextLvlTravelTime: number,
 	GrowthRate: number,
 	CostGrowthRate: number,
+	Description: string,
 }
 
 export type BuildingInstance = {
@@ -53,10 +53,9 @@ export type BuildingInstance = {
 	CurrentVisualModel: Model | nil,
 	BuildingId: number,
 	BuildingName: string,
-	PBDetails: { [string]: TextLabel | Frame },
 	Description: string,
 	PurchaseBoard: Model,
-	BuildingBuff: { Buffs.BuffState },
+	BuildingBuff: { BuffType.BuffState },
 
 	-- Core Building Actions
 	Purchase: (self: BuildingInstance) -> (),

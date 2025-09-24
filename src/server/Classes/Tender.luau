@@ -6,12 +6,13 @@ local Formulas = require(ServerScriptService.Server.Math.Formulas)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local TweenService = game:GetService("TweenService")
+local BuffType = require(ReplicatedStorage.Shared.Types.BuffType)
 local Animator = require(ServerScriptService.Server.Classes.Modules.Animator)
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
 local ProximityPrompt = require(ServerScriptService.Server.Classes.Modules.ProximityPrompt)
 local PurchaseBoard = require(ServerScriptService.Server.Classes.Modules.PurchaseBoard)
-local TenderType = require(ServerScriptService.Server.Classes.Types.Classes.TenderType)
+local TenderType = require(ReplicatedStorage.Shared.Types.Classes.TenderType)
 local Buffs = require(ServerScriptService.Server.Math.Buffs)
 local ProgressBar = require(ServerScriptService.Server.Modules.Tweens.ProgressBar)
 local FadeEffect = require(ServerScriptService.Server.Modules.Tweens.FadeEffect)
@@ -22,7 +23,7 @@ local CleanerService = require(ServerScriptService.Server.Services.CleanerServic
 type Tender = TenderType.Tender
 type TenderProps = TenderType.TenderProps
 type TenderInstance = TenderType.TenderInstance
-type BuffState = Buffs.BuffState
+type BuffState = BuffType.BuffState
 -- //!SECTION
 
 -- //SECTION -  Tender Data

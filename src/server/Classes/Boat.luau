@@ -6,12 +6,13 @@ local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.Clas
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
 local ProximityPrompt = require(ServerScriptService.Server.Classes.Modules.ProximityPrompt)
 local PurchaseBoard = require(ServerScriptService.Server.Classes.Modules.PurchaseBoard)
-local BoatType = require(ServerScriptService.Server.Classes.Types.Classes.BoatType)
+local BoatType = require(ReplicatedStorage.Shared.Types.Classes.BoatType)
 local Buffs = require(ServerScriptService.Server.Math.Buffs)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
 local PopUp = require(ServerScriptService.Server.Modules.Tweens.PopUp)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
+local BuffType = require(ReplicatedStorage.Shared.Types.BuffType)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local SetInterval = require(ServerScriptService.Server.Modules.SetInterval)
 local FadeEffect = require(ServerScriptService.Server.Modules.Tweens.FadeEffect)
@@ -21,7 +22,7 @@ local CleanerService = require(ServerScriptService.Server.Services.CleanerServic
 type Boat = BoatType.Boat
 type BoatProps = BoatType.BoatProps
 type BoatInstance = BoatType.BoatInstance
-type BuffState = Buffs.BuffState
+type BuffState = BuffType.BuffState
 -- //!SECTION
 
 -- //SECTION - Boat Data

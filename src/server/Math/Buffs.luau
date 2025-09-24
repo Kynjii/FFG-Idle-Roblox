@@ -1,13 +1,8 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local BuffType = require(ReplicatedStorage.Shared.Types.BuffType)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Buffs = {}
-
-export type BuffState = {
-	Name: string,
-	BaseValue: number,
-	CurrentValue: number,
-	Type: string,
-}
 
 local GROWTH_RATES = {
 	Multiplier = { 1.15, 1.12, 1.10, 1.08, 1.07, 1.06, 1.05, 1.04, 1.03, 1.02, 1.01 },
@@ -25,12 +20,12 @@ local LEVEL_GROWTH_RATES = {
 	TimeReduction = 1.015,
 }
 
-function Buffs.CalculateStageBuffValue(stage: number, buffState: BuffState): number
+function Buffs.CalculateStageBuffValue(stage: number, buffState: BuffType.BuffState): number
 	local growthRate = GROWTH_RATES[buffState.Type][stage]
 	return buffState.BaseValue * growthRate
 end
 
-function Buffs.CalculateLevelBuffValue(stage: number, level: number, buffState: BuffState): number
+function Buffs.CalculateLevelBuffValue(stage: number, level: number, buffState: BuffType.BuffState): number
 	local stageGrowthRate = GROWTH_RATES[buffState.Type][stage] or 1
 	local levelGrowthRate = LEVEL_GROWTH_RATES[buffState.Type] or 1.1
 

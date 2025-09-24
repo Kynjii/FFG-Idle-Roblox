@@ -1,5 +1,5 @@
-local ServerScriptService = game:GetService("ServerScriptService")
-local Buffs = require(ServerScriptService.Server.Math.Buffs)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local BuffType = require(ReplicatedStorage.Shared.Types.BuffType)
 local TenderType = {}
 
 export type TenderProps = {
@@ -26,6 +26,7 @@ export type TenderProps = {
 	GrowthRate: number,
 	CostGrowthRate: number,
 	BaseLoadTime: number,
+	Description: string,
 }
 
 export type TenderInstance = {
@@ -52,6 +53,7 @@ export type TenderInstance = {
 	GrowthRate: number,
 	CostGrowthRate: number,
 	Entity: string,
+	Description: string,
 
 	-- (Not-Saved to DataStore) Props
 	Model: Model,
@@ -64,11 +66,9 @@ export type TenderInstance = {
 	Animations: { [string]: Animation },
 	VisualModels: { [string]: Model },
 	CurrentVisualModel: Model | nil,
-	Buffs: { Buffs.BuffState },
+	Buffs: { BuffType.BuffState },
 	LoadTime: number?,
 	PurchaseBoard: Model,
-	PBDetails: { [string]: TextLabel | Frame },
-	Description: string,
 
 	-- Core Tender Actions
 	Purchase: (self: TenderInstance) -> (),
@@ -95,7 +95,7 @@ export type TenderInstance = {
 	AttachAttListeners: (self: TenderInstance) -> (),
 
 	-- Buffs
-	GetBuffs: (self: TenderInstance) -> { Buffs.BuffState },
+	GetBuffs: (self: TenderInstance) -> { BuffType.BuffState },
 	UpdateBuffs: (self: TenderInstance) -> (),
 
 	-- Setup

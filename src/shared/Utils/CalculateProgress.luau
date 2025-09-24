@@ -1,8 +1,5 @@
-local ServerScriptService = game:GetService("ServerScriptService")
-local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
-
 local CalculateProgress = function(currentValue: number, maxValue: number)
-	if currentValue == nil or maxValue == nil then FFGHelpers.PrintLog("A value was nil when attempting to calculate progress") end
+	if currentValue == nil or maxValue == nil then print("A value was nil when attempting to calculate progress") end
 
 	local progress = currentValue / maxValue
 

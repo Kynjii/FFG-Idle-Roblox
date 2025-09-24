@@ -1,5 +1,5 @@
-local ServerScriptService = game:GetService("ServerScriptService")
-local Buffs = require(ServerScriptService.Server.Math.Buffs)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local BuffType = require(ReplicatedStorage.Shared.Types.BuffType)
 local BoatType = {}
 
 export type BoatProps = {
@@ -25,6 +25,7 @@ export type BoatProps = {
 	NextFPS: number,
 	GrowthRate: number,
 	CostGrowthRate: number,
+	Description: string,
 }
 
 export type BoatInstance = {
@@ -51,6 +52,7 @@ export type BoatInstance = {
 	GrowthRate: number,
 	CostGrowthRate: number,
 	Entity: string,
+	Description: string,
 
 	-- (Not-Saved to DataStore) Props
 	Model: Model,
@@ -60,10 +62,8 @@ export type BoatInstance = {
 	Animations: { [string]: Animation },
 	VisualModels: { [string]: Model },
 	CurrentVisualModel: Model | nil,
-	Buffs: { Buffs.BuffState },
+	Buffs: { BuffType.BuffState },
 	PurchaseBoard: Model,
-	PBDetails: { [string]: TextLabel | Frame },
-	Description: string,
 
 	-- Core Boat Actions
 	Purchase: (self: BoatInstance) -> (),
@@ -93,7 +93,7 @@ export type BoatInstance = {
 	ShowFishPopUp: (self: BoatInstance) -> (),
 
 	-- Buffs
-	GetBuffs: (self: BoatInstance) -> { Buffs.BuffState },
+	GetBuffs: (self: BoatInstance) -> { BuffType.BuffState },
 	UpdateBuffs: (self: BoatInstance) -> (),
 
 	-- Visibility and Collision

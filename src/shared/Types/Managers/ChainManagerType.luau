@@ -1,6 +1,6 @@
-local ServerScriptService = game:GetService("ServerScriptService")
-local BoatType = require(ServerScriptService.Server.Classes.Types.Classes.BoatType)
-local TenderType = require(ServerScriptService.Server.Classes.Types.Classes.TenderType)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local BoatType = require(ReplicatedStorage.Shared.Types.Classes.BoatType)
+local TenderType = require(ReplicatedStorage.Shared.Types.Classes.TenderType)
 local ChainManagerType = {}
 
 export type ChainManagerInstance = {
