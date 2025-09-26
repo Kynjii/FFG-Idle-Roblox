@@ -7,9 +7,9 @@ local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 
 local player = Players.LocalPlayer
-local hud = DeepWait(player, "PlayerGui", "HUD")
+local hud = DeepWait(player, "PlayerGui", "HUD", "Main")
 
-local currencyTemplate = DeepWait(hud, "Currencies", "Currency", "CurrencyContainer", "CurrencyTextLabelTemplate")
+local currencyTemplate = DeepWait(hud, "Container", "Currencies", "Currency", "CurrencyContainer", "CurrencyTextLabelTemplate")
 local realmBuffsTemplate = DeepWait(hud, "RealmBuffs", "Buffs", "BuffContainer", "BuffTextLabelTemplate")
 
 local currencyLabels = {}
@@ -30,7 +30,6 @@ local function setCurrency(name: string, v: number)
 
 	currencyLabel.Font = FFGEnum.FONT
 	currencyLabel.Text = FormatNumber(v)
-	currencyLabel.TextSize = currencyLabel.AbsoluteSize.Y / 2
 end
 
 local realmBuffLabels = {}
@@ -57,7 +56,6 @@ local function setRealmBuff(name: string, buff)
 	else
 		buffLabel.Text = "-" .. FormatNumber(value) .. "%" .. " " .. buff.Label
 	end
-	buffLabel.TextSize = buffLabel.AbsoluteSize.Y / 2
 end
 
 ReplicaData.StateChanged:Connect(function(playerData)

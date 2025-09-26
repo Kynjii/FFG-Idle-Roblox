@@ -5,7 +5,7 @@ FFGEnum.FONT = Enum.Font.FredokaOne
 FFGEnum.QUALITY = {
 	[1] = {
 		Label = "Common",
-		Color = Color3.fromHex("#BFBFBF"),
+		Color = Color3.fromRGB(251, 245, 236),
 	},
 	[2] = {
 		Label = "Uncommon",

@@ -1,5 +1,4 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ServerScriptService = game:GetService("ServerScriptService")
 local BoatType = require(ReplicatedStorage.Shared.Types.Classes.BoatType)
 local PortStorageType = require(ReplicatedStorage.Shared.Types.Classes.PortStorageType)
 local TenderType = require(ReplicatedStorage.Shared.Types.Classes.TenderType)

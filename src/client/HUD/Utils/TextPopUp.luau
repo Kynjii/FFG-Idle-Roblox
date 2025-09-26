@@ -38,7 +38,7 @@ local function animateMessage(textLabel: TextLabel)
 end
 
 function TextPopUp.ShowRedTextPopUp(player: Player, msg: string)
-	local textLabelTemplate = DeepWait(player.PlayerGui, "HUD", "Warnings", labels.RedWarning)
+	local textLabelTemplate = DeepWait(player.PlayerGui, "WarningGUI", "Warnings", labels.RedWarning)
 
 	local textLabel: TextLabel
 	if textLabelTemplate then

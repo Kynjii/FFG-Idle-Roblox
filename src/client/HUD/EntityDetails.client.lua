@@ -8,7 +8,7 @@ local PortStorageType = require(ReplicatedStorage.Shared.Types.Classes.PortStora
 local TenderType = require(ReplicatedStorage.Shared.Types.Classes.TenderType)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
-local CalculateProgress = require(ReplicatedStorage.Shared.Utils.CalculateProgress)
+local Theme = require(ReplicatedStorage.Shared.Theme.Theme)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 
@@ -27,28 +27,41 @@ end)
 
 local details = {}
 -- Defaults
-details.NameLabel = DeepWait(player.PlayerGui, "EntityDetails", "DetailsContainer", "Name") :: TextLabel
-details.LevelLabel = DeepWait(player.PlayerGui, "EntityDetails", "DetailsContainer", "Level") :: TextLabel
-details.Description = DeepWait(player.PlayerGui, "EntityDetails", "DetailsContainer", "Description") :: TextLabel
+details.NameLabel = entityDetailsUI:FindFirstChild("EntityName", true) :: TextLabel
+details.LevelLabel = entityDetailsUI:FindFirstChild("Level", true) :: TextLabel
+details.Description = entityDetailsUI:FindFirstChild("Description", true) :: TextLabel
 
 -- Boat
-details.CurrentFPSLabel = DeepWait(player.PlayerGui, "EntityDetails", "DetailsContainer", "CurrentFPS") :: TextLabel
-details.NextFPSLabel = DeepWait(player.PlayerGui, "EntityDetails", "DetailsContainer", "NextFPS") :: TextLabel
+details.CurrentFPSLabel = entityDetailsUI:FindFirstChild("CurrentFPSLabel", true) :: TextLabel
+details.CurrentFPSValue = entityDetailsUI:FindFirstChild("CurrentFPSValue", true) :: TextLabel
+details.NextFPSLabel = entityDetailsUI:FindFirstChild("NextFPSLabel", true) :: TextLabel
+details.NextFPSValue = entityDetailsUI:FindFirstChild("NextFPSValue", true) :: TextLabel
 
 -- Tender
-details.CurrentTravelTimeLabel = DeepWait(player.PlayerGui, "EntityDetails", "DetailsContainer", "CurrentTT") :: TextLabel
-details.CurrentLoadTimeLabel = DeepWait(player.PlayerGui, "EntityDetails", "DetailsContainer", "CurrentLT") :: TextLabel
+details.CurrentTravelTimeLabel = entityDetailsUI:FindFirstChild("CurrentTTLabel", true) :: TextLabel
+details.CurrentTravelTimeValue = entityDetailsUI:FindFirstChild("CurrentTTValue", true) :: TextLabel
+details.NextTravelTimeLabel = entityDetailsUI:FindFirstChild("NextTTLabel", true) :: TextLabel
+details.NextTravelTimeValue = entityDetailsUI:FindFirstChild("NextTTValue", true) :: TextLabel
+details.CurrentLoadTimeLabel = entityDetailsUI:FindFirstChild("CurrentLTLabel", true) :: TextLabel
+details.CurrentLoadTimeValue = entityDetailsUI:FindFirstChild("CurrentLTValue", true) :: TextLabel
+details.NextLoadTimeLabel = entityDetailsUI:FindFirstChild("NextLTLabel", true) :: TextLabel
+details.NextLoadTimeValue = entityDetailsUI:FindFirstChild("NextLTValue", true) :: TextLabel
 
 -- Non-Building
-details.StorageProgress = DeepWait(player.PlayerGui, "EntityDetails", "DetailsContainer", "StorageBar", "StorageProgress") :: Frame
-details.CurrentMaxStorageLabel = DeepWait(player.PlayerGui, "EntityDetails", "DetailsContainer", "CurrentMaxStorage") :: TextLabel
-details.NextMaxStorageLabel = DeepWait(player.PlayerGui, "EntityDetails", "DetailsContainer", "NextMaxStorage") :: TextLabel
+details.CurrentMaxStorageLabel = entityDetailsUI:FindFirstChild("CurrentMaxStorageLabel", true) :: TextLabel
+details.CurrentMaxStorageValue = entityDetailsUI:FindFirstChild("CurrentMaxStorageValue", true) :: TextLabel
+details.NextMaxStorageLabel = entityDetailsUI:FindFirstChild("NextMaxStorageLabel", true) :: TextLabel
+details.NextMaxStorageValue = entityDetailsUI:FindFirstChild("NextMaxStorageValue", true) :: TextLabel
 
 -- Building
-details.BuffLabel = DeepWait(player.PlayerGui, "EntityDetails", "DetailsContainer", "Buff") :: TextLabel
+details.CurrentBuffLabel = entityDetailsUI:FindFirstChild("CurrentBuffLabel", true) :: TextLabel
+details.CurrentBuffValue = entityDetailsUI:FindFirstChild("CurrentBuffValue", true) :: TextLabel
+
+-- EntityInteractiveFrame
+details.EntityInteractiveFrameLabel = entityDetailsUI:FindFirstChild("EntityInteractiveFrame", true) :: TextLabel
 
 -- Buttons
-details.upgradeButton = DeepWait(player.PlayerGui, "EntityDetails", "DetailsContainer", "UpgradeButton") :: ImageButton
+details.upgradeButton = entityDetailsUI:FindFirstChild("UpgradeButton", true) :: ImageButton
 
 -- Open/Close EntityDetails
 -- Default close
@@ -83,22 +96,39 @@ end
 
 -- //TODO - Handle button state based on if the player can afford the upgrade/purchase
 
+local function enableButton(btn)
+	btn.Active = true
+	btn.ImageColor3 = Theme.color.greenLight
+	btn.HoverImage = Theme.button.hoverImage
+	btn.PressedImage = Theme.button.pressedImage
+	btn.Interactable = true
+end
+
+local function disableButton(btn)
+	btn.Active = false
+	btn.ImageColor3 = Theme.color.gray
+	btn.HoverImage = ""
+	btn.PressedImage = ""
+	btn.Interactable = false
+end
+
 -- Populate the Details Page
 function populateDetailsUI()
 	if not entityData then return end
 	local class: BoatType.BoatProps | TenderType.TenderProps | PortStorageType.StorageProps | BuildingType.BuildingProps = entityData
 
-	-- Hide all elements by defaults except for progress bars
+	-- Hide all elements by default
 	for k, element in pairs(details) do
-		if k ~= "ProgressBar" then element.Visible = false end
+		element.Visible = false
 	end
 
 	-- Name
+	details.NameLabel.Text = class.Name or class.Entity
 	local qualityInfo = FFGEnum.QUALITY[class.UpgradeStage]
-	local color = qualityInfo.Color
-	details.NameLabel.TextColor3 = color
-	details.NameLabel.TextXAlignment = "Center"
-	details.NameLabel.Text = class.Name
+	if qualityInfo then
+		local color = qualityInfo.Color
+		details.NameLabel.TextColor3 = color
+	end
 	details.NameLabel.Visible = true
 
 	-- Level
@@ -109,51 +139,50 @@ function populateDetailsUI()
 	details.Description.Text = class.Description or ""
 	details.Description.Visible = true
 
+	-- EntityInteractiveFrame
+	details.EntityInteractiveFrameLabel.Text = class.isPurchased and "Upgrade" or "Purchase"
+	details.EntityInteractiveFrameLabel.Visible = true
+
 	-- Upgrade Button
 	details.upgradeButton.TextLabel.Text = class.isPurchased and "Upgrade" or "Purchase"
 	details.upgradeButton.Visible = true
 	if currentState.Currencies and currentState.Currencies.Gold then
 		local cost = class.isPurchased and class.UpgradeCost or class.BaseCost
 		if currentState.Currencies.Gold < cost then
-			details.upgradeButton.Active = false
-			details.upgradeButton.ImageColor3 = Color3.fromHex("#3f3f3f")
+			disableButton(details.upgradeButton)
 		else
-			details.upgradeButton.Active = true
-			details.upgradeButton.ImageColor3 = Color3.fromRGB(255, 255, 255)
+			enableButton(details.upgradeButton)
 		end
 	end
 
 	-- Boat
 	if class.Entity == FFGEnum.CLASS.ENTITY_NAME.Boat then
-		details.CurrentFPSLabel.Text = class.isPurchased and "FPS: " .. FormatNumber(class.CurrentFPS) or ""
-		details.NextFPSLabel.Text = class.isPurchased and "Next Lvl FPS: " .. FormatNumber(class.NextFPS) or ""
+		details.CurrentFPSValue.Text = class.isPurchased and FormatNumber(class.CurrentFPS) or ""
+		details.NextFPSValue.Text = class.isPurchased and "+" .. FormatNumber(class.NextFPS) or ""
 
-		details.CurrentFPSLabel.Visible = true
-		details.NextFPSLabel.Visible = true
+		details.CurrentFPSValue.Visible = true
+		details.NextFPSValue.TextColor3 = Theme.color.greenLight
+		details.NextFPSValue.Visible = true
 	end
 
 	-- Tender
 	if class.Entity == FFGEnum.CLASS.ENTITY_NAME.Tender then
-		details.CurrentTravelTimeLabel.Text = class.isPurchased and "Travel Time: " .. FormatNumber(class.CurrentTravelTime) .. " secs" or ""
-		details.CurrentLoadTimeLabel.Text = class.isPurchased and "Load Time: " .. FormatNumber(class.LoadTime) .. " secs" or ""
+		details.CurrentTravelTimeValue.Text = class.isPurchased and FormatNumber(class.CurrentTravelTime) .. " secs" or ""
+		details.CurrentLoadTimeValue.Text = class.isPurchased and FormatNumber(class.LoadTime) .. " secs" or ""
 
-		details.CurrentTravelTimeLabel.Visible = true
-		details.CurrentLoadTimeLabel.Visible = true
+		details.CurrentTravelTimeValue.Visible = true
+		details.CurrentLoadTimeValue.Visible = true
 	end
 
 	-- Non-Building
 	if class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Building then
-		-- Progress Bar
-		local storageProgress = CalculateProgress(class.FishInStorage, class.CurrentMaxStorage)
-		details.StorageProgress.Size = UDim2.fromScale(1, storageProgress)
-		details.StorageProgress.Visible = class.isPurchased and true or false
-
 		-- STORAGE Stats
-		details.CurrentMaxStorageLabel.Text = class.isPurchased and "Storage: " .. FormatNumber(class.CurrentMaxStorage) or ""
-		details.NextMaxStorageLabel.Text = class.isPurchased and "Next Lvl Storage: " .. FormatNumber(class.NextLvlMaxStorage) or ""
+		details.CurrentMaxStorageValue.Text = class.isPurchased and FormatNumber(class.CurrentMaxStorage) or ""
+		details.NextMaxStorageValue.Text = class.isPurchased and "+" .. FormatNumber(class.NextLvlMaxStorage) or ""
 
-		details.CurrentMaxStorageLabel.Visible = true
-		details.NextMaxStorageLabel.Visible = true
+		details.CurrentMaxStorageValue.Visible = true
+		details.NextMaxStorageValue.TextColor3 = Theme.color.greenLight
+		details.NextMaxStorageValue.Visible = true
 	end
 
 	-- Building
@@ -161,13 +190,13 @@ function populateDetailsUI()
 		if class.isPurchased and class.BuildingBuff then
 			local isPlus = class.BuildingBuff.IsPlus
 			if isPlus then
-				details.BuffLabel.Text = "+" .. (FormatNumber(class.BuildingBuff.CurrentValue * 100)) .. "%" .. " " .. class.BuildingBuff.Label
+				details.CurrentBuffValue.Text = "+" .. (FormatNumber(class.BuildingBuff.CurrentValue * 100)) .. "%" .. " " .. class.BuildingBuff.Label
 			else
-				details.BuffLabel.Text = "-" .. FormatNumber(class.BuildingBuff.CurrentValue * 100) .. "%" .. " " .. class.BuildingBuff.Label
+				details.CurrentBuffValue.Text = "-" .. FormatNumber(class.BuildingBuff.CurrentValue * 100) .. "%" .. " " .. class.BuildingBuff.Label
 			end
 
-			details.BuffLabel.TextColor3 = Color3.fromHex("#55ff00")
-			details.BuffLabel.Visible = true
+			details.CurrentBuffValue.TextColor3 = Theme.color.greenLight
+			details.CurrentBuffValue.Visible = true
 		end
 	end
 end
