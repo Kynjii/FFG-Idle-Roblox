@@ -139,7 +139,7 @@ function populateDetailsUI()
 	-- Level
 	details.LevelLabel.Text = class.isPurchased and "Lvl: " .. class.Level or ""
 	details.LevelLabel.Visible = true
-	print(class)
+
 	-- Description
 	details.Description.Text = class.Description or ""
 	details.Description.Visible = true
