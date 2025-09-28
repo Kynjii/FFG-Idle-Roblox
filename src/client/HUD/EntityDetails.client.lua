@@ -73,6 +73,7 @@ local entityData = nil
 local entityDetails = Events.GetRemote(Events.RemoteNames.OpenEntityDetails)
 if entityDetails then entityDetails.OnClientEvent:Connect(function(data)
 	if data then
+		player.PlayerGui.EntityDetails.Enabled = true
 		entityDetailsUI.Visible = true
 		entityData = data
 		populateDetailsUI()
@@ -97,11 +98,9 @@ function handleClosingEntityDetailsUI()
 	end
 end
 
--- //TODO - Handle button state based on if the player can afford the upgrade/purchase
-
 local function enableButton(btn)
 	btn.Active = true
-	btn.ImageColor3 = Theme.color.greenLight
+	btn.ImageColor3 = Theme.color.green
 	btn.HoverImage = Theme.button.hoverImage
 	btn.PressedImage = Theme.button.pressedImage
 	btn.Interactable = true
@@ -109,7 +108,7 @@ end
 
 local function disableButton(btn)
 	btn.Active = false
-	btn.ImageColor3 = Theme.color.gray
+	btn.ImageColor3 = Theme.color.slateBlue
 	btn.HoverImage = ""
 	btn.PressedImage = ""
 	btn.Interactable = false
@@ -166,7 +165,7 @@ function populateDetailsUI()
 		details.NextFPSValue.Text = class.isPurchased and "+" .. FormatNumber(class.NextFPS) or ""
 
 		details.CurrentFPSValue.Visible = true
-		details.NextFPSValue.TextColor3 = Theme.color.greenLight
+		details.NextFPSValue.TextColor3 = Theme.color.green
 		details.NextFPSValue.Visible = true
 	end
 
@@ -186,7 +185,7 @@ function populateDetailsUI()
 		details.NextMaxStorageValue.Text = class.isPurchased and "+" .. FormatNumber(class.NextLvlMaxStorage) or ""
 
 		details.CurrentMaxStorageValue.Visible = true
-		details.NextMaxStorageValue.TextColor3 = Theme.color.greenLight
+		details.NextMaxStorageValue.TextColor3 = Theme.color.green
 		details.NextMaxStorageValue.Visible = true
 	end
 
@@ -200,7 +199,7 @@ function populateDetailsUI()
 				details.CurrentBuffValue.Text = "-" .. FormatNumber(class.BuildingBuff.CurrentValue * 100) .. "%" .. " " .. class.BuildingBuff.Label
 			end
 
-			details.CurrentBuffValue.TextColor3 = Theme.color.greenLight
+			details.CurrentBuffValue.TextColor3 = Theme.color.green
 			details.CurrentBuffValue.Visible = true
 		end
 	end
@@ -231,5 +230,5 @@ function handleUpgradeClick()
 	-- write another listener for the server and client that handle upgrading
 	-- client sends update event
 	-- Server listens (teammanager i think) and upgrades correct class as well as setting it to show/upgrade and startFishing
-	-- Server sends the latest class data for the UI to update
+	-- Server sends the latest class data for the UI to update (maytbe not, the ui listens to replica data)
 end

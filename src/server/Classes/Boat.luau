@@ -453,10 +453,15 @@ end
 function Boat:AttachEventListeners()
 	local purchasedEvent = Events.GetRemote(Events.RemoteNames.EntityPurchased)
 	if purchasedEvent then
-		purchasedEvent.OnServerEvent:Connect(function(player, data)
+		purchasedEvent.OnServerEvent:Connect(function(player, entityId)
 			-- //TODO - add id and owner check before doing anything
+			if self.Player ~= player or self.Owner ~= player.UserId then return end
+			if self.Id ~= entityId then
+				print("not my id")
+				return
+			end
 			-- //TODO - might be worth exploring adding addition checks to ensure they are not manipulating level amounts of if they can afford it or not
-			print("purchased data recieved from client", player, data)
+			print("purchased data recieved from client", player, entityId)
 		end)
 	end
 
