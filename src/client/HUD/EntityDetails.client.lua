@@ -241,7 +241,7 @@ function updateButtonState()
 		details.upgradeButton.Interactable = true
 	else
 		details.upgradeButton.Active = false
-		details.upgradeButton.ImageColor3 = Theme.color.slateBlue
+		details.upgradeButton.ImageColor3 = Theme.color.black
 		details.upgradeButton.HoverImage = ""
 		details.upgradeButton.PressedImage = ""
 		details.upgradeButton.Interactable = false

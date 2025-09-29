@@ -453,10 +453,7 @@ end
 function Boat:AttachEventListeners()
 	-- Helper
 	local function handleStateUpdate(player)
-		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, not self.isPurchased and self.BaseCost or self.UpgradeCost) then
-			Events.FireEvent(Events.RemoteNames.WarningMsg, self.Player, "Not enough gold!")
-			return
-		end
+		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, not self.isPurchased and self.BaseCost or self.UpgradeCost) then return end
 
 		DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, not self.isPurchased and self.BaseCost or self.UpgradeCost)
 
