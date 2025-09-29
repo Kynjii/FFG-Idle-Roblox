@@ -94,11 +94,6 @@ function watchEntity()
 			updateLevel()
 			updateStats()
 			updateEntityInteractiveFrameLabel()
-		end)
-
-		-- Upgrade Button
-		replicaData:OnSet({ "Currencies", "Gold" }, function(newValue)
-			currentState.Currencies["Gold"] = newValue
 			updateButtonState()
 		end)
 	end)
