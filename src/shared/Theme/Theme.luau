@@ -1,5 +1,5 @@
 local Theme = {
-	font = Enum.Font.FredokaOne,
+	font = Font.fromId(12187371840),
 
 	color = {
 		panel = Color3.fromRGB(181, 136, 99), -- Oak

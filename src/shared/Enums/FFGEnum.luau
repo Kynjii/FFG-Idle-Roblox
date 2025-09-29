@@ -1,7 +1,5 @@
 local FFGEnum = {}
 
-FFGEnum.FONT = Enum.Font.FredokaOne
-
 FFGEnum.QUALITY = {
 	[1] = {
 		Label = "Common",

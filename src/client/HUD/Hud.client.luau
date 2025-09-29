@@ -1,7 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Replica = require(ReplicatedStorage.Shared.ReplicaClient)
-local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
+local Theme = require(ReplicatedStorage.Shared.Theme.Theme)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 
@@ -27,7 +27,7 @@ local function setCurrency(name: string, v: number)
 		currencyLabels[name] = currencyLabel
 	end
 
-	currencyLabel.Font = FFGEnum.FONT
+	currencyLabel.FontFace = Theme.font
 	currencyLabel.Text = FormatNumber(v)
 end
 
@@ -47,7 +47,7 @@ local function setRealmBuff(name: string, buff)
 		realmBuffLabels[name] = buffLabel
 	end
 
-	buffLabel.Font = FFGEnum.FONT
+	buffLabel.FontFace = Theme.font
 	local value = buff.CurrentValue * 100
 	local isPlus = buff.IsPlus
 	if isPlus then
