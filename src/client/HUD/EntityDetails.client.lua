@@ -62,6 +62,7 @@ details.EntityInteractiveFrameLabel = entityDetailsUI:FindFirstChild("EntityInte
 
 -- Buttons
 details.upgradeButton = entityDetailsUI:FindFirstChild("UpgradeButton", true) :: ImageButton
+details.UpgradeCostLabel = entityDetailsUI:FindFirstChild("UpgradeCostLabel", true) :: TextLabel
 
 -- Open/Close EntityDetails
 -- Default close
@@ -248,6 +249,7 @@ function updateButtonState()
 	end
 
 	details.upgradeButton.TextLabel.Text = entityData.isPurchased and "Upgrade" or "Purchase"
+	details.UpgradeCostLabel.Text = FormatNumber(cost)
 end
 
 function handleUpgradeClick()
