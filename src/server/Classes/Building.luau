@@ -4,6 +4,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Signal = require(ReplicatedStorage.Packages.Signal)
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
+local EventListeners = require(ServerScriptService.Server.Classes.Modules.EventListeners)
 local ProximityPrompt = require(ServerScriptService.Server.Classes.Modules.ProximityPrompt)
 local PurchaseBoard = require(ServerScriptService.Server.Classes.Modules.PurchaseBoard)
 local BuildingType = require(ReplicatedStorage.Shared.Types.Classes.BuildingType)
@@ -192,6 +193,8 @@ function Building.New(state, player: Player, model: Model, realmBuffs: { [string
 
 	self.PurchaseBoard, self.PBDetails = self:SetupPurchaseBoard()
 
+	self:AttachEventListeners()
+
 	self._cleaner = CleanerService.new()
 
 	self.Upgraded = self._cleaner:add(Signal.new())
@@ -313,6 +316,12 @@ end
 -- //SECTION - Buffs
 function Building:UpdateBuffValue()
 	self.BuildingBuff.CurrentValue = Buffs.CalculateLevelBuffValue(self.UpgradeStage, self.Level, self.BuildingBuff)
+end
+-- //!SECTION
+
+-- //SECTION - Event Listeners
+function Building:AttachEventListeners()
+	EventListeners.Attach(self)
 end
 -- //!SECTION
 

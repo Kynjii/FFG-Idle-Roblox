@@ -103,6 +103,9 @@ export type StorageInstance = {
 	GetVisualModels: (self: StorageInstance) -> { [string]: Model },
 	RemovePreviousVisualModel: (self: StorageInstance) -> (),
 
+	-- Event Listener
+	AttachEventListeners: (self: StorageInstance) -> (),
+
 	-- Tweens
 	ProgressTween: Tween | nil,
 	FishModel: UnionOperation,

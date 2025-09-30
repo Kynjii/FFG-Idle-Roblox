@@ -11,6 +11,7 @@ local BuffType = require(ReplicatedStorage.Shared.Types.BuffType)
 local Animator = require(ServerScriptService.Server.Classes.Modules.Animator)
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
+local EventListeners = require(ServerScriptService.Server.Classes.Modules.EventListeners)
 local ProximityPrompt = require(ServerScriptService.Server.Classes.Modules.ProximityPrompt)
 local PurchaseBoard = require(ServerScriptService.Server.Classes.Modules.PurchaseBoard)
 local TenderType = require(ReplicatedStorage.Shared.Types.Classes.TenderType)
@@ -550,43 +551,7 @@ end
 
 -- //SECTION - Event Listeners
 function Tender:AttachEventListeners()
-	-- Helper
-	local function handleStateUpdate(player)
-		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, not self.isPurchased and self.BaseCost or self.UpgradeCost) then return end
-
-		DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, not self.isPurchased and self.BaseCost or self.UpgradeCost)
-
-		if self.isPurchased then
-			self:Upgrade()
-		else
-			self:Purchase()
-			self:Show()
-			self:CanCollide()
-		end
-
-		-- Update UIs
-		self:UpdatePurchaseBoardUI()
-
-		self:Save()
-	end
-
-	-- Purchased Event
-	local purchasedEvent = Events.GetRemote(Events.RemoteNames.EntityPurchased)
-	if purchasedEvent then purchasedEvent.OnServerEvent:Connect(function(player, entityId)
-		if self.Player ~= player or self.Owner ~= player.UserId then return end
-		if self.Id ~= entityId then return end
-
-		handleStateUpdate(player)
-	end) end
-
-	-- Upgraded Event
-	local upgradedEvent = Events.GetRemote(Events.RemoteNames.EntityUpgraded)
-	if upgradedEvent then upgradedEvent.OnServerEvent:Connect(function(player, entityId)
-		if self.Player ~= player or self.Owner ~= player.UserId then return end
-		if self.Id ~= entityId then return end
-
-		handleStateUpdate(player)
-	end) end
+	EventListeners.Attach(self)
 end
 -- //!SECTION
 

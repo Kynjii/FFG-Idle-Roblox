@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
+local EventListeners = require(ServerScriptService.Server.Classes.Modules.EventListeners)
 local ProximityPrompt = require(ServerScriptService.Server.Classes.Modules.ProximityPrompt)
 local PurchaseBoard = require(ServerScriptService.Server.Classes.Modules.PurchaseBoard)
 local PortStorageType = require(ReplicatedStorage.Shared.Types.Classes.PortStorageType)
@@ -99,6 +100,8 @@ function PortStorage.New(state, player: Player, model: Model): Storage
 	self.CurrentVisualModel = nil
 
 	self.PurchaseBoard, self.PBDetails = self:SetupPurchaseBoard()
+
+	self:AttachEventListeners()
 
 	-- Tweens
 	self.ProgressTween = nil
@@ -344,6 +347,12 @@ function PortStorage:UpdateStorageStatus(status)
 end
 -- //!SECTION
 
+-- //SECTION - Event Listeners
+function PortStorage:AttachEventListeners()
+	EventListeners.Attach(self)
+end
+-- //!SECTION
+
 -- //SECTION - Loading and Saving
 function PortStorage:Serialize()
 	return {
@@ -352,6 +361,7 @@ function PortStorage:Serialize()
 		Id = self.Id,
 		Owner = self.Owner,
 		RealmId = self.RealmId,
+		Name = self.Name,
 		Tier = self.Tier,
 		Level = self.Level,
 		MaxLevel = self.MaxLevel,

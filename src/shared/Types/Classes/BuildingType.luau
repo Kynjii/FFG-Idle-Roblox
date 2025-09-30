@@ -85,6 +85,9 @@ export type BuildingInstance = {
 	GetName: (self: BuildingInstance) -> string,
 	CanUpgrade: (self: BuildingInstance) -> boolean,
 
+	-- Event Listeners
+	AttachEventListeners: (self: BuildingInstance) -> (),
+
 	-- Signals
 	Upgraded: Signal.Connection,
 	Purchased: Signal.Connection,
