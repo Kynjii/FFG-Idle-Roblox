@@ -88,7 +88,7 @@ FFGEnum.CLASS = {
 	ENTITY_NAME = {
 		Boat = "Boat",
 		Tender = "Tender",
-		PortStorage = "PortStorage",
+		PortStorage = "Storage",
 		Building = "Building",
 	},
 }

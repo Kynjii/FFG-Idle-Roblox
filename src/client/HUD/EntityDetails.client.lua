@@ -69,15 +69,16 @@ details.UpgradeCostLabel = entityDetailsUI:FindFirstChild("UpgradeCostLabel", tr
 entityDetailsUI.Visible = false
 local detailsAreOpen = false
 
-local entityData: BoatType.BoatProps | TenderType.TenderProps | PortStorageType.StorageProps | BuildingType.BuildingProps = nil
+local _replica = nil
+local entityData: { [string]: BoatType.BoatProps | TenderType.TenderProps | PortStorageType.StorageProps | BuildingType.BuildingProps } = {}
 
 local entityDetails = Events.GetRemote(Events.RemoteNames.OpenEntityDetails)
 if entityDetails then entityDetails.OnClientEvent:Connect(function(data)
 	if data then
 		player.PlayerGui.EntityDetails.Enabled = true
 		entityDetailsUI.Visible = true
-		entityData = data
 		detailsAreOpen = true
+		entityData = data
 		watchEntity()
 		populateDetailsUI()
 		handleClosingEntityDetailsUI()
@@ -87,14 +88,9 @@ end) end
 function watchEntity()
 	local indexKey = entityData.Entity .. "s"
 	Replica.OnNew("PlayerState", function(replicaData)
-		-- General State
-		replicaData:OnSet({ "Realms", replicaData.Data.CurrentRealm, indexKey, entityData.Id }, function(newState)
+		_replica = replicaData:OnSet({ "Realms", replicaData.Data.CurrentRealm, indexKey, entityData.Id }, function(newState)
 			entityData = newState
-			updateName()
-			updateLevel()
-			updateStats()
-			updateEntityInteractiveFrameLabel()
-			updateButtonState()
+			updateUI()
 		end)
 	end)
 end
@@ -106,6 +102,10 @@ function handleClosingEntityDetailsUI()
 	while true do
 		local distance = player:DistanceFromCharacter(originalPosition)
 		if distance >= 8 then
+			if _replica then
+				_replica:Disconnect()
+				_replica = nil
+			end
 			entityDetailsUI.Visible = false
 			detailsAreOpen = false
 			entityData = nil
@@ -123,12 +123,16 @@ function populateDetailsUI()
 	local blur = Instance.new("BlurEffect")
 	blur.Parent = Lighting
 
+	writeDescription()
+	updateUI()
+end
+
+function updateUI()
 	updateName()
 	updateLevel()
-	writeDescription()
+	updateStats()
 	updateEntityInteractiveFrameLabel()
 	updateButtonState()
-	updateStats()
 end
 
 function updateLevel()
