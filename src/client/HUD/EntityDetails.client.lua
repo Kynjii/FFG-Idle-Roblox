@@ -1,6 +1,8 @@
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterPlayer = game:GetService("StarterPlayer")
+local AnimateButtonHover = require(StarterPlayer.StarterPlayerScripts.Client.HUD.Utils.AnimateButtonHover)
 local BoatType = require(ReplicatedStorage.Shared.Types.Classes.BoatType)
 local BuildingType = require(ReplicatedStorage.Shared.Types.Classes.BuildingType)
 local PortStorageType = require(ReplicatedStorage.Shared.Types.Classes.PortStorageType)
@@ -62,7 +64,8 @@ details.EntityInteractiveFrameLabel = entityDetailsUI:FindFirstChild("EntityInte
 
 -- Buttons
 details.upgradeButton = entityDetailsUI:FindFirstChild("UpgradeButton", true) :: ImageButton
-details.UpgradeCostLabel = entityDetailsUI:FindFirstChild("UpgradeCostLabel", true) :: TextLabel
+details.upgradeCostLabel = entityDetailsUI:FindFirstChild("UpgradeCostLabel", true) :: TextLabel
+details.closeButton = entityDetailsUI:FindFirstChild("EntityDetailsCloseButton", true) :: ImageButton
 
 -- Open/Close EntityDetails
 -- Default close
@@ -104,16 +107,19 @@ function handleClosingEntityDetailsUI()
 	while true do
 		local distance = player:DistanceFromCharacter(originalPosition)
 		if distance >= 8 then
-			entityDetailsUI.Visible = false
-			detailsAreOpen = false
 			clearExistingData()
-			local blur: BlurEffect = Lighting.Blur
-			if blur then blur:Destroy() end
+			closeDetails()
 			break
 		end
 
 		task.wait(0.5)
 	end
+end
+
+function closeDetails()
+	entityDetailsUI.Visible = false
+	detailsAreOpen = false
+	if Lighting and Lighting.Blur then Lighting.Blur:Destroy() end
 end
 
 function clearExistingData()
@@ -142,7 +148,7 @@ function updateUI()
 end
 
 function updateLevel()
-	details.Defaults.LevelLabel.Text = entityData.isPurchased and "Lvl: " .. entityData.Level or ""
+	details.Defaults.LevelLabel.Text = entityData.isPurchased and "Level: " .. entityData.Level or ""
 	details.Defaults.LevelLabel.Visible = true
 end
 function updateName()
@@ -226,10 +232,22 @@ function updateEntityInteractiveFrameLabel()
 	details.EntityInteractiveFrameLabel.Visible = true
 end
 
+-- Buttons
 -- Upgrade Button
-if details.upgradeButton then details.upgradeButton.Activated:Connect(function()
-	handleUpgradeClick()
-end) end
+if details.upgradeButton then
+	local baseSize = details.upgradeButton.Size
+	details.upgradeButton.Activated:Connect(function()
+		handleUpgradeClick()
+	end)
+
+	details.upgradeButton.MouseEnter:Connect(function()
+		AnimateButtonHover.Enter(details.upgradeButton, baseSize)
+	end)
+
+	details.upgradeButton.MouseLeave:Connect(function()
+		AnimateButtonHover.Leave(details.upgradeButton, baseSize)
+	end)
+end
 
 function updateButtonState()
 	if not detailsAreOpen then return end
@@ -247,14 +265,14 @@ function updateButtonState()
 		details.upgradeButton.Interactable = true
 	else
 		details.upgradeButton.Active = false
-		details.upgradeButton.ImageColor3 = Theme.color.black
+		details.upgradeButton.ImageColor3 = Theme.color.slateBlue
 		details.upgradeButton.HoverImage = ""
 		details.upgradeButton.PressedImage = ""
 		details.upgradeButton.Interactable = false
 	end
 
 	details.upgradeButton.TextLabel.Text = entityData.isPurchased and "Upgrade" or "Purchase"
-	details.UpgradeCostLabel.Text = FormatNumber(cost)
+	details.upgradeCostLabel.Text = FormatNumber(cost)
 end
 
 function handleUpgradeClick()
@@ -277,3 +295,24 @@ Replica.OnNew("PlayerState", function(replicaData)
 		currentState.Currencies.Gold = newValue
 	end)
 end)
+
+-- Close Button
+if details.closeButton then
+	local baseSize = details.closeButton.Size
+	details.closeButton.Activated:Connect(function()
+		handleCloseClick()
+	end)
+
+	details.closeButton.MouseEnter:Connect(function()
+		AnimateButtonHover.Enter(details.closeButton, baseSize)
+	end)
+
+	details.closeButton.MouseLeave:Connect(function()
+		AnimateButtonHover.Leave(details.closeButton, baseSize)
+	end)
+end
+
+function handleCloseClick()
+	clearExistingData()
+	closeDetails()
+end

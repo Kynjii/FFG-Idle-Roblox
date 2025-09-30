@@ -44,9 +44,9 @@ local Theme = {
 	},
 
 	button = {
-		image = "rbxassetid://107775994550465",
-		hoverImage = "rbxassetid://130925689990072",
-		pressedImage = "rbxassetid://106232614340873",
+		image = "rbxassetid://80427328338898",
+		hoverImage = "rbxassetid://80427328338898",
+		pressedImage = "rbxassetid://72623624680339",
 	},
 }
 
