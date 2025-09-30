@@ -37,7 +37,7 @@ local NAME = {
 	[11] = "The Crown’s Keep",
 }
 
-local DESCRIPTION = "A Harbor Storehouse, it holds the Fish delivered by your Tender."
+local DESCRIPTION = "Timber sheds line the dock, smelling faintly of salt and tar. \n\n- Expands how much fish you can store before selling."
 
 local DEFAULTS: StorageProps = {
 	Entity = FFGEnum.CLASS.ENTITY_NAME.PortStorage,

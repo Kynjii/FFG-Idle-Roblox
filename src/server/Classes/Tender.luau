@@ -43,7 +43,7 @@ local NAME = {
 	[11] = "Little Lucy",
 }
 
-local DESCRIPTION = "A Supply Vessel, it transports caught Fish back to Port over time."
+local DESCRIPTION = "A nimble Tender, darting back and forth between port and sea. \n\n- Delivers your boat’s Fish with travel and load times that improve as you upgrade."
 
 local DEFAULTS: TenderProps = {
 	Entity = FFGEnum.CLASS.ENTITY_NAME.Tender,

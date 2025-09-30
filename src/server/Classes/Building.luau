@@ -118,13 +118,13 @@ local NAME = {
 }
 
 local DESCRIPTION = {
-	Market = "Increases the value of Fish",
-	BoatStorageUpgrader = "Increases Boat Storage",
-	BoatFPSUpgrader = "Increases FPS",
-	TenderTTUpgrader = "Increases Travel Time for your Tender",
-	TenderLoadUpgrader = "Increases Load Times for your Tender",
-	TenderStorageUpgrader = "Increases Tender Storage",
-	PortStorageUpgrader = "Increases Port Storage",
+	Market = "Bustling with trade and salty gossip, your market boosts profits. \n\n- Increases the gold value of fish.",
+	BoatStorageUpgrader = "Extra crates, sheds, and yards mean fewer wasted hauls. \n\n- Increases how much your boat can carry before unloading.",
+	BoatFPSUpgrader = "Better nets and gear keep the fish flowing. \n\n- Increases your boat’s Fish Per Second (FPS).",
+	TenderTTUpgrader = "Charts, signals, and waystations smooth every voyage. \n\n- Decreases your tender’s travel time.",
+	TenderLoadUpgrader = "Hoists, pulleys, and strong arms at the dock. \n\n- Decreases your tender’s load/unload time.",
+	TenderStorageUpgrader = "From baskets to vaults, there’s always room for more catch. \n\n- Increases your tender’s storage capacity.",
+	PortStorageUpgrader = "The harbor swells with barrels, sheds, and warehouses. \n\n- Increases total port storage for fish and goods.",
 }
 
 local BUILDING_BUFFS = {

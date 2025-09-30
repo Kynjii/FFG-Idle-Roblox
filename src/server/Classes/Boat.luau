@@ -41,7 +41,7 @@ local NAME = {
 	[11] = "The Flynnrunner",
 }
 
-local DESCRIPTION = "A Fishing Boat, it passively collects Fish every second (FPS)."
+local DESCRIPTION = "A sturdy fishing boat, your faithful companion at sea. \n\n- Passively catches fish each second (FPS)."
 
 local DEFAULTS: BoatProps = {
 	Entity = FFGEnum.CLASS.ENTITY_NAME.Boat,
