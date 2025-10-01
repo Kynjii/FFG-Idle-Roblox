@@ -6,10 +6,10 @@ local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 
 local player = Players.LocalPlayer
-local hud = DeepWait(player, "PlayerGui", "HUD", "Main")
+local hud: Frame = DeepWait(player, "PlayerGui", "HUD", "Main")
 
-local currencyTemplate = DeepWait(hud, "Container", "Currencies", "Currency", "CurrencyContainer", "CurrencyTextLabelTemplate")
-local realmBuffsTemplate = DeepWait(hud, "RealmBuffs", "Buffs", "BuffContainer", "BuffTextLabelTemplate")
+local currencyTemplate = hud:FindFirstChild("CurrencyTextLabelTemplate", true)
+local realmBuffsTemplate = hud:FindFirstChild("BuffTextLabelTemplate", true)
 
 local currencyLabels = {}
 
@@ -48,6 +48,15 @@ local function setRealmBuff(name: string, buff)
 		buffLabel.Parent = realmBuffsTemplate.Parent
 		buffLabel.Visible = true
 		realmBuffLabels[name] = buffLabel
+	end
+
+	local container: Frame = hud:FindFirstChild("RealmBuffs", true)
+	if container then
+		if realmBuffCount > 0 then
+			container.Visible = true
+		else
+			container.Visible = false
+		end
 	end
 
 	buffLabel.FontFace = Theme.font

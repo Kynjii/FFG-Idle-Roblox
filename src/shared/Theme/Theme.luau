@@ -5,7 +5,7 @@ local Theme = {
 
 	color = {
 		panel = Color3.fromRGB(181, 136, 99), -- Oak
-		border = Color3.fromRGB(92, 64, 51), -- Walnut frame
+		border = Color3.fromRGB(180, 123, 65), -- Walnut frame
 		text = Color3.fromRGB(250, 240, 210), -- Parchment
 		subtle = Color3.fromRGB(95, 85, 80), -- Stone/secondary text
 
@@ -52,7 +52,7 @@ local Theme = {
 	},
 
 	textColor = {
-		[FFGEnum.CLASS.ENTITY_NAME.Boat] = Color3.fromRGB(92, 64, 51),
+		[FFGEnum.CLASS.ENTITY_NAME.Boat] = Color3.fromRGB(180, 123, 65),
 		[FFGEnum.CLASS.ENTITY_NAME.Tender] = Color3.fromRGB(181, 136, 99),
 		[FFGEnum.CLASS.ENTITY_NAME.PortStorage] = Color3.fromRGB(249, 132, 74),
 		[FFGEnum.CLASS.ENTITY_NAME.Building] = Color3.fromRGB(39, 125, 161),

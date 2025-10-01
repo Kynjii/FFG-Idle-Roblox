@@ -246,8 +246,8 @@ end
 function ChainManager:StartUnloadingFish()
 	self.TenderModel.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.finishedLoading, false)
 
-	local tender = self.LaneTender
-	local storage = self.LaneStorage
+	local tender: TenderType.TenderInstance = self.LaneTender
+	local storage: PortStorageType.StorageInstance = self.LaneStorage
 
 	-- If there’s nothing to unload, finish immediately.
 	if (tender.FishInStorage or 0) <= 0 then
@@ -265,6 +265,7 @@ function ChainManager:StartUnloadingFish()
 
 	while true do
 		if not storage.isPurchased then
+			tender:ShowTenderStoppedBillboard()
 			task.wait(1)
 			continue
 		end
@@ -292,8 +293,7 @@ function ChainManager:StartUnloadingFish()
 			tender:RemoveFish(amount)
 			storage:AddFish(amount)
 			if tender.Buffs then tender:UpdatePurchaseBoardUI() end
-		else
-			print("amount", amount)
+		elseif amount <= 0 and storage:IsStorageFull() then
 			tender:ShowTenderStoppedBillboard()
 		end
 
