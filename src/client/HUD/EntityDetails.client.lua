@@ -1,4 +1,3 @@
-local BulkImportService = game:GetService("BulkImportService")
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
