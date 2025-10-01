@@ -11,13 +11,13 @@ local realmBuffs = {
 	CaravanStorage_Percent = { Name = "CaravanStorage_Percent", Label = "Caravan Storage", BaseValue = 0.08, Type = "QoL", Scope = "Caravan", IsPlus = true },
 
 	-- TRAVEL TIME
-	HelperTravelTime_Percent = { Name = "HelperTravelTime_Percent", Label = "Helper Travel Times", BaseValue = 0.05, Type = "TimeReduction", Scope = "Helper", IsPlus = false },
-	CaravanTravelTime_Percent = { Name = "CaravanTravelTime_Percent", Label = "Caravan Travel Times", BaseValue = 0.05, Type = "TimeReduction", Scope = "Caravan", IsPlus = false },
-	TenderTravelTime_Percent = { Name = "TenderTravelTime_Percent", Label = "Tender Travel Times", BaseValue = 0.05, Type = "TimeReduction", Scope = "Tender", IsPlus = false },
+	HelperTravelTime_Percent = { Name = "HelperTravelTime_Percent", Label = "Helper Traveltime", BaseValue = 0.05, Type = "TimeReduction", Scope = "Helper", IsPlus = false },
+	CaravanTravelTime_Percent = { Name = "CaravanTravelTime_Percent", Label = "Caravan Traveltime", BaseValue = 0.05, Type = "TimeReduction", Scope = "Caravan", IsPlus = false },
+	TenderTravelTime_Percent = { Name = "TenderTravelTime_Percent", Label = "Tender Traveltime", BaseValue = 0.05, Type = "TimeReduction", Scope = "Tender", IsPlus = false },
 
 	-- LOAD TIME
-	TenderLoadTime_Percent = { Name = "TenderLoadTime_Percent", Label = "Tender Load Times", BaseValue = 0.08, Type = "TimeReduction", Scope = "Tender", IsPlus = false },
-	HelperLoadTime_Percent = { Name = "HelperLoadTime_Percent", Label = "Helper Load Times", BaseValue = 0.08, Type = "TimeReduction", Scope = "Helper", IsPlus = false },
+	TenderLoadTime_Percent = { Name = "TenderLoadTime_Percent", Label = "Tender Loadtime", BaseValue = 0.08, Type = "TimeReduction", Scope = "Tender", IsPlus = false },
+	HelperLoadTime_Percent = { Name = "HelperLoadTime_Percent", Label = "Helper Loadtime", BaseValue = 0.08, Type = "TimeReduction", Scope = "Helper", IsPlus = false },
 
 	-- FPS
 	FPS_Percent = { Name = "FPS_Percent", Label = "Fish Per Second", BaseValue = 0.05, Type = "Production", Scope = "Boat", IsPlus = true },
