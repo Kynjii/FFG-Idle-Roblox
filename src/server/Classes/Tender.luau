@@ -305,10 +305,7 @@ function Tender:MoveToPort()
 end
 
 function Tender:AddFish(amount)
-	if self:IsStorageFull() then
-		self:UpdateProgressBar()
-		return
-	end
+	if self:IsStorageFull() then return end
 
 	self.FishInStorage += amount
 
@@ -319,7 +316,6 @@ function Tender:AddFish(amount)
 		self:UpdateStorageStatus(true)
 	end
 
-	self:UpdateProgressBar()
 	self:Save()
 end
 
@@ -327,42 +323,11 @@ function Tender:RemoveFish(amount)
 	self.FishInStorage = math.max(self.FishInStorage - amount, 0)
 
 	self:UpdateStorageStatus(false)
-	self:UpdateProgressBar()
 	self:Save()
 end
 
 function Tender:UpdateStorageStatus(status)
 	self.StorageFull = status
-end
-
-function Tender:ShowProgressBar()
-	local billboard = self.BillBoard
-	if billboard then ProgressBar.Show(billboard) end
-end
-
-function Tender:HideProgressBar()
-	local billboard = self.BillBoard
-	if billboard then ProgressBar.Hide(billboard) end
-end
-
-function Tender:UpdateProgressBar()
-	if self.ProgressTween then
-		pcall(function()
-			self.ProgressTween:Cancel()
-		end)
-		self.ProgressTween = nil
-	end
-
-	local tween = ProgressBar.Update(self.ProgressBar, self.FishInStorage, self.CurrentMaxStorage)
-	self.ProgressTween = tween
-
-	tween.Completed:Once(function()
-		if self.ProgressTween == tween then self.ProgressTween = nil end
-
-		pcall(function()
-			tween:Destroy()
-		end)
-	end)
 end
 -- //!SECTION
 

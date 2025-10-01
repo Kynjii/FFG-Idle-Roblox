@@ -6,7 +6,6 @@ local PortStorageType = require(ReplicatedStorage.Shared.Types.Classes.PortStora
 local TenderType = require(ReplicatedStorage.Shared.Types.Classes.TenderType)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Theme = require(ReplicatedStorage.Shared.Theme.Theme)
-local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 
 local PB = {}
@@ -17,12 +16,12 @@ function PB.CreatePB(pbModel: Model, class: BoatType.BoatInstance | TenderType.T
 	local pbDetails = {}
 
 	-- Default
-	pbDetails.NameLabel = DeepWait(purchaseBoard, "Paper", "SurfaceGui", "HeaderContainer", "Name") :: TextLabel
-	pbDetails.LevelLabel = DeepWait(purchaseBoard, "Paper", "SurfaceGui", "InfoContainer", "Level") :: TextLabel
-	pbDetails.EntityLabel = DeepWait(purchaseBoard, "Paper", "SurfaceGui", "InfoContainer", "EntityName") :: TextLabel
-	pbDetails.QualityLabel = DeepWait(purchaseBoard, "Paper", "SurfaceGui", "InfoContainer", "Quality") :: TextLabel
-	pbDetails.ProgressBar = DeepWait(purchaseBoard, "Paper", "SurfaceGui", "ProgressContainer", "ProgressBG", "ProgressBar") :: ImageLabel
-	pbDetails.StorageLabel = DeepWait(purchaseBoard, "Paper", "SurfaceGui", "ProgressContainer", "ProgressBG", "StorageText") :: TextLabel
+	pbDetails.NameLabel = purchaseBoard:FindFirstChild("Name", true) :: TextLabel
+	pbDetails.LevelLabel = purchaseBoard:FindFirstChild("Level", true) :: TextLabel
+	pbDetails.EntityLabel = purchaseBoard:FindFirstChild("EntityName", true) :: TextLabel
+	pbDetails.QualityLabel = purchaseBoard:FindFirstChild("Quality", true) :: TextLabel
+	pbDetails.ProgressBar = purchaseBoard:FindFirstChild("ProgressBar", true) :: ImageLabel
+	pbDetails.StorageLabel = purchaseBoard:FindFirstChild("StorageText", true) :: TextLabel
 
 	-- Add relevant data to texts
 	if pbDetails then

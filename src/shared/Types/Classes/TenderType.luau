@@ -92,7 +92,6 @@ export type TenderInstance = {
 	AddFish: (self: TenderInstance, amount: number) -> boolean,
 	RemoveFish: (self: TenderInstance, amount: number) -> boolean,
 	UpdateStorageStatus: (self: TenderInstance, status: boolean) -> (),
-	UpdateProgressBar: (self: TenderInstance) -> (),
 	AttachAttListeners: (self: TenderInstance) -> (),
 
 	-- Buffs
@@ -111,8 +110,6 @@ export type TenderInstance = {
 	Hide: (self: TenderInstance) -> (),
 	CanCollide: (self: TenderInstance) -> (),
 	CannotCollide: (self: TenderInstance) -> (),
-	ShowProgressBar: (self: TenderInstance) -> (),
-	HideProgressBar: (self: TenderInstance) -> (),
 
 	-- Utilities
 	GetName: (self: TenderInstance) -> string,
