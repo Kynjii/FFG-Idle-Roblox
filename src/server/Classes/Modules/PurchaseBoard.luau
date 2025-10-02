@@ -53,6 +53,8 @@ function PB.CreatePB(pbModel: Model, class: BoatType.BoatInstance | TenderType.T
 			pbDetails.LevelLabel.Text = class.isPurchased and "Level: " .. class.Level
 		end
 
+		-- Building Buff
+
 		-- Progress Bar
 		if class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Building then
 			pbDetails.StorageLabel.Text = FormatNumber(class.FishInStorage) .. "/" .. FormatNumber(class.CurrentMaxStorage)
