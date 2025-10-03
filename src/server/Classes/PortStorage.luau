@@ -17,9 +17,8 @@ local ResizeFromEdge = require(ServerScriptService.Server.Modules.Tweens.ResizeF
 local CleanerService = require(ServerScriptService.Server.Services.CleanerService)
 
 -- //SECTION - Types
-type Storage = PortStorageType.Storage
-type StorageProps = PortStorageType.StorageProps
 type StorageInstance = PortStorageType.StorageInstance
+type PortStorageData = PortStorageType.PortStorageData
 -- //!SECTION
 
 -- //SECTION - Data
@@ -39,7 +38,7 @@ local NAME = {
 
 local DESCRIPTION = "Timber sheds line the dock, smelling faintly of salt and tar. \n\n- Expands how much fish you can store before selling."
 
-local DEFAULTS: StorageProps = {
+local DEFAULTS = {
 	Entity = FFGEnum.CLASS.ENTITY_NAME.PortStorage,
 	RealmId = 1,
 	Tier = 1,
@@ -58,12 +57,15 @@ local PORTSTORAGE_BUFFS = {
 }
 -- //!SECTION
 
-local PortStorage = {} :: StorageInstance
+local PortStorage = {}
 PortStorage.__index = PortStorage
 
+-- Local type alias for internal method signatures
+type PortStorage = typeof(setmetatable({} :: PortStorageData, PortStorage))
+
 -- //SECTION - Constructor
-function PortStorage.New(state, player: Player, model: Model): Storage
-	local self: StorageInstance = setmetatable({}, PortStorage)
+function PortStorage.New(state: { [string]: any }?, player: Player, model: Model): PortStorage
+	local self = setmetatable({} :: PortStorageData, PortStorage)
 
 	-- Start with default stats as base
 	for key, value in pairs(DEFAULTS) do
@@ -105,7 +107,7 @@ function PortStorage.New(state, player: Player, model: Model): Storage
 
 	-- Tweens
 	self.ProgressTween = nil
-	self.FishModel = DeepWait(self.Model, "FishInStorage", "Base") :: UnionOperation
+	self.FishModel = DeepWait(self.Model, "FishInStorage", "Base")
 
 	self._cleaner = CleanerService.new()
 
@@ -116,15 +118,15 @@ end
 -- //!SECTION
 
 -- //SECTION - Buffs
-function PortStorage:GetBuffs()
+function PortStorage.GetBuffs(self: PortStorage)
 	return Buffs.GetBuffs(self.Player, PORTSTORAGE_BUFFS)
 end
 
-function PortStorage:UpdateBuffs()
+function PortStorage.UpdateBuffs(self: PortStorage)
 	self.Buffs = self:GetBuffs()
 end
 
-function PortStorage:RecalculateAll()
+function PortStorage.RecalculateAll(self: PortStorage)
 	self:UpdateBuffs()
 
 	self.UpgradeCost = self:CalculateUpgradeCost()
@@ -135,7 +137,7 @@ end
 -- //!SECTION
 
 -- //SECTION - Core Actions
-function PortStorage:Purchase()
+function PortStorage.Purchase(self: PortStorage): ()
 	self.isPurchased = true
 
 	self.TakeFishPrompt = self:SetupFishRemovalPrompt()
@@ -144,7 +146,7 @@ function PortStorage:Purchase()
 	self:Save()
 end
 
-function PortStorage:Upgrade()
+function PortStorage.Upgrade(self: PortStorage): ()
 	if not self:CanUpgrade() then return end
 
 	self.Level += 1
@@ -163,12 +165,12 @@ function PortStorage:Upgrade()
 	self:Save()
 end
 
-function PortStorage:IncreaseUpgradeStage(stage)
+function PortStorage.IncreaseUpgradeStage(self: PortStorage, stage: number): ()
 	self.UpgradeStage = stage
 	self.Name = self:GetName()
 end
 
-function PortStorage:AddFish(amount: number)
+function PortStorage.AddFish(self: PortStorage, amount: number): ()
 	self.FishInStorage += amount
 	if self.FishInStorage >= self.CurrentMaxStorage then
 		self.FishInStorage = self.CurrentMaxStorage
@@ -179,7 +181,7 @@ function PortStorage:AddFish(amount: number)
 	self:UpdateFishModel()
 end
 
-function PortStorage:RemoveFish(amount: number)
+function PortStorage.RemoveFish(self: PortStorage, amount: number): ()
 	self.FishInStorage = math.max(self.FishInStorage :: number - amount, 0)
 	self:UpdateStorageStatus(false)
 
@@ -189,8 +191,8 @@ function PortStorage:RemoveFish(amount: number)
 	self:Save()
 end
 
-function PortStorage:UpdateFishModel()
-	local part: BasePart = self.FishModel
+function PortStorage.UpdateFishModel(self: PortStorage): ()
+	local part = self.FishModel
 	if not part or not part.Parent then return end
 
 	local maxHeight = 9
@@ -205,14 +207,14 @@ end
 -- //!SECTION
 
 -- //SECTION - Calculations
-function PortStorage:CalculateBaseCost()
+function PortStorage.CalculateBaseCost(self: PortStorage): number
 	local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, self.Tier, self.RealmId)
 	self.BaseCost = base
 
 	return base
 end
 
-function PortStorage:CalculateUpgradeCost()
+function PortStorage.CalculateUpgradeCost(self: PortStorage): number
 	local baseCost = self.BaseCost or DEFAULTS.BaseCost
 	if baseCost == DEFAULTS.BaseCost then baseCost = self:CalculateBaseCost() end
 
@@ -223,14 +225,14 @@ function PortStorage:CalculateUpgradeCost()
 	return cost
 end
 
-function PortStorage:CalculateBaseStorage()
+function PortStorage.CalculateBaseStorage(self: PortStorage): number
 	local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseStorage, self.Tier, self.RealmId)
 	self.BaseStorage = base
 
 	return base
 end
 
-function PortStorage:CalculateMaxStorage()
+function PortStorage.CalculateMaxStorage(self: PortStorage): (number, number)
 	local baseStorage = self.BaseStorage or DEFAULTS.BaseStorage
 	if baseStorage == DEFAULTS.BaseStorage then baseStorage = self:CalculateBaseStorage() end
 	local storagePercentBuff = self.Buffs[PORTSTORAGE_BUFFS.PortStorage_Percent] and self.Buffs[PORTSTORAGE_BUFFS.PortStorage_Percent].CurrentValue or nil
@@ -240,7 +242,7 @@ end
 -- //!SECTION
 
 -- //SECTION - UI Setup
-function PortStorage:Initialize()
+function PortStorage.Initialize(self: PortStorage): ()
 	-- Handle visibility based on purchase status
 	if not self.isPurchased then
 		self:Hide()
@@ -256,26 +258,32 @@ function PortStorage:Initialize()
 	self:UpdateFishModel()
 end
 
-function PortStorage:SetupPurchaseBoard()
+function PortStorage.SetupPurchaseBoard(self: PortStorage): Model
 	local purchaseBoard = self.Model:WaitForChild("Purchase_Board")
 
-	return PurchaseBoard.CreatePB(purchaseBoard, self)
+	return PurchaseBoard.CreatePB(purchaseBoard, self :: any)
 end
 
-function PortStorage:UpdatePurchaseBoardUI()
-	PurchaseBoard.UpdatePB(self)
+function PortStorage.UpdatePurchaseBoardUI(self: PortStorage)
+	PurchaseBoard.UpdatePB(self :: any)
 end
 
-function PortStorage:SetupProximityPrompt(purchaseBoard: Model)
-	local proximityPrompt = Instance.new("ProximityPrompt", purchaseBoard)
+function PortStorage.SetupProximityPrompt(self: PortStorage, purchaseBoard: Model)
+	local proximityPrompt: ProximityPrompt = Instance.new("ProximityPrompt")
+	proximityPrompt.Parent = purchaseBoard
+	if self._cleaner then self._cleaner:add(proximityPrompt) end
 
-	ProximityPrompt.CreatePP(proximityPrompt, self)
+	ProximityPrompt.CreatePP(proximityPrompt, self :: any)
 end
 
-function PortStorage:SetupFishRemovalPrompt()
+function PortStorage.SetupFishRemovalPrompt(self: PortStorage)
 	-- Create the proximity prompt
-	local parent = self.Model.Storage.Panel
-	local proximityPrompt = Instance.new("ProximityPrompt", parent)
+	local parent = self.Model:FindFirstChild("Panel", true)
+	local proximityPrompt
+	if parent then
+		proximityPrompt = Instance.new("ProximityPrompt")
+		proximityPrompt.Parent = parent
+	end
 
 	proximityPrompt.HoldDuration = 0.5
 	proximityPrompt.ObjectText = ""
@@ -306,21 +314,23 @@ function PortStorage:SetupFishRemovalPrompt()
 	end)
 end
 
-function PortStorage:ShowStorageFullBillboard()
+function PortStorage.ShowStorageFullBillboard(self: PortStorage)
 	local billboard: BillboardGui = game.Workspace.BillBoards:FindFirstChild("StorageFullAlert", true)
 	local existing = self.PurchaseBoard:FindFirstChild("StorageFullAlert_Clone", true)
 	if billboard and not existing then
 		local clone: BillboardGui = billboard:Clone()
-		clone.Parent = self.PurchaseBoard.PrimaryPart
-		clone.Adornee = self.PurchaseBoard.PrimaryPart
+		if self.PurchaseBoard.PrimaryPart then
+			clone.Parent = self.PurchaseBoard.PrimaryPart
+			if clone:IsA("BillboardGui") then clone.Adornee = self.PurchaseBoard.PrimaryPart end
+		end
 		clone.Name = "StorageFullAlert_Clone"
 
-		local canvasGroup: CanvasGroup = clone:FindFirstChild("CanvasGroup")
+		local canvasGroup = clone:FindFirstChild("CanvasGroup") :: CanvasGroup
 		canvasGroup.Visible = true
 	end
 end
 
-function PortStorage:DestroyStorageFullBillboard()
+function PortStorage.DestroyStorageFullBillboard(self: PortStorage)
 	local clonedBillboard = nil
 	if self.Model then clonedBillboard = self.Model:FindFirstChild("StorageFullAlert_Clone", true) end
 
@@ -329,43 +339,55 @@ end
 -- //!SECTION
 
 -- //SECTION - Visibility and Collision
-function PortStorage:Show()
-	ClassVisualizer.Show(self.Model.FishInStorage)
-	ClassVisualizer.Show(self.Model.Storage)
+function PortStorage.Show(self: PortStorage)
+	local fishStorage = self.Model:FindFirstChild("FishInStorage", true)
+	local storage = self.Model:FindFirstChild("Storage", true)
+
+	if fishStorage then ClassVisualizer.Show(fishStorage) end
+	if storage then ClassVisualizer.Show(storage) end
 end
 
-function PortStorage:Hide()
-	ClassVisualizer.Hide(self.Model.FishInStorage)
-	ClassVisualizer.Hide(self.Model.Storage)
+function PortStorage.Hide(self: PortStorage)
+	local fishStorage = self.Model:FindFirstChild("FishInStorage", true)
+	local storage = self.Model:FindFirstChild("Storage", true)
+
+	if fishStorage then ClassVisualizer.Hide(fishStorage) end
+	if storage then ClassVisualizer.Hide(storage) end
 end
 
-function PortStorage:CanCollide()
-	ClassVisualizer.CanCollide(self.Model.FishInStorage)
-	ClassVisualizer.CanCollide(self.Model.Storage)
+function PortStorage.CanCollide(self: PortStorage)
+	local fishStorage = self.Model:FindFirstChild("FishInStorage", true)
+	local storage = self.Model:FindFirstChild("Storage", true)
+
+	if fishStorage then ClassVisualizer.CanCollide(fishStorage) end
+	if storage then ClassVisualizer.CanCollide(storage) end
 end
 
-function PortStorage:CannotCollide()
-	ClassVisualizer.CannotCollide(self.Model.FishInStorage)
-	ClassVisualizer.CannotCollide(self.Model.Storage)
+function PortStorage.CannotCollide(self: PortStorage)
+	local fishStorage = self.Model:FindFirstChild("FishInStorage", true)
+	local storage = self.Model:FindFirstChild("Storage", true)
+
+	if fishStorage then ClassVisualizer.CannotCollide(fishStorage) end
+	if storage then ClassVisualizer.CannotCollide(storage) end
 end
 -- //!SECTION
 
 -- //SECTION -  Boat Utilities
-function PortStorage:GetName()
+function PortStorage.GetName(self: PortStorage)
 	return NAME[self.UpgradeStage]
 end
 
-function PortStorage:CanUpgrade()
+function PortStorage.CanUpgrade(self: PortStorage)
 	return self.Level < self.MaxLevel
 end
 
-function PortStorage:IsStorageFull()
+function PortStorage.IsStorageFull(self: PortStorage)
 	local status = self.FishInStorage >= self.CurrentMaxStorage
 	if self.StorageFull ~= status then self:UpdateStorageStatus(status) end
 	return status
 end
 
-function PortStorage:UpdateStorageStatus(status)
+function PortStorage.UpdateStorageStatus(self: PortStorage, status)
 	self.StorageFull = status
 
 	if status then
@@ -377,13 +399,13 @@ end
 -- //!SECTION
 
 -- //SECTION - Event Listeners
-function PortStorage:AttachEventListeners()
+function PortStorage.AttachEventListeners(self: PortStorage)
 	EventListeners.Attach(self)
 end
 -- //!SECTION
 
 -- //SECTION - Loading and Saving
-function PortStorage:Serialize()
+function PortStorage.Serialize(self: PortStorage): { [string]: any }
 	return {
 		Entity = self.Entity,
 		Description = self.Description,
@@ -405,25 +427,25 @@ function PortStorage:Serialize()
 	}
 end
 
-function PortStorage:Save()
+function PortStorage.Save(self: PortStorage)
 	DataService.SaveStorageState(self.Player, self.Id, self:Serialize())
 end
 -- //!SECTION
 
 -- //SECTION - Visual Models
-function PortStorage:GetVisualModels()
+function PortStorage.GetVisualModels(self: PortStorage): { [number]: Model }
 	local modelsFolder = DeepWait(game.Workspace, "Storage", "VisualStages")
 	local models = modelsFolder:GetChildren()
 
 	local templateModels: { [number]: Model } = {}
 	for i, model in ipairs(models) do
-		templateModels[tonumber(model.Name)] = model
+		templateModels[model.Name] = model
 	end
 
 	return templateModels
 end
 
-function PortStorage:RemovePreviousVisualModel()
+function PortStorage.RemovePreviousVisualModel(self: PortStorage)
 	local visualModel = self.CurrentVisualModel
 	if not visualModel then return end
 
@@ -431,10 +453,12 @@ function PortStorage:RemovePreviousVisualModel()
 	self.CurrentVisualModel = nil
 end
 
-function PortStorage:UpdateVisualModel()
+function PortStorage.UpdateVisualModel(self: PortStorage)
 	self:RemovePreviousVisualModel()
 
+	if not self.VisualModels then return end
 	local templateModel = self.VisualModels[self.UpgradeStage]
+	if not templateModel then return end
 	local updatedModel = templateModel:Clone()
 
 	updatedModel.Name = templateModel.Name .. "_Clone"
@@ -458,7 +482,7 @@ end
 -- //!SECTION
 
 -- //SECTION - Cleanup
-function PortStorage:Destroy()
+function PortStorage.Destroy(self: PortStorage)
 	self:Hide()
 	self:CannotCollide()
 
@@ -466,11 +490,13 @@ function PortStorage:Destroy()
 		self:Save()
 	end)
 
-	self._cleaner:clean()
-	self._cleaner = nil
+	if self._cleaner then
+		self._cleaner:clean()
+		self._cleaner = nil
+	end
 
-	self.Player = nil
-	self.Model = nil
+	self.Player = nil :: any
+	self.Model = nil :: any
 end
 -- //!SECTION
 

@@ -20,9 +20,8 @@ local FadeEffect = require(ServerScriptService.Server.Modules.Tweens.FadeEffect)
 local CleanerService = require(ServerScriptService.Server.Services.CleanerService)
 
 -- //SECTION - Boat Types
-type Boat = BoatType.Boat
-type BoatProps = BoatType.BoatProps
 type BoatInstance = BoatType.BoatInstance
+type BoatData = BoatType.BoatData
 type BuffState = BuffType.BuffState
 -- //!SECTION
 
@@ -43,7 +42,7 @@ local NAME = {
 
 local DESCRIPTION = "A sturdy fishing boat, your faithful companion at sea. \n\n- Passively catches fish each second (FPS)."
 
-local DEFAULTS: BoatProps = {
+local DEFAULTS = {
 	Entity = FFGEnum.CLASS.ENTITY_NAME.Boat,
 	RealmId = 1,
 	Tier = 1,
@@ -69,12 +68,14 @@ local BOAT_BUFFS = {
 }
 -- //!SECTION
 
-local Boat = {} :: BoatInstance
+local Boat = {}
 Boat.__index = Boat
 
+type Boat = typeof(setmetatable({} :: BoatData, Boat))
+
 -- //SECTION - Constructor
-function Boat.New(state, player: Player, model: Model): Boat
-	local self: BoatInstance = setmetatable({}, Boat)
+function Boat.New(state: { [string]: any }?, player: Player, model: Model): Boat
+	local self = setmetatable({} :: BoatData, Boat)
 
 	-- Start with default stats as base
 	for key, value in pairs(DEFAULTS) do
@@ -127,15 +128,15 @@ end
 -- //!SECTION
 
 -- //SECTION - Buffs
-function Boat:GetBuffs()
+function Boat.GetBuffs(self: Boat)
 	return Buffs.GetBuffs(self.Player, BOAT_BUFFS)
 end
 
-function Boat:UpdateBuffs()
+function Boat.UpdateBuffs(self: Boat): ()
 	self.Buffs = self:GetBuffs()
 end
 
-function Boat:RecalculateAll()
+function Boat.RecalculateAll(self: Boat): ()
 	self:UpdateBuffs()
 
 	self.UpgradeCost = self:CalculateUpgradeCost()
@@ -148,16 +149,16 @@ end
 -- //!SECTION
 
 -- //SECTION - Core Boat Actions
-function Boat:Purchase()
+function Boat.Purchase(self: Boat): ()
 	self.isPurchased = true
-	self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.isPurchased, true)
+	if self.Model.PrimaryPart then self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.isPurchased, true) end
 
 	self:UpdateBuffs()
 	self:UpdateVisualModel()
 	self:Save()
 end
 
-function Boat:Upgrade()
+function Boat.Upgrade(self: Boat): ()
 	if not self:CanUpgrade() then return end
 
 	self.Level += 1
@@ -177,21 +178,21 @@ function Boat:Upgrade()
 	self:Save()
 end
 
-function Boat:IncreaseUpgradeStage(stage)
+function Boat.IncreaseUpgradeStage(self: Boat, stage: number): ()
 	self.UpgradeStage = stage
 	self.Name = self:GetName()
 end
 -- //!SECTION
 
 -- //SECTION - Calculations
-function Boat:CalculateBaseCost()
+function Boat.CalculateBaseCost(self: Boat): number
 	local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, self.Tier, self.RealmId)
 	self.BaseCost = base
 
 	return base
 end
 
-function Boat:CalculateUpgradeCost()
+function Boat.CalculateUpgradeCost(self: Boat): number
 	local baseCost = self.BaseCost or DEFAULTS.BaseCost
 	if baseCost == DEFAULTS.BaseCost then baseCost = self:CalculateBaseCost() end
 
@@ -202,14 +203,14 @@ function Boat:CalculateUpgradeCost()
 	return cost
 end
 
-function Boat:CalculateBaseStorage()
+function Boat.CalculateBaseStorage(self: Boat): number
 	local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseStorage, self.Tier, self.RealmId)
 	self.BaseStorage = base
 
 	return base
 end
 
-function Boat:CalculateMaxStorage()
+function Boat.CalculateMaxStorage(self: Boat): (number, number)
 	local baseStorage = self.BaseStorage or DEFAULTS.BaseStorage
 	if baseStorage == DEFAULTS.BaseStorage then baseStorage = self:CalculateBaseStorage() end
 	local storagePercentBuff = self.Buffs[BOAT_BUFFS.BoatStorage_Percent] and self.Buffs[BOAT_BUFFS.BoatStorage_Percent].CurrentValue or nil
@@ -217,14 +218,14 @@ function Boat:CalculateMaxStorage()
 	return ClassCalculators.CalculateMaxStorage(baseStorage, self.Level, storagePercentBuff)
 end
 
-function Boat:CalculateBaseFPS()
+function Boat.CalculateBaseFPS(self: Boat): number
 	local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseFPS, self.Tier, self.RealmId)
 	self.BaseFPS = base
 
 	return base
 end
 
-function Boat:CalculateFPS()
+function Boat.CalculateFPS(self: Boat): (number, number)
 	local baseFPS = self.BaseFPS or DEFAULTS.BaseFPS
 	if baseFPS == DEFAULTS.BaseFPS then baseFPS = self:CalculateBaseFPS() end
 	local fpsPercentBuff = self.Buffs[BOAT_BUFFS.FPS_Percent] and self.Buffs[BOAT_BUFFS.FPS_Percent].CurrentValue or nil
@@ -234,7 +235,7 @@ end
 -- //!SECTION
 
 -- //SECTION - Handling Fish
-function Boat:StartFishing()
+function Boat.StartFishing(self: Boat): ()
 	self.FishingInterval = SetInterval(function()
 		if not self:IsStorageFull() then
 			self:AddFish(self.CurrentFPS)
@@ -243,10 +244,10 @@ function Boat:StartFishing()
 			self:UpdateStorageStatus(true)
 		end
 	end, 1)
-	if self.FishingInterval then self._cleaner:add(self.FishingInterval) end
+	if self.FishingInterval and self._cleaner then self._cleaner:add(self.FishingInterval) end
 end
 
-function Boat:AddFish(amount)
+function Boat.AddFish(self: Boat, amount: number): ()
 	local availableStorage = self.CurrentMaxStorage - self.FishInStorage
 	local calcAmount = math.min(availableStorage, amount)
 
@@ -261,13 +262,13 @@ function Boat:AddFish(amount)
 	self:Save()
 end
 
-function Boat:RemoveFish(amount)
+function Boat.RemoveFish(self: Boat, amount: number): ()
 	self.FishInStorage -= amount
 	self:UpdateStorageStatus(false)
 	self:Save()
 end
 
-function Boat:UpdateStorageStatus(status)
+function Boat.UpdateStorageStatus(self: Boat, status: boolean): ()
 	self.StorageFull = status
 
 	if status then
@@ -279,7 +280,7 @@ end
 -- //!SECTION
 
 -- //SECTION - UI Setup
-function Boat:Initialize()
+function Boat.Initialize(self: Boat): ()
 	-- Handle visibility based on purchase status
 	if not self.isPurchased then
 		self:Hide()
@@ -297,48 +298,59 @@ function Boat:Initialize()
 	end) end
 end
 
-function Boat:SetupPurchaseBoard()
+function Boat.SetupPurchaseBoard(self: Boat): Model
 	local purchaseBoard = self.Model:WaitForChild("Purchase_Board")
 
-	return PurchaseBoard.CreatePB(purchaseBoard, self)
+	return PurchaseBoard.CreatePB(purchaseBoard, self :: any)
 end
 
-function Boat:UpdatePurchaseBoardUI()
-	PurchaseBoard.UpdatePB(self)
+function Boat.UpdatePurchaseBoardUI(self: Boat): ()
+	PurchaseBoard.UpdatePB(self :: any)
 end
 
-function Boat:SetupProximityPrompt(purchaseBoard: Model)
-	local proximityPrompt: ProximityPrompt = self._cleaner:add(Instance.new("ProximityPrompt", purchaseBoard))
+function Boat.SetupProximityPrompt(self: Boat, purchaseBoard: Model): ()
+	local proximityPrompt: ProximityPrompt = Instance.new("ProximityPrompt")
+	proximityPrompt.Parent = purchaseBoard
+	if self._cleaner then self._cleaner:add(proximityPrompt) end
 
-	return ProximityPrompt.CreatePP(proximityPrompt, self)
+	return ProximityPrompt.CreatePP(proximityPrompt, self :: any)
 end
 
-function Boat:ShowFishPopUp(amount)
-	local billboard: BillboardGui = self.Model.PrimaryPart.Billboard:WaitForChild("FishPopupTemplate")
-	if billboard then
-		local clone = billboard:Clone()
-		clone.Parent = self.Model.PrimaryPart.Billboard
-		clone.Adornee = self.Model.PrimaryPart
-		clone.Name = "Popup_Clone"
-		PopUp.Animate(clone, amount, clone.Fish)
+function Boat.ShowFishPopUp(self: Boat, amount: number): ()
+	local billboard = self.Model:FindFirstChild("FishPopupTemplate", true) :: BillboardGui?
+	if not billboard then return end
+
+	local primaryPart = self.Model.PrimaryPart
+	if not primaryPart then return end
+
+	local clone = billboard:Clone()
+	local container = primaryPart:FindFirstChild("Billboard")
+	if container then
+		clone.Parent = container
+	else
+		clone.Parent = primaryPart
 	end
+
+	clone.Adornee = primaryPart
+	clone.Name = "Popup_Clone"
+	PopUp.Animate(clone, amount, clone.Fish)
 end
 
-function Boat:ShowStorageFullBillboard()
+function Boat.ShowStorageFullBillboard(self: Boat): ()
 	local billboard: BillboardGui = game.Workspace.BillBoards:FindFirstChild("StorageFullAlert", true)
 	local existing = self.PurchaseBoard:FindFirstChild("StorageFullAlert_Clone", true)
 	if billboard and not existing then
 		local clone: BillboardGui = billboard:Clone()
 		clone.Parent = self.PurchaseBoard.PrimaryPart
-		clone.Adornee = self.PurchaseBoard.PrimaryPart
+		if self.PurchaseBoard.PrimaryPart then clone.Adornee = self.PurchaseBoard.PrimaryPart end
 		clone.Name = "StorageFullAlert_Clone"
 
-		local canvasGroup: CanvasGroup = clone:FindFirstChild("CanvasGroup")
+		local canvasGroup = clone:FindFirstChild("CanvasGroup") :: CanvasGroup
 		canvasGroup.Visible = true
 	end
 end
 
-function Boat:DestroyStorageFullBillboard()
+function Boat.DestroyStorageFullBillboard(self: Boat): ()
 	local clonedBillboard = nil
 	if self.Model then clonedBillboard = self.Model:FindFirstChild("StorageFullAlert_Clone", true) end
 
@@ -347,39 +359,39 @@ end
 -- //!SECTION
 
 -- //SECTION - Visibility and Collision
-function Boat:Show()
-	ClassVisualizer.Show(self.Model.Boat.VisualRoot:GetChildren()[1])
+function Boat.Show(self: Boat): ()
+	ClassVisualizer.Show(self.VisualRoot:GetChildren()[1])
 end
 
-function Boat:Hide()
-	ClassVisualizer.Hide(self.Model.Boat.VisualRoot:GetChildren()[1])
+function Boat.Hide(self: Boat): ()
+	ClassVisualizer.Hide(self.VisualRoot:GetChildren()[1])
 end
 
-function Boat:CanCollide()
-	ClassVisualizer.CanCollide(self.Model.Boat.VisualRoot:GetChildren()[1])
+function Boat.CanCollide(self: Boat): ()
+	ClassVisualizer.CanCollide(self.VisualRoot:GetChildren()[1])
 end
 
-function Boat:CannotCollide()
-	ClassVisualizer.CannotCollide(self.Model.Boat.VisualRoot:GetChildren()[1])
+function Boat.CannotCollide(self: Boat): ()
+	ClassVisualizer.CannotCollide(self.VisualRoot:GetChildren()[1])
 end
 -- //!SECTION
 
 -- //SECTION -  Boat Utilities
-function Boat:GetName()
+function Boat.GetName(self: Boat): string
 	return NAME[self.UpgradeStage]
 end
 
-function Boat:CanUpgrade()
+function Boat.CanUpgrade(self: Boat): boolean
 	return self.Level < self.MaxLevel
 end
 
-function Boat:IsStorageFull()
+function Boat.IsStorageFull(self: Boat): boolean
 	local status = self.FishInStorage == self.CurrentMaxStorage
 	if self.StorageFull ~= status then self:UpdateStorageStatus(status) end
 	return status
 end
 
-function Boat:ShowUpgradeStageUpgrade()
+function Boat.ShowUpgradeStageUpgrade(self: Boat): boolean
 	local nextStart = Formulas.PROMO_LEVEL[self.UpgradeStage + 1]
 	if not nextStart then return false end
 	return self.Level == (nextStart - 1)
@@ -387,7 +399,7 @@ end
 -- //!SECTION
 
 -- //SECTION - Loading and Saving
-function Boat:Serialize()
+function Boat.Serialize(self: Boat): { [string]: any }
 	return {
 		Entity = self.Entity,
 		Description = self.Description,
@@ -413,25 +425,25 @@ function Boat:Serialize()
 	}
 end
 
-function Boat:Save()
+function Boat.Save(self: Boat): ()
 	DataService.SaveBoatState(self.Player, self.Id, self:Serialize())
 end
 -- //!SECTION
 
 -- //SECTION - Visual Models
-function Boat:GetVisualModels()
+function Boat.GetVisualModels(self: Boat): { [number]: Model }
 	local modelsFolder = DeepWait(game.Workspace, "Boats", "VisualStages")
 	local models = modelsFolder:GetChildren()
 
 	local templateModels: { [number]: Model } = {}
 	for i, model in ipairs(models) do
-		templateModels[tonumber(model.Name)] = model
+		templateModels[model.Name] = model
 	end
 
 	return templateModels
 end
 
-function Boat:RemovePreviousVisualModel()
+function Boat.RemovePreviousVisualModel(self: Boat): ()
 	local visualModel = self.CurrentVisualModel
 	if not visualModel then return end
 
@@ -439,10 +451,12 @@ function Boat:RemovePreviousVisualModel()
 	self.CurrentVisualModel = nil
 end
 
-function Boat:UpdateVisualModel()
+function Boat.UpdateVisualModel(self: Boat): ()
 	self:RemovePreviousVisualModel()
 
+	if not self.VisualModels then return end
 	local templateModel = self.VisualModels[self.UpgradeStage]
+	if not templateModel then return end
 	local updatedModel = templateModel:Clone()
 
 	updatedModel.Name = templateModel.Name .. "_Clone"
@@ -466,32 +480,39 @@ end
 -- //!SECTION
 
 -- //SECTION - Animations
-function Boat:StartAnimation()
+function Boat.StartAnimation(self: Boat): ()
 	local animator: Animator = DeepWait(self.Model, "Boat", "AnimationController", "Animator")
 	local animation: Animation = Animator.GetAnimation(ANIMATIONS.WaterBob)
 
-	local animationTrack: AnimationTrack = self._cleaner:add(animator:LoadAnimation(animation))
-	animationTrack.Looped = true
+	if animator then
+		local animationTrack: AnimationTrack
+		if self._cleaner then
+			animationTrack = self._cleaner:add(animator:LoadAnimation(animation))
+		else
+			animationTrack = animator:LoadAnimation(animation)
+		end
+		animationTrack.Looped = true
 
-	task.wait(math.random(0.5, 1.5))
-	animationTrack:Play()
+		task.wait(math.random(0.5, 1.5))
+		animationTrack:Play()
+	end
 end
 -- //!SECTION
 
 -- //SECTION - Event Listeners
-function Boat:AttachEventListeners()
+function Boat.AttachEventListeners(self: Boat)
 	EventListeners.Attach(self)
 end
 -- //!SECTION
 
 -- //SECTION - Cleanup
-function Boat:ClearAllAttributes(instance: Instance)
+function Boat.ClearAllAttributes(self: Boat, instance: Instance)
 	for name, _ in pairs(instance:GetAttributes()) do
 		if not string.find(name, "^RBX_") then instance:SetAttribute(name, nil) end
 	end
 end
 
-function Boat:Destroy()
+function Boat.Destroy(self: Boat)
 	self:Hide()
 	self:CannotCollide()
 
@@ -506,8 +527,8 @@ function Boat:Destroy()
 		self._cleaner = nil
 	end
 
-	self.Player = nil
-	self.Model = nil
+	self.Player = nil :: any
+	self.Model = nil :: any
 end
 -- //!SECTION
 

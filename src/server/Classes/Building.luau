@@ -7,7 +7,6 @@ local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.Class
 local EventListeners = require(ServerScriptService.Server.Classes.Modules.EventListeners)
 local ProximityPrompt = require(ServerScriptService.Server.Classes.Modules.ProximityPrompt)
 local PurchaseBoard = require(ServerScriptService.Server.Classes.Modules.PurchaseBoard)
-local BuildingType = require(ReplicatedStorage.Shared.Types.Classes.BuildingType)
 local Buffs = require(ServerScriptService.Server.Math.Buffs)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
@@ -18,9 +17,9 @@ local FadeEffect = require(ServerScriptService.Server.Modules.Tweens.FadeEffect)
 local CleanerService = require(ServerScriptService.Server.Services.CleanerService)
 
 -- //SECTION - Building Types
-type Building = BuildingType.Building
-type BuildingProps = BuildingType.BuildingProps
+local BuildingType = require(ReplicatedStorage.Shared.Types.Classes.BuildingType)
 type BuildingInstance = BuildingType.BuildingInstance
+type BuildingData = BuildingType.BuildingData
 -- //!SECTION
 
 -- //SECTION - Building Data
@@ -138,7 +137,7 @@ local BUILDING_BUFFS = {
 	PortStorageUpgrader = FFGEnum.BUFFS.STORAGE.Port_Percent,
 }
 
-local DEFAULTS: BuildingProps = {
+local DEFAULTS = {
 	Entity = FFGEnum.CLASS.ENTITY_NAME.Building,
 	RealmId = 1,
 	Tier = 1,
@@ -151,12 +150,15 @@ local DEFAULTS: BuildingProps = {
 }
 -- //!SECTION
 
-local Building = {} :: BuildingInstance
+local Building = {}
 Building.__index = Building
 
+-- Local type alias for internal method signatures
+type Building = typeof(setmetatable({} :: BuildingData, Building))
+
 -- //SECTION - Constructor
-function Building.New(state, player: Player, model: Model, realmBuffs: BuffType.BuffState): Building
-	local self = setmetatable({}, Building)
+function Building.New(state: { [string]: any }?, player: Player, model: Model, realmBuffs: BuffType.BuffState): Building
+	local self = setmetatable({} :: BuildingData, Building)
 
 	-- Start with default stats as base
 	for key, value in pairs(DEFAULTS) do
@@ -207,17 +209,17 @@ end
 -- //!SECTION
 
 -- //SECTION - Core Building Actions
-function Building:Purchase()
+function Building.Purchase(self: Building): ()
 	self.isPurchased = true
-	self.BuildingBuff.CurrentValue = Buffs.CalculateLevelBuffValue(self.UpgradeStage, self.Level, self.BuildingBuff)
+	if self.BuildingBuff then self.BuildingBuff.CurrentValue = Buffs.CalculateLevelBuffValue(self.UpgradeStage, self.Level, self.BuildingBuff) end
 
 	self:UpdateVisualModel()
 
-	self.Purchased:Fire(self)
+	if self.Purchased then self.Purchased:Fire(self) end
 	self:Save()
 end
 
-function Building:Upgrade()
+function Building.Upgrade(self: Building): ()
 	if not self:CanUpgrade() then return end
 
 	self.Level += 1
@@ -232,25 +234,25 @@ function Building:Upgrade()
 
 	self.UpgradeCost = self:CalculateUpgradeCost()
 	self:UpdatePurchaseBoardUI()
-	self.Upgraded:Fire(self)
+	if self.Upgraded then self.Upgraded:Fire(self) end
 	self:Save()
 end
 
-function Building:IncreaseUpgradeStage(stage)
+function Building.IncreaseUpgradeStage(self: Building, stage: number): ()
 	self.UpgradeStage = stage
 	self.Name = self:GetName()
 end
 -- //!SECTION
 
 -- //SECTION - Calculations
-function Building:CalculateBaseCost()
+function Building.CalculateBaseCost(self: Building): number
 	local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, self.Tier, self.RealmId)
 	self.BaseCost = base
 
 	return base
 end
 
-function Building:CalculateUpgradeCost()
+function Building.CalculateUpgradeCost(self: Building): number
 	local baseCost = self.BaseCost or DEFAULTS.BaseCost
 	if baseCost == DEFAULTS.BaseCost then baseCost = self:CalculateBaseCost() end
 
@@ -263,7 +265,7 @@ end
 -- //!SECTION
 
 -- //SECTION - UI Setup
-function Building:Initialize()
+function Building.Initialize(self: Building)
 	-- Handle visibility based on purchase status
 	if not self.isPurchased then
 		self:Hide()
@@ -279,66 +281,67 @@ function Building:Initialize()
 	self:Save()
 end
 
-function Building:SetupPurchaseBoard()
-	local purchaseBoard: Model = self.Model:WaitForChild("Purchase_Board")
+function Building.SetupPurchaseBoard(self: Building): (Model, { [string]: any })
+	local purchaseBoard = self.Model:WaitForChild("Purchase_Board") :: Model
 
-	return PurchaseBoard.CreatePB(purchaseBoard, self)
+	return PurchaseBoard.CreatePB(purchaseBoard, self :: any)
 end
 
-function Building:UpdatePurchaseBoardUI()
-	PurchaseBoard.UpdatePB(self)
+function Building.UpdatePurchaseBoardUI(self: Building): ()
+	PurchaseBoard.UpdatePB(self :: any)
 end
 
-function Building:SetupProximityPrompt(purchaseBoard: Model)
-	local proximityPrompt: ProximityPrompt = self._cleaner:add(Instance.new("ProximityPrompt"))
+function Building.SetupProximityPrompt(self: Building, purchaseBoard: Model): ()
+	local proximityPrompt: ProximityPrompt = Instance.new("ProximityPrompt")
 	proximityPrompt.Parent = purchaseBoard
+	if self._cleaner then self._cleaner:add(proximityPrompt) end
 
-	ProximityPrompt.CreatePP(proximityPrompt, self)
+	ProximityPrompt.CreatePP(proximityPrompt, self :: any)
 end
 -- //!SECTION
 
 -- //SECTION - Visibility and Collision
-function Building:Show()
-	ClassVisualizer.Show(self.Model.Building.VisualRoot:GetChildren()[1])
+function Building.Show(self: Building): ()
+	ClassVisualizer.Show(self.VisualRoot:GetChildren()[1])
 end
 
-function Building:Hide()
-	ClassVisualizer.Hide(self.Model.Building.VisualRoot:GetChildren()[1])
+function Building.Hide(self: Building): ()
+	ClassVisualizer.Hide(self.VisualRoot:GetChildren()[1])
 end
 
-function Building:CanCollide()
-	ClassVisualizer.CanCollide(self.Model.Building.VisualRoot:GetChildren()[1])
+function Building.CanCollide(self: Building): ()
+	ClassVisualizer.CanCollide(self.VisualRoot:GetChildren()[1])
 end
 
-function Building:CannotCollide()
-	ClassVisualizer.CannotCollide(self.Model.Building.VisualRoot:GetChildren()[1])
+function Building.CannotCollide(self: Building): ()
+	ClassVisualizer.CannotCollide(self.VisualRoot:GetChildren()[1])
 end
 -- //!SECTION
 
 -- //SECTION - Buffs
-function Building:UpdateBuffValue()
-	self.BuildingBuff.CurrentValue = Buffs.CalculateLevelBuffValue(self.UpgradeStage, self.Level, self.BuildingBuff)
+function Building.UpdateBuffValue(self: Building): ()
+	if self.BuildingBuff then self.BuildingBuff.CurrentValue = Buffs.CalculateLevelBuffValue(self.UpgradeStage, self.Level, self.BuildingBuff) end
 end
 -- //!SECTION
 
 -- //SECTION - Event Listeners
-function Building:AttachEventListeners()
-	EventListeners.Attach(self)
+function Building.AttachEventListeners(self: Building): ()
+	EventListeners.Attach(self :: any)
 end
 -- //!SECTION
 
 -- //SECTION -  Building Utilities
-function Building:GetName()
+function Building.GetName(self: Building): string
 	return NAME[self.BuildingName][self.UpgradeStage]
 end
 
-function Building:CanUpgrade()
+function Building.CanUpgrade(self: Building): boolean
 	return self.Level < self.MaxLevel
 end
 -- //!SECTION
 
 -- //SECTION - Loading and Saving
-function Building:Serialize()
+function Building.Serialize(self: Building): { [string]: any }
 	return {
 		Entity = self.Entity,
 		Description = self.Description,
@@ -358,15 +361,15 @@ function Building:Serialize()
 	}
 end
 
-function Building:Save()
-	if self.isPurchased then DataService.SaveBuffState(self.Player, self.BuildingBuff) end
+function Building.Save(self: Building): ()
+	if self.isPurchased then DataService.SaveBuffState(self.Player, self.BuildingBuff or nil) end
 
 	DataService.SaveBuildingState(self.Player, self:Serialize())
 end
 -- //!SECTION
 
 -- //SECTION - Visual Models
-function Building:GetVisualModels()
+function Building.GetVisualModels(self: Building): { [number]: Model }
 	local modelsFolder = DeepWait(game.Workspace, "Buildings", "VisualStages", self.BuildingName)
 	local models = modelsFolder:GetChildren()
 
@@ -379,19 +382,19 @@ function Building:GetVisualModels()
 	return templateModels
 end
 
-function Building:RemovePreviousVisualModel()
-	local visualModel = self.CurrentVisualModel
+function Building.RemovePreviousVisualModel(self: Building): ()
+	local visualModel = self.CurrentVisualModel :: Model
 	if not visualModel then return end
 
 	visualModel:Destroy()
 	self.CurrentVisualModel = nil
 end
 
-function Building:UpdateVisualModel()
+function Building.UpdateVisualModel(self: Building): ()
 	self:RemovePreviousVisualModel()
 
-	local templateModel = self.VisualModels[self.UpgradeStage]
-	local updatedModel = templateModel:Clone()
+	local templateModel = self.VisualModels and self.VisualModels[self.UpgradeStage]
+	local updatedModel = templateModel:Clone() :: Model
 
 	updatedModel.Name = templateModel.Name .. "_Clone"
 	updatedModel.Parent = self.VisualRoot
@@ -414,13 +417,13 @@ end
 -- //!SECTION
 
 -- //SECTION - Cleanup
-function Building:ClearAllAttributes(instance: Instance)
+function Building.ClearAllAttributes(self: Building, instance: Instance): ()
 	for name, _ in pairs(instance:GetAttributes()) do
 		if not string.find(name, "^RBX_") then instance:SetAttribute(name, nil) end
 	end
 end
 
-function Building:Destroy()
+function Building.Destroy(self: Building): ()
 	self:Hide()
 	self:CannotCollide()
 
@@ -435,8 +438,8 @@ function Building:Destroy()
 		self._cleaner = nil
 	end
 
-	self.Player = nil
-	self.Model = nil
+	self.Player = nil :: any
+	self.Model = nil :: any
 end
 -- //!SECTION
 

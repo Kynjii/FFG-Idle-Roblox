@@ -125,19 +125,19 @@ function DataService.SaveBoatState(player: Player, boatId: string, newState): bo
 	local profile = DataService.Profiles[player]
 	if not profile then
 		FFGHelpers.PrintLog("No profile found when attempting to save boat state for: ", player)
-		return
+		return false
 	end
 
 	-- Ensure the data structure exists
 	if not profile.Data.Realms then
 		FFGHelpers.PrintLog("No Realms data structure found")
-		return
+		return false
 	end
 
 	local currentRealm = profile.Data.CurrentRealm or 1
 	if not profile.Data.Realms[currentRealm] then
 		FFGHelpers.PrintLog("No data structure found for Realm:", currentRealm)
-		return
+		return false
 	end
 
 	-- Initialize Boats array if it doesn't exist
@@ -147,6 +147,8 @@ function DataService.SaveBoatState(player: Player, boatId: string, newState): bo
 
 	local replica = DataService.Replicas[player]
 	if replica then replica:Set({ "Realms", currentRealm, "Boats", boatId }, newState) end
+
+	return true
 end
 -- //!SECTION
 
@@ -155,19 +157,19 @@ function DataService.SaveTenderState(player: Player, tenderId: string, newState)
 	local profile = DataService.Profiles[player]
 	if not profile then
 		FFGHelpers.PrintLog("No profile found when attempting to save tender state for: ", player)
-		return
+		return false
 	end
 
 	-- Ensure the data structure exists
 	if not profile.Data.Realms then
 		FFGHelpers.PrintLog("No Realms data structure found")
-		return
+		return false
 	end
 
 	local currentRealm = profile.Data.CurrentRealm or 1
 	if not profile.Data.Realms[currentRealm] then
 		FFGHelpers.PrintLog("No data structure found for Realm:", currentRealm)
-		return
+		return false
 	end
 
 	-- Initialize Tenders array if it doesn't exist
@@ -177,6 +179,8 @@ function DataService.SaveTenderState(player: Player, tenderId: string, newState)
 
 	local replica = DataService.Replicas[player]
 	if replica then replica:Set({ "Realms", currentRealm, "Tenders", tenderId }, newState) end
+
+	return true
 end
 -- //!SECTION
 
@@ -185,19 +189,19 @@ function DataService.SaveStorageState(player: Player, storageId: string, newStat
 	local profile = DataService.Profiles[player]
 	if not profile then
 		FFGHelpers.PrintLog("No profile found when attempting to save tender state for: ", player)
-		return
+		return false
 	end
 
 	-- Ensure the data structure exists
 	if not profile.Data.Realms then
 		FFGHelpers.PrintLog("No Realms data structure found")
-		return
+		return false
 	end
 
 	local currentRealm = profile.Data.CurrentRealm or 1
 	if not profile.Data.Realms[currentRealm] then
 		FFGHelpers.PrintLog("No data structure found for Realm:", currentRealm)
-		return
+		return false
 	end
 
 	-- Initialize Storage array if it doesn't exist
@@ -207,6 +211,8 @@ function DataService.SaveStorageState(player: Player, storageId: string, newStat
 
 	local replica = DataService.Replicas[player]
 	if replica then replica:Set({ "Realms", currentRealm, "Storages", storageId }, newState) end
+
+	return true
 end
 -- //!SECTION
 
@@ -215,19 +221,19 @@ function DataService.SaveBuildingState(player: Player, newState: BuildingType.Bu
 	local profile = DataService.Profiles[player]
 	if not profile then
 		FFGHelpers.PrintLog("No profile found when attempting to save building state for: ", player)
-		return
+		return false
 	end
 
 	-- Ensure the data structure exists
 	if not profile.Data.Realms then
 		FFGHelpers.PrintLog("No Realms data structure found")
-		return
+		return false
 	end
 
 	local currentRealm = profile.Data.CurrentRealm or 1
 	if not profile.Data.Realms[currentRealm] then
 		FFGHelpers.PrintLog("No data structure found for Realm:", currentRealm)
-		return
+		return false
 	end
 
 	-- Initialize Buildings array if it doesn't exist
@@ -237,6 +243,8 @@ function DataService.SaveBuildingState(player: Player, newState: BuildingType.Bu
 
 	local replica = DataService.Replicas[player]
 	if replica then replica:Set({ "Realms", currentRealm, "Buildings", newState.Id }, newState) end
+
+	return true
 end
 -- //!SECTION
 
@@ -245,19 +253,19 @@ function DataService.SaveBuffState(player: Player, newState: { [string]: number 
 	local profile = DataService.Profiles[player]
 	if not profile then
 		FFGHelpers.PrintLog("No profile found when attempting to save buff state for: ", player)
-		return
+		return false
 	end
 
 	-- Ensure the data structure exists
 	if not profile.Data.Realms then
 		FFGHelpers.PrintLog("No Realms data structure found")
-		return
+		return false
 	end
 
 	local currentRealm = profile.Data.CurrentRealm or 1
 	if not profile.Data.Realms[currentRealm] then
 		FFGHelpers.PrintLog("No data structure found for Realm:", currentRealm)
-		return
+		return false
 	end
 
 	-- Initialize Buffs array if it doesn't exist
@@ -267,28 +275,30 @@ function DataService.SaveBuffState(player: Player, newState: { [string]: number 
 
 	local replica = DataService.Replicas[player]
 	if replica then replica:Set({ "Realms", currentRealm, "Buffs", newState.Name }, newState) end
+
+	return true
 end
 
-function DataService.GetBuffState(player: Player, buffNames: { string })
+function DataService.GetBuffState(player: Player, buffNames: { string }): { [string]: any } | boolean
 	local profile = DataService.Profiles[player]
 	if not profile then
 		FFGHelpers.PrintLog("No profile found when attempting to get buff state for: ", player)
-		return
+		return false
 	end
 
 	-- Ensure the data structure exists
 	if not profile.Data.Realms then
 		FFGHelpers.PrintLog("No Realms data structure found")
-		return
+		return false
 	end
 
 	local currentRealm = profile.Data.CurrentRealm or 1
 	if not profile.Data.Realms[currentRealm] then
 		FFGHelpers.PrintLog("No data structure found for Realm:", currentRealm)
-		return
+		return false
 	end
 
-	if not profile.Data.Realms[currentRealm].Buffs then return end
+	if not profile.Data.Realms[currentRealm].Buffs then return false end
 
 	local buffs = {}
 	for k, v in pairs(buffNames) do
@@ -299,11 +309,11 @@ function DataService.GetBuffState(player: Player, buffNames: { string })
 end
 -- //!SECTION
 
-function DataService.ResetAllPlayerData(player: Player)
+function DataService.ResetAllPlayerData(player: Player): boolean
 	local profile = DataService.Profiles[player]
 	if not profile then
 		FFGHelpers.PrintLog("No profile found when attempting to reset data for: ", player)
-		return
+		return false
 	end
 
 	DataService.ClearProfileData(player, profile)
@@ -311,6 +321,8 @@ function DataService.ResetAllPlayerData(player: Player)
 
 	DataService.CreateNewProfileData(player, profile)
 	DataService.AttachReplica(player, profile)
+
+	return true
 end
 
 return DataService
