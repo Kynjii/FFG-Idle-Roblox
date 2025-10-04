@@ -548,7 +548,7 @@ end
 
 -- //SECTION - Event Listeners
 function Tender.AttachEventListeners(self: Tender)
-	EventListeners.Attach(self)
+	EventListeners.Attach(self :: any)
 end
 -- //!SECTION
 

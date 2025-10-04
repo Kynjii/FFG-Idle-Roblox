@@ -95,7 +95,7 @@ function Boat.New(state: { [string]: any }?, player: Player, model: Model): Boat
 	self.Owner = self.Owner or player.UserId
 	self.Model = model
 	self.Entity = self.Entity or DEFAULTS.Entity
-	self.VisualRoot = DeepWait(model, "Boat", "VisualRoot")
+	self.VisualRoot = model:FindFirstChild("VisualRoot", true)
 	self.Name = self:GetName()
 	self.Tier = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.Tier) or DEFAULTS.Tier
 	self.Player = player
@@ -360,19 +360,19 @@ end
 
 -- //SECTION - Visibility and Collision
 function Boat.Show(self: Boat): ()
-	ClassVisualizer.Show(self.VisualRoot:GetChildren()[1])
+	ClassVisualizer.Show(self.VisualRoot)
 end
 
 function Boat.Hide(self: Boat): ()
-	ClassVisualizer.Hide(self.VisualRoot:GetChildren()[1])
+	ClassVisualizer.Hide(self.VisualRoot)
 end
 
 function Boat.CanCollide(self: Boat): ()
-	ClassVisualizer.CanCollide(self.VisualRoot:GetChildren()[1])
+	ClassVisualizer.CanCollide(self.VisualRoot)
 end
 
 function Boat.CannotCollide(self: Boat): ()
-	ClassVisualizer.CannotCollide(self.VisualRoot:GetChildren()[1])
+	ClassVisualizer.CannotCollide(self.VisualRoot)
 end
 -- //!SECTION
 
@@ -501,7 +501,7 @@ end
 
 -- //SECTION - Event Listeners
 function Boat.AttachEventListeners(self: Boat)
-	EventListeners.Attach(self)
+	EventListeners.Attach(self :: any)
 end
 -- //!SECTION
 

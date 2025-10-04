@@ -5,16 +5,19 @@ local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
 local Building = require(ServerScriptService.Server.Classes.Building)
 local BuildingsManagerType = require(ReplicatedStorage.Shared.Types.Managers.BuildingsManagerType)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
-local BuildingType = require(ReplicatedStorage.Shared.Types.Classes.BuildingType)
 local taggedBuildings = CollectionService:GetTagged("Building")
 
-type BuildingsManger = BuildingsManagerType.BuildingsManager
+-- //SECTION - BuildingManager Types
+type BuildingsMangerInstance = BuildingsManagerType.BuildingsManagerInstance
+-- //!SECTION
 
-local BuildingsManager = {} :: BuildingsManger
+local BuildingsManager = {}
 BuildingsManager.__index = BuildingsManager
 
+type BuildingsManager = typeof(setmetatable({} :: BuildingsMangerInstance, BuildingsManager))
+
 function BuildingsManager.New(realmData, player: Player, teamId: number)
-	local self: BuildingsManger = setmetatable({}, BuildingsManager)
+	local self = setmetatable({} :: BuildingsMangerInstance, BuildingsManager)
 
 	self.Player = player
 	self.TeamId = teamId

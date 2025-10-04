@@ -26,7 +26,7 @@ export type BoatData = {
 	NextFPS: number,
 	GrowthRate: number?,
 	CostGrowthRate: number?,
-	VisualRoot: any,
+	VisualRoot: Part,
 	FishingInterval: any?,
 	Animations: { [string]: any }?,
 	VisualModels: { [number]: Model }?,

@@ -22,6 +22,7 @@ local function ResizeY(
 		cleaner: any?,
 		ratio: number?,
 		maxHeight: number?,
+		minHeight: number?,
 		targetHeight: number?,
 	}
 )

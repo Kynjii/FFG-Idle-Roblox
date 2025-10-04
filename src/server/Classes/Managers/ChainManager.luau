@@ -2,25 +2,28 @@ local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
-local TenderType = require(ReplicatedStorage.Shared.Types.Classes.TenderType)
-local BoatType = require(ReplicatedStorage.Shared.Types.Classes.BoatType)
 local ChainManagerType = require(ReplicatedStorage.Shared.Types.Managers.ChainManagerType)
-local PortStorageType = require(ReplicatedStorage.Shared.Types.Classes.PortStorageType)
 local Boat = require(ServerScriptService.Server.Classes.Boat)
 local PortStorage = require(ServerScriptService.Server.Classes.PortStorage)
 local Tender = require(ServerScriptService.Server.Classes.Tender)
 
+-- //SECTION -  ChainManager Types
+type ChainManagerInstance = ChainManagerType.ChainManagerInstance
+-- //!SECTION
+
+-- //SECTION - Tagged Entities within Studio
 local taggedBoats = CollectionService:GetTagged("Boat")
 local taggedTenders = CollectionService:GetTagged("Tender")
 local taggedStorage = CollectionService:GetTagged("Storage")
+-- //!SECTION
 
-type ChainManager = ChainManagerType.ChainManagerInstance
-
-local ChainManager = {} :: ChainManager
+local ChainManager = {}
 ChainManager.__index = ChainManager
 
+type ChainManager = typeof(setmetatable({} :: ChainManagerInstance, ChainManager))
+
 function ChainManager.New(realmData, tier: number, player: Player, teamId: number, buildingClasses: { [number]: { [string]: any } })
-	local self: ChainManager = setmetatable({}, ChainManager)
+	local self = setmetatable({} :: ChainManagerInstance, ChainManager)
 
 	local boatsArr = realmData.Boats
 	local tendersArr = realmData.Tenders
@@ -47,7 +50,7 @@ function ChainManager.New(realmData, tier: number, player: Player, teamId: numbe
 	for k, v in pairs(tendersArr) do
 		if v[FFGEnum.CLASS.PROPERTIES.Tier] == tier then tenderData = v end
 	end
-	self.LaneTender = Tender.New(tenderData, player, self.TenderModel, self.BoatModel)
+	self.LaneTender = Tender.New(tenderData, player, self.TenderModel)
 
 	-- Create Port Storage
 	self.StorageModel = self:FindStorageModel() :: Model
@@ -153,11 +156,11 @@ function ChainManager:AttachAttListeners()
 	end)
 
 	for _, building in pairs(self.Buildings) do
-		self.Signals.PurchasedEvent = building.Purchased:Connect(function(building)
-			self:HandleBuildingEvent(building)
+		self.Signals.PurchasedEvent = building.Purchased:Connect(function(purchasedBuilding)
+			self:HandleBuildingEvent(purchasedBuilding)
 		end)
-		self.Signals.UpgradedEvent = building.Upgraded:Connect(function(building)
-			self:HandleBuildingEvent(building)
+		self.Signals.UpgradedEvent = building.Upgraded:Connect(function(upgradedBuilding)
+			self:HandleBuildingEvent(upgradedBuilding)
 		end)
 	end
 end
@@ -248,8 +251,8 @@ end
 function ChainManager:StartUnloadingFish()
 	self.TenderModel.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.finishedLoading, false)
 
-	local tender: TenderType.TenderInstance = self.LaneTender
-	local storage: PortStorageType.StorageInstance = self.LaneStorage
+	local tender = self.LaneTender
+	local storage = self.LaneStorage
 
 	if (tender.FishInStorage or 0) <= 0 then
 		self.TenderModel.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.finishedUnloading, true)
@@ -282,7 +285,7 @@ function ChainManager:StartUnloadingFish()
 		local currentMaxStorage = storage.CurrentMaxStorage
 		local storageFree = math.max(0, currentMaxStorage - storage.FishInStorage)
 
-		local currentTenderFish = math.max(0, tender.FishInStorage)
+		local currentTenderFish = math.max(0, tender.FishInStorage or 0)
 		local targetTenderFish = (p >= 1) and 0 or math.ceil(initialCargo * (1 - p))
 		if targetTenderFish < 0 then targetTenderFish = 0 end
 

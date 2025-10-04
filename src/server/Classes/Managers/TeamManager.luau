@@ -1,6 +1,4 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local BoatType = require(ReplicatedStorage.Shared.Types.Classes.BoatType)
-local TenderType = require(ReplicatedStorage.Shared.Types.Classes.TenderType)
 local Teams = game:GetService("Teams")
 local BuildingsManager = require(script.Parent.BuildingsManager)
 local ChainManager = require(script.Parent.ChainManager)
@@ -8,8 +6,6 @@ local BuildingsManagerType = require(ReplicatedStorage.Shared.Types.Managers.Bui
 local ChainManagerType = require(ReplicatedStorage.Shared.Types.Managers.ChainManagerType)
 
 type BuildingsManager = BuildingsManagerType.BuildingsManagerInstance
-type BoatInstance = BoatType.BoatInstance
-type Tender = TenderType.Tender
 type ChainManager = ChainManagerType.ChainManagerInstance
 
 local TeamManager = {}
@@ -44,7 +40,7 @@ TeamManager.Teams = {
 	},
 	[8] = {
 		Name = "Islander 8",
-		TeamColor = BrickColor.new("New yeller"),
+		TeamColor = BrickColor.new("New Yeller"),
 	},
 	[9] = {
 		Name = "Islander 9",
@@ -82,11 +78,11 @@ function TeamManager.AssignChainManagers(profile, player: Player, teamId: number
 	if not realmData then return end
 	local buildingClasses = TeamManager.BuildingsManager[player.UserId] and TeamManager.BuildingsManager[player.UserId].Buildings or {}
 	for lane = 1, realmData.Lanes do
-		local ChainManager: ChainManager = ChainManager.New(realmData, lane, player, teamId, buildingClasses)
-		if not ChainManager then break end
+		local chainManager: ChainManager = ChainManager.New(realmData, lane, player, teamId, buildingClasses)
+		if not chainManager then break end
 
-		table.insert(TeamManager.ChainManagers[player.UserId], ChainManager)
-		ChainManager:Initialize()
+		table.insert(TeamManager.ChainManagers[player.UserId], chainManager)
+		chainManager:Initialize()
 	end
 end
 
@@ -97,11 +93,11 @@ function TeamManager.AssignBuildingsManager(profile, player: Player, teamId: num
 
 	if not realmData then return end
 
-	local BuildingsManager: BuildingsManager = BuildingsManager.New(realmData, player, teamId)
-	if not BuildingsManager then return end
+	local buildingsManager: BuildingsManager = BuildingsManager.New(realmData, player, teamId)
+	if not buildingsManager then return end
 
-	TeamManager.BuildingsManager[player.UserId] = BuildingsManager
-	BuildingsManager:Initialize()
+	TeamManager.BuildingsManager[player.UserId] = buildingsManager
+	buildingsManager:Initialize()
 end
 
 function TeamManager.AssignTeam(player: Player)

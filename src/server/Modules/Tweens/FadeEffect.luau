@@ -6,7 +6,7 @@ local DEFAULTS = {
 }
 
 function Fade.In(part: Part)
-	local tweenGoal: Part = {
+	local tweenGoal = {
 		Transparency = 0,
 	}
 
@@ -27,7 +27,7 @@ function Fade.In(part: Part)
 end
 
 function Fade.Out(part: Part)
-	local tweenGoal: Part = {
+	local tweenGoal = {
 		Transparency = 1,
 	}
 

@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local BoatType = require(ReplicatedStorage.Shared.Types.Classes.BoatType)
 local BuildingType = require(ReplicatedStorage.Shared.Types.Classes.BuildingType)
@@ -7,7 +8,25 @@ local TenderType = require(ReplicatedStorage.Shared.Types.Classes.TenderType)
 
 local PP = {}
 
-function PP.CreatePP(proximityPrompt: ProximityPrompt, class: BoatType.BoatInstance | TenderType.TenderInstance | PortStorageType.StorageInstance | BuildingType.BuildingInstance)
+type Boat = BoatType.BoatInstance
+type Tender = TenderType.TenderInstance
+type PortStorage = PortStorageType.StorageInstance
+type Building = BuildingType.BuildingInstance
+
+function PP.CreatePP(proximityPrompt: ProximityPrompt, class: Boat | Tender | PortStorage | Building)
+	local typedClass
+	if class.Entity == FFGEnum.CLASS.ENTITY_NAME.Boat then
+		typedClass = class :: Boat
+	elseif class.Entity == FFGEnum.CLASS.ENTITY_NAME.Tender then
+		typedClass = class :: Tender
+	elseif class.Entity == FFGEnum.CLASS.ENTITY_NAME.PortStorage then
+		typedClass = class :: PortStorage
+	elseif class.Entity == FFGEnum.CLASS.ENTITY_NAME.Building then
+		typedClass = class :: Building
+	else
+		error("Invalid entity passed to CreatePB")
+	end
+
 	proximityPrompt.HoldDuration = 0
 	proximityPrompt.MaxActivationDistance = 5
 	proximityPrompt.ObjectText = "Open"
@@ -17,7 +36,7 @@ function PP.CreatePP(proximityPrompt: ProximityPrompt, class: BoatType.BoatInsta
 		if player.UserId ~= class.Owner then return end
 		if class.Level == class.MaxLevel then return end
 
-		Events.FireEvent(Events.RemoteNames.OpenEntityDetails, class.Player, class)
+		Events.FireEvent(Events.RemoteNames.OpenEntityDetails, class.Player, typedClass)
 	end))
 
 	return proximityPrompt

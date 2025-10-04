@@ -400,7 +400,7 @@ end
 
 -- //SECTION - Event Listeners
 function PortStorage.AttachEventListeners(self: PortStorage)
-	EventListeners.Attach(self)
+	EventListeners.Attach(self :: any)
 end
 -- //!SECTION
 

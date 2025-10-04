@@ -50,7 +50,7 @@ local function setRealmBuff(name: string, buff)
 		realmBuffLabels[name] = buffLabel
 	end
 
-	local container: Frame = hud:FindFirstChild("RealmBuffs", true)
+	local container = hud:FindFirstChild("RealmBuffs", true) :: Frame
 	if container then
 		if realmBuffCount > 0 then
 			container.Visible = true

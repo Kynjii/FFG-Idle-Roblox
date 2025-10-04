@@ -14,6 +14,11 @@ local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local Replica = require(ReplicatedStorage.Shared.ReplicaClient)
 
+type Boat = BoatType.BoatInstance
+type Tender = TenderType.TenderInstance
+type PortStorage = PortStorageType.StorageInstance
+type Building = BuildingType.BuildingInstance
+
 local player = Players.LocalPlayer
 local entityDetailsUI: Frame = DeepWait(player.PlayerGui, "EntityDetails", "DetailsContainer")
 
@@ -73,22 +78,15 @@ entityDetailsUI.Visible = false
 local detailsAreOpen = false
 
 local _replica = nil
-local entityData: BoatType.BoatInstance | TenderType.TenderInstance | PortStorageType.StorageInstance | BuildingType.BuildingInstance = {}
+local entityData: any = {}
 
-local entityDetails = Events.GetRemote(Events.RemoteNames.OpenEntityDetails)
-if entityDetails then entityDetails.OnClientEvent:Connect(function(data)
-	clearExistingData()
-
-	if data then
-		player.PlayerGui.EntityDetails.Enabled = true
-		entityDetailsUI.Visible = true
-		detailsAreOpen = true
-		entityData = data
-		watchEntity()
-		populateDetailsUI()
-		handleClosingEntityDetailsUI()
+function clearExistingData()
+	if _replica then
+		_replica:Disconnect()
+		_replica = nil
 	end
-end) end
+	entityData = nil
+end
 
 function watchEntity()
 	local indexKey = entityData.Entity .. "s"
@@ -123,31 +121,6 @@ function closeDetails()
 		local blur = Lighting:FindFirstChild("Blur")
 		if blur then blur:Destroy() end
 	end
-end
-
-function clearExistingData()
-	if _replica then
-		_replica:Disconnect()
-		_replica = nil
-	end
-	entityData = nil
-end
-
-function populateDetailsUI()
-	if not entityData then return end
-	local blur = Instance.new("BlurEffect")
-	blur.Parent = Lighting
-
-	writeDescription()
-	updateUI()
-end
-
-function updateUI()
-	updateName()
-	updateLevel()
-	updateStats()
-	updateEntityInteractiveFrameLabel()
-	updateButtonState()
 end
 
 function updateLevel()
@@ -235,6 +208,19 @@ function updateEntityInteractiveFrameLabel()
 	details.EntityInteractiveFrameLabel.Visible = true
 end
 
+function handleUpgradeClick()
+	local events = {
+		Purchased = Events.GetRemote(Events.RemoteNames.EntityPurchased),
+		Upgraded = Events.GetRemote(Events.RemoteNames.EntityUpgraded),
+	}
+
+	if not entityData.isPurchased then
+		events.Purchased:FireServer(entityData[FFGEnum.CLASS.PROPERTIES.Id])
+	else
+		events.Upgraded:FireServer(entityData[FFGEnum.CLASS.PROPERTIES.Id])
+	end
+end
+
 -- Buttons
 -- Upgrade Button
 if details.upgradeButton then
@@ -278,17 +264,9 @@ function updateButtonState()
 	details.upgradeCostLabel.Text = FormatNumber(cost)
 end
 
-function handleUpgradeClick()
-	local events = {
-		Purchased = Events.GetRemote(Events.RemoteNames.EntityPurchased),
-		Upgraded = Events.GetRemote(Events.RemoteNames.EntityUpgraded),
-	}
-
-	if not entityData.isPurchased then
-		events.Purchased:FireServer(entityData[FFGEnum.CLASS.PROPERTIES.Id])
-	else
-		events.Upgraded:FireServer(entityData[FFGEnum.CLASS.PROPERTIES.Id])
-	end
+function handleCloseClick()
+	clearExistingData()
+	closeDetails()
 end
 
 -- Close Button
@@ -307,11 +285,6 @@ if details.closeButton then
 	end)
 end
 
-function handleCloseClick()
-	clearExistingData()
-	closeDetails()
-end
-
 Replica.OnNew("PlayerState", function(replicaData)
 	currentState = replicaData.Data
 
@@ -319,3 +292,35 @@ Replica.OnNew("PlayerState", function(replicaData)
 		currentState.Currencies.Gold = newValue
 	end)
 end)
+
+function updateUI()
+	updateName()
+	updateLevel()
+	updateStats()
+	updateEntityInteractiveFrameLabel()
+	updateButtonState()
+end
+
+function populateDetailsUI()
+	if not entityData then return end
+	local blur = Instance.new("BlurEffect")
+	blur.Parent = Lighting
+
+	writeDescription()
+	updateUI()
+end
+
+local entityDetails = Events.GetRemote(Events.RemoteNames.OpenEntityDetails)
+if entityDetails then entityDetails.OnClientEvent:Connect(function(data)
+	clearExistingData()
+
+	if data then
+		player.PlayerGui.EntityDetails.Enabled = true
+		entityDetailsUI.Visible = true
+		detailsAreOpen = true
+		entityData = data
+		watchEntity()
+		populateDetailsUI()
+		handleClosingEntityDetailsUI()
+	end
+end) end

@@ -10,7 +10,7 @@ local DEFAULTS = {
 function PopUp.Animate(billboard: BillboardGui, textValue: number, imageLabel: ImageLabel)
 	if billboard and textValue then
 		local image = imageLabel
-		local text: TextLabel = billboard:WaitForChild("TextLabel")
+		local text = billboard:WaitForChild("TextLabel") :: TextLabel
 
 		billboard.StudsOffsetWorldSpace = Vector3.new(0, 0, 10)
 		text.Text = "+" .. FormatNumber(textValue)
@@ -23,7 +23,7 @@ function PopUp.Animate(billboard: BillboardGui, textValue: number, imageLabel: I
 end
 
 function PopUp.AnimateImageLabel(imageLabel: ImageLabel)
-	local tweenGoal: ImageLabel = {
+	local tweenGoal = {
 		ImageTransparency = 0,
 	}
 
@@ -44,7 +44,7 @@ function PopUp.AnimateImageLabel(imageLabel: ImageLabel)
 end
 
 function PopUp.AnimateTextLabel(textLabel: ImageLabel)
-	local tweenGoal: TextLabel = {
+	local tweenGoal = {
 		TextTransparency = 0,
 	}
 
@@ -65,7 +65,7 @@ function PopUp.AnimateTextLabel(textLabel: ImageLabel)
 end
 
 function PopUp.AnimateBillboard(billboard: BillboardGui)
-	local tweenGoal: BillboardGui = {
+	local tweenGoal = {
 		StudsOffsetWorldSpace = billboard.StudsOffsetWorldSpace + Vector3.new(0, 0, 2),
 	}
 
