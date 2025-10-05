@@ -41,12 +41,11 @@ end
 
 function BuildingsManager:CreateBuildings(buildingsData, realmBuffs)
 	local buildings = {}
-
 	for k, v in pairs(self.BuildingModels) do
 		local existingBuilding = TableUtil.Find(buildingsData, function(building)
 			return building.BuildingName == k
 		end)
-		if existingBuilding then buildings[k] = Building.New(existingBuilding or nil, self.Player, self.BuildingModels[k], realmBuffs) end
+		buildings[k] = Building.New(existingBuilding or {}, self.Player, self.BuildingModels[k], realmBuffs)
 	end
 
 	return buildings

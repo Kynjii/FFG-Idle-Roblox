@@ -68,15 +68,17 @@ function PB.CreatePB(pbModel: Model, class: Boat | Tender | PortStorage | Buildi
 			progressContainer.Visible = true
 			pbDetails.LevelLabel.Visible = true
 			pbDetails.QualityLabel.Visible = true
-			pbDetails.LevelLabel.Text = typedClass.isPurchased and "Level: " .. typedClass.Level
+			pbDetails.LevelLabel.Text = typedClass.isPurchased and `Level: {typedClass.Level}`
 		end
 
 		-- Building Buff
-		if typedClass.Entity == FFGEnum.CLASS.ENTITY_NAME.Building then pbDetails.EntityLabel.Text = tostring(typedClass.BuildingBuff and (typedClass.BuildingBuff.CurrentValue :: number)) end
+		if typedClass.Entity == FFGEnum.CLASS.ENTITY_NAME.Building then
+			if not typedClass.isPurchased then pbDetails.EntityLabel.Text = typedClass.BuildingBuff.Label end
+		end
 
 		-- Progress Bar
 		if typedClass.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Building then
-			pbDetails.StorageLabel.Text = FormatNumber(typedClass.FishInStorage) .. "/" .. FormatNumber(typedClass.CurrentMaxStorage)
+			pbDetails.StorageLabel.Text = `{FormatNumber(typedClass.FishInStorage)} / {FormatNumber(typedClass.CurrentMaxStorage)}`
 			ProgressBar.Update(pbDetails.ProgressBar, typedClass.FishInStorage, typedClass.CurrentMaxStorage)
 		else
 			if progressContainer then progressContainer.Visible = false end

@@ -86,7 +86,7 @@ function PortStorage.New(state: { [string]: any }?, player: Player, model: Model
 	self.Owner = self.Owner or player.UserId
 	self.Model = model
 	self.Name = self:GetName()
-	self.VisualRoot = DeepWait(model, "Storage", "VisualRoot")
+	self.VisualRoot = model:FindFirstChild("VisualRoot", true)
 	self.Tier = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.Tier) or DEFAULTS.Tier
 	self.Player = player
 
@@ -258,7 +258,7 @@ function PortStorage.Initialize(self: PortStorage): ()
 	self:UpdateFishModel()
 end
 
-function PortStorage.SetupPurchaseBoard(self: PortStorage): Model
+function PortStorage.SetupPurchaseBoard(self: PortStorage): (Model, { [string]: any })
 	local purchaseBoard = self.Model:WaitForChild("Purchase_Board")
 
 	return PurchaseBoard.CreatePB(purchaseBoard, self :: any)

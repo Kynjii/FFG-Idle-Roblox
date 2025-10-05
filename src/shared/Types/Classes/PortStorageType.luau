@@ -38,6 +38,7 @@ export type PortStorageData = {
 export type StorageInstance = {
 	-- Essential Properties (accessed by other modules)
 	Entity: string,
+	Owner: string,
 	Level: number,
 	UpgradeStage: number,
 	isPurchased: boolean,

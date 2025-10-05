@@ -46,6 +46,7 @@ export type BuildingData = {
 export type BuildingInstance = {
 	-- Essential Properties (accessed by other modules)
 	Entity: string,
+	Owner: string,
 	Level: number,
 	UpgradeStage: number,
 	isPurchased: boolean,

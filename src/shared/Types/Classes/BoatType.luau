@@ -40,6 +40,7 @@ export type BoatData = {
 export type BoatInstance = {
 	-- Essential Properties (accessed by other modules)
 	Entity: string,
+	Owner: string,
 	Level: number,
 	UpgradeStage: number,
 	isPurchased: boolean,

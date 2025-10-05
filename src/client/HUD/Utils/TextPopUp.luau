@@ -8,7 +8,7 @@ local labels = {
 }
 
 local function showMessage(textLabel: TextLabel)
-	local tweenGoal: TextLabel = {
+	local tweenGoal = {
 		TextTransparency = 0,
 	}
 

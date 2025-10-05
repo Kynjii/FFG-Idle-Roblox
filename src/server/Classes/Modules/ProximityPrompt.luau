@@ -30,11 +30,17 @@ function PP.CreatePP(proximityPrompt: ProximityPrompt, class: Boat | Tender | Po
 	proximityPrompt.HoldDuration = 0
 	proximityPrompt.MaxActivationDistance = 5
 	proximityPrompt.ObjectText = "Open"
-	proximityPrompt.ActionText = class.Entity .. " Details"
+	proximityPrompt.ActionText = `{class.Entity} Details`
 
 	class._cleaner:add(proximityPrompt.Triggered:Connect(function(player)
-		if player.UserId ~= class.Owner then return end
-		if class.Level == class.MaxLevel then return end
+		if player.UserId ~= class.Owner then
+			print("Not the owner", player.UserId, class.Owner)
+			return
+		end
+		if class.Level == class.MaxLevel then
+			print("max level")
+			return
+		end
 
 		Events.FireEvent(Events.RemoteNames.OpenEntityDetails, class.Player, typedClass)
 	end))

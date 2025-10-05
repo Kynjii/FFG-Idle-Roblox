@@ -298,8 +298,8 @@ function Boat.Initialize(self: Boat): ()
 	end) end
 end
 
-function Boat.SetupPurchaseBoard(self: Boat): Model
-	local purchaseBoard = self.Model:WaitForChild("Purchase_Board")
+function Boat.SetupPurchaseBoard(self: Boat): (Model, { [string]: any })
+	local purchaseBoard = self.Model:WaitForChild("Purchase_Board") :: Model
 
 	return PurchaseBoard.CreatePB(purchaseBoard, self :: any)
 end

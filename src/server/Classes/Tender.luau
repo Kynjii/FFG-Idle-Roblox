@@ -97,7 +97,7 @@ function Tender.New(state: { [string]: any }?, player: Player, model: Model): Te
 	self.Owner = self.Owner or player.UserId
 	self.Model = model
 	self.Entity = self.Entity or DEFAULTS.Entity
-	self.VisualRoot = DeepWait(model, "Tender", "VisualRoot")
+	self.VisualRoot = model:FindFirstChild("VisualRoot", true)
 	self.PortPos = model.PrimaryPart and model.PrimaryPart.CFrame or CFrame.new()
 	self.Name = self:GetName()
 	self.Tier = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.Tier) or DEFAULTS.Tier

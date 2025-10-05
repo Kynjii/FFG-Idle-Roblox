@@ -177,7 +177,7 @@ function Building.New(state: { [string]: any }?, player: Player, model: Model, r
 	self.Owner = self.Owner or player.UserId
 	self.Model = model
 	self.Entity = self.Entity or DEFAULTS.Entity
-	self.VisualRoot = DeepWait(model, "Building", "VisualRoot")
+	self.VisualRoot = model:FindFirstChild("VisualRoot", true)
 	self.Tier = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.Tier) or DEFAULTS.Tier
 	self.BuildingId = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.BuildingId)
 	self.BuildingName = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.BuildingName)
@@ -283,7 +283,6 @@ end
 
 function Building.SetupPurchaseBoard(self: Building): (Model, { [string]: any })
 	local purchaseBoard = self.Model:WaitForChild("Purchase_Board") :: Model
-
 	return PurchaseBoard.CreatePB(purchaseBoard, self :: any)
 end
 
@@ -292,10 +291,9 @@ function Building.UpdatePurchaseBoardUI(self: Building): ()
 end
 
 function Building.SetupProximityPrompt(self: Building, purchaseBoard: Model): ()
-	local proximityPrompt: ProximityPrompt = Instance.new("ProximityPrompt")
+	local proximityPrompt = Instance.new("ProximityPrompt")
 	proximityPrompt.Parent = purchaseBoard
 	if self._cleaner then self._cleaner:add(proximityPrompt) end
-
 	ProximityPrompt.CreatePP(proximityPrompt, self :: any)
 end
 -- //!SECTION

@@ -45,6 +45,7 @@ export type TenderData = {
 export type TenderInstance = {
 	-- Essential Properties (accessed by other modules)
 	Entity: string,
+	Owner: string,
 	Level: number,
 	UpgradeStage: number,
 	isPurchased: boolean,
