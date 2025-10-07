@@ -1,6 +1,7 @@
 local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local Trove = require(ReplicatedStorage.Packages.Trove)
 local Animator = require(ServerScriptService.Server.Classes.Modules.Animator)
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
@@ -17,7 +18,6 @@ local BuffType = require(ReplicatedStorage.Shared.Types.BuffType)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local SetInterval = require(ServerScriptService.Server.Modules.SetInterval)
 local FadeEffect = require(ServerScriptService.Server.Modules.Tweens.FadeEffect)
-local CleanerService = require(ServerScriptService.Server.Services.CleanerService)
 
 -- //SECTION - Boat Types
 type BoatInstance = BoatType.BoatInstance
@@ -116,7 +116,7 @@ function Boat.New(state: { [string]: any }?, player: Player, model: Model): Boat
 
 	self:AttachEventListeners()
 
-	self._cleaner = CleanerService.new()
+	self._cleaner = Trove.new()
 
 	self.FishingInterval = nil
 
@@ -244,7 +244,7 @@ function Boat.StartFishing(self: Boat): ()
 			self:UpdateStorageStatus(true)
 		end
 	end, 1)
-	if self.FishingInterval and self._cleaner then self._cleaner:add(self.FishingInterval) end
+	if self.FishingInterval and self._cleaner then self._cleaner:Add(self.FishingInterval) end
 end
 
 function Boat.AddFish(self: Boat, amount: number): ()
@@ -311,7 +311,7 @@ end
 function Boat.SetupProximityPrompt(self: Boat, purchaseBoard: Model): ()
 	local proximityPrompt: ProximityPrompt = Instance.new("ProximityPrompt")
 	proximityPrompt.Parent = purchaseBoard
-	if self._cleaner then self._cleaner:add(proximityPrompt) end
+	if self._cleaner then self._cleaner:Add(proximityPrompt) end
 
 	return ProximityPrompt.CreatePP(proximityPrompt, self :: any)
 end
@@ -482,7 +482,7 @@ function Boat.StartAnimation(self: Boat): ()
 	if animator then
 		local animationTrack: AnimationTrack
 		if self._cleaner then
-			animationTrack = self._cleaner:add(animator:LoadAnimation(animation))
+			animationTrack = self._cleaner:Add(animator:LoadAnimation(animation))
 		else
 			animationTrack = animator:LoadAnimation(animation)
 		end
@@ -518,7 +518,7 @@ function Boat.Destroy(self: Boat)
 	self:ClearAllAttributes(self.Model.PrimaryPart)
 
 	if self._cleaner then
-		self._cleaner:clean()
+		self._cleaner:Clean()
 		self._cleaner = nil
 	end
 

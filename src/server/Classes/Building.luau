@@ -2,6 +2,7 @@ local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local Signal = require(ReplicatedStorage.Packages.Signal)
+local Trove = require(ReplicatedStorage.Packages.Trove)
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
 local EventListeners = require(ServerScriptService.Server.Classes.Modules.EventListeners)
@@ -14,7 +15,6 @@ local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local BuffType = require(ReplicatedStorage.Shared.Types.BuffType)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FadeEffect = require(ServerScriptService.Server.Modules.Tweens.FadeEffect)
-local CleanerService = require(ServerScriptService.Server.Services.CleanerService)
 
 -- //SECTION - Building Types
 local BuildingType = require(ReplicatedStorage.Shared.Types.Classes.BuildingType)
@@ -196,10 +196,10 @@ function Building.New(state: { [string]: any }?, player: Player, model: Model, r
 
 	self.PurchaseBoard, self.PBDetails = self:SetupPurchaseBoard()
 
-	self._cleaner = CleanerService.new()
+	self._cleaner = Trove.new()
 
-	self.Upgraded = self._cleaner:add(Signal.new())
-	self.Purchased = self._cleaner:add(Signal.new())
+	self.Upgraded = self._cleaner:Add(Signal.new())
+	self.Purchased = self._cleaner:Add(Signal.new())
 
 	self:AttachEventListeners()
 	self:UpdateVisualModel()
@@ -293,7 +293,7 @@ end
 function Building.SetupProximityPrompt(self: Building, purchaseBoard: Model): ()
 	local proximityPrompt = Instance.new("ProximityPrompt")
 	proximityPrompt.Parent = purchaseBoard
-	if self._cleaner then self._cleaner:add(proximityPrompt) end
+	if self._cleaner then self._cleaner:Add(proximityPrompt) end
 	ProximityPrompt.CreatePP(proximityPrompt, self :: any)
 end
 -- //!SECTION
@@ -426,7 +426,7 @@ function Building.Destroy(self: Building): ()
 	self:ClearAllAttributes(self.Model.PrimaryPart)
 
 	if self._cleaner then
-		self._cleaner:clean()
+		self._cleaner:Clean()
 		self._cleaner = nil
 	end
 

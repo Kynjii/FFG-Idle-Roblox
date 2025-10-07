@@ -1,6 +1,7 @@
 local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local Trove = require(ReplicatedStorage.Packages.Trove)
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
 local EventListeners = require(ServerScriptService.Server.Classes.Modules.EventListeners)
@@ -14,7 +15,6 @@ local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FadeEffect = require(ServerScriptService.Server.Modules.Tweens.FadeEffect)
 local ResizeFromEdge = require(ServerScriptService.Server.Modules.Tweens.ResizeFromEdge)
-local CleanerService = require(ServerScriptService.Server.Services.CleanerService)
 
 -- //SECTION - Types
 type StorageInstance = PortStorageType.StorageInstance
@@ -109,7 +109,7 @@ function PortStorage.New(state: { [string]: any }?, player: Player, model: Model
 	self.ProgressTween = nil
 	self.FishModel = DeepWait(self.Model, "FishInStorage", "Base")
 
-	self._cleaner = CleanerService.new()
+	self._cleaner = Trove.new()
 
 	self:UpdateVisualModel()
 
@@ -271,7 +271,7 @@ end
 function PortStorage.SetupProximityPrompt(self: PortStorage, purchaseBoard: Model)
 	local proximityPrompt: ProximityPrompt = Instance.new("ProximityPrompt")
 	proximityPrompt.Parent = purchaseBoard
-	if self._cleaner then self._cleaner:add(proximityPrompt) end
+	if self._cleaner then self._cleaner:Add(proximityPrompt) end
 
 	ProximityPrompt.CreatePP(proximityPrompt, self :: any)
 end
@@ -486,7 +486,7 @@ function PortStorage.Destroy(self: PortStorage)
 	end)
 
 	if self._cleaner then
-		self._cleaner:clean()
+		self._cleaner:Clean()
 		self._cleaner = nil
 	end
 

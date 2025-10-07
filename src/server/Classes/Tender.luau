@@ -6,6 +6,7 @@ local Formulas = require(ServerScriptService.Server.Math.Formulas)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local TweenService = game:GetService("TweenService")
+local Trove = require(ReplicatedStorage.Packages.Trove)
 local BuffType = require(ReplicatedStorage.Shared.Types.BuffType)
 local Animator = require(ServerScriptService.Server.Classes.Modules.Animator)
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
@@ -17,7 +18,6 @@ local TenderType = require(ReplicatedStorage.Shared.Types.Classes.TenderType)
 local Buffs = require(ServerScriptService.Server.Math.Buffs)
 local FadeEffect = require(ServerScriptService.Server.Modules.Tweens.FadeEffect)
 local PopUp = require(ServerScriptService.Server.Modules.Tweens.PopUp)
-local CleanerService = require(ServerScriptService.Server.Services.CleanerService)
 
 -- //SECTION - Tender Types
 type TenderInstance = TenderType.TenderInstance
@@ -127,7 +127,7 @@ function Tender.New(state: { [string]: any }?, player: Player, model: Model): Te
 	self.ProgressTween = nil
 	self.MoveTween = nil
 
-	self._cleaner = CleanerService.new()
+	self._cleaner = Trove.new()
 
 	self:AttachEventListeners()
 	self:UpdateVisualModel()
@@ -263,9 +263,9 @@ function Tender.MoveToBoat(self: Tender, boatPos: CFrame)
 
 	self.MoveTween = tween
 	if self._cleaner then
-		self._cleaner:add(tween)
+		self._cleaner:Add(tween)
 
-		self._cleaner:add(tween.Completed:Once(function(playbackState)
+		self._cleaner:Add(tween.Completed:Once(function(playbackState)
 			if self.Model.PrimaryPart then self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.atBoat, true) end
 			if self.MoveTween == tween then self.MoveTween = nil end
 		end))
@@ -294,9 +294,9 @@ function Tender.MoveToPort(self: Tender)
 
 	self.MoveTween = tween
 	if self._cleaner then
-		self._cleaner:add(tween)
+		self._cleaner:Add(tween)
 
-		self._cleaner:add(tween.Completed:Once(function(playbackState)
+		self._cleaner:Add(tween.Completed:Once(function(playbackState)
 			if self.Model.PrimaryPart then self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.atPort, true) end
 			if self.MoveTween == tween then self.MoveTween = nil end
 		end))
@@ -365,7 +365,7 @@ end
 function Tender.SetupProximityPrompt(self: Tender, purchaseBoard: Model): ProximityPrompt
 	local proximityPrompt: ProximityPrompt = Instance.new("ProximityPrompt")
 	proximityPrompt.Parent = purchaseBoard
-	if self._cleaner then self._cleaner:add(proximityPrompt) end
+	if self._cleaner then self._cleaner:Add(proximityPrompt) end
 
 	return ProximityPrompt.CreatePP(proximityPrompt, self :: any)
 end
@@ -533,7 +533,7 @@ function Tender.StartAnimation(self: Tender)
 	local animationTrack = animator:LoadAnimation(animation)
 	if not animationTrack then return end
 
-	if self._cleaner then self._cleaner:add(animationTrack) end
+	if self._cleaner then self._cleaner:Add(animationTrack) end
 	animationTrack.Looped = true
 
 	task.wait(math.random(0.5, 1.5))
@@ -580,7 +580,7 @@ function Tender.Destroy(self: Tender)
 	self:ClearAllAttributes(self.Model.PrimaryPart)
 
 	if self._cleaner then
-		self._cleaner:clean()
+		self._cleaner:Clean()
 		self._cleaner = nil
 	end
 
