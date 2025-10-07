@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Theme = {
-	font = Font.fromId(12187371840),
+	font = Font.fromId(12187374954),
 
 	color = {
 		panel = Color3.fromRGB(181, 136, 99), -- Oak

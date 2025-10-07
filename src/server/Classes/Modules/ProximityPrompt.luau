@@ -32,7 +32,7 @@ function PP.CreatePP(proximityPrompt: ProximityPrompt, class: Boat | Tender | Po
 	proximityPrompt.ObjectText = "Open"
 	proximityPrompt.ActionText = `{class.Entity} Details`
 
-	class._cleaner:add(proximityPrompt.Triggered:Connect(function(player)
+	class._cleaner:Add(proximityPrompt.Triggered:Connect(function(player)
 		if player.UserId ~= class.Owner then
 			print("Not the owner", player.UserId, class.Owner)
 			return
