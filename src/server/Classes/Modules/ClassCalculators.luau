@@ -13,17 +13,21 @@ local function clampStage(s)
 	return math.clamp(s, 1, Formulas.STAGE_COUNT or 1)
 end
 
--- //SECTION - Boats
 function ClassCalculator.CalculateBaseValue(baseValue: number, tier: number, realmNum: number)
 	local tierMultiplier = Formulas.TIER_MULTIPLIER[tier] or 1
 	local realmMultiplier = (realmNum and math.pow(realmNum, 2.25)) or 1
 	return baseValue * tierMultiplier * realmMultiplier
 end
 
-function ClassCalculator.CalculateUpgradeCost(baseValue: number, level: number)
+function ClassCalculator.CalculateUpgradeCost(baseValue: number, level: number, tier: number?, realmId: number?)
 	level = clampLevel(level)
-	local mult = (Formulas.COST_MULT and Formulas.COST_MULT[level]) or 1
-	return baseValue * mult
+	local costMult = (Formulas.COST_MULT and Formulas.COST_MULT[level]) or 1
+
+	local tierMult = (tier and Formulas.TIER_MULTIPLIER[tier]) or 1
+
+	local realmMult = (realmId and math.pow(realmId, 2.25)) or 1
+
+	return baseValue * costMult * tierMult * realmMult
 end
 
 function ClassCalculator.CalculateMaxStorage(baseValue: number, level: number, percentBuffValue: number?)

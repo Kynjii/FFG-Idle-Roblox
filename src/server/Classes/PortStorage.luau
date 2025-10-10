@@ -216,7 +216,7 @@ function PortStorage.CalculateUpgradeCost(self: PortStorage): number
 	local baseCost = self.BaseCost or DEFAULTS.BaseCost
 	if baseCost == DEFAULTS.BaseCost then baseCost = self:CalculateBaseCost() end
 
-	local cost = ClassCalculators.CalculateUpgradeCost(baseCost, self.Level)
+	local cost = ClassCalculators.CalculateUpgradeCost(baseCost, self.Level, self.Tier, self.RealmId)
 
 	self.UpgradeCost = cost
 
