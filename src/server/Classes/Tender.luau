@@ -130,9 +130,6 @@ function Tender.New(state: { [string]: any }?, player: Player, model: Model): Te
 	self._cleaner = Trove.new()
 
 	self:AttachEventListeners()
-	self:UpdateVisualModel()
-	self:StartAnimation()
-
 	return self
 end
 -- //!SECTION
@@ -334,14 +331,18 @@ end
 
 -- //SECTION - UI Setup
 function Tender.Initialize(self: Tender)
+	print("int", self)
 	-- Handle visibility based on purchase status
 	if not self.isPurchased then
 		self:Hide()
 		self:CannotCollide()
 	else
+		self:UpdateVisualModel()
 		self:Show()
 		self:CanCollide()
 	end
+
+	self:StartAnimation()
 
 	-- Setup UI components
 	if self.PurchaseBoard then self:SetupProximityPrompt(self.PurchaseBoard) end
@@ -511,16 +512,10 @@ function Tender.UpdateVisualModel(self: Tender)
 	local updatedModel = templateModel:Clone()
 
 	updatedModel.Name = templateModel.Name .. "_Clone"
+	updatedModel.Parent = self.VisualRoot
+	updatedModel:PivotTo(self.VisualRoot.CFrame)
 
-	if not self.VisualRoot then
-		self.VisualRoot = self.Model:FindFirstChild("VisualRoot", true)
-		if self.VisualRoot then
-			updatedModel.Parent = self.VisualRoot
-			updatedModel:PivotTo(self.VisualRoot.CFrame)
-		end
-	end
-
-	for _, part in pairs(updatedModel:GetChildren()) do
+	for _, part in pairs(updatedModel:GetDescendants()) do
 		if part:IsA("BasePart") then
 			local weld = Instance.new("WeldConstraint")
 			weld.Parent = part

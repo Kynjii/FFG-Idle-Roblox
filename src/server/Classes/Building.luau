@@ -397,7 +397,7 @@ function Building.UpdateVisualModel(self: Building): ()
 	updatedModel.Parent = self.VisualRoot
 	updatedModel:PivotTo(self.VisualRoot.CFrame)
 
-	for _, part in pairs(updatedModel:GetChildren()) do
+	for _, part in pairs(updatedModel:GetDescendants()) do
 		if part:IsA("BasePart") then
 			local weld = Instance.new("WeldConstraint")
 			weld.Parent = part
