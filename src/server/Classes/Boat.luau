@@ -475,6 +475,8 @@ function Boat.UpdateVisualModel(self: Boat): ()
 		end
 	end
 
+	if self.VisualRoot.Anchored == true then self.VisualRoot.Anchored = false end
+
 	self.CurrentVisualModel = updatedModel
 end
 -- //!SECTION

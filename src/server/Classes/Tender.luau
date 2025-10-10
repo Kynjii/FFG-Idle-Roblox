@@ -526,6 +526,8 @@ function Tender.UpdateVisualModel(self: Tender)
 		end
 	end
 
+	if self.VisualRoot.Anchored == true then self.VisualRoot.Anchored = false end
+
 	self.CurrentVisualModel = updatedModel
 end
 -- //!SECTION
