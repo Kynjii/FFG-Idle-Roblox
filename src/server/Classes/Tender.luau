@@ -408,19 +408,19 @@ end
 
 -- //SECTION - Visibility and Collision
 function Tender.Show(self: Tender)
-	ClassVisualizer.Show(self.VisualRoot:GetChildren()[1])
+	ClassVisualizer.Show(self.VisualRoot)
 end
 
 function Tender.Hide(self: Tender)
-	ClassVisualizer.Hide(self.VisualRoot:GetChildren()[1])
+	ClassVisualizer.Hide(self.VisualRoot)
 end
 
 function Tender.CanCollide(self: Tender)
-	ClassVisualizer.CanCollide(self.VisualRoot:GetChildren()[1])
+	ClassVisualizer.CanCollide(self.VisualRoot)
 end
 
 function Tender.CannotCollide(self: Tender)
-	ClassVisualizer.CannotCollide(self.VisualRoot:GetChildren()[1])
+	ClassVisualizer.CannotCollide(self.VisualRoot)
 end
 -- //!SECTION
 
@@ -511,8 +511,14 @@ function Tender.UpdateVisualModel(self: Tender)
 	local updatedModel = templateModel:Clone()
 
 	updatedModel.Name = templateModel.Name .. "_Clone"
-	updatedModel.Parent = self.VisualRoot
-	updatedModel:PivotTo(self.VisualRoot.CFrame)
+
+	if not self.VisualRoot then
+		self.VisualRoot = self.Model:FindFirstChild("VisualRoot", true)
+		if self.VisualRoot then
+			updatedModel.Parent = self.VisualRoot
+			updatedModel:PivotTo(self.VisualRoot.CFrame)
+		end
+	end
 
 	for _, part in pairs(updatedModel:GetChildren()) do
 		if part:IsA("BasePart") then

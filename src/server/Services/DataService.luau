@@ -88,6 +88,11 @@ function DataService.Earn(player: Player, currencyType: string, amount: number)
 	local newValue = current + amount
 	profile.Data.Currencies[currencyType] = newValue
 
+	local leaderStats = player:FindFirstChild("leaderstats")
+	local currency = leaderStats:FindFirstChild(currencyType)
+
+	if currency then currency.Value = newValue end
+
 	local replica = DataService.Replicas[player]
 	if replica then replica:Set({ "Currencies", currencyType }, newValue) end
 end
@@ -109,6 +114,11 @@ function DataService.Spend(player: Player, currencyType: string, amount: number)
 
 	local newValue = current - amount
 	profile.Data.Currencies[currencyType] = newValue
+
+	local leaderStats = player:FindFirstChild("leaderstats")
+	local currency = leaderStats:FindFirstChild(currencyType)
+
+	if currency then currency.Value = newValue end
 
 	local replica = DataService.Replicas[player]
 	if replica then replica:Set({ "Currencies", currencyType }, newValue) end

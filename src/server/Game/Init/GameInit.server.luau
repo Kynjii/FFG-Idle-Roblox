@@ -18,6 +18,23 @@ Events.InitOnServer()
 -- Create Teams based on static data and kick someone if the team has more than one player
 TeamManager.CreateTeams()
 
+-- Setup leaderboard
+local function leaderboardSetup(player, playerData)
+	local leaderstats = Instance.new("Folder")
+	leaderstats.Name = "leaderstats"
+	leaderstats.Parent = player
+
+	local gold = Instance.new("IntValue")
+	gold.Name = "Gold"
+	gold.Value = playerData.Currencies.Gold or 0
+	gold.Parent = leaderstats
+
+	local isPrimary = Instance.new("BoolValue")
+	isPrimary.Name = "IsPrimary"
+	isPrimary.Value = true
+	isPrimary.Parent = gold
+end
+
 -- Create new Playerstore using the PlayerDataTemplate
 local PlayerStore = ProfileStore.New(FFGHelpers.GetStoreName(), PlayerDataTemplate)
 
@@ -51,6 +68,8 @@ local function PlayerAdded(player: Player)
 				player:Kick("Server is full, try again")
 				return
 			end
+
+			leaderboardSetup(player, profile.Data)
 
 			TeamManager.AssignBuildingsManager(profile.Data, player, teamId)
 			TeamManager.AssignChainManagers(profile.Data, player, teamId)

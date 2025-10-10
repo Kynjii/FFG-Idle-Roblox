@@ -1,11 +1,8 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Replica = require(ReplicatedStorage.Shared.ReplicaClient)
-local Theme = require(ReplicatedStorage.Shared.Theme.Theme)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
-
-local boldFont = Font.fromId(12187374954, Enum.FontWeight.Bold)
 
 local player = Players.LocalPlayer
 local hud: Frame = DeepWait(player, "PlayerGui", "HUD", "Main")
@@ -29,7 +26,7 @@ local function setCurrency(name: string, v: number)
 		currencyLabels[name] = currencyLabel
 	end
 
-	currencyLabel.FontFace = boldFont
+	currencyLabel.FontFace.Bold = true
 	currencyLabel.Text = FormatNumber(v)
 end
 
@@ -62,7 +59,6 @@ local function setRealmBuff(name: string, buff)
 		end
 	end
 
-	buffLabel.FontFace = Theme.font
 	local value = buff.CurrentValue * 100
 	local isPlus = buff.IsPlus
 	if isPlus then

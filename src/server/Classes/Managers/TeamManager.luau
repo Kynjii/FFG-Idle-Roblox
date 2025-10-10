@@ -107,6 +107,8 @@ function TeamManager.AssignTeam(player: Player)
 		if #playersOnTeam == 0 then
 			player.TeamColor = team.TeamColor
 			player.Neutral = false
+
+			player:LoadCharacter()
 			return i
 		end
 	end

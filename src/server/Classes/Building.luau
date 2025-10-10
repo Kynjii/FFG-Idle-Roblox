@@ -300,19 +300,19 @@ end
 
 -- //SECTION - Visibility and Collision
 function Building.Show(self: Building): ()
-	ClassVisualizer.Show(self.VisualRoot:GetChildren()[1])
+	ClassVisualizer.Show(self.VisualRoot)
 end
 
 function Building.Hide(self: Building): ()
-	ClassVisualizer.Hide(self.VisualRoot:GetChildren()[1])
+	ClassVisualizer.Hide(self.VisualRoot)
 end
 
 function Building.CanCollide(self: Building): ()
-	ClassVisualizer.CanCollide(self.VisualRoot:GetChildren()[1])
+	ClassVisualizer.CanCollide(self.VisualRoot)
 end
 
 function Building.CannotCollide(self: Building): ()
-	ClassVisualizer.CannotCollide(self.VisualRoot:GetChildren()[1])
+	ClassVisualizer.CannotCollide(self.VisualRoot)
 end
 -- //!SECTION
 

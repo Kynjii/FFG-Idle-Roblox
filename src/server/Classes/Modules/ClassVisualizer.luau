@@ -3,6 +3,7 @@ local FadeEffect = require(ServerScriptService.Server.Modules.Tweens.FadeEffect)
 local ClassVisualizer = {}
 
 function ClassVisualizer.Show(root: Part)
+	if not root then return end
 	local modelParts = root:GetChildren()
 	for _, part in pairs(modelParts) do
 		if part:IsA("Part") or part:IsA("UnionOperation") then
@@ -16,6 +17,7 @@ function ClassVisualizer.Show(root: Part)
 end
 
 function ClassVisualizer.Hide(root: Part)
+	if not root then return end
 	local modelParts = root:GetChildren()
 	for _, part in pairs(modelParts) do
 		if part:IsA("Part") or part:IsA("UnionOperation") then FadeEffect.Out(part) end
@@ -23,6 +25,7 @@ function ClassVisualizer.Hide(root: Part)
 end
 
 function ClassVisualizer.CanCollide(root: Part)
+	if not root then return end
 	local modelParts = root:GetChildren()
 	for _, part in pairs(modelParts) do
 		if part:IsA("Part") or part:IsA("UnionOperation") then
@@ -32,6 +35,7 @@ function ClassVisualizer.CanCollide(root: Part)
 end
 
 function ClassVisualizer.CannotCollide(root: Part)
+	if not root then return end
 	local modelParts = root:GetChildren()
 	for _, part in pairs(modelParts) do
 		if part:IsA("Part") or part:IsA("UnionOperation") then
