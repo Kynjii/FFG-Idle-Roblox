@@ -255,7 +255,7 @@ function Tender.MoveToBoat(self: Tender, boatPos: CFrame)
 		CFrame = boatPos:ToWorldSpace(offset),
 	}
 
-	local tweenInfo = TweenInfo.new(self.CurrentTravelTime)
+	local tweenInfo = TweenInfo.new(self.CurrentTravelTime, Enum.EasingStyle.Linear)
 	local tween = TweenService:Create(tenderModel.PrimaryPart, tweenInfo, tweenGoal)
 
 	self.MoveTween = tween
@@ -286,7 +286,7 @@ function Tender.MoveToPort(self: Tender)
 		CFrame = portPos,
 	}
 
-	local tweenInfo = TweenInfo.new(self.CurrentTravelTime)
+	local tweenInfo = TweenInfo.new(self.CurrentTravelTime, Enum.EasingStyle.Linear)
 	local tween = TweenService:Create(tenderModel.PrimaryPart, tweenInfo, tweenGoal)
 
 	self.MoveTween = tween

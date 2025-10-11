@@ -45,7 +45,7 @@ local function setRealmBuff(name: string, buff)
 		buffLabel.Name = name .. "_LabelClone"
 		buffLabel.LayoutOrder = realmBuffCount
 		buffLabel.Parent = realmBuffsTemplate.Parent
-		buffLabel.Size = UDim2.fromScale(1, 0.1)
+		buffLabel.Size = UDim2.fromScale(0.75, 0.5)
 		buffLabel.Visible = true
 		realmBuffLabels[name] = buffLabel
 	end

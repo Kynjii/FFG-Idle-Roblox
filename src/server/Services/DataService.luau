@@ -71,28 +71,32 @@ end
 
 local function calculateBuffedAmount(player, amount)
 	local validBuffs = {
-		"Gold_Multi",
-		"Fish_Multi",
-		"Fish_Percent",
+		["Gold_Multi"] = "Gold_Multi",
+		["Fish_Multi"] = "Fish_Multi",
+		["Fish_Percent"] = "Fish_Percent",
 	}
 
 	local buffState = DataService.GetBuffState(player, validBuffs)
 
-	if not buffState or #buffState == 0 then return amount end
+	local fishPercent: number? = buffState["Fish_Percent"] and buffState["Fish_Percent"].CurrentValue or nil
+	local fishMulti: number? = buffState["Fish_Multi"] and buffState["Fish_Multi"].CurrentValue or nil
+	local goldMulti: number? = buffState["Gold_Multi"] and buffState["Gold_Multi"].CurrentValue or nil
 
-	local fishPercent = buffState["Fish_Percent"] and buffState["Fish_Percent"].CurrentValue or nil
-	local fishMulti = buffState["Fish_Multi"] and buffState["Fish_Multi"].CurrentValue or nil
-	local goldMulti = buffState["Gold_Multi"] and buffState["Gold_Multi"].CurrentValue or nil
-
-	local buffedAmount = amount
-	if fishPercent then buffedAmount = amount * fishPercent end
+	local buffedAmount: number = amount
+	if fishPercent then
+		local percentValue: number = amount * fishPercent
+		buffedAmount += percentValue
+		print("w/ fish percent", buffedAmount)
+	end
 
 	if fishMulti then
 		buffedAmount *= fishMulti
+		print("w/ fish multi", buffedAmount)
 	end
 
 	if goldMulti then
 		buffedAmount *= goldMulti
+		print("w/ gold multi", buffedAmount)
 	end
 
 	return buffedAmount
