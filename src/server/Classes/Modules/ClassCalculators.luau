@@ -23,11 +23,7 @@ function ClassCalculator.CalculateUpgradeCost(baseValue: number, level: number, 
 	level = clampLevel(level)
 	local costMult = (Formulas.COST_MULT and Formulas.COST_MULT[level]) or 1
 
-	local tierMult = (tier and Formulas.TIER_MULTIPLIER[tier]) or 1
-
-	local realmMult = (realmId and math.pow(realmId, 2.25)) or 1
-
-	return baseValue * costMult * tierMult * realmMult
+	return baseValue * costMult
 end
 
 function ClassCalculator.CalculateMaxStorage(baseValue: number, level: number, percentBuffValue: number?)
