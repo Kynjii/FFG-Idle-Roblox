@@ -124,6 +124,11 @@ function closeDetails()
 end
 
 function updateLevel()
+	if not entityData.isPurchased then
+		details.Defaults.LevelLabel.Parent.Visible = false
+	else
+		details.Defaults.LevelLabel.Parent.Visible = true
+	end
 	details.Defaults.LevelLabel.Text = entityData.isPurchased and "Level: " .. entityData.Level or ""
 	details.Defaults.LevelLabel.Visible = true
 end

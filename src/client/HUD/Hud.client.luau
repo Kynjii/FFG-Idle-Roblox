@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
 local Replica = require(ReplicatedStorage.Shared.ReplicaClient)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
@@ -11,6 +12,24 @@ local currencyTemplate = hud:FindFirstChild("CurrencyTextLabelTemplate", true)
 local realmBuffsTemplate = hud:FindFirstChild("BuffTextLabelTemplate", true)
 
 local currencyLabels = {}
+
+local function animate(currencyLabel: TextLabel)
+	if currencyLabel then
+		local tweenGoal = {
+			Size = currencyLabel.Size + UDim2.fromScale(0.1, 0.1),
+		}
+
+		local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Linear)
+		local tween = TweenService:Create(currencyLabel, tweenInfo, tweenGoal)
+
+		tween:Play()
+
+		tween.Completed:Connect(function()
+			currencyLabel.Size = UDim2.fromScale(1, 1)
+			tween:Destroy()
+		end)
+	end
+end
 
 local function setCurrency(name: string, v: number)
 	if not v then return end
@@ -25,6 +44,8 @@ local function setCurrency(name: string, v: number)
 		currencyLabel.Visible = true
 		currencyLabels[name] = currencyLabel
 	end
+
+	animate(currencyLabel)
 
 	currencyLabel.FontFace.Bold = true
 	currencyLabel.Text = FormatNumber(v)
