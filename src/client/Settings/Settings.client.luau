@@ -3,18 +3,22 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local AnimateButtonHover = require(StarterPlayer.StarterPlayerScripts.Client.HUD.Utils.AnimateButtonHover)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
+local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 
 local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-local settingsGui = playerGui:WaitForChild("Settings")
+local settingsGui: ScreenGui = DeepWait(player, "PlayerGui", "Settings")
 
 local settingsOpened = false
 
-local settingsButton = settingsGui:FindFirstChild("SettingsButton", true) :: ImageButton
+local settingsBtn = settingsGui:FindFirstChild("SettingsButton", true) :: ImageButton
 local settingsModal = settingsGui:FindFirstChild("SettingsModel", true) :: Frame
 local confirmationModel = settingsGui:FindFirstChild("ConfirmationModel", true) :: Frame
 
-if settingsButton then
+if settingsBtn then
+	print("settings button exists", settingsBtn.Active)
+	settingsBtn.Active = true
+
+	print("setting btn is active", settingsBtn.Active)
 	local function toggleSettings()
 		print("Settings button clicked!")
 		if settingsOpened then
@@ -27,18 +31,20 @@ if settingsButton then
 		end
 	end
 
-	settingsButton.Activated:Connect(function()
+	settingsBtn.MouseButton1Click:Connect(function()
 		print("clicked")
 		toggleSettings()
 	end)
 
-	local baseSize = settingsButton.Size
-	settingsButton.MouseEnter:Connect(function()
-		AnimateButtonHover.Enter(settingsButton, baseSize)
+	local baseSize = settingsBtn.Size
+	settingsBtn.MouseEnter:Connect(function()
+		print("hovered")
+		AnimateButtonHover.Enter(settingsBtn, baseSize)
 	end)
 
-	settingsButton.MouseLeave:Connect(function()
-		AnimateButtonHover.Leave(settingsButton, baseSize)
+	settingsBtn.MouseLeave:Connect(function()
+		print("hovered out")
+		AnimateButtonHover.Leave(settingsBtn, baseSize)
 	end)
 end
 
