@@ -25,7 +25,7 @@ local function animate(currencyLabel: TextLabel)
 		tween:Play()
 
 		tween.Completed:Connect(function()
-			currencyLabel.Size = UDim2.fromScale(1, 1)
+			currencyLabel.Size = UDim2.fromScale(0.628, 0.702)
 			tween:Destroy()
 		end)
 	end
@@ -42,6 +42,7 @@ local function setCurrency(name: string, v: number)
 		currencyLabel.Name = name .. "_LabelClone"
 		currencyLabel.Parent = currencyTemplate.Parent
 		currencyLabel.Visible = true
+		currencyLabel.Size = UDim2.fromScale(0.628, 0.702)
 		currencyLabels[name] = currencyLabel
 	end
 

@@ -1,5 +1,8 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 local Teams = game:GetService("Teams")
+local Events = require(ReplicatedStorage.Shared.Events.Events)
+local DataService = require(ServerScriptService.Server.Services.DataService)
 local BuildingsManager = require(script.Parent.BuildingsManager)
 local ChainManager = require(script.Parent.ChainManager)
 local BuildingsManagerType = require(ReplicatedStorage.Shared.Types.Managers.BuildingsManagerType)
@@ -144,6 +147,17 @@ function TeamManager.CleanupPlayer(userId: number)
 		buildingList[i] = nil
 	end
 	TeamManager.BuildingsManager[userId] = nil
+end
+
+function TeamManager.ListenForReset(player: Player)
+	local resetEvent = Events.GetRemote(Events.RemoteNames.GameReset)
+	if resetEvent then resetEvent.OnServerEvent(function(playerInst)
+		if playerInst == player then
+			DataService.ResetAllPlayerData(playerInst)
+			TeamManager.CleanupPlayer(player.UserId)
+			player:LoadCharacter()
+		end
+	end) end
 end
 
 return TeamManager
