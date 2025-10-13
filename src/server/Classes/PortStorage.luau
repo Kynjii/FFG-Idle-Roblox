@@ -491,6 +491,7 @@ function PortStorage.Destroy(self: PortStorage)
 	self:CannotCollide()
 	self:RemovePreviousVisualModel()
 	self:UpdatePurchaseBoardUI(true)
+	self:DestroyStorageFullBillboard()
 
 	pcall(function()
 		self:Save()

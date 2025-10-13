@@ -523,6 +523,7 @@ function Boat.Destroy(self: Boat)
 	self:CannotCollide()
 	self:RemovePreviousVisualModel()
 	self:UpdatePurchaseBoardUI(true)
+	self:DestroyStorageFullBillboard()
 
 	pcall(function()
 		self:Save()

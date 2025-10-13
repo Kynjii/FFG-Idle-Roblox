@@ -573,6 +573,7 @@ function Tender.Destroy(self: Tender)
 	self:CannotCollide()
 	self:RemovePreviousVisualModel()
 	self:UpdatePurchaseBoardUI(true)
+	self:DestroyTenderStoppedBillboard()
 
 	pcall(function()
 		self:Save()
