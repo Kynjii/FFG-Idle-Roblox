@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 local PlayerDataTemplate = require(ServerScriptService.Server.Modules.PlayerDataTemplate)
@@ -96,16 +97,9 @@ Players.PlayerRemoving:Connect(function(player)
 	end)
 
 	local profile = DataService.Profiles[player]
-	if profile then
-		task.delay(1, function()
-			profile:EndSession()
-		end)
-
-		task.delay(1, function()
-			DataService.Profiles[player] = nil
-		end)
-	end
-	DataService.DetachReplica(player)
+	if profile then task.delay(2, function()
+		profile:EndSession()
+	end) end
 end)
 
 -- Start music
