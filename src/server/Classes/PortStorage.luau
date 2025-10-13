@@ -103,6 +103,9 @@ function PortStorage.New(state: { [string]: any }?, player: Player, model: Model
 
 	self.PurchaseBoard, self.PBDetails = self:SetupPurchaseBoard()
 
+	-- Warnings
+	self.ClonedBillboard = nil
+
 	self:AttachEventListeners()
 
 	-- Tweens
@@ -318,27 +321,29 @@ function PortStorage.SetupFishRemovalPrompt(self: PortStorage)
 	end)
 end
 
-function PortStorage.ShowStorageFullBillboard(self: PortStorage)
+function PortStorage.ShowStorageFullBillboard(self: PortStorage): ()
+	if self.ClonedBillboard then return end
+
 	local billboard: BillboardGui = game.Workspace.BillBoards:FindFirstChild("StorageFullAlert", true)
-	local existing = self.PurchaseBoard:FindFirstChild("StorageFullAlert_Clone", true)
-	if billboard and not existing then
+
+	if billboard and self.PurchaseBoard.PrimaryPart then
 		local clone: BillboardGui = billboard:Clone()
-		if self.PurchaseBoard.PrimaryPart then
-			clone.Parent = self.PurchaseBoard.PrimaryPart
-			if clone:IsA("BillboardGui") then clone.Adornee = self.PurchaseBoard.PrimaryPart end
-		end
+		clone.Parent = self.PurchaseBoard.PrimaryPart
+		clone.Adornee = self.PurchaseBoard.PrimaryPart
 		clone.Name = "StorageFullAlert_Clone"
 
 		local canvasGroup = clone:FindFirstChild("CanvasGroup") :: CanvasGroup
 		canvasGroup.Visible = true
+
+		self.ClonedBillboard = clone
 	end
 end
 
-function PortStorage.DestroyStorageFullBillboard(self: PortStorage)
-	local clonedBillboard = nil
-	if self.Model then clonedBillboard = self.Model:FindFirstChild("StorageFullAlert_Clone", true) end
+function PortStorage.DestroyStorageFullBillboard(self: PortStorage): ()
+	if not self.ClonedBillboard then return end
 
-	if clonedBillboard then clonedBillboard:Destroy() end
+	self.ClonedBillboard:Destroy()
+	self.ClonedBillboard = nil
 end
 -- //!SECTION
 

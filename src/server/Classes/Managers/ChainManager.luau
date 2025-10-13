@@ -273,6 +273,8 @@ function ChainManager:StartUnloadingFish()
 			lastUpdateTime = currentTime
 			task.wait(1)
 			continue
+		else
+			tender:DestroyTenderStoppedBillboard()
 		end
 
 		local deltaTime = currentTime - lastUpdateTime
@@ -294,11 +296,9 @@ function ChainManager:StartUnloadingFish()
 		local amount = math.clamp(deltaToRemove, 0, math.max(0, maxAmount))
 
 		if amount > 0 then
-			tender:DestroyTenderStoppedBillboard()
 			tender:RemoveFish(amount)
 			storage:AddFish(amount)
 		elseif amount <= 0 and storage:IsStorageFull() then
-			tender:ShowTenderStoppedBillboard()
 			lastUpdateTime = currentTime
 		end
 

@@ -123,6 +123,9 @@ function Tender.New(state: { [string]: any }?, player: Player, model: Model): Te
 
 	self.PurchaseBoard, self.PBDetails = self:SetupPurchaseBoard()
 
+	-- Warnings
+	self.ClonedBillboard = nil
+
 	-- Tweens
 	self.ProgressTween = nil
 	self.MoveTween = nil
@@ -390,10 +393,11 @@ function Tender.ShowFishPopUp(self: Tender, amount: number)
 	end
 end
 
-function Tender.ShowTenderStoppedBillboard(self: Tender)
+function Tender.ShowTenderStoppedBillboard(self: Tender): ()
+	if self.ClonedBillboard then return end
+
 	local billboard: BillboardGui = game.Workspace.BillBoards:FindFirstChild("TenderStopped", true)
-	local existing = self.PurchaseBoard:FindFirstChild("TenderStopped_Clone", true)
-	if billboard and not existing and self.PurchaseBoard.PrimaryPart then
+	if billboard and self.PurchaseBoard.PrimaryPart then
 		local clone: BillboardGui = billboard:Clone()
 		clone.Parent = self.PurchaseBoard.PrimaryPart
 		clone.Adornee = self.PurchaseBoard.PrimaryPart
@@ -401,14 +405,16 @@ function Tender.ShowTenderStoppedBillboard(self: Tender)
 
 		local canvasGroup: CanvasGroup = clone:FindFirstChild("CanvasGroup") :: CanvasGroup
 		canvasGroup.Visible = true
+
+		self.ClonedBillboard = clone
 	end
 end
 
-function Tender.DestroyTenderStoppedBillboard(self: Tender)
-	local clonedBillboard = nil
-	if self.Model then clonedBillboard = self.Model:FindFirstChild("TenderStopped_Clone", true) end
+function Tender.DestroyTenderStoppedBillboard(self: Tender): ()
+	if not self.ClonedBillboard then return end
 
-	if clonedBillboard then clonedBillboard:Destroy() end
+	self.ClonedBillboard:Destroy()
+	self.ClonedBillboard = nil
 end
 -- //!SECTION
 

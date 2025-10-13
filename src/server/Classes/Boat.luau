@@ -114,6 +114,9 @@ function Boat.New(state: { [string]: any }?, player: Player, model: Model): Boat
 
 	self.PurchaseBoard, self.PBDetails = self:SetupPurchaseBoard()
 
+	-- Warnings
+	self.ClonedBillboard = nil
+
 	self:AttachEventListeners()
 
 	self._cleaner = Trove.new()
@@ -341,24 +344,27 @@ function Boat.ShowFishPopUp(self: Boat, amount: number): ()
 end
 
 function Boat.ShowStorageFullBillboard(self: Boat): ()
+	if self.ClonedBillboard then return end
+
 	local billboard: BillboardGui = game.Workspace.BillBoards:FindFirstChild("StorageFullAlert", true)
-	local existing = self.PurchaseBoard:FindFirstChild("StorageFullAlert_Clone", true)
-	if billboard and not existing then
+	if billboard and self.PurchaseBoard.PrimaryPart then
 		local clone: BillboardGui = billboard:Clone()
 		clone.Parent = self.PurchaseBoard.PrimaryPart
-		if self.PurchaseBoard.PrimaryPart then clone.Adornee = self.PurchaseBoard.PrimaryPart end
+		clone.Adornee = self.PurchaseBoard.PrimaryPart
 		clone.Name = "StorageFullAlert_Clone"
 
 		local canvasGroup = clone:FindFirstChild("CanvasGroup") :: CanvasGroup
 		canvasGroup.Visible = true
+
+		self.ClonedBillboard = clone
 	end
 end
 
 function Boat.DestroyStorageFullBillboard(self: Boat): ()
-	local clonedBillboard = nil
-	if self.Model then clonedBillboard = self.Model:FindFirstChild("StorageFullAlert_Clone", true) end
+	if not self.ClonedBillboard then return end
 
-	if clonedBillboard then clonedBillboard:Destroy() end
+	self.ClonedBillboard:Destroy()
+	self.ClonedBillboard = nil
 end
 -- //!SECTION
 

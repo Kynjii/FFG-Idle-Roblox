@@ -38,6 +38,7 @@ export type TenderData = {
 	Buffs: { [string]: any },
 	PurchaseBoard: Model,
 	PBDetails: { [string]: any }?,
+	ClonedBillboard: Instance?,
 	_cleaner: any?,
 	ProgressTween: Tween?,
 }

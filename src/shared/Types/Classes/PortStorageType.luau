@@ -29,6 +29,7 @@ export type PortStorageData = {
 	TakeFishPrompt: ProximityPrompt?,
 	PurchaseBoard: Model,
 	PBDetails: { [string]: any }?,
+	ClonedBillboard: Instance?,
 	_cleaner: any?,
 	Buffs: { [string]: any },
 	ProgressTween: any?,

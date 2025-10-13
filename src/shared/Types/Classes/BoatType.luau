@@ -33,6 +33,7 @@ export type BoatData = {
 	CurrentVisualModel: Model?,
 	PurchaseBoard: Model,
 	PBDetails: { [string]: any }?,
+	ClonedBillboard: Instance?,
 	_cleaner: any?,
 	Buffs: { [string]: any },
 }
