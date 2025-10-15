@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local Economy = require(ServerScriptService.Server.Analytics.Economy)
 local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
 local BuildingType = require(ReplicatedStorage.Shared.Types.Classes.BuildingType)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
@@ -118,10 +119,12 @@ function DataService.Earn(player: Player, currencyType: string, amount: number)
 	end
 
 	local current = tonumber(profile.Data.Currencies[currencyType]) or 0
-	local buffedAmount = calculateBuffedAmount(player, amount)
+	local buffedDiff = calculateBuffedAmount(player, amount)
 
-	local newValue = current + buffedAmount
+	local newValue = current + buffedDiff
 	profile.Data.Currencies[currencyType] = newValue
+
+	Economy.Log(player, Economy.FlowType.CurrencyAdd, currencyType, amount, newValue, Economy.TransactionType.Gameplay)
 
 	local leaderStats = player:FindFirstChild("leaderstats")
 	local currency = leaderStats:FindFirstChild(currencyType)
@@ -149,6 +152,8 @@ function DataService.Spend(player: Player, currencyType: string, amount: number)
 
 	local newValue = current - amount
 	profile.Data.Currencies[currencyType] = newValue
+
+	Economy.Log(player, Economy.FlowType.CurrencyRemove, currencyType, amount, newValue, Economy.TransactionType.Gameplay)
 
 	local leaderStats = player:FindFirstChild("leaderstats")
 	local currency = leaderStats:FindFirstChild(currencyType)
