@@ -376,6 +376,7 @@ function DataService.SaveTutorialState(player: Player, completedStage: number)
 	end
 
 	if completedStage == 3 then profile.Data.CompletedTutorial = true end
+	if completedStage == 2 then profile.Data.TutorialStageComplete[1] = true end
 
 	profile.Data.TutorialStageComplete[completedStage] = true
 end
