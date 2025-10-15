@@ -1,6 +1,7 @@
 local PortStorageType = {}
 
 export type PortStorageData = {
+	Entity: string,
 	Id: string,
 	TeamId: number,
 	Owner: number,
@@ -13,7 +14,6 @@ export type PortStorageData = {
 	UpgradeCost: number,
 	isPurchased: boolean,
 	UpgradeStage: number,
-	Entity: string,
 	Description: string,
 	Model: Model,
 	Player: Player,
@@ -42,6 +42,7 @@ export type StorageInstance = {
 	Entity: string,
 	Owner: string,
 	Level: number,
+	Tier: number,
 	UpgradeStage: number,
 	isPurchased: boolean,
 	FishInStorage: number?,

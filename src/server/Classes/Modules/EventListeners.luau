@@ -10,10 +10,12 @@ local DataService = require(ServerScriptService.Server.Services.DataService)
 
 local EventListeners = {}
 
+-- //SECTION - TYPES
 type Boat = BoatType.BoatInstance
 type Tender = TenderType.TenderInstance
 type PortStorage = PortStorageType.StorageInstance
 type Building = BuildingType.BuildingInstance
+-- //!SECTION
 
 function EventListeners.Attach(class: Boat | Tender | PortStorage | Building)
 	local typedClass
@@ -29,8 +31,44 @@ function EventListeners.Attach(class: Boat | Tender | PortStorage | Building)
 		error("Invalid entity passed to CreatePB")
 	end
 
+	local function checkTutorialState(player: Player): boolean
+		if not DataService.CompletedTutorial(player) then
+			-- If the class is either a building or not tier 1, return
+			if typedClass.Tier ~= 1 or typedClass.Entity == FFGEnum.CLASS.ENTITY_NAME.Building then return false end
+
+			local tutorialOrder = {
+				[1] = FFGEnum.CLASS.ENTITY_NAME.Boat,
+				[2] = FFGEnum.CLASS.ENTITY_NAME.Tender,
+				[3] = FFGEnum.CLASS.ENTITY_NAME.PortStorage,
+			}
+
+			-- Check to see if the entity matches the correct stage
+			local currentTutorialStage = DataService.CurrentTutorialStage(player)
+			if currentTutorialStage then
+				local currentTutotialEntity = tutorialOrder[currentTutorialStage]
+
+				if typedClass.Entity == currentTutotialEntity then
+					return true
+				else
+					return false
+				end
+			else
+				if typedClass.Entity == FFGEnum.CLASS.ENTITY_NAME.Boat then
+					return true
+				else
+					return false
+				end
+			end
+		else
+			return true
+		end
+	end
+
 	local function handleStateUpdate(player)
-		if not DataService.CompletedTutorial(player) then return end
+		local canProceed = checkTutorialState(player)
+		if not canProceed then return end
+
+		-- See if the player can afford the state update (purchase / upgrade)
 		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, not typedClass.isPurchased and typedClass.BaseCost or typedClass.UpgradeCost) then return end
 
 		DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, not typedClass.isPurchased and typedClass.BaseCost or typedClass.UpgradeCost)
@@ -47,7 +85,6 @@ function EventListeners.Attach(class: Boat | Tender | PortStorage | Building)
 
 		-- Update UIs
 		typedClass:UpdatePurchaseBoardUI()
-
 		typedClass:Save()
 	end
 

@@ -49,6 +49,7 @@ export type TenderInstance = {
 	Entity: string,
 	Owner: string,
 	Level: number,
+	Tier: number,
 	UpgradeStage: number,
 	isPurchased: boolean,
 	FishInStorage: number?,

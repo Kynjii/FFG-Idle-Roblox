@@ -3,6 +3,7 @@ local Signal = require(ReplicatedStorage.Packages.Signal)
 local BuildingType = {}
 
 export type BuildingData = {
+	Entity: string,
 	Id: string,
 	Owner: number,
 	RealmId: number,
@@ -14,7 +15,6 @@ export type BuildingData = {
 	UpgradeCost: number,
 	isPurchased: boolean,
 	UpgradeStage: number,
-	Entity: string,
 	Description: string,
 	Model: Model,
 	Player: Player,
@@ -48,6 +48,7 @@ export type BuildingInstance = {
 	Entity: string,
 	Owner: string,
 	Level: number,
+	Tier: number,
 	UpgradeStage: number,
 	isPurchased: boolean,
 	FishInStorage: number?,
