@@ -12,7 +12,7 @@ local Tender = require(ServerScriptService.Server.Classes.Tender)
 type ChainManagerInstance = ChainManagerType.ChainManagerInstance
 -- //!SECTION
 
--- //SECTION - Tagged Entities within Studio
+-- //SECTION - Tagged Entities within Workspace
 local taggedBoats = CollectionService:GetTagged("Boat")
 local taggedTenders = CollectionService:GetTagged("Tender")
 local taggedStorage = CollectionService:GetTagged("Storage")
@@ -42,7 +42,7 @@ function ChainManager.New(realmData, tier: number, player: Player, teamId: numbe
 	for k, v in pairs(boatsArr) do
 		if v[FFGEnum.CLASS.PROPERTIES.Tier] == tier then boatData = v end
 	end
-	self.LaneBoat = Boat.New(boatData, player, self.BoatModel)
+	self.LaneBoat = Boat.New(boatData, player, self.BoatModel, self.TeamId)
 
 	-- Create Tender
 	self.TenderModel = self:FindTenderModel() :: Model
@@ -51,7 +51,7 @@ function ChainManager.New(realmData, tier: number, player: Player, teamId: numbe
 	for k, v in pairs(tendersArr) do
 		if v[FFGEnum.CLASS.PROPERTIES.Tier] == tier then tenderData = v end
 	end
-	self.LaneTender = Tender.New(tenderData, player, self.TenderModel)
+	self.LaneTender = Tender.New(tenderData, player, self.TenderModel, self.TeamId)
 
 	-- Create Port Storage
 	self.StorageModel = self:FindStorageModel() :: Model
@@ -60,7 +60,7 @@ function ChainManager.New(realmData, tier: number, player: Player, teamId: numbe
 	for k, v in pairs(storageArr) do
 		if v[FFGEnum.CLASS.PROPERTIES.Tier] == tier then storageData = v end
 	end
-	self.LaneStorage = PortStorage.New(storageData, player, self.StorageModel)
+	self.LaneStorage = PortStorage.New(storageData, player, self.StorageModel, self.TeamId)
 
 	self._cleaner = Trove.new()
 

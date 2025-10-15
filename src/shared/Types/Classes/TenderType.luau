@@ -3,6 +3,7 @@ local TenderType = {}
 export type TenderData = {
 	Entity: string,
 	Id: string,
+	TeamId: number,
 	Owner: number,
 	RealmId: number,
 	Tier: number,

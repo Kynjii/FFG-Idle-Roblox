@@ -1,7 +1,9 @@
 local BoatType = {}
 
 export type BoatData = {
+	Entity: string,
 	Id: string,
+	TeamId: number,
 	Owner: number,
 	RealmId: number,
 	Tier: number,
@@ -12,7 +14,6 @@ export type BoatData = {
 	UpgradeCost: number,
 	isPurchased: boolean,
 	UpgradeStage: number,
-	Entity: string,
 	Description: string,
 	Model: Model,
 	Player: Player,

@@ -14,6 +14,7 @@ local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.Class
 local EventListeners = require(ServerScriptService.Server.Classes.Modules.EventListeners)
 local ProximityPrompt = require(ServerScriptService.Server.Classes.Modules.ProximityPrompt)
 local PurchaseBoard = require(ServerScriptService.Server.Classes.Modules.PurchaseBoard)
+local Tutorial = require(ServerScriptService.Server.Game.Tutorial)
 local TenderType = require(ReplicatedStorage.Shared.Types.Classes.TenderType)
 local Buffs = require(ServerScriptService.Server.Math.Buffs)
 local FadeEffect = require(ServerScriptService.Server.Modules.Tweens.FadeEffect)
@@ -76,7 +77,7 @@ Tender.__index = Tender
 type Tender = typeof(setmetatable({} :: TenderData, Tender))
 
 -- //SECTION - Constructor
-function Tender.New(state: { [string]: any }?, player: Player, model: Model): Tender
+function Tender.New(state: { [string]: any }?, player: Player, model: Model, teamId: number): Tender
 	local self = setmetatable({} :: TenderData, Tender)
 
 	-- Start with default stats as base
@@ -93,6 +94,7 @@ function Tender.New(state: { [string]: any }?, player: Player, model: Model): Te
 
 	-- Calculate derived properties
 	self.Id = self.Id or HttpService:GenerateGUID(false)
+	self.TeamId = teamId
 	self.Description = DESCRIPTION
 	self.Owner = self.Owner or player.UserId
 	self.Model = model
@@ -167,6 +169,8 @@ function Tender.Purchase(self: Tender)
 	self:UpdateBuffs()
 	self:UpdateVisualModel()
 	self:Save()
+
+	if self.Tier == 1 then Tutorial.Update(self.Player, self.TeamId) end
 end
 
 function Tender.Upgrade(self: Tender)

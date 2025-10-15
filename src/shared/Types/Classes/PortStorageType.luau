@@ -2,6 +2,7 @@ local PortStorageType = {}
 
 export type PortStorageData = {
 	Id: string,
+	TeamId: number,
 	Owner: number,
 	RealmId: number,
 	Tier: number,

@@ -7,6 +7,7 @@ local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.Class
 local EventListeners = require(ServerScriptService.Server.Classes.Modules.EventListeners)
 local ProximityPrompt = require(ServerScriptService.Server.Classes.Modules.ProximityPrompt)
 local PurchaseBoard = require(ServerScriptService.Server.Classes.Modules.PurchaseBoard)
+local Tutorial = require(ServerScriptService.Server.Game.Tutorial)
 local PortStorageType = require(ReplicatedStorage.Shared.Types.Classes.PortStorageType)
 local Buffs = require(ServerScriptService.Server.Math.Buffs)
 local DataService = require(ServerScriptService.Server.Services.DataService)
@@ -64,7 +65,7 @@ PortStorage.__index = PortStorage
 type PortStorage = typeof(setmetatable({} :: PortStorageData, PortStorage))
 
 -- //SECTION - Constructor
-function PortStorage.New(state: { [string]: any }?, player: Player, model: Model): PortStorage
+function PortStorage.New(state: { [string]: any }?, player: Player, model: Model, teamId: number): PortStorage
 	local self = setmetatable({} :: PortStorageData, PortStorage)
 
 	-- Start with default stats as base
@@ -81,6 +82,7 @@ function PortStorage.New(state: { [string]: any }?, player: Player, model: Model
 
 	-- Calculate derived properties
 	self.Id = self.Id or HttpService:GenerateGUID(false)
+	self.TeamId = teamId
 	self.Description = DESCRIPTION
 	self.Entity = self.Entity or DEFAULTS.Entity
 	self.Owner = self.Owner or player.UserId
@@ -145,6 +147,8 @@ function PortStorage.Purchase(self: PortStorage): ()
 	self:UpdateBuffs()
 	self:UpdateVisualModel()
 	self:Save()
+
+	if self.Tier == 1 then Tutorial.Update(self.Player, self.TeamId) end
 end
 
 function PortStorage.Upgrade(self: PortStorage): ()

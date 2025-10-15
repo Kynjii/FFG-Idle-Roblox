@@ -367,6 +367,20 @@ function DataService.GetBuffState(player: Player, buffNames: { string }): { [str
 end
 -- //!SECTION
 
+-- //SECTION - TUTORIAL
+function DataService.SaveTutorialState(player: Player, completedStage: number)
+	local profile = DataService.Profiles[player]
+	if not profile then
+		FFGHelpers.PrintLog("No profile found when attempting to save tutorial state for: ", player)
+		return
+	end
+
+	if completedStage == 3 then profile.Data.CompletedTutorial = true end
+
+	profile.Data.TutorialStageComplete[completedStage] = true
+end
+-- //!SECTION
+
 function DataService.ResetAllPlayerData(player: Player): boolean
 	local profile = DataService.Profiles[player]
 	if not profile then

@@ -74,4 +74,10 @@ return {
 	Currencies = {
 		Gold = 1100,
 	},
+	CompletedTutorial = false,
+	TutorialStageComplete = {
+		[1] = false,
+		[2] = false,
+		[3] = false,
+	},
 }

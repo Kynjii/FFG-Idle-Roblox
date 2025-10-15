@@ -8,6 +8,7 @@ local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.Class
 local EventListeners = require(ServerScriptService.Server.Classes.Modules.EventListeners)
 local ProximityPrompt = require(ServerScriptService.Server.Classes.Modules.ProximityPrompt)
 local PurchaseBoard = require(ServerScriptService.Server.Classes.Modules.PurchaseBoard)
+local Tutorial = require(ServerScriptService.Server.Game.Tutorial)
 local BoatType = require(ReplicatedStorage.Shared.Types.Classes.BoatType)
 local Buffs = require(ServerScriptService.Server.Math.Buffs)
 local DataService = require(ServerScriptService.Server.Services.DataService)
@@ -74,7 +75,7 @@ Boat.__index = Boat
 type Boat = typeof(setmetatable({} :: BoatData, Boat))
 
 -- //SECTION - Constructor
-function Boat.New(state: { [string]: any }?, player: Player, model: Model): Boat
+function Boat.New(state: { [string]: any }?, player: Player, model: Model, teamId: number): Boat
 	local self = setmetatable({} :: BoatData, Boat)
 
 	-- Start with default stats as base
@@ -91,6 +92,7 @@ function Boat.New(state: { [string]: any }?, player: Player, model: Model): Boat
 
 	-- Calculate derived properties
 	self.Id = self.Id or HttpService:GenerateGUID(false)
+	self.TeamId = teamId
 	self.Description = DESCRIPTION
 	self.Owner = self.Owner or player.UserId
 	self.Model = model
@@ -156,6 +158,8 @@ function Boat.Purchase(self: Boat): ()
 	self:UpdateBuffs()
 	self:UpdateVisualModel()
 	self:Save()
+
+	if self.Tier == 1 then Tutorial.Update(self.Player, self.TeamId) end
 end
 
 function Boat.Upgrade(self: Boat): ()
