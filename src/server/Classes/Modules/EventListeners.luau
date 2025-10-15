@@ -30,6 +30,7 @@ function EventListeners.Attach(class: Boat | Tender | PortStorage | Building)
 	end
 
 	local function handleStateUpdate(player)
+		if not DataService.CompletedTutorial(player) then return end
 		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, not typedClass.isPurchased and typedClass.BaseCost or typedClass.UpgradeCost) then return end
 
 		DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, not typedClass.isPurchased and typedClass.BaseCost or typedClass.UpgradeCost)

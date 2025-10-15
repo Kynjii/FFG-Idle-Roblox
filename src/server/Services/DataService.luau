@@ -380,6 +380,16 @@ function DataService.SaveTutorialState(player: Player, completedStage: number)
 
 	profile.Data.TutorialStageComplete[completedStage] = true
 end
+
+function DataService.CompletedTutorial(player: Player): boolean
+	local profile = DataService.Profiles[player]
+	if not profile then
+		FFGHelpers.PrintLog("No profile found when attempting to save tutorial state for: ", player)
+		return false
+	end
+
+	return profile.Data.CompletedTutorial
+end
 -- //!SECTION
 
 function DataService.ResetAllPlayerData(player: Player): boolean
