@@ -374,7 +374,7 @@ end
 -- //!SECTION
 
 -- //SECTION - SHOP
-function DataService.SaveItem(player: Player, itemId: number, item: ShopItems.ShopItem): boolean
+function DataService.SaveItem(player: Player, item: ShopItems.ShopItem): boolean
 	local profile = DataService.Profiles[player]
 	if not profile then
 		FFGHelpers.PrintLog("No profile found when attempting to save shop state for: ", player)
@@ -396,10 +396,19 @@ function DataService.SaveItem(player: Player, itemId: number, item: ShopItems.Sh
 	-- Initialize Shop array if it doesn't exist
 	if not profile.Data.Realms[currentRealm].Items then profile.Data.Realms[currentRealm].Items = {} end
 
-	profile.Data.Realms[currentRealm].Items[itemId] = item
+	-- Create a clean copy to avoid nested/circular reference issues
+	local itemData = {
+		id = item.id,
+		name = item.name,
+		baseCost = item.baseCost,
+		category = item.category,
+		currencyType = item.currencyType,
+	}
+
+	profile.Data.Realms[currentRealm].Items[item.id] = itemData
 
 	local replica = DataService.Replicas[player]
-	if replica then replica:Set({ "Realms", currentRealm, "Items" }, item) end
+	if replica then replica:Set({ "Realms", currentRealm, "Items" }, profile.Data.Realms[currentRealm].Items) end
 
 	return true
 end

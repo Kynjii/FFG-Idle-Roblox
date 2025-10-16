@@ -1,6 +1,7 @@
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
 local EventListeners = require(ServerScriptService.Server.Classes.Modules.EventListeners)
 local ProximityPrompt = require(ServerScriptService.Server.Classes.Modules.ProximityPrompt)
@@ -52,7 +53,9 @@ function ShopManager.PurchaseItem(self: ShopManager, itemId: number): ()
 	local owned = self.PlayerItemData[itemId]
 	if owned then return end
 
-	local item = self.ShopCatalog[itemId]
+	local item = TableUtil.Find(self.ShopCatalog, function(catalogItem)
+		return catalogItem.id == itemId
+	end)
 	if not item then
 		print("no item found", self.ShopCatalog, itemId)
 		return
@@ -62,7 +65,7 @@ function ShopManager.PurchaseItem(self: ShopManager, itemId: number): ()
 
 	DataService.Spend(self.Player, item.currencyType, item.baseCost)
 	self.PlayerItemData[itemId] = item
-	DataService.SaveItem(self.Player, itemId, item)
+	DataService.SaveItem(self.Player, item)
 end
 
 -- //SECTION - UI Setup
