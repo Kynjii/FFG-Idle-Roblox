@@ -106,9 +106,9 @@ function TeamManager.AssignShopManager(profile, player: Player, teamId: number)
 	TeamManager.ShopManagers[player.UserId] = TeamManager.ShopManagers[player.UserId] or { OwnerId = player.UserId }
 	local currentRealm = profile.CurrentRealm or 1
 	local realmData = profile and profile.Realms[currentRealm]
-	local state = realmData.Shop
+	local playerItemState = realmData.Items
 
-	local shopManager = ShopManager.New(state, player, teamId)
+	local shopManager = ShopManager.New(playerItemState, player, teamId)
 	if not shopManager then return end
 
 	TeamManager.ShopManagers[player.UserId] = shopManager

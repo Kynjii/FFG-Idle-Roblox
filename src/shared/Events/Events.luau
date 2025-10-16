@@ -11,6 +11,7 @@ Events.RemoteNames = {
 	GameReset = "GameReset",
 	OpenShopDetails = "OpenShopDetails",
 	ShopItemPurchased = "ShopItemPurchased",
+	PrepareShopItems = "PrepareShopItems",
 }
 
 local FOLDER_NAME = "Events"
@@ -43,7 +44,7 @@ function Events.GetRemote(name: string): RemoteEvent?
 	return folder:WaitForChild(name, 5) :: RemoteEvent
 end
 
-function Events.FireEvent(name: string, player: Player, data: string)
+function Events.FireEvent(name: string, player: Player, data: any)
 	assert(RunService:IsServer(), "FireEvent must be called from the server")
 	local folder = ReplicatedStorage:FindFirstChild(FOLDER_NAME)
 	local ev = folder and folder:FindFirstChild(name)

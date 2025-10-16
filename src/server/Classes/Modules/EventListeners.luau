@@ -67,47 +67,62 @@ function EventListeners.Attach(class: Boat | Tender | PortStorage | Building)
 		end
 	end
 
-	local function handleStateUpdate(player)
+	-- //SECTION - Handle non-shop events
+	if typedClass.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Shop then
+		local function handleStateUpdate(player)
+			local canProceed = checkTutorialState(player)
+			if not canProceed then return end
+
+			-- See if the player can afford the state update (purchase / upgrade)
+			if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, not typedClass.isPurchased and typedClass.BaseCost or typedClass.UpgradeCost) then return end
+
+			DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, not typedClass.isPurchased and typedClass.BaseCost or typedClass.UpgradeCost)
+
+			if typedClass.isPurchased then
+				typedClass:Upgrade()
+			else
+				typedClass:Purchase()
+				typedClass:Show()
+				typedClass:CanCollide()
+
+				if typedClass.Entity == FFGEnum.CLASS.ENTITY_NAME.Boat then typedClass:StartFishing() end
+			end
+
+			-- Update UIs
+			typedClass:UpdatePurchaseBoardUI()
+			typedClass:Save()
+		end
+
+		-- Purchased Event
+		local purchasedEvent = Events.GetRemote(Events.RemoteNames.EntityPurchased)
+		if purchasedEvent then typedClass._cleaner:Add(purchasedEvent.OnServerEvent:Connect(function(player: Player, entityId: string)
+			if typedClass.Player ~= player or typedClass.Owner ~= player.UserId then return end
+			if typedClass.Id ~= entityId then return end
+
+			handleStateUpdate(player)
+		end)) end
+
+		-- Upgraded Event
+		local upgradedEvent = Events.GetRemote(Events.RemoteNames.EntityUpgraded)
+		if upgradedEvent then typedClass._cleaner:Add(upgradedEvent.OnServerEvent:Connect(function(player: Player, entityId: string)
+			if typedClass.Player ~= player or typedClass.Owner ~= player.UserId then return end
+			if typedClass.Id ~= entityId then return end
+
+			handleStateUpdate(player)
+		end)) end
+	end
+	-- //!SECTION
+
+	-- Shop Item Purchased
+	local itemPurchased = Events.GetRemote(Events.RemoteNames.ShopItemPurchased)
+	if itemPurchased then typedClass._cleaner:Add(itemPurchased.OnServerEvent:Connect(function(player: Player, itemId: string)
+		if typedClass.Player ~= player or typedClass.Owner ~= player.UserId then return end
+
 		local canProceed = checkTutorialState(player)
 		if not canProceed then return end
 
-		-- See if the player can afford the state update (purchase / upgrade)
-		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, not typedClass.isPurchased and typedClass.BaseCost or typedClass.UpgradeCost) then return end
-
-		DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, not typedClass.isPurchased and typedClass.BaseCost or typedClass.UpgradeCost)
-
-		if typedClass.isPurchased then
-			typedClass:Upgrade()
-		else
-			typedClass:Purchase()
-			typedClass:Show()
-			typedClass:CanCollide()
-
-			if typedClass.Entity == FFGEnum.CLASS.ENTITY_NAME.Boat then typedClass:StartFishing() end
-		end
-
-		-- Update UIs
-		typedClass:UpdatePurchaseBoardUI()
-		typedClass:Save()
-	end
-
-	-- Purchased Event
-	local purchasedEvent = Events.GetRemote(Events.RemoteNames.EntityPurchased)
-	if purchasedEvent then purchasedEvent.OnServerEvent:Connect(function(player, entityId)
-		if typedClass.Player ~= player or typedClass.Owner ~= player.UserId then return end
-		if typedClass.Id ~= entityId then return end
-
-		handleStateUpdate(player)
-	end) end
-
-	-- Upgraded Event
-	local upgradedEvent = Events.GetRemote(Events.RemoteNames.EntityUpgraded)
-	if upgradedEvent then upgradedEvent.OnServerEvent:Connect(function(player, entityId)
-		if typedClass.Player ~= player or typedClass.Owner ~= player.UserId then return end
-		if typedClass.Id ~= entityId then return end
-
-		handleStateUpdate(player)
-	end) end
+		typedClass:PurchaseItem(itemId)
+	end)) end
 end
 
 return EventListeners

@@ -3,7 +3,6 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local AnimateButtonHover = require(StarterPlayer.StarterPlayerScripts.Client.HUD.Utils.AnimateButtonHover)
-local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local Theme = require(ReplicatedStorage.Shared.Theme.Theme)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
@@ -11,13 +10,17 @@ local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local Replica = require(ReplicatedStorage.Shared.ReplicaClient)
 
 local player = Players.LocalPlayer
-local shopDetailsUI: Frame = DeepWait(player.PlayerGui, "MockShopGUI", "DetailsContainer")
+local shopDetailsUI: Frame = DeepWait(player.PlayerGui, "IslandShopGUI", "DetailsContainer")
+
+-- //TODO -
+-- 1. Get all items and add them to the shopgui
 
 local currentState = {
 	Currencies = {
 		Gold = 0,
 	},
 	GlobalBuffs = {},
+	Items = {},
 }
 
 local details = {
@@ -40,6 +43,13 @@ local detailsAreOpen = false
 local _replica = nil
 local shopData: any = {}
 
+function createShopItemElement(scrollingFrame: ScrollingFrame)
+	local container = Instance.new("Frame")
+
+	container.Parent = scrollingFrame
+	return container
+end
+
 function clearExistingData()
 	if _replica then
 		_replica:Disconnect()
@@ -48,10 +58,9 @@ function clearExistingData()
 	shopData = nil
 end
 
-function watchEntity()
-	local indexKey = shopData.Entity
+function watchPlayerItems()
 	Replica.OnNew("PlayerState", function(replicaData)
-		_replica = replicaData:OnSet({ "Realms", replicaData.Data.CurrentRealm, indexKey }, function(newState)
+		_replica = replicaData:OnSet({ "Realms", replicaData.Data.CurrentRealm, "Items" }, function(newState)
 			shopData = newState
 			updateUI()
 		end)
@@ -83,9 +92,9 @@ function closeDetails()
 	end
 end
 
-function handlePurchaseClick()
+function handlePurchaseClick(itemId: string)
 	local shopItemPurchased = Events.GetRemote(Events.RemoteNames.ShopItemPurchased)
-	if shopItemPurchased then shopItemPurchased:FireServer(shopData[FFGEnum.CLASS.PROPERTIES.Id]) end
+	if shopItemPurchased then shopItemPurchased:FireServer(itemId) end
 end
 
 -- Buttons
@@ -93,7 +102,7 @@ end
 if details.upgradeButton then
 	local baseSize = details.upgradeButton.Size
 	details.upgradeButton.Activated:Connect(function()
-		handlePurchaseClick()
+		handlePurchaseClick("bleh")
 	end)
 
 	details.upgradeButton.MouseEnter:Connect(function()
@@ -157,10 +166,14 @@ Replica.OnNew("PlayerState", function(replicaData)
 	replicaData:OnSet({ "Currencies", "Gold" }, function(newValue)
 		currentState.Currencies.Gold = newValue
 	end)
+
+	replicaData:OnSet({ "Realms", 1, "Items" }, function(newValue)
+		currentState.Items = newValue
+	end)
 end)
 
 function updateUI()
-	updateButtonState()
+	--
 end
 
 function populateDetailsUI()
@@ -173,7 +186,6 @@ end
 
 local shopDetails = Events.GetRemote(Events.RemoteNames.OpenShopDetails)
 if shopDetails then shopDetails.OnClientEvent:Connect(function(data)
-	print("clciked")
 	clearExistingData()
 
 	if data then
@@ -181,8 +193,15 @@ if shopDetails then shopDetails.OnClientEvent:Connect(function(data)
 		shopDetailsUI.Visible = true
 		detailsAreOpen = true
 		shopData = data
-		watchEntity()
+		watchPlayerItems()
 		populateDetailsUI()
 		handleClosingShopDetailsUI()
 	end
 end) end
+
+local playerItemStateEvent = Events.GetRemote(Events.RemoteNames.PrepareShopItems)
+if playerItemStateEvent then
+	playerItemStateEvent.OnClientEvent:Connect(function(data)
+		-- //TODO - Take the player's item state and update existing ui elements
+	end)
+end

@@ -2,6 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local Economy = require(ServerScriptService.Server.Analytics.Economy)
 local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
+local ShopItems = require(ReplicatedStorage.Shared.Items.ShopItems)
 local BuildingType = require(ReplicatedStorage.Shared.Types.Classes.BuildingType)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 local PlayerDataTemplate = require(ServerScriptService.Server.Modules.PlayerDataTemplate)
@@ -373,7 +374,7 @@ end
 -- //!SECTION
 
 -- //SECTION - SHOP
-function DataService.SaveShopState(player: Player, shopId: string, newState): boolean
+function DataService.SaveItem(player: Player, itemId: number, item: ShopItems.ShopItem): boolean
 	local profile = DataService.Profiles[player]
 	if not profile then
 		FFGHelpers.PrintLog("No profile found when attempting to save shop state for: ", player)
@@ -393,12 +394,12 @@ function DataService.SaveShopState(player: Player, shopId: string, newState): bo
 	end
 
 	-- Initialize Shop array if it doesn't exist
-	if not profile.Data.Realms[currentRealm].Shop then profile.Data.Realms[currentRealm].Shop = {} end
+	if not profile.Data.Realms[currentRealm].Items then profile.Data.Realms[currentRealm].Items = {} end
 
-	profile.Data.Realms[currentRealm].Shop[shopId] = newState
+	profile.Data.Realms[currentRealm].Items[itemId] = item
 
 	local replica = DataService.Replicas[player]
-	if replica then replica:Set({ "Realms", currentRealm, "Shop" }, newState) end
+	if replica then replica:Set({ "Realms", currentRealm, "Items" }, item) end
 
 	return true
 end
