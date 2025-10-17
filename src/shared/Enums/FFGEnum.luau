@@ -1,50 +1,50 @@
 local FFGEnum = {}
 
-FFGEnum.QUALITY = {
+FFGEnum.QUALITIES = {
 	[1] = {
 		Label = "Common",
 		Color = Color3.fromRGB(251, 245, 236),
+		DropChance = 60,
 	},
 	[2] = {
 		Label = "Uncommon",
 		Color = Color3.fromHex("#3EFF3E"),
+		DropChance = 25,
 	},
 	[3] = {
 		Label = "Rare",
 		Color = Color3.fromHex("#0070DD"),
+		DropChance = 10,
 	},
 	[4] = {
 		Label = "Epic",
 		Color = Color3.fromHex("#A335EE"),
+		DropChance = 4,
 	},
 	[5] = {
 		Label = "Legendary",
 		Color = Color3.fromHex("#FF9A00"),
+		DropChance = 0.9,
 	},
 	[6] = {
-		Label = "Exotic",
-		Color = Color3.fromHex("#E6C266"),
-	},
-	[7] = {
-		Label = "Ascended",
-		Color = Color3.fromHex("#FF66CC"),
-	},
-	[8] = {
 		Label = "Mythic",
-		Color = Color3.fromHex("#00FFFF"),
+		Color = Color3.fromHex("#FF3B3B"),
+		DropChance = 0.1,
 	},
-	[9] = {
-		Label = "Divine",
-		Color = Color3.fromHex("#FFD700"),
-	},
-	[10] = {
-		Label = "Eternal",
-		Color = Color3.fromHex("#C0C0FF"),
-	},
-	[11] = {
-		Label = "Transcendent",
-		Color = Color3.fromHex("#F5E663"),
-	},
+}
+
+FFGEnum.STAGES = {
+	[1] = { Color = Color3.fromHex("#B0B0B0"), Label = "Stage I" },
+	[2] = { Color = Color3.fromHex("#C0C0C0"), Label = "Stage II" },
+	[3] = { Color = Color3.fromHex("#D0D0D0"), Label = "Stage III" },
+	[4] = { Color = Color3.fromHex("#E0E0E0"), Label = "Stage IV" },
+	[5] = { Color = Color3.fromHex("#F0F0F0"), Label = "Stage V" },
+	[6] = { Color = Color3.fromHex("#F5F2E7"), Label = "Stage VI" },
+	[7] = { Color = Color3.fromHex("#E7D6A8"), Label = "Stage VII" },
+	[8] = { Color = Color3.fromHex("#D8B970"), Label = "Stage VIII" },
+	[9] = { Color = Color3.fromHex("#C9A242"), Label = "Stage IX" },
+	[10] = { Color = Color3.fromHex("#B98C1F"), Label = "Stage X" },
+	[11] = { Color = Color3.fromHex("#A67812"), Label = "Stage XI" },
 }
 
 FFGEnum.ATTRIBUTES = {
@@ -93,6 +93,13 @@ FFGEnum.CLASS = {
 		Shop = "Shop",
 		Helper = "Helper",
 	},
+}
+
+FFGEnum.CATEGORIES = {
+	[1] = "Fishing",
+	[2] = "Woodcutting",
+	[3] = "Mining",
+	[4] = "Transport",
 }
 
 FFGEnum.CURRENCY_TYPES = {

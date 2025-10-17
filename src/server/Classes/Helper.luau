@@ -10,17 +10,10 @@ local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 
 -- //SECTION - Boat Data
 local NAME = {
-	[1] = "Hireling",
-	[2] = "Runner",
-	[3] = "Laborer",
-	[4] = "Courier",
-	[5] = "Steward",
-	[6] = "Guild Hand",
-	[7] = "Foreman",
-	[8] = "Overseer",
-	[9] = "Quartermaster",
-	[10] = "Envoy",
-	[11] = "The Grandmaster",
+	Fishing = "Fisher", -- [Category]: Name
+	Woodcutting = "Woodcutter",
+	Mining = "Miner",
+	Transport = "Hauler",
 }
 
 local DEFAULTS = {
@@ -70,6 +63,8 @@ function Helper.New(state: { [string]: any }?, player: Player, teamId: number): 
 	self.Player = player
 	self.Owner = self.Owner or player.UserId
 	self.TeamId = teamId
+	self.CategoryFocus = state and state.CategoryFocus or self:GenerateCategoryFocus()
+	print("Category Focus:", self.CategoryFocus)
 	self.Name = self:GetName()
 
 	self.BaseCost = self:CalculateBaseCost()
@@ -78,6 +73,9 @@ function Helper.New(state: { [string]: any }?, player: Player, teamId: number): 
 	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
 	self.LoadTime = self:CalculateLoadTime()
 	self.CurrentTravelTime = self:CalculateTravelTime()
+	self.QualityId = state and state.QualityId or self:DefineQuality()
+	self.Stats = state and state.Stats or self:GenerateStats()
+	print("Stats:", self.Stats)
 
 	self._cleaner = Trove.new()
 
@@ -108,7 +106,6 @@ end
 
 function Helper.IncreaseUpgradeStage(self: Helper, stage: number): ()
 	self.UpgradeStage = stage
-	self.Name = self:GetName()
 end
 -- //!SECTION
 
@@ -146,11 +143,44 @@ function Helper.CalculateMaxStorage(self: Helper): (number, number)
 end
 
 function Helper.CalculateTravelTime(self: Helper): number
-	return ClassCalculators.CalculateTravelTime(DEFAULTS.BaseTravelTime)
+	return ClassCalculators.CalculateTravelTime(DEFAULTS.BaseTravelTime, self.Level)
 end
 
 function Helper.CalculateLoadTime(self: Helper): number
-	return ClassCalculators.CalculateLoadTime(DEFAULTS.BaseLoadTime)
+	return ClassCalculators.CalculateLoadTime(DEFAULTS.BaseLoadTime, self.Level)
+end
+-- //!SECTION
+
+-- //SECTION - Generators
+function Helper.GenerateCategoryFocus(self: Helper): number
+	local categories = FFGEnum.CATEGORIES
+	return categories[math.random(1, #categories)]
+end
+
+function Helper.GenerateStats(self: Helper)
+	--
+end
+
+function Helper.DefineQuality(self: Helper): number?
+	local function getRandomQuality()
+		local totalWeight = 0
+		for _, data in pairs(FFGEnum.QUALITIES) do
+			totalWeight += data.DropChance
+		end
+
+		local randomValue = math.random() * totalWeight
+		local cumulative = 0
+
+		for qualityId, data in pairs(FFGEnum.QUALITIES) do
+			cumulative += data.DropChance
+			if randomValue <= cumulative then return qualityId end
+		end
+
+		return nil, nil
+	end
+
+	local qualityId = getRandomQuality()
+	return qualityId
 end
 -- //!SECTION
 
@@ -207,7 +237,7 @@ end
 
 -- //SECTION -  Helper Utilities
 function Helper.GetName(self: Helper): string
-	return NAME[self.UpgradeStage]
+	return NAME[self.CategoryFocus]
 end
 
 function Helper.CanUpgrade(self: Helper): boolean
@@ -231,6 +261,7 @@ function Helper.Serialize(self: Helper): { [string]: any }
 		Tier = self.Tier,
 		Name = self.Name,
 		Level = self.Level,
+		QualityId = self.QualityId,
 		MaxLevel = self.MaxLevel,
 		BaseCost = self.BaseCost,
 		UpgradeCost = self.UpgradeCost,

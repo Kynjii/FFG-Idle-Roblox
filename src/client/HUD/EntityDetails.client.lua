@@ -132,16 +132,6 @@ function updateLevel()
 	details.Defaults.LevelLabel.Text = entityData.isPurchased and "Level: " .. entityData.Level or ""
 	details.Defaults.LevelLabel.Visible = true
 end
-function updateName()
-	details.Defaults.NameLabel.Text = entityData.Name or entityData.Entity
-	local qualityInfo = FFGEnum.QUALITY[entityData.UpgradeStage]
-	if qualityInfo then
-		local color = qualityInfo.Color
-		details.Defaults.NameLabel.TextColor3 = color
-	end
-
-	if not details.Defaults.NameLabel.Visible then details.Defaults.NameLabel.Visible = true end
-end
 function writeDescription()
 	details.Defaults.Description.Text = entityData.Description or ""
 	details.Defaults.Description.Visible = true
@@ -299,7 +289,6 @@ Replica.OnNew("PlayerState", function(replicaData)
 end)
 
 function updateUI()
-	updateName()
 	updateLevel()
 	updateStats()
 	updateEntityInteractiveFrameLabel()

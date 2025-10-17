@@ -61,7 +61,6 @@ export type TenderInstance = {
 	PBDetails: { [string]: any }?,
 
 	-- Essential Methods (called by other modules)
-	GetName: (self: TenderInstance) -> string,
 	Initialize: (self: TenderInstance) -> (),
 	Destroy: (self: TenderInstance) -> (),
 

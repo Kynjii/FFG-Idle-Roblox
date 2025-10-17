@@ -27,27 +27,13 @@ type BuffState = BuffType.BuffState
 -- //!SECTION
 
 -- //SECTION - Boat Data
-local NAME = {
-	[1] = "Driftwood Skiff",
-	[2] = "Netting Dory",
-	[3] = "Herring Lugger",
-	[4] = "Tidecaller Canoe",
-	[5] = "Seablessed Punt",
-	[6] = "Knight's Hull",
-	[7] = "Crimson Cutter",
-	[8] = "Ironhook Galley",
-	[9] = "Mariner’s Galleon",
-	[10] = "Wyrmcatcher",
-	[11] = "The Flynnrunner",
-}
-
 local DESCRIPTION = "A sturdy fishing boat, your faithful companion at sea. \n\n- Passively catches fish each second (FPS)."
 
 local DEFAULTS = {
 	Entity = FFGEnum.CLASS.ENTITY_NAME.Boat,
 	RealmId = 1,
 	Tier = 1,
-	Name = "Unnamed Boat",
+	Name = "Fishing Boat",
 	Level = 1,
 	MaxLevel = 100,
 	BaseCost = Formulas.BOAT.BaseCost,
@@ -98,7 +84,6 @@ function Boat.New(state: { [string]: any }?, player: Player, model: Model, teamI
 	self.Model = model
 	self.Entity = self.Entity or DEFAULTS.Entity
 	self.VisualRoot = model:FindFirstChild("VisualRoot", true)
-	self.Name = self:GetName()
 	self.Tier = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.Tier) or DEFAULTS.Tier
 	self.Player = player
 
@@ -184,7 +169,6 @@ end
 
 function Boat.IncreaseUpgradeStage(self: Boat, stage: number): ()
 	self.UpgradeStage = stage
-	self.Name = self:GetName()
 end
 -- //!SECTION
 
@@ -390,10 +374,6 @@ end
 -- //!SECTION
 
 -- //SECTION -  Boat Utilities
-function Boat.GetName(self: Boat): string
-	return NAME[self.UpgradeStage]
-end
-
 function Boat.CanUpgrade(self: Boat): boolean
 	return self.Level < self.MaxLevel
 end

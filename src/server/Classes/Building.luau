@@ -24,97 +24,13 @@ type BuildingData = BuildingType.BuildingData
 
 -- //SECTION - Building Data
 local NAME = {
-	Market = {
-		[1] = "Fish Stall",
-		[2] = "Fish Cart",
-		[3] = "Fishmonger’s Hut",
-		[4] = "Wharf Stand",
-		[5] = "Harbor Market",
-		[6] = "Fisher’s Pavilion",
-		[7] = "Dockside Bazaar",
-		[8] = "Seafarer’s Market Hall",
-		[9] = "Maritime Exchange",
-		[10] = "Grand Harbor Market",
-		[11] = "Oceanfront City Market",
-	},
-	BoatStorageUpgrader = {
-		[1] = "Wooden Crates",
-		[2] = "Carpenter’s Shack",
-		[3] = "Timber Workshop",
-		[4] = "Dockside Workshop",
-		[5] = "Shipwright’s Lodge",
-		[6] = "Pier Workshop",
-		[7] = "Drydock Hall",
-		[8] = "Harbor Shipyard",
-		[9] = "Great Shipwright’s Yard",
-		[10] = "Maritime Dockworks",
-		[11] = "Royal Shipyard",
-	},
-	BoatFPSUpgrader = {
-		[1] = "Fishing Nets",
-		[2] = "Rope Weaver’s Corner",
-		[3] = "Netting Shed",
-		[4] = "Spinner’s Workshop",
-		[5] = "Tangle Hall",
-		[6] = "Knotcrafter’s Den",
-		[7] = "Weaver’s Guildhouse",
-		[8] = "Fisher’s Loom Hall",
-		[9] = "Maritime Net Guild",
-		[10] = "Grand Loomworks",
-		[11] = "Oceanic Guild of Nets",
-	},
-	TenderTTUpgrader = {
-		[1] = "Dockside Map Table",
-		[2] = "Wayfinder’s Stand",
-		[3] = "Courier’s Hut",
-		[4] = "Pilot’s Booth",
-		[5] = "Quay Relay Shed",
-		[6] = "Harbor Waystation",
-		[7] = "Lighthouse Signal House",
-		[8] = "Port Dispatch Guild",
-		[9] = "Chartmaker’s Hall",
-		[10] = "Grand Pilotage Office",
-		[11] = "Royal Admiralty Relay",
-	},
-	TenderLoadUpgrader = {
-		[1] = "Dockside Pulley",
-		[2] = "Porter’s Table",
-		[3] = "Stevedore’s Stall",
-		[4] = "Hoistman’s Shed",
-		[5] = "Capstan House",
-		[6] = "Winchwright’s Workshop",
-		[7] = "Block-and-Tackle Hall",
-		[8] = "Wharf Loading Yard",
-		[9] = "Porters’ Guildhall",
-		[10] = "Grand Hoistworks",
-		[11] = "Royal Cargo Works",
-	},
-	TenderStorageUpgrader = {
-		[1] = "Fish Baskets",
-		[2] = "Fish Crate Pile",
-		[3] = "Cold Cellar",
-		[4] = "Timber Storehouse",
-		[5] = "Stone Granary",
-		[6] = "Dockside Warehouse",
-		[7] = "Harbor Strongroom",
-		[8] = "Seafarer’s Vault",
-		[9] = "Maritime Storehall",
-		[10] = "Grand Harbor Depot",
-		[11] = "Royal Maritime Vault",
-	},
-	PortStorageUpgrader = {
-		[1] = "Fish Barrels",
-		[2] = "Cargo Shed",
-		[3] = "Timber Warehouse",
-		[4] = "Stone Storehouse",
-		[5] = "Harbor Granary",
-		[6] = "Dockside Depot",
-		[7] = "Maritime Warehouse",
-		[8] = "Harbor Stronghold",
-		[9] = "Port Granary Hall",
-		[10] = "Grand Maritime Depot",
-		[11] = "Royal Port Storehouse",
-	},
+	Market = "Harbor Market",
+	BoatStorageUpgrader = "Harbor Shipyard",
+	BoatFPSUpgrader = "Fishing Nets",
+	TenderTTUpgrader = "Transporter Workshop",
+	TenderLoadUpgrader = "Transporter Shed",
+	TenderStorageUpgrader = "Transporter Cellar",
+	PortStorageUpgrader = "Storage Shed",
 }
 
 local DESCRIPTION = {
@@ -239,7 +155,6 @@ end
 
 function Building.IncreaseUpgradeStage(self: Building, stage: number): ()
 	self.UpgradeStage = stage
-	self.Name = self:GetName()
 end
 -- //!SECTION
 
@@ -335,7 +250,7 @@ end
 
 -- //SECTION -  Building Utilities
 function Building.GetName(self: Building): string
-	return NAME[self.BuildingName][self.UpgradeStage]
+	return NAME[self.BuildingName]
 end
 
 function Building.CanUpgrade(self: Building): boolean

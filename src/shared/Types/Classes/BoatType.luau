@@ -55,7 +55,6 @@ export type BoatInstance = {
 	PBDetails: { [string]: any }?,
 
 	-- Essential Methods (called by other modules)
-	GetName: (self: BoatInstance) -> string,
 	Initialize: (self: BoatInstance) -> (),
 	Destroy: (self: BoatInstance) -> (),
 

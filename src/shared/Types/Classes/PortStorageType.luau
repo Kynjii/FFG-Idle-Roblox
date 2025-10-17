@@ -52,7 +52,6 @@ export type StorageInstance = {
 	PBDetails: { [string]: any }?,
 
 	-- Essential Methods (called by other modules)
-	GetName: (self: StorageInstance) -> string,
 	Initialize: (self: StorageInstance) -> (),
 	Destroy: (self: StorageInstance) -> (),
 

@@ -57,7 +57,6 @@ export type BuildingInstance = {
 	BuildingBuff: { CurrentValue: number? }?,
 
 	-- Essential Methods (called by other modules)
-	GetName: (self: BuildingInstance) -> string,
 	Initialize: (self: BuildingInstance) -> (),
 	Destroy: (self: BuildingInstance) -> (),
 

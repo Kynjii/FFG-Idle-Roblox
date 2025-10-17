@@ -27,27 +27,13 @@ type BuffState = BuffType.BuffState
 -- //!SECTION
 
 -- //SECTION -  Tender Data
-local NAME = {
-	[1] = "Wooden Cart-Barge",
-	[2] = "Barrel Barge",
-	[3] = "Oarsman’s Ferry",
-	[4] = "Courier Skiff",
-	[5] = "Windcloak Sloop",
-	[6] = "Seawarden’s Tender",
-	[7] = "Crate Hauler",
-	[8] = "Knight’s Courier",
-	[9] = "Harbormaster’s Crest",
-	[10] = "Starlit Barge",
-	[11] = "Little Lucy",
-}
-
 local DESCRIPTION = "A nimble Tender, darting back and forth between port and sea. \n\n- Delivers your boat’s Fish with travel and load times that improve as you upgrade."
 
 local DEFAULTS = {
 	Entity = FFGEnum.CLASS.ENTITY_NAME.Tender,
 	RealmId = 1,
 	Tier = 1,
-	Name = "Unnamed Tender",
+	Name = "Transporter",
 	Level = 1,
 	MaxLevel = 100,
 	BaseCost = Formulas.TENDER.BaseCost,
@@ -101,7 +87,6 @@ function Tender.New(state: { [string]: any }?, player: Player, model: Model, tea
 	self.Entity = self.Entity or DEFAULTS.Entity
 	self.VisualRoot = model:FindFirstChild("VisualRoot", true)
 	self.PortPos = model.PrimaryPart and model.PrimaryPart.CFrame or CFrame.new()
-	self.Name = self:GetName()
 	self.Tier = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.Tier) or DEFAULTS.Tier
 	self.Player = player
 
@@ -196,7 +181,6 @@ end
 
 function Tender.IncreaseUpgradeStage(self: Tender, stage: number)
 	self.UpgradeStage = stage
-	self.Name = self:GetName()
 end
 -- //!SECTION
 
@@ -442,10 +426,6 @@ end
 -- //!SECTION
 
 -- //SECTION - Tender Utilities
-function Tender.GetName(self: Tender): string
-	return NAME[self.UpgradeStage]
-end
-
 function Tender.CanUpgrade(self: Tender): boolean
 	return self.Level < self.MaxLevel
 end

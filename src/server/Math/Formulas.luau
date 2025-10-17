@@ -1,14 +1,22 @@
+--!strict
+-- Server/Math/Formulas.lua
+
+-- =========================
+-- Core progression knobs
+-- =========================
+
 local MAX_LEVEL = 100
 
+-- Level thresholds where you "promote" to the next stage (1-indexed stage)
 local PROMO_LEVEL = { 1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 }
 
--- Early stages: earnings > costs
--- Later stages: costs > earnings
-local EARN_RATE = { 1.25, 1.16, 1.12, 1.10, 1.08, 1.08, 1.07, 1.06, 1.05, 1.05 } -- FPS / Storage etc.
+-- Early stages: earnings > costs ; Later stages: costs > earnings
+-- Per-stage geometric rates used to build cumulative level multipliers.
+local EARN_RATE = { 1.25, 1.16, 1.12, 1.10, 1.08, 1.08, 1.07, 1.06, 1.05, 1.05 } -- FPS / Storage, etc.
 local COST_RATE = { 1.14, 1.16, 1.18, 1.19, 1.20, 1.21, 1.22, 1.23, 1.24, 1.25 } -- Upgrade Cost
 
--- One-time bonus when ENTERING a stage (by stage index after the bump).
--- Example: when a Boat goes from stage 1 -> 2 (at level 10), apply +7% immediately.
+-- One-time bonus when ENTERING a stage (by stage index AFTER the bump).
+-- Example: going 1 -> 2 at level 10 applies +7% immediately.
 local EARN_BONUS = {
 	[2] = 0.07,
 	[3] = 0.07,
@@ -20,6 +28,10 @@ local EARN_BONUS = {
 	[9] = 0.12,
 	[10] = 0.15,
 }
+
+-- =========================
+-- Helpers (internal)
+-- =========================
 
 local function stageForLevel(level: number): number
 	level = math.clamp(level, 1, MAX_LEVEL)
@@ -57,21 +69,42 @@ local function buildMultipliers(ratePerStage: { number }, bonusPerStage: { [numb
 	return mult
 end
 
-local EARN_MULT = buildMultipliers(EARN_RATE, EARN_BONUS)
-local COST_MULT = buildMultipliers(COST_RATE, nil)
+-- =========================
+-- Cumulative level multipliers
+-- =========================
+
+local EARN_MULT = buildMultipliers(EARN_RATE, EARN_BONUS) -- index by level
+local COST_MULT = buildMultipliers(COST_RATE, nil) -- index by level
+
+-- Derive a stage-based earning multiplier by sampling the cumulative at each promo level.
+local STAGE_COUNT = #PROMO_LEVEL
+local STAGE_EARN_MULT = table.create(STAGE_COUNT, 1)
+for s = 1, STAGE_COUNT do
+	local lvlAtStage = PROMO_LEVEL[s]
+	STAGE_EARN_MULT[s] = EARN_MULT[lvlAtStage]
+end
+
+-- =========================
+-- Economy baselines
+-- =========================
 
 local FORMULAS = {
+	-- Core progression
 	MAX_LEVEL = MAX_LEVEL,
 	PROMO_LEVEL = PROMO_LEVEL,
-	EARN_RATE = EARN_RATE, -- per-stage rates (for tuning UI/debug)
+	EARN_RATE = EARN_RATE,
 	COST_RATE = COST_RATE,
-	EARN_BONUS = EARN_BONUS, -- optional
+	EARN_BONUS = EARN_BONUS,
 
-	-- Cumulative products
-	EARN_MULT = EARN_MULT, -- EARN_MULT[level]
-	COST_MULT = COST_MULT, -- COST_MULT[level]
+	-- Level-indexed cumulative multipliers
+	EARN_MULT = EARN_MULT,
+	COST_MULT = COST_MULT,
 
-	-- Helper queries
+	-- Stage-indexed (sampled from EARN_MULT at promo levels)
+	STAGE_COUNT = STAGE_COUNT,
+	STAGE_EARN_MULT = STAGE_EARN_MULT,
+
+	-- Convenience helpers
 	StageForLevel = stageForLevel,
 	GetEarnMultiplier = function(level: number)
 		return EARN_MULT[math.clamp(level, 1, MAX_LEVEL)]
@@ -80,22 +113,13 @@ local FORMULAS = {
 		return COST_MULT[math.clamp(level, 1, MAX_LEVEL)]
 	end,
 
-	BOAT = {
-		BaseCost = 100,
-		BaseStorage = 100,
-		BaseFPS = 5,
-	},
-	TENDER = {
-		BaseCost = 100,
-		BaseStorage = 60,
-	},
-	STORAGE = {
-		BaseCost = 25,
-		BaseStorage = 200,
-	},
-	BUILDING = {
-		BaseCost = 1000,
-	},
+	-- Entity baselines
+	BOAT = { BaseCost = 100, BaseStorage = 100, BaseFPS = 5 },
+	TENDER = { BaseCost = 100, BaseStorage = 60 },
+	STORAGE = { BaseCost = 25, BaseStorage = 200 },
+	BUILDING = { BaseCost = 1000 },
+
+	-- Tier (rarity) curve used elsewhere in your economy
 	TIER_MULTIPLIER = {
 		[1] = 1,
 		[2] = 8,
@@ -106,18 +130,144 @@ local FORMULAS = {
 	},
 }
 
-local STAGE_COUNT = #PROMO_LEVEL
-local STAGE_EARN_MULT = table.create(STAGE_COUNT, 1)
+-- =========================
+-- Additive per-level growth (before Stage/Quality)
+-- =========================
 
-for s = 1, STAGE_COUNT do
-	local lvlAtStage = PROMO_LEVEL[s] -- e.g., 1,10,20,...
-	STAGE_EARN_MULT[s] = EARN_MULT[lvlAtStage] -- use the cumulative at that level
-end
+FORMULAS.PER_LEVEL_STORAGE_ADD = 3.0 -- +3 storage / level
+FORMULAS.PER_LEVEL_FPS_ADD = 0.5 -- +0.5 FPS   / level
 
-FORMULAS.STAGE_COUNT = STAGE_COUNT
-FORMULAS.STAGE_EARN_MULT = STAGE_EARN_MULT
+-- =========================
+-- Time-stat tuning (Stage → % faster)
+-- =========================
 
--- Allow hot-reload tuning in Studio without restart.
+FORMULAS.STAGE_TIME_REDUCTION_COEFF = 0.20 -- each +1.0 of (stageMult-1) ≈ 20% faster
+FORMULAS.MAX_STAGE_TIME_REDUCTION = 0.50 -- cap 50% faster from Stage
+FORMULAS.TIME_MIN_FRACTION = 0.05 -- never below 5% of base
+
+-- =========================
+-- Helper system knobs
+-- =========================
+
+-- Quality (rarity) multiplier after Level & Stage
+FORMULAS.QUALITY_MULT = {
+	[1] = 1.00, -- Common
+	[2] = 1.15, -- Uncommon
+	[3] = 1.35, -- Rare
+	[4] = 1.60, -- Epic
+	[5] = 1.90, -- Legendary
+	[6] = 2.30, -- Mythic
+}
+
+-- Base stats (defaults exist for all; per-category are exclusive)
+FORMULAS.HELPER_BASE = {
+	Defaults = {
+		WalkSpeed = 10, -- “up”
+		Storage = 50, -- “up”
+	},
+	PerCategory = {
+		Fishing = { CatchRate = 5, Luck = 0, CastTime = 6 }, -- CastTime “timeDown”
+		Woodcutting = { ChopRate = 5, Sturdiness = 0, SwingTime = 5 },
+		Mining = { OreYield = 4, Prospecting = 0, SwingTime = 6 },
+		Transport = { Throughput = 8, RouteSkill = 0, TravelTime = 12 },
+	},
+}
+
+-- Per-level additive growth (small, before Stage/Quality)
+FORMULAS.HELPER_PER_LEVEL_ADD = {
+	Defaults = {
+		WalkSpeed = 0.35,
+		Storage = 3.00,
+	},
+	PerCategory = {
+		Fishing = { CatchRate = 0.30, Luck = 0.15, CastTime = 0.00 },
+		Woodcutting = { ChopRate = 0.30, Sturdiness = 0.15, SwingTime = 0.00 },
+		Mining = { OreYield = 0.28, Prospecting = 0.15, SwingTime = 0.00 },
+		Transport = { Throughput = 0.40, RouteSkill = 0.15, TravelTime = 0.00 },
+	},
+}
+
+-- Stat types (decides math path for each stat)
+FORMULAS.HELPER_STAT_TYPES = {
+	-- Defaults
+	WalkSpeed = "up",
+	Storage = "up",
+	-- Fishing
+	CatchRate = "up",
+	Luck = "up",
+	CastTime = "timeDown",
+	-- Woodcutting
+	ChopRate = "up",
+	Sturdiness = "up",
+	SwingTime = "timeDown",
+	-- Mining
+	OreYield = "up",
+	Prospecting = "up", -- SwingTime already defined
+	-- Transport
+	Throughput = "up",
+	RouteSkill = "up",
+	TravelTime = "timeDown",
+}
+
+-- =========================
+-- Perks: slots, value ranges, selection weights
+-- =========================
+
+-- How many perk slots a Helper gets by quality
+FORMULAS.QUALITY_PERK_COUNT = {
+	[1] = 0, -- Common
+	[2] = 0, -- Uncommon
+	[3] = 1, -- Rare
+	[4] = 2, -- Epic
+	[5] = 2, -- Legendary
+	[6] = 3, -- Mythic
+}
+
+-- Slight magnitude scaling by quality (kept modest for balance)
+FORMULAS.QUALITY_PERK_VALUE_MULT = {
+	[1] = 1.00,
+	[2] = 1.00,
+	[3] = 1.05,
+	[4] = 1.08,
+	[5] = 1.10,
+	[6] = 1.12,
+}
+
+-- Perk value ranges (fractions unless noted). Keys must match your HelperCalculator’s PERKS_DEF.
+FORMULAS.PERK_VALUE_RANGES = {
+	Fleet = { min = 0.06, max = 0.12 }, -- +% WalkSpeed
+	Organizer = { min = 0.08, max = 0.15 }, -- +% Storage
+	SwiftHands = { min = 0.06, max = 0.12 }, -- -% time stats
+
+	SeasonedAngler = { min = 0.10, max = 0.18 }, -- +% CatchRate (+flat Luck side bonus)
+	TrueGrit = { min = 0.10, max = 0.18 }, -- +% ChopRate (+flat Sturdiness)
+	StoneSense = { min = 0.10, max = 0.18 }, -- +% OreYield (+flat Prospecting)
+	RoadCraft = { min = 0.10, max = 0.18 }, -- +% Throughput (+flat RouteSkill)
+}
+
+-- Small flat “side bonuses” paired with some perks
+FORMULAS.PERK_FLAT_SIDE_BONUS = {
+	SeasonedAngler = 3, -- +Luck
+	TrueGrit = 3, -- +Sturdiness
+	StoneSense = 3, -- +Prospecting
+	RoadCraft = 3, -- +RouteSkill
+}
+
+-- Optional weighted selection for perks (higher = more likely). Omit for uniform.
+FORMULAS.PERK_SELECTION_WEIGHTS = {
+	-- Fleet = 1.0,
+	-- Organizer = 1.0,
+	-- SwiftHands = 0.8,
+	-- SeasonedAngler = 1.2,
+	-- TrueGrit = 1.2,
+	-- StoneSense = 1.2,
+	-- RoadCraft = 1.2,
+}
+
+-- =========================
+-- Hot reload support (Studio)
+-- =========================
+
 function FORMULAS.Rebuild()
 	FORMULAS.EARN_MULT = buildMultipliers(FORMULAS.EARN_RATE, FORMULAS.EARN_BONUS)
 	FORMULAS.COST_MULT = buildMultipliers(FORMULAS.COST_RATE, nil)

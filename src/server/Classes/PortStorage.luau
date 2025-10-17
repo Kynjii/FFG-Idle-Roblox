@@ -23,26 +23,13 @@ type PortStorageData = PortStorageType.PortStorageData
 -- //!SECTION
 
 -- //SECTION - Data
-local NAME = {
-	[1] = "Driftwood Crates",
-	[2] = "Fisher’s Shack",
-	[3] = "Salted Net Loft",
-	[4] = "Harbor Shed",
-	[5] = "Guild Granary",
-	[6] = "Stone Wharfhouse",
-	[7] = "Ironclad Warehouse",
-	[8] = "Lord’s Storehall",
-	[9] = "Grand Harbor Vault",
-	[10] = "Dragonbone Strongroom",
-	[11] = "The Crown’s Keep",
-}
-
 local DESCRIPTION = "Timber sheds line the dock, smelling faintly of salt and tar. \n\n- Expands how much fish you can store before selling."
 
 local DEFAULTS = {
 	Entity = FFGEnum.CLASS.ENTITY_NAME.PortStorage,
 	RealmId = 1,
 	Tier = 1,
+	Name = "Fish Storage",
 	Level = 1,
 	MaxLevel = 100,
 	BaseCost = Formulas.STORAGE.BaseCost,
@@ -87,7 +74,6 @@ function PortStorage.New(state: { [string]: any }?, player: Player, model: Model
 	self.Entity = self.Entity or DEFAULTS.Entity
 	self.Owner = self.Owner or player.UserId
 	self.Model = model
-	self.Name = self:GetName()
 	self.VisualRoot = model:FindFirstChild("VisualRoot", true)
 	self.Tier = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.Tier) or DEFAULTS.Tier
 	self.Player = player
@@ -173,7 +159,6 @@ end
 
 function PortStorage.IncreaseUpgradeStage(self: PortStorage, stage: number): ()
 	self.UpgradeStage = stage
-	self.Name = self:GetName()
 end
 
 function PortStorage.AddFish(self: PortStorage, amount: number): ()
@@ -388,10 +373,6 @@ end
 -- //!SECTION
 
 -- //SECTION -  Boat Utilities
-function PortStorage.GetName(self: PortStorage)
-	return NAME[self.UpgradeStage]
-end
-
 function PortStorage.CanUpgrade(self: PortStorage)
 	return self.Level < self.MaxLevel
 end

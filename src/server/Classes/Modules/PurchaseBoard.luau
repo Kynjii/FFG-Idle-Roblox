@@ -38,21 +38,21 @@ function PB.CreatePB(pbModel: Model, class: Boat | Tender | PortStorage | Buildi
 	pbDetails.NameLabel = purchaseBoard:FindFirstChild("Name", true) :: TextLabel
 	pbDetails.LevelLabel = purchaseBoard:FindFirstChild("Level", true) :: TextLabel
 	pbDetails.EntityLabel = purchaseBoard:FindFirstChild("EntityName", true) :: TextLabel
-	pbDetails.QualityLabel = purchaseBoard:FindFirstChild("Quality", true) :: TextLabel
+	pbDetails.StageLabel = purchaseBoard:FindFirstChild("Stage", true) :: TextLabel
 	pbDetails.ProgressBar = purchaseBoard:FindFirstChild("ProgressBar", true) :: ImageLabel
 	pbDetails.StorageLabel = purchaseBoard:FindFirstChild("StorageText", true) :: TextLabel
 
 	-- Add relevant data to texts
 	if pbDetails then
 		-- Name
-		pbDetails.NameLabel.Text = typedClass:GetName()
+		pbDetails.NameLabel.Text = typedClass.Name
 
-		-- Quality
-		local qualityInfo = FFGEnum.QUALITY[typedClass.UpgradeStage]
-		local color = qualityInfo.Color
-		local quality = qualityInfo.Label
-		pbDetails.QualityLabel.Text = quality
-		pbDetails.QualityLabel.TextColor3 = color
+		-- Stage
+		local stageInfo = FFGEnum.STAGES[typedClass.UpgradeStage]
+		local color = stageInfo.Color
+		local stage = stageInfo.Label
+		pbDetails.StageLabel.Text = stage
+		pbDetails.StageLabel.TextColor3 = color
 
 		-- Entity Name
 		pbDetails.EntityLabel.Text = typedClass.Entity
@@ -62,12 +62,12 @@ function PB.CreatePB(pbModel: Model, class: Boat | Tender | PortStorage | Buildi
 		local progressContainer: Frame = pbDetails.ProgressBar:FindFirstAncestor("ProgressContainer")
 		if not typedClass.isPurchased then
 			pbDetails.LevelLabel.Visible = false
-			pbDetails.QualityLabel.Visible = false
+			pbDetails.StageLabel.Visible = false
 			progressContainer.Visible = false
 		else
 			progressContainer.Visible = true
 			pbDetails.LevelLabel.Visible = true
-			pbDetails.QualityLabel.Visible = true
+			pbDetails.StageLabel.Visible = true
 			pbDetails.LevelLabel.Text = typedClass.isPurchased and `Level: {typedClass.Level}`
 		end
 
@@ -102,14 +102,14 @@ function PB.UpdatePB(class: Boat | Tender | PortStorage | Building)
 	end
 
 	-- Name
-	typedClass.PBDetails.NameLabel.Text = typedClass:GetName()
+	typedClass.PBDetails.NameLabel.Text = typedClass.Name
 
-	-- Quality
-	local qualityInfo = FFGEnum.QUALITY[typedClass.UpgradeStage]
-	local color = qualityInfo.Color
-	local quality = qualityInfo.Label
-	typedClass.PBDetails.QualityLabel.Text = quality
-	typedClass.PBDetails.QualityLabel.TextColor3 = color
+	-- Stage
+	local stageInfo = FFGEnum.STAGES[typedClass.UpgradeStage]
+	local color = stageInfo.Color
+	local stage = stageInfo.Label
+	typedClass.PBDetails.StageLabel.Text = stage
+	typedClass.PBDetails.StageLabel.TextColor3 = color
 
 	-- Entity Name
 	typedClass.PBDetails.EntityLabel.Text = typedClass.Entity
@@ -119,12 +119,12 @@ function PB.UpdatePB(class: Boat | Tender | PortStorage | Building)
 	local progressContainer: Frame = typedClass.PBDetails.ProgressBar:FindFirstAncestor("ProgressContainer")
 	if not typedClass.isPurchased then
 		typedClass.PBDetails.LevelLabel.Visible = false
-		typedClass.PBDetails.QualityLabel.Visible = false
+		typedClass.PBDetails.StageLabel.Visible = false
 		progressContainer.Visible = false
 	else
 		progressContainer.Visible = true
 		typedClass.PBDetails.LevelLabel.Visible = true
-		typedClass.PBDetails.QualityLabel.Visible = true
+		typedClass.PBDetails.StageLabel.Visible = true
 		typedClass.PBDetails.LevelLabel.Text = typedClass.isPurchased and "Level: " .. typedClass.Level
 	end
 
@@ -144,7 +144,7 @@ function PB.ResetPB(pbModel: Model)
 	pbDetails.NameLabel = purchaseBoard:FindFirstChild("Name", true) :: TextLabel
 	pbDetails.LevelLabel = purchaseBoard:FindFirstChild("Level", true) :: TextLabel
 	pbDetails.EntityLabel = purchaseBoard:FindFirstChild("EntityName", true) :: TextLabel
-	pbDetails.QualityLabel = purchaseBoard:FindFirstChild("Quality", true) :: TextLabel
+	pbDetails.StageLabel = purchaseBoard:FindFirstChild("Stage", true) :: TextLabel
 	pbDetails.ProgressBar = purchaseBoard:FindFirstChild("ProgressBar", true) :: ImageLabel
 	pbDetails.StorageLabel = purchaseBoard:FindFirstChild("StorageText", true) :: TextLabel
 
@@ -159,9 +159,9 @@ function PB.ResetPB(pbModel: Model)
 		pbDetails.EntityLabel.TextColor3 = Theme.textColor[FFGEnum.CLASS.ENTITY_NAME.Boat]
 		pbDetails.EntityLabel.Visible = false
 
-		pbDetails.QualityLabel.Text = ""
-		pbDetails.QualityLabel.TextColor3 = FFGEnum.QUALITY[1].Color
-		pbDetails.QualityLabel.Visible = false
+		pbDetails.StageLabel.Text = ""
+		pbDetails.StageLabel.TextColor3 = FFGEnum.STAGES[1].Color
+		pbDetails.StageLabel.Visible = false
 
 		if pbDetails.ProgressBar then
 			local progressContainer: Frame = pbDetails.ProgressBar:FindFirstAncestor("ProgressContainer")
