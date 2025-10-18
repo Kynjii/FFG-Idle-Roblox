@@ -15,7 +15,12 @@ dependencies = []
 [[package]]
 name = "dtbur/ffg-idle-roblox"
 version = "0.1.0"
-dependencies = [["Find", "sleitnick/find@1.0.0"], ["Sift", "csqrl/sift@0.0.11"], ["Signal", "sleitnick/signal@1.5.0"], ["TableUtil", "sleitnick/table-util@1.2.1"], ["Trove", "sleitnick/trove@1.5.1"], ["vide", "centau/vide@0.3.1"]]
+dependencies = [["Find", "sleitnick/find@1.0.0"], ["Sift", "csqrl/sift@0.0.11"], ["Signal", "sleitnick/signal@1.5.0"], ["TableUtil", "sleitnick/table-util@1.2.1"], ["Trove", "sleitnick/trove@1.5.1"], ["ui-labs", "pepeeltoro41/ui-labs@2.4.1"], ["vide", "centau/vide@0.3.1"]]
+
+[[package]]
+name = "pepeeltoro41/ui-labs"
+version = "2.4.1"
+dependencies = []
 
 [[package]]
 name = "sleitnick/find"
