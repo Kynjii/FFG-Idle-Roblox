@@ -5,7 +5,6 @@ local BoatType = require(ReplicatedStorage.Shared.Types.Classes.BoatType)
 local PortStorageType = require(ReplicatedStorage.Shared.Types.Classes.PortStorageType)
 local TenderType = require(ReplicatedStorage.Shared.Types.Classes.TenderType)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
-local Theme = require(ReplicatedStorage.Shared.Theme.Theme)
 local BuildingType = require(ReplicatedStorage.Shared.Types.Classes.BuildingType)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 
@@ -56,7 +55,7 @@ function PB.CreatePB(pbModel: Model, class: Boat | Tender | PortStorage | Buildi
 
 		-- Entity Name
 		pbDetails.EntityLabel.Text = typedClass.Entity
-		pbDetails.EntityLabel.TextColor3 = Theme.textColor[typedClass.Entity]
+		pbDetails.EntityLabel.TextColor3 = FFGEnum.THEME.textColor[typedClass.Entity]
 
 		-- Handle State based on isPurchased
 		local progressContainer: Frame = pbDetails.ProgressBar:FindFirstAncestor("ProgressContainer")
@@ -113,7 +112,7 @@ function PB.UpdatePB(class: Boat | Tender | PortStorage | Building)
 
 	-- Entity Name
 	typedClass.PBDetails.EntityLabel.Text = typedClass.Entity
-	typedClass.PBDetails.EntityLabel.TextColor3 = Theme.textColor[typedClass.Entity]
+	typedClass.PBDetails.EntityLabel.TextColor3 = FFGEnum.THEME.textColor[typedClass.Entity]
 
 	-- Handle State based on isPurchased
 	local progressContainer: Frame = typedClass.PBDetails.ProgressBar:FindFirstAncestor("ProgressContainer")
@@ -156,7 +155,7 @@ function PB.ResetPB(pbModel: Model)
 		pbDetails.LevelLabel.Visible = false
 
 		pbDetails.EntityLabel.Text = ""
-		pbDetails.EntityLabel.TextColor3 = Theme.textColor[FFGEnum.CLASS.ENTITY_NAME.Boat]
+		pbDetails.EntityLabel.TextColor3 = FFGEnum.THEME.textColor[FFGEnum.CLASS.ENTITY_NAME.Boat]
 		pbDetails.EntityLabel.Visible = false
 
 		pbDetails.StageLabel.Text = ""

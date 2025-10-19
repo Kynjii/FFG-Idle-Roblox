@@ -9,7 +9,6 @@ local PortStorageType = require(ReplicatedStorage.Shared.Types.Classes.PortStora
 local TenderType = require(ReplicatedStorage.Shared.Types.Classes.TenderType)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
-local Theme = require(ReplicatedStorage.Shared.Theme.Theme)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local Replica = require(ReplicatedStorage.Shared.ReplicaClient)
@@ -147,7 +146,7 @@ function updateStats()
 	if entityData.Entity == FFGEnum.CLASS.ENTITY_NAME.Boat then
 		details.Stats.CurrentFPSValue.Text = entityData.isPurchased and FormatNumber(entityData.CurrentFPS) or ""
 		details.Stats.NextFPSValue.Text = entityData.isPurchased and "+" .. FormatNumber(entityData.NextFPS - entityData.CurrentFPS) or ""
-		details.Stats.NextFPSValue.TextColor3 = Theme.color.green
+		details.Stats.NextFPSValue.TextColor3 = FFGEnum.THEME.color.green
 
 		local currentFPSParent = details.Stats.CurrentFPSValue:FindFirstAncestorWhichIsA("Frame")
 		currentFPSParent.Visible = entityData.isPurchased and true
@@ -174,7 +173,7 @@ function updateStats()
 		-- STORAGE Stats
 		details.Stats.CurrentMaxStorageValue.Text = entityData.isPurchased and FormatNumber(entityData.CurrentMaxStorage) or ""
 		details.Stats.NextMaxStorageValue.Text = entityData.isPurchased and "+" .. FormatNumber(entityData.NextLvlMaxStorage - entityData.CurrentMaxStorage) or ""
-		details.Stats.NextMaxStorageValue.TextColor3 = Theme.color.green
+		details.Stats.NextMaxStorageValue.TextColor3 = FFGEnum.THEME.color.green
 
 		local currentMaxStorageParent = details.Stats.CurrentMaxStorageValue:FindFirstAncestorWhichIsA("Frame")
 		currentMaxStorageParent.Visible = entityData.isPurchased and true
@@ -193,7 +192,7 @@ function updateStats()
 				details.Stats.CurrentBuffValue.Text = "-" .. FormatNumber(entityData.BuildingBuff.CurrentValue * 100) .. "%" .. " " .. entityData.BuildingBuff.Label
 			end
 
-			details.Stats.CurrentBuffValue.TextColor3 = Theme.color.green
+			details.Stats.CurrentBuffValue.TextColor3 = FFGEnum.THEME.color.green
 			details.Stats.CurrentBuffValue.Visible = true
 		end
 	end
@@ -243,13 +242,13 @@ function updateButtonState()
 
 	if enable then
 		details.upgradeButton.Active = true
-		details.upgradeButton.ImageColor3 = Theme.color.green
-		details.upgradeButton.HoverImage = Theme.button.hoverImage
-		details.upgradeButton.PressedImage = Theme.button.pressedImage
+		details.upgradeButton.ImageColor3 = FFGEnum.THEME.color.green
+		details.upgradeButton.HoverImage = FFGEnum.THEME.button.hoverImage
+		details.upgradeButton.PressedImage = FFGEnum.THEME.button.pressedImage
 		details.upgradeButton.Interactable = true
 	else
 		details.upgradeButton.Active = false
-		details.upgradeButton.ImageColor3 = Theme.color.white
+		details.upgradeButton.ImageColor3 = FFGEnum.THEME.color.white
 		details.upgradeButton.HoverImage = ""
 		details.upgradeButton.PressedImage = ""
 		details.upgradeButton.Interactable = false
