@@ -46,9 +46,12 @@ local Theme = {
 	},
 
 	button = {
+		shopBuy = "rbxassetid://103266412720403",
+		shopBuyHover = "rbxassetid://122918373699379",
 		image = "rbxassetid://80427328338898",
 		hoverImage = "rbxassetid://80427328338898",
 		pressedImage = "rbxassetid://72623624680339",
+		cornerRadius = UDim.new(0.05),
 	},
 
 	textColor = {

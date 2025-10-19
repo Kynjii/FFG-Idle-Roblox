@@ -57,7 +57,6 @@ function Helper.New(state: { [string]: any }?, player: Player, teamId: number): 
 			self[key] = value
 		end
 	end
-
 	-- Calculate derived properties
 	self.Entity = self.Entity or DEFAULTS.Entity
 	self.Player = player
