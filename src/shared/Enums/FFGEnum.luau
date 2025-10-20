@@ -195,6 +195,9 @@ FFGEnum.THEME = {
 	},
 
 	button = {
+		disabledColor = Color3.fromRGB(87, 117, 144),
+		pressedColor = Color3.fromHex("1976D2"),
+		white = "rbxassetid://118445227667136",
 		shopBuy = "rbxassetid://103266412720403",
 		shopBuyHover = "rbxassetid://122918373699379",
 		shopBuyDisabled = "rbxassetid://87220614829273",
@@ -205,7 +208,11 @@ FFGEnum.THEME = {
 	},
 
 	shopItem = {
-		bgColor = Color3.fromRGB(23, 139, 241),
+		buttonColor = Color3.fromHex("e88f57"),
+		bgColor = Color3.fromHex("ffffdd"),
+		outline = Color3.fromHex("b9bc98"),
+		element = Color3.fromHex("f6c794"),
+		outlineThickness = 3,
 	},
 
 	sounds = {
