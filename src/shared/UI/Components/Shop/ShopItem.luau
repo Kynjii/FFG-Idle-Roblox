@@ -1,14 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local vide = require(ReplicatedStorage.Packages.vide)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
-local GetValue = require(ReplicatedStorage.Shared.Utils.GetValue)
-
--- //SECTION -  Vide functions
-local create = vide.create
-local effect = vide.effect
-local source = vide.source
-local spring = vide.spring
--- //!SECTION
 
 local function ShopItem(
 	props: {
@@ -23,146 +14,93 @@ local function ShopItem(
 		Visible: boolean?,
 		HoverEffect: boolean?,
 		ItemImage: string,
+		ItemPrice: string,
 	}
 )
-	-- //SECTION - Shop Item State
-	local isOwned = source(false)
-	-- //!SECTION
+	local shopItemContainer = Instance.new("CanvasGroup")
+	shopItemContainer.Name = "ShopItemContainer"
+	shopItemContainer.BackgroundTransparency = props.BackgroundTransparency or 1
+	shopItemContainer.Size = props.Size
+	shopItemContainer.BackgroundColor3 = props.BackgroundColor3 or FFGEnum.THEME.color.white
+	shopItemContainer.AnchorPoint = props.AnchorPoint or FFGEnum.THEME.alignment.anchor.center
+	shopItemContainer.Position = props.Position or FFGEnum.THEME.alignment.position.center
+	shopItemContainer.Visible = props.Visible or true
+	shopItemContainer.ClipsDescendants = true
 
-	-- //SECTION - Shop Item Container
-	-- Handles outline hover
-	local strokeThicknessSource = source(0)
-	local strokeThickness = spring(strokeThicknessSource, 0.2)
-	local springDebounce = false
-
-	local shopItemContainer = create("Frame")({
-		BackgroundTransparency = props.BackgroundTransparency or 1,
-		Size = props.Size,
-		BackgroundColor3 = props.BackgroundColor3 or FFGEnum.THEME.color.white,
-		AnchorPoint = props.AnchorPoint or FFGEnum.THEME.alignment.anchor.center,
-		Position = props.Position or FFGEnum.THEME.alignment.position.center,
-		Visible = props.Visible or true,
-
-		MouseEnter = function()
-			if not GetValue(props.HoverEffect) then return end
-			if springDebounce then return end
-			springDebounce = true
-			strokeThicknessSource(FFGEnum.THEME.shop.shopItem.outlineThickness)
-		end,
-		MouseLeave = function()
-			if not GetValue(props.HoverEffect) then return end
-			strokeThicknessSource(0)
-			springDebounce = false
-		end,
-	})
+	local strokeThickness = 0
+	shopItemContainer.MouseEnter:Connect(function()
+		if not props.HoverEffect then return end
+	end)
+	shopItemContainer.MouseLeave:Connect(function()
+		if props.HoverEffect then return end
+	end)
 
 	-- //SECTION - Shop Item Outline
-	local containerStroke = create("UIStroke")({
-		Color = props.HoverEffect and FFGEnum.THEME.shop.shopItem.outline or Color3.new(0, 0, 0),
-		StrokeSizingMode = Enum.StrokeSizingMode.FixedSize,
-		Thickness = strokeThickness,
-	})
+	local containerStroke = Instance.new("UIStroke")
+	containerStroke.Color = props.HoverEffect and FFGEnum.THEME.shop.shopItem.outline or Color3.new(0, 0, 0)
+	containerStroke.StrokeSizingMode = Enum.StrokeSizingMode.FixedSize
+	containerStroke.Thickness = strokeThickness
+
 	containerStroke.Parent = shopItemContainer
+
+	shopItemContainer.MouseEnter:Connect(function()
+		strokeThickness = FFGEnum.THEME.shop.shopItem.outlineThickness
+		containerStroke.Thickness = strokeThickness
+	end)
+
+	shopItemContainer.MouseLeave:Connect(function()
+		strokeThickness = 0
+		containerStroke.Thickness = strokeThickness
+	end)
 	-- //!SECTION
 
 	-- //SECTION -  Shop Item Corner
-	local corner = create("UICorner")({})
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = props.Rounded
 	corner.Parent = shopItemContainer
-
-	if GetValue(props.Rounded) then
-		corner.CornerRadius = props.Rounded
-	else
-		corner.CornerRadius = UDim.new(0)
-	end
 	-- //!SECTION
 
 	-- //SECTION Holds all the main elements
-	local mainContainer = create("Frame")({
-		Size = UDim2.fromScale(0.9, 0.9),
-		Position = FFGEnum.THEME.alignment.position.center,
-		AnchorPoint = FFGEnum.THEME.alignment.anchor.center,
-		BackgroundTransparency = 1,
-	})
+	local mainContainer = Instance.new("Frame")
+	mainContainer.Name = "ShopItemMainContainer"
+	mainContainer.Size = UDim2.fromScale(0.9, 0.9)
+	mainContainer.Position = FFGEnum.THEME.alignment.position.center
+	mainContainer.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
+	mainContainer.BackgroundTransparency = 1
 	mainContainer.Parent = shopItemContainer
 	-- //!SECTION
 
 	-- //SECTION -  Item Image
-	local item = create("ImageLabel")({
-		Image = props.ItemImage,
-		BackgroundTransparency = 1,
-		Size = UDim2.fromScale(0.8, 0.75),
-	})
+	local item = Instance.new("ImageLabel")
+	item.Image = props.ItemImage
+	item.BackgroundTransparency = 1
+	item.Size = UDim2.fromScale(0.8, 0.75)
 	item.Parent = mainContainer
 	-- //!SECTION
 
-	-- //SECTION -  Buy Button
-	local buttonSize = UDim2.fromScale(1, 0.2)
-	local sizeSource = source(buttonSize)
-	local buttonColor = source(FFGEnum.THEME.shop.shopItem.buttonColor)
-	local buttonText = source("Purchase")
-	local size = spring(sizeSource, 0.2)
-	local sizeSpringDebounce = false
+	-- //SECTION -  Item Price
+	local itemPriceColor = FFGEnum.THEME.shop.shopItem.buttonColor
 
-	local buyButton = create("ImageButton")({
-		BackgroundTransparency = 1,
-		PressedImage = FFGEnum.THEME.button.white,
-		Image = FFGEnum.THEME.button.white,
-		HoverImage = FFGEnum.THEME.button.white,
-		ResampleMode = Enum.ResamplerMode.Pixelated,
-		ImageColor3 = buttonColor,
-		ScaleType = props.ScaleType,
-		SliceCenter = props.SliceCenter,
-		LayoutOrder = 2,
-		Parent = mainContainer,
-		Size = size,
-		Activated = function(input)
-			isOwned(true)
-		end,
-		MouseEnter = function()
-			if sizeSpringDebounce then return end
-			sizeSpringDebounce = true
-			local size = buttonSize + UDim2.fromScale(0.01, 0.01)
-			sizeSource(size)
-		end,
-		MouseLeave = function()
-			sizeSource(buttonSize)
-			sizeSpringDebounce = false
-		end,
-	})
-
-	local buttonTxt = create("TextLabel")({
-		Position = UDim2.fromScale(0.5, 0.45),
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		TextColor3 = FFGEnum.THEME.color.white,
-		BackgroundTransparency = 1,
-		TextScaled = true,
-		Text = buttonText,
-		Font = FFGEnum.THEME.font,
-		Size = buyButton.Size + UDim2.fromScale(0, 0.5),
-	})
-	buttonTxt.Parent = buyButton
+	local itemPriceTxt = Instance.new("TextLabel")
+	itemPriceTxt.BorderSizePixel = 0
+	itemPriceTxt.Position = FFGEnum.THEME.alignment.position.bottom
+	itemPriceTxt.AnchorPoint = FFGEnum.THEME.alignment.anchor.bottom
+	itemPriceTxt.TextColor3 = FFGEnum.THEME.color.white
+	itemPriceTxt.BackgroundColor3 = itemPriceColor
+	itemPriceTxt.TextScaled = true
+	itemPriceTxt.Text = props.ItemPrice
+	itemPriceTxt.Font = FFGEnum.THEME.font
+	itemPriceTxt.Size = UDim2.fromScale(1, 0.2)
+	itemPriceTxt.Parent = shopItemContainer
 	-- //!SECTION
 
 	-- //SECTION - UI List Layout
-	local uiList = create("UIListLayout")({
-		HorizontalAlignment = Enum.HorizontalAlignment.Center,
-		FillDirection = Enum.FillDirection.Vertical,
-		VerticalFlex = Enum.UIFlexAlignment.SpaceBetween,
-	})
+	local uiList = Instance.new("UIListLayout")
+	uiList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	uiList.FillDirection = Enum.FillDirection.Vertical
+	uiList.SortOrder = Enum.SortOrder.LayoutOrder
+	uiList.VerticalFlex = Enum.UIFlexAlignment.SpaceBetween
 	uiList.Parent = mainContainer
-	-- //!SECTION
-
-	-- //SECTION - Effects
-	effect(function()
-		if isOwned() then
-			buttonColor(FFGEnum.THEME.button.disabledColor)
-			buttonText("Owned")
-
-			buyButton.Active = false
-			buyButton.Interactable = false
-			buttonTxt.TextColor3 = FFGEnum.THEME.intent.disabled
-		end
-	end)
 	-- //!SECTION
 
 	return shopItemContainer
