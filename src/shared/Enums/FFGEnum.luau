@@ -180,7 +180,7 @@ FFGEnum.THEME = {
 		warning = Color3.fromRGB(248, 150, 30),
 		danger = Color3.fromRGB(249, 65, 68),
 		notice = Color3.fromRGB(249, 199, 79),
-		muted = Color3.fromRGB(87, 117, 144),
+		disabled = Color3.fromRGB(108, 146, 179),
 	},
 
 	-- Sizing/styling

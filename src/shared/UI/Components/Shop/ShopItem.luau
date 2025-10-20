@@ -168,6 +168,7 @@ local function ShopItem(
 
 			buyButton.Active = false
 			buyButton.Interactable = false
+			buttonTxt.TextColor3 = FFGEnum.THEME.intent.disabled
 		end
 	end)
 	-- //!SECTION
