@@ -112,7 +112,7 @@ function TeamManager.AssignHelperManager(profile, player: Player, teamId: number
 	if not helperManager then return end
 
 	TeamManager.HelperManager[player.UserId] = helperManager
-	HelperManager:Initialize()
+	helperManager:Initialize()
 end
 
 function TeamManager.AssignTeam(player: Player): number?

@@ -15,10 +15,12 @@ local function ShopItem(
 		HoverEffect: boolean?,
 		ItemImage: string,
 		ItemPrice: string,
+		ItemName: string,
+		ItemId: string,
 	}
 )
 	local shopItemContainer = Instance.new("CanvasGroup")
-	shopItemContainer.Name = "ShopItemContainer"
+	shopItemContainer.Name = props.ItemId
 	shopItemContainer.BackgroundTransparency = props.BackgroundTransparency or 1
 	shopItemContainer.Size = props.Size
 	shopItemContainer.BackgroundColor3 = props.BackgroundColor3 or FFGEnum.THEME.color.white

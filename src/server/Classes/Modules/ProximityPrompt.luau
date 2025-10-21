@@ -55,7 +55,7 @@ function PP.CreatePP(proximityPrompt: ProximityPrompt, class: Boat | Tender | Po
 				return
 			end
 
-			Events.FireEvent(Events.RemoteNames.OpenShopDetails, class.Player, typedClass)
+			Events.FireEvent(Events.RemoteNames.OpenHelperShop, class.Player, typedClass)
 		end))
 	end
 

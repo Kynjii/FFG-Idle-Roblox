@@ -9,9 +9,9 @@ Events.RemoteNames = {
 	EntityPurchased = "EntityPurchased",
 	EntityUpgraded = "EntityUpgraded",
 	GameReset = "GameReset",
-	OpenShopDetails = "OpenShopDetails",
-	ShopItemPurchased = "ShopItemPurchased",
-	PrepareShopItems = "PrepareShopItems",
+	OpenHelperShop = "OpenHelperShop",
+	HelperPurchased = "HelperPurchased",
+	PrepareHelperShop = "PrepareHelperShop",
 }
 
 local FOLDER_NAME = "Events"

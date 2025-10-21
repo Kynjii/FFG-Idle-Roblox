@@ -9,7 +9,7 @@ local DataService = require(ServerScriptService.Server.Services.DataService)
 local Trove = require(ReplicatedStorage.Packages.Trove)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
-local Helpers = require(ReplicatedStorage.Shared.Inventory.Helpers)
+local ShopHelpers = require(ReplicatedStorage.Shared.Inventory.ShopHelpers)
 
 -- //SECTION - Tagged Entities within Workspace
 local taggedShops = CollectionService:GetTagged("HelperShop")
@@ -21,9 +21,9 @@ HelperManager.__index = HelperManager
 
 type HelperManager = typeof(setmetatable({}, HelperManager))
 
-local baseHelperCatalog: { Helpers.Helper } = Helpers
+local baseHelperCatalog: { ShopHelpers.Helper } = ShopHelpers
 
-function HelperManager.New(playerHelperData: { Helpers.Helper }, player: Player, teamId: number): HelperManager
+function HelperManager.New(playerHelperData: { ShopHelpers.Helper }, player: Player, teamId: number): HelperManager
 	local self = setmetatable({}, HelperManager)
 
 	self.Entity = FFGEnum.CLASS.ENTITY_NAME.Shop
@@ -80,14 +80,14 @@ function HelperManager.Purchasehelper(self: HelperManager, helperId: number): ()
 end
 
 -- //SECTION - UI Setup
-function HelperManager:Initialize(): ()
+function HelperManager.Initialize(self: HelperManager): ()
 	self:Show()
 	self:CanCollide()
 
 	-- Setup UI components
 	if self.ShopModel then self:SetupProximityPrompt(self.ShopModel) end
 
-	Events.FireEvent(Events.RemoteNames.PrepareShophelpers, self.Player, self.PlayerHelperData)
+	Events.FireEvent(Events.RemoteNames.PrepareHelperShop, self.Player, self.PlayerHelperData)
 end
 
 function HelperManager.SetupProximityPrompt(self: HelperManager, model: Model): ()

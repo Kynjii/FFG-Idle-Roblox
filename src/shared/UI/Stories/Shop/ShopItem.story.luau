@@ -21,6 +21,8 @@ local function story(target)
 		ScaleType = Enum.ScaleType.Slice,
 		SliceCenter = Rect.new(32, 83, 32, 83),
 		ItemPrice = "1.1k",
+		ItemName = "hammer_01",
+		ItemId = "Hammer",
 	})
 	item.Parent = target
 
