@@ -3,10 +3,11 @@ local PlayerInventory = require(ReplicatedStorage.Shared.UI.Components.Inventory
 
 local function story(target)
 	local instance = PlayerInventory.Create({ Name = "Inventory", ScreenGuiName = "PlayerInventory" })
-	instance.Parent = target
+	local detailsContainer = instance:WaitForChild("DetailsContainer") :: Frame
+	detailsContainer.Parent = target
 
 	return function()
-		instance:Destroy()
+		detailsContainer:Destroy()
 	end
 end
 

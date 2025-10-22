@@ -2,8 +2,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local AnimateButtonHover = require(StarterPlayer.StarterPlayerScripts.Client.HUD.Utils.AnimateButtonHover)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
+local Events = require(ReplicatedStorage.Shared.Events.Events)
 
-local function ShopTooltip(props: {
+local Tooltip = {}
+
+function Tooltip.Create(props: {
 	BackgroundColor3: Color3?,
 	Size: UDim2,
 	Rounded: UDim?,
@@ -186,4 +189,47 @@ local function ShopTooltip(props: {
 	return shopTooltipContainer
 end
 
-return ShopTooltip
+function Tooltip.Initialize(parentInstance: Instance)
+	local tooltip = Tooltip.Create({
+		ItemImage = "",
+		ItemCost = "",
+		ItemDescription = "",
+		ItemName = "",
+		Parent = parentInstance,
+		Size = UDim2.fromScale(0.3, 1),
+		Rounded = FFGEnum.THEME.button.cornerRadius,
+		Visible = false,
+	})
+
+	-- //SECTION - Bindables
+	type itemData = {
+		Image: string,
+		Price: number,
+		Name: string,
+		Id: string,
+		Description: string,
+	}
+
+	local bindableEvent = Events.GetBindableEvent(Events.BindableNames.ShowShopTooltip)
+	if bindableEvent then bindableEvent.Event:Connect(function(data: itemData)
+		if not data then
+			error("Not data was passed when attempting to open shop tooltip", data)
+			return
+		end
+
+		if tooltip then tooltip:Destroy() end
+		tooltip = Tooltip.Create({
+			ItemCost = data.Price,
+			ItemDescription = data.Description,
+			ItemName = data.Name,
+			ItemImage = data.Image,
+			Size = UDim2.fromScale(0.3, 1),
+			Rounded = FFGEnum.THEME.button.cornerRadius,
+			Visible = true,
+			Parent = parentInstance,
+		})
+	end) end
+	-- //!SECTION
+end
+
+return Tooltip
