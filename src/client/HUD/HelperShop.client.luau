@@ -12,10 +12,12 @@ local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
+
 local helperShopUI
 local shopDetailsUI
 local main
 local shopItemsContainer
+
 task.spawn(function()
 	helperShopUI = ShopGUI.Create({ ShopName = "Crew Shop", ScreenGuiName = "HelperShop" })
 	helperShopUI.Parent = playerGui
@@ -41,7 +43,7 @@ function createShopItemElement(helper: HelperType.HelperData)
 		ItemName = helper.Name,
 		ItemId = helper.Id,
 		ItemDescription = "Wee wooo",
-		ItemPrice = FormatNumber(helper.Stats and helper.Stats.BaseCost),
+		ItemPrice = FormatNumber(helper.BaseCost),
 		BackgroundColor3 = FFGEnum.THEME.shop.shopItem.bgColor,
 		BackgroundTransparency = 0,
 		Size = UDim2.fromScale(1, 1),
@@ -56,12 +58,12 @@ function createShopItemElement(helper: HelperType.HelperData)
 end
 
 local _replica = nil
-local shopData: any = {}
+local shopData: {[string]: any} = {}
 
 function watchplayerTutorialItems()
 	Replica.OnNew("PlayerState", function(replicaData)
 		_replica = replicaData:OnSet({ "TutorialHelpers" }, function(newState)
-			playerTutorialItems = newState
+			shopData = newState
 			updateUI()
 		end)
 	end)
@@ -86,7 +88,7 @@ end
 
 function updateUI()
 	for _, element: Frame in pairs(itemElements) do
-		local associatedItem = TableUtil.Find(playerTutorialItems, function(item)
+		local associatedItem = TableUtil.Find(shopData, function(item)
 			return item.Id == element.Name
 		end) :: Instance
 
@@ -103,23 +105,26 @@ function populateDetailsUI()
 end
 
 local shopDetails = Events.GetRemote(Events.RemoteNames.OpenHelperShop)
-if shopDetails then shopDetails.OnClientEvent:Connect(function(data)
-	if data then
-		shopDetailsUI.Visible = true
-		shopData = data
-		watchplayerTutorialItems()
-		populateDetailsUI()
-		task.spawn(function()
-			handleClosingShopDetailsUI()
-		end)
-	end
-end) end
+if shopDetails then
+	shopDetails.OnClientEvent:Connect(function(data)
+		if data then
+			print(`Open Shop Data (used to see current items): {data}`)
+			shopDetailsUI.Visible = true
+			shopData = data
+			-- watchplayerTutorialItems()
+			populateDetailsUI()
+			task.spawn(function()
+				handleClosingShopDetailsUI()
+			end)
+		end
+	end)
+end
 
-local playerTutorialItemstateEvent = Events.GetRemote(Events.RemoteNames.PrepareHelperShop)
-if playerTutorialItemstateEvent then playerTutorialItemstateEvent.OnClientEvent:Connect(function(data)
+local prepareShopEvent = Events.GetRemote(Events.RemoteNames.PrepareHelperShop)
+if prepareShopEvent then prepareShopEvent.OnClientEvent:Connect(function(data)
 	if not data then return end
-
-	playerTutorialItems = data
+	print(`Prepare Shop (used for restocking): {data}`)
+	shopData = data
 
 	if shopItemsContainer then
 		for i, item in ipairs(playerTutorialItems) do

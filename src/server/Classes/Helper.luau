@@ -20,7 +20,7 @@ local NAME = {
 	Transport = "Hauler",
 }
 
-local helperFolder = game.Workspace:WaitForChild("Helpers")
+local helperFolder: Instance = game.Workspace:WaitForChild("Helpers")
 local helperModel: Model
 if helperFolder then
 	helperModel = helperFolder:FindFirstChild("HelperTemplate")
@@ -53,7 +53,7 @@ type Helper = typeof(setmetatable({} :: HelperType.HelperData, Helper))
 local function chooseJob()
 	local jobs = {}
 
-	local index = 1
+	local index: number = 1
 	for k, v in pairs(FFGEnum.JOB_CATEGORY) do
 		jobs[index] = v
 		index += 1
@@ -68,13 +68,13 @@ end
 
 local function chooseQuality()
 	local function getRandomQuality()
-		local totalWeight = 0
+		local totalWeight: number = 0
 		for _, data in pairs(FFGEnum.QUALITIES) do
 			totalWeight += data.DropChance
 		end
 
-		local randomValue = math.random() * totalWeight
-		local cumulative = 0
+		local randomValue: number = math.random() * totalWeight
+		local cumulative: number = 0
 
 		for qualityId, data in pairs(FFGEnum.QUALITIES) do
 			cumulative += data.DropChance
@@ -84,18 +84,18 @@ local function chooseQuality()
 		return nil, nil
 	end
 
-	local qualityId = getRandomQuality()
+	local qualityId: number = getRandomQuality()
 	return qualityId
 end
 
-local function generateStats(jobCategory, level, qualityId)
+local function generateStats(jobCategory: string, level: number, qualityId: number?)
 	return HelperCalculators.CalculateStats(jobCategory, level, qualityId)
 end
 -- //!SECTION
 
 -- //SECTION - Constructor
 function Helper.New(state: HelperType.HelperData, player: Player, teamId: number): Helper
-	local self = setmetatable({} :: HelperType.HelperData, Helper)
+	local self = setmetatable({} :: HelperType.HelperInstance, Helper)
 
 	-- Start with default stats as base
 	for key, value in pairs(DEFAULTS) do
@@ -126,7 +126,7 @@ function Helper.New(state: HelperType.HelperData, player: Player, teamId: number
 	self.Quality = FFGEnum.QUALITIES[self.QualityId]
 
 	-- Calculate default stats based on quality and job
-	self.Stats = state.Stats or generateStats(self.JobCategory, self.Level, self.QualityId)
+	self.Stats = state.Stats or generateStats(self.JobCategory, self.Level, self.QualityId) :: HelperType.HelperStats
 	self.BaseCost = state.BaseCost or ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, self.QualityId, self.RealmId)
 	self.UpgradeCost = state.UpgradeCost or ClassCalculators.CalculateUpgradeCost(self.BaseCost, self.Level, self.QualityId, self.RealmId)
 
@@ -142,7 +142,7 @@ end
 
 -- //SECTION - Static to generate data for shops
 function Helper.CreateStateData(player: Player, currencyType: string)
-	local state = {} :: HelperType.HelperData
+	local state: HelperType.HelperData = {}
 
 	-- Start with default stats as base
 	for key, value in pairs(DEFAULTS) do
@@ -184,7 +184,7 @@ end
 -- //!SECTION
 
 -- //SECTION - Core Helper Actions
-function Helper.Purchase(self: Helper & HelperType.HelperData): ()
+function Helper.Purchase(self: Helper): ()
 	self.IsPurchased = true
 	self.Model = self._cleaner and self._cleaner:Add(helperModel and helperModel:Clone())
 	self.CurrentAssignment = FFGEnum.JOB_ASSIGNMENTS.Unassigned
@@ -194,11 +194,11 @@ function Helper.Purchase(self: Helper & HelperType.HelperData): ()
 	if self.Tier == 1 then Tutorial.Update(self.Player, self.TeamId) end
 end
 
-function Helper.Upgrade(self: Helper & HelperType.HelperData): ()
+function Helper.Upgrade(self: Helper): ()
 	if not self:CanUpgrade() then return end
 
 	self.Level += 1
-	local stage = Formulas.StageForLevel(self.Level)
+	local stage: number = Formulas.StageForLevel(self.Level)
 	if self.UpgradeStage < stage then self:IncreaseUpgradeStage(stage) end
 
 	self.Stats = self:CalculateStats()
@@ -206,33 +206,33 @@ function Helper.Upgrade(self: Helper & HelperType.HelperData): ()
 	self:Save()
 end
 
-function Helper.IncreaseUpgradeStage(self: Helper & HelperType.HelperData, stage: number): ()
+function Helper.IncreaseUpgradeStage(self: Helper, stage: number): ()
 	self.UpgradeStage = stage
 end
 -- //!SECTION
 
 -- //SECTION - Calculations
-function Helper.GenerateJobCategory(self: Helper & HelperType.HelperData): number
+function Helper.GenerateJobCategory(self: Helper): number
 	return chooseJob()
 end
 
-function Helper.CalculateStats(self: Helper & HelperType.HelperData)
+function Helper.CalculateStats(self: Helper)
 	return generateStats(self.JobCategory, self.Level, self.QualityId)
 end
 
-function Helper.DefineQuality(self: Helper & HelperType.HelperData): number?
+function Helper.DefineQuality(self: Helper): number?
 	return chooseQuality()
 end
 -- //!SECTION
 
 -- //SECTION - Handling Resources
-function Helper.AddResource(self: Helper & HelperType.HelperData, amount: number): ()
+function Helper.AddResource(self: Helper, amount: number): ()
 	local availableStorage = (self.Stats and self.Stats.Storage) - self.ResourceInStorage
-	local calcAmount = math.min(availableStorage, amount)
+	local calcAmount: number = math.min(availableStorage, amount)
 
 	self.ResourceInStorage += calcAmount
 
-	if self.ResourceInStorage >= self.Stats and self.Stats.Storage then
+	if self.ResourceInStorage >= (self.Stats and self.Stats.Storage) then
 		self.ResourceInStorage = self.Stats and self.Stats.Storage
 		self:UpdateStorageStatus(true)
 	end
@@ -240,60 +240,60 @@ function Helper.AddResource(self: Helper & HelperType.HelperData, amount: number
 	self:Save()
 end
 
-function Helper.RemoveResource(self: Helper & HelperType.HelperData, amount: number): ()
+function Helper.RemoveResource(self: Helper, amount: number): ()
 	self.ResourceInStorage -= amount
 	self:UpdateStorageStatus(false)
 	self:Save()
 end
 
-function Helper.UpdateStorageStatus(self: Helper & HelperType.HelperData, status: boolean): ()
+function Helper.UpdateStorageStatus(self: Helper, status: boolean): ()
 	self.StorageFull = status
 end
 -- //!SECTION
 
 -- //SECTION - Setup
-function Helper.Initialize(self: Helper & HelperType.HelperData): ()
+function Helper.Initialize(self: Helper): ()
 	self:Show()
 	self:CanCollide()
 end
 -- //!SECTION
 
 -- //SECTION - Visibility and Collision
-function Helper.Show(self: Helper & HelperType.HelperData): ()
+function Helper.Show(self: Helper): ()
 	ClassVisualizer.Show(self.VisualRoot)
 end
 
-function Helper.Hide(self: Helper & HelperType.HelperData): ()
+function Helper.Hide(self: Helper): ()
 	ClassVisualizer.Hide(self.VisualRoot)
 end
 
-function Helper.CanCollide(self: Helper & HelperType.HelperData): ()
+function Helper.CanCollide(self: Helper): ()
 	ClassVisualizer.CanCollide(self.VisualRoot)
 end
 
-function Helper.CannotCollide(self: Helper & HelperType.HelperData): ()
+function Helper.CannotCollide(self: Helper): ()
 	ClassVisualizer.CannotCollide(self.VisualRoot)
 end
 -- //!SECTION
 
 -- //SECTION -  Helper Utilities
-function Helper.GetName(self: Helper & HelperType.HelperData): string
+function Helper.GetName(self: Helper): string
 	return NAME[self.JobCategory]
 end
 
-function Helper.CanUpgrade(self: Helper & HelperType.HelperData): boolean
+function Helper.CanUpgrade(self: Helper): boolean
 	return self.Level < self.MaxLevel
 end
 
-function Helper.IsStorageFull(self: Helper & HelperType.HelperData): boolean
-	local status = self.ResourceInStorage == self.Stats and self.Stats.Storage
+function Helper.IsStorageFull(self: Helper): boolean
+	local status: boolean = self.ResourceInStorage == (self.Stats and self.Stats.Storage)
 	if self.StorageFull ~= status then self:UpdateStorageStatus(status) end
 	return status
 end
 -- //!SECTION
 
 -- //SECTION - Loading and Saving
-function Helper.Serialize(self: Helper & HelperType.HelperData): HelperType.HelperData
+function Helper.Serialize(self: Helper): { [string]: any }
 	return {
 		Entity = self.Entity,
 		Id = self.Id,
@@ -317,7 +317,7 @@ function Helper.Serialize(self: Helper & HelperType.HelperData): HelperType.Help
 	}
 end
 
-function Helper.Save(self: Helper & HelperType.HelperData): ()
+function Helper.Save(self: Helper): ()
 	if self.IsTutorialHelper then
 		DataService.SaveTutorialHelper(self.Player, self:Serialize())
 	else
@@ -327,14 +327,14 @@ end
 -- //!SECTION
 
 -- //SECTION - Event Listeners
-function Helper.AttachEventListeners(self: Helper & HelperType.HelperData)
+function Helper.AttachEventListeners(self: Helper)
 	-- //TODO -
 	-- EventListeners.Attach(self :: any)
 end
 -- //!SECTION
 
 -- //SECTION - Cleanup
-function Helper.Destroy(self: Helper & HelperType.HelperData)
+function Helper.Destroy(self: Helper)
 	self:Hide()
 	self:CannotCollide()
 

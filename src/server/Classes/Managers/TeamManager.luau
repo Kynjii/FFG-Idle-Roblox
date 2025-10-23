@@ -2,7 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Teams = game:GetService("Teams")
 local BuildingsManager = require(script.Parent.BuildingsManager)
 local ChainManager = require(script.Parent.ChainManager)
-local HelperManager = require(script.Parent.HelperManager)
+local HelperShopManager = require(script.Parent.HelperShopManager)
 local BuildingsManagerType = require(ReplicatedStorage.Shared.Types.Managers.BuildingsManagerType)
 local ChainManagerType = require(ReplicatedStorage.Shared.Types.Managers.ChainManagerType)
 
@@ -55,7 +55,7 @@ TeamManager.Teams = {
 
 TeamManager.ChainManagers = {}
 TeamManager.BuildingsManager = {}
-TeamManager.HelperManager = {}
+TeamManager.HelperShopManager = {}
 
 function TeamManager.CreateTeams(): ()
 	for i, team in ipairs(TeamManager.Teams) do
@@ -102,19 +102,20 @@ function TeamManager.AssignBuildingsManager(profile, player: Player, teamId: num
 	buildingsManager:Initialize()
 end
 
-function TeamManager.AssignHelperManager(profile, player: Player, teamId: number): ()
-	TeamManager.HelperManager[player.UserId] = TeamManager.HelperManager[player.UserId] or { OwnerId = player.UserId }
+function TeamManager.AssignHelperShopManager(profile, player: Player, teamId: number): ()
+	TeamManager.HelperShopManager[player.UserId] = TeamManager.HelperShopManager[player.UserId] or { OwnerId = player.UserId }
 	local currentRealm = profile.CurrentRealm or 1
 	local realmData = profile and profile.Realms[currentRealm]
+
 	local playerTutorialHelpers = profile.TutorialHelpers
-	local playerHelpers = realmData.Helpers
+
 	local shopState = realmData.Shops["HelperShop"]
 
-	local helperManager = HelperManager.New({ HelpersOwned = playerHelpers, TutorialHelpers = playerTutorialHelpers }, shopState, player, teamId)
-	if not helperManager then return end
+	local HelperShopManager = HelperShopManager.New(playerTutorialHelpers, shopState, player, teamId)
+	if not HelperShopManager then return end
 
-	TeamManager.HelperManager[player.UserId] = helperManager
-	helperManager:Initialize()
+	TeamManager.HelperShopManager[player.UserId] = HelperShopManager
+	HelperShopManager:Initialize()
 end
 
 function TeamManager.AssignTeam(player: Player): number?
@@ -156,14 +157,14 @@ local function listClean(list, userId, managerType): ()
 	elseif managerType == managerTypes.Building then
 		TeamManager.BuildingsManager[userId] = nil
 	elseif managerType == managerTypes.Shop then
-		TeamManager.HelperManager[userId] = nil
+		TeamManager.HelperShopManager[userId] = nil
 	end
 end
 
 function TeamManager.CleanupPlayer(userId: number): ()
 	local chainList = TeamManager.ChainManagers[userId]
 	local buildingList = TeamManager.BuildingsManager[userId]
-	local helperList = TeamManager.HelperManager[userId]
+	local helperList = TeamManager.HelperShopManager[userId]
 
 	if chainList then listClean(chainList, userId, managerTypes.Chain) end
 	if buildingList then listClean(buildingList, userId, managerTypes.Building) end

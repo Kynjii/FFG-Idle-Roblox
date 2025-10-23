@@ -71,7 +71,7 @@ function Boat.New(state: { [string]: any }?, player: Player, model: Model, teamI
 
 	-- Override with provided state values
 	if state then
-		for key, value in pairs(state) do
+		for key: string, value: any in pairs(state) do
 			self[key] = value
 		end
 	end
@@ -107,8 +107,6 @@ function Boat.New(state: { [string]: any }?, player: Player, model: Model, teamI
 	self._cleaner = Trove.new()
 
 	self:AttachEventListeners()
-
-	self.FishingInterval = nil
 
 	return self
 end
@@ -151,7 +149,7 @@ function Boat.Upgrade(self: Boat): ()
 	if not self:CanUpgrade() then return end
 
 	self.Level += 1
-	local stage = Formulas.StageForLevel(self.Level)
+	local stage: number = Formulas.StageForLevel(self.Level)
 	if self.UpgradeStage < stage then
 		self:IncreaseUpgradeStage(stage)
 		self:UpdateVisualModel()
@@ -172,17 +170,17 @@ end
 
 -- //SECTION - Calculations
 function Boat.CalculateBaseCost(self: Boat): number
-	local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, self.Tier, self.RealmId)
+	local base: number = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, self.Tier, self.RealmId)
 	self.BaseCost = base
 
 	return base
 end
 
 function Boat.CalculateUpgradeCost(self: Boat): number
-	local baseCost = self.BaseCost or DEFAULTS.BaseCost
+	local baseCost: number = self.BaseCost or DEFAULTS.BaseCost
 	if baseCost == DEFAULTS.BaseCost then baseCost = self:CalculateBaseCost() end
 
-	local cost = ClassCalculators.CalculateUpgradeCost(baseCost, self.Level, self.Tier, self.RealmId)
+	local cost: number = ClassCalculators.CalculateUpgradeCost(baseCost, self.Level, self.Tier, self.RealmId)
 
 	self.UpgradeCost = cost
 
@@ -190,14 +188,14 @@ function Boat.CalculateUpgradeCost(self: Boat): number
 end
 
 function Boat.CalculateBaseStorage(self: Boat): number
-	local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseStorage, self.Tier, self.RealmId)
+	local base: number = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseStorage, self.Tier, self.RealmId)
 	self.BaseStorage = base
 
 	return base
 end
 
 function Boat.CalculateMaxStorage(self: Boat): (number, number)
-	local baseStorage = self.BaseStorage or DEFAULTS.BaseStorage
+	local baseStorage: number = self.BaseStorage or DEFAULTS.BaseStorage
 	if baseStorage == DEFAULTS.BaseStorage then baseStorage = self:CalculateBaseStorage() end
 	local storagePercentBuff = self.Buffs[BOAT_BUFFS.BoatStorage_Percent] and self.Buffs[BOAT_BUFFS.BoatStorage_Percent].CurrentValue or nil
 
@@ -205,14 +203,14 @@ function Boat.CalculateMaxStorage(self: Boat): (number, number)
 end
 
 function Boat.CalculateBaseFPS(self: Boat): number
-	local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseFPS, self.Tier, self.RealmId)
+	local base: number = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseFPS, self.Tier, self.RealmId)
 	self.BaseFPS = base
 
 	return base
 end
 
 function Boat.CalculateFPS(self: Boat): (number, number)
-	local baseFPS = self.BaseFPS or DEFAULTS.BaseFPS
+	local baseFPS: number = self.BaseFPS or DEFAULTS.BaseFPS
 	if baseFPS == DEFAULTS.BaseFPS then baseFPS = self:CalculateBaseFPS() end
 	local fpsPercentBuff = self.Buffs[BOAT_BUFFS.FPS_Percent] and self.Buffs[BOAT_BUFFS.FPS_Percent].CurrentValue or nil
 
@@ -222,20 +220,21 @@ end
 
 -- //SECTION - Handling Fish
 function Boat.StartFishing(self: Boat): ()
-	self.FishingInterval = SetInterval(function()
-		if not self:IsStorageFull() then
-			self:AddFish(self.CurrentFPS)
-			self:UpdatePurchaseBoardUI()
-		else
-			self:UpdateStorageStatus(true)
-		end
-	end, 1)
-	if self.FishingInterval and self._cleaner then self._cleaner:Add(self.FishingInterval) end
+	if self._cleaner then
+		self._cleaner:Add(SetInterval(function()
+			if not self:IsStorageFull() then
+				self:AddFish(self.CurrentFPS)
+				self:UpdatePurchaseBoardUI()
+			else
+				self:UpdateStorageStatus(true)
+			end
+		end, 1))
+	end
 end
 
 function Boat.AddFish(self: Boat, amount: number): ()
-	local availableStorage = self.CurrentMaxStorage - self.FishInStorage
-	local calcAmount = math.min(availableStorage, amount)
+	local availableStorage: number = self.CurrentMaxStorage - self.FishInStorage
+	local calcAmount: number = math.min(availableStorage, amount)
 
 	self.FishInStorage += calcAmount
 
@@ -309,14 +308,14 @@ function Boat.SetupProximityPrompt(self: Boat, purchaseBoard: Model): ()
 end
 
 function Boat.ShowFishPopUp(self: Boat, amount: number): ()
-	local billboard = self.Model:FindFirstChild("FishPopupTemplate", true) :: BillboardGui?
+	local billboard: BillboardGui? = self.Model:FindFirstChild("FishPopupTemplate", true)
 	if not billboard then return end
 
-	local primaryPart = self.Model.PrimaryPart
+	local primaryPart: BasePart? = self.Model.PrimaryPart
 	if not primaryPart then return end
 
-	local clone = billboard:Clone()
-	local container = primaryPart:FindFirstChild("Billboard")
+	local clone: BillboardGui = billboard:Clone()
+	local container: Instance? = primaryPart:FindFirstChild("Billboard")
 	if container then
 		clone.Parent = container
 	else
@@ -377,7 +376,7 @@ function Boat.CanUpgrade(self: Boat): boolean
 end
 
 function Boat.IsStorageFull(self: Boat): boolean
-	local status = self.FishInStorage == self.CurrentMaxStorage
+	local status: boolean = self.FishInStorage == self.CurrentMaxStorage
 	if self.StorageFull ~= status then self:UpdateStorageStatus(status) end
 	return status
 end
@@ -420,7 +419,7 @@ function Boat.GetVisualModels(self: Boat): { [number]: Model }
 	local modelsFolder = DeepWait(game.Workspace, "Boats", "VisualStages")
 	local models = modelsFolder:GetChildren()
 
-	local sortedModels = {}
+	local sortedModels: {Model} = {}
 	for k, v in pairs(models) do
 		sortedModels[tonumber(v.Name)] = v
 	end
@@ -429,7 +428,7 @@ function Boat.GetVisualModels(self: Boat): { [number]: Model }
 end
 
 function Boat.RemovePreviousVisualModel(self: Boat): ()
-	local visualModel = self.CurrentVisualModel
+	local visualModel: Model? = self.CurrentVisualModel
 	if not visualModel then return end
 
 	visualModel:Destroy()
@@ -440,17 +439,17 @@ function Boat.UpdateVisualModel(self: Boat): ()
 	self:RemovePreviousVisualModel()
 
 	if not self.VisualModels then return end
-	local templateModel = self.VisualModels[self.UpgradeStage]
+	local templateModel: Model = self.VisualModels[self.UpgradeStage]
 	if not templateModel then return end
-	local updatedModel = templateModel:Clone()
+	local updatedModel: Model = templateModel:Clone()
 
 	updatedModel.Name = templateModel.Name .. "_Clone"
 	updatedModel.Parent = self.VisualRoot
 	updatedModel:PivotTo(self.VisualRoot.CFrame)
 
-	for _, part in pairs(updatedModel:GetDescendants()) do
+	for _, part: Instance in pairs(updatedModel:GetDescendants()) do
 		if part:IsA("BasePart") then
-			local weld = Instance.new("WeldConstraint")
+			local weld: WeldConstraint = Instance.new("WeldConstraint")
 			weld.Parent = part
 			weld.Part0 = part
 			weld.Part1 = self.VisualRoot
@@ -494,7 +493,7 @@ end
 
 -- //SECTION - Cleanup
 function Boat.ClearAllAttributes(self: Boat, instance: Instance)
-	for name, _ in pairs(instance:GetAttributes()) do
+	for name: string, _ in pairs(instance:GetAttributes()) do
 		if not string.find(name, "^RBX_") then instance:SetAttribute(name, nil) end
 	end
 end

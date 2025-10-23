@@ -28,6 +28,7 @@ local stateTypes = {
 	CompletedTutorial = "complete Tutorial",
 	GetTutorialState = "get Tutorial",
 	ResetData = "Reset",
+	HelperShop = "save Helper Shop",
 }
 
 local function getProfile(player: Player, stateType: string): any | boolean
@@ -393,6 +394,29 @@ function DataService.SaveTutorialHelper(player: Player, helper: HelperType.Helpe
 
 	local replica = DataService.Replicas[player]
 	if replica then replica:Set({ "TutorialHelpers" }, profile.Data.TutorialHelpers) end
+
+	return true
+end
+-- //!SECTION
+
+-- //SECTION - SHOPS
+function DataService.SaveHelperShop(player: Player, shopState: { [string]: any })
+	local profile = getProfile(player, stateTypes.HelperShop)
+	if not profile then return false end
+
+	local hasRealms = getRealms(profile)
+	if not hasRealms then return false end
+
+	local currentRealm = getRealmData(profile)
+	if not currentRealm then return false end
+
+	-- Initialize HelperShop array if it doesn't exist
+	if not profile.Data.Realms[currentRealm].Shops then profile.Data.Realms[currentRealm].Shops = {} end
+
+	profile.Data.Realms[currentRealm].Shops["HelperShop"] = shopState
+
+	local replica = DataService.Replicas[player]
+	if replica then replica:Set({ "Realms", currentRealm, "Shops" }, profile.Data.Realms[currentRealm].Shops) end
 
 	return true
 end
