@@ -18,8 +18,9 @@ local function ShopItem(
 		ItemName: string,
 		ItemId: string,
 		ItemDescription: string,
-		ItemPrice: string,
+		ItemBaseCost: string,
 		ItemStats: { [number]: { [string]: any } }?,
+		ItemQualityId: number,
 		Parent: Instance,
 		ShopInstance: Instance,
 	}
@@ -34,6 +35,34 @@ local function ShopItem(
 	shopItemContainer.Visible = props.Visible or true
 	shopItemContainer.ClipsDescendants = true
 	shopItemContainer.Parent = props.Parent or nil
+
+	local backgroundPattern = Instance.new("ImageLabel")
+	backgroundPattern.Name = "ImageLabel"
+	backgroundPattern.AnchorPoint = Vector2.new(0.5, 0.5)
+	backgroundPattern.BackgroundTransparency = 1
+	backgroundPattern.Image = "rbxassetid://78417979980159"
+	backgroundPattern.Position = UDim2.fromScale(0.5, 0.4)
+	backgroundPattern.ScaleType = Enum.ScaleType.Fit
+	backgroundPattern.Size = UDim2.fromScale(1, 1)
+	backgroundPattern.ZIndex = 0
+	backgroundPattern.Parent = shopItemContainer
+
+	local backgroundPatternGradient = Instance.new("UIGradient")
+	backgroundPatternGradient.Name = "UIGradient"
+	local base = props.BackgroundColor3 or FFGEnum.THEME.color.white
+	local factor = 0.8 -- reduce brightness by 20%
+	local darker = Color3.new(math.clamp(base.R * factor, 0, 1), math.clamp(base.G * factor, 0, 1), math.clamp(base.B * factor, 0, 1))
+
+	backgroundPatternGradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, props.BackgroundColor3 or FFGEnum.THEME.color.white),
+		ColorSequenceKeypoint.new(0.5, darker),
+		ColorSequenceKeypoint.new(1, props.BackgroundColor3 or FFGEnum.THEME.color.white),
+	})
+	backgroundPatternGradient.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.7),
+		NumberSequenceKeypoint.new(1, 0.7),
+	})
+	backgroundPatternGradient.Parent = backgroundPattern
 
 	local strokeThickness = 0
 	shopItemContainer.MouseEnter:Connect(function()
@@ -96,19 +125,19 @@ local function ShopItem(
 	-- //!SECTION
 
 	-- //SECTION -  Item Price
-	local itemPriceColor = FFGEnum.THEME.shop.shopItem.buttonColor
+	local ItemBaseCostColor = FFGEnum.THEME.shop.shopItem.buttonColor
 
-	local itemPriceTxt = Instance.new("TextLabel")
-	itemPriceTxt.BorderSizePixel = 0
-	itemPriceTxt.Position = FFGEnum.THEME.alignment.position.bottom
-	itemPriceTxt.AnchorPoint = FFGEnum.THEME.alignment.anchor.bottom
-	itemPriceTxt.TextColor3 = FFGEnum.THEME.color.white
-	itemPriceTxt.BackgroundColor3 = itemPriceColor
-	itemPriceTxt.TextScaled = true
-	itemPriceTxt.Text = props.ItemPrice
-	itemPriceTxt.Font = FFGEnum.THEME.font
-	itemPriceTxt.Size = UDim2.fromScale(1, 0.2)
-	itemPriceTxt.Parent = shopItemContainer
+	local ItemBaseCostTxt = Instance.new("TextLabel")
+	ItemBaseCostTxt.BorderSizePixel = 0
+	ItemBaseCostTxt.Position = FFGEnum.THEME.alignment.position.bottom
+	ItemBaseCostTxt.AnchorPoint = FFGEnum.THEME.alignment.anchor.bottom
+	ItemBaseCostTxt.TextColor3 = FFGEnum.THEME.color.white
+	ItemBaseCostTxt.BackgroundColor3 = ItemBaseCostColor
+	ItemBaseCostTxt.TextScaled = true
+	ItemBaseCostTxt.Text = props.ItemBaseCost
+	ItemBaseCostTxt.Font = FFGEnum.THEME.font
+	ItemBaseCostTxt.Size = UDim2.fromScale(1, 0.2)
+	ItemBaseCostTxt.Parent = shopItemContainer
 	-- //!SECTION
 
 	-- //SECTION - UI List Layout
@@ -130,12 +159,13 @@ local function ShopItem(
 		local bindableEvent = Events.GetBindableEvent(Events.BindableNames.ShowShopTooltip)
 		if bindableEvent then
 			local itemData = {
-				Image = props.ItemImage,
-				Price = props.ItemPrice,
-				Name = props.ItemName,
-				Id = props.ItemId,
-				Description = props.ItemDescription,
-				Stats = props.ItemStats,
+				ItemImage = props.ItemImage,
+				ItemBaseCost = props.ItemBaseCost,
+				ItemName = props.ItemName,
+				ItemId = props.ItemId,
+				ItemDescription = props.ItemDescription,
+				ItemStats = props.ItemStats,
+				ItemQualityId = props.ItemQualityId,
 			}
 
 			Events.FireBindableEvent(Events.BindableNames.ShowShopTooltip, itemData)

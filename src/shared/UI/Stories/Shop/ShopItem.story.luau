@@ -20,7 +20,7 @@ local function story(target)
 		Visible = props.Visible,
 		ScaleType = Enum.ScaleType.Slice,
 		SliceCenter = Rect.new(32, 83, 32, 83),
-		ItemPrice = "1.1k",
+		ItemBaseCost = "1.1k",
 		ItemName = "hammer_01",
 		ItemId = "Hammer",
 		ItemDescription = "",

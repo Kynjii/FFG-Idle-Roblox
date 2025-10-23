@@ -303,20 +303,22 @@ FFGEnum.THEME = {
 		},
 		shopTooltip = {
 			frameTriangle = "rbxassetid://108183848038135",
-			outlineThickness = 1,
+			outlineThickness = 5,
+			border = Color3.fromHex("ffffdd"),
 		},
 	},
 
 	alignment = {
 		position = {
 			center = UDim2.fromScale(0.5, 0.5),
-			frameHeader = UDim2.fromScale(0.5, -0.03),
+			frameHeader = UDim2.fromScale(0.5, -0.08),
 			top = UDim2.fromScale(0.5, 0),
 			bottom = UDim2.fromScale(0.5, 1),
 			textCenter = UDim2.fromScale(0.5, 0.45),
 			textFrameHeaderCenter = UDim2.fromScale(0.5, 0.35),
 		},
 		anchor = {
+			frameHeader = Vector2.new(0.5, 0),
 			top = Vector2.new(0.5, 0),
 			bottom = Vector2.new(0.5, 1),
 			center = Vector2.new(0.5, 0.5),

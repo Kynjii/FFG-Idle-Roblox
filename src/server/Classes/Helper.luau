@@ -168,8 +168,6 @@ function Helper.CreateStateData(player: Player, currencyType: string, existingSt
 	state.CurrencyType = state.CurrencyType or currencyType
 	state.Description = state.Description or DESCRIPTION[state.JobCategory]
 
-	print(state.Description, DESCRIPTION, DESCRIPTION[state.JobCategory], state.JobCategory)
-
 	-- Define quality first
 	state.QualityId = state.QualityId or chooseQuality()
 	state.Quality = FFGEnum.QUALITIES[state.QualityId]
@@ -179,7 +177,6 @@ function Helper.CreateStateData(player: Player, currencyType: string, existingSt
 
 	-- Calculate default stats based on quality and job
 	state.Stats = state.Stats or generateStats(state.JobCategory, 1, state.QualityId)
-	print(state.Stats)
 	state.BaseCost = state.BaseCost or ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, state.QualityId, state.RealmId)
 	state.UpgradeCost = state.UpgradeCost or ClassCalculators.CalculateUpgradeCost(state.BaseCost, state.Level, state.QualityId, state.RealmId)
 

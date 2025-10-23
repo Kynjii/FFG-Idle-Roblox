@@ -16,7 +16,7 @@ local function story(target)
 		Size = UDim2.fromOffset(150, 300),
 		Rounded = FFGEnum.THEME.button.cornerRadius,
 		Visible = props.Visible,
-		ItemCost = "1.2k",
+		ItemBaseCost = "1.2k",
 		ItemName = "Flynn's Hammer",
 		ItemDescription = "A crew member specialized in Transporting Fish from the Port to the Market.",
 		ItemStats = {},
