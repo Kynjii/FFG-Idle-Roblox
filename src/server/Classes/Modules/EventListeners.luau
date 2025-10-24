@@ -116,13 +116,13 @@ function EventListeners.Attach(class: Boat | Tender | PortStorage | Building)
 	else
 		-- Shop Item Purchased
 		local itemPurchased = Events.GetRemote(Events.RemoteNames.HelperPurchased)
-		if itemPurchased then typedClass._cleaner:Add(itemPurchased.OnServerEvent:Connect(function(player: Player, helper: HelperType.HelperData)
+		if itemPurchased then typedClass._cleaner:Add(itemPurchased.OnServerEvent:Connect(function(player: Player, helperId: string)
 			if typedClass.Player ~= player or typedClass.Owner ~= player.UserId then return end
 
 			local canProceed = checkTutorialState(player)
 			if not canProceed then return end
 
-			typedClass:Purchasehelper(helper)
+			typedClass:Purchasehelper(helperId)
 		end)) end
 	end
 end

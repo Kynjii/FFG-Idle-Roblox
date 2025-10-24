@@ -7,7 +7,7 @@ local Tooltip = require(ReplicatedStorage.Shared.UI.Components.Tooltips.Tooltip)
 local ShopGUI = {}
 
 function ShopGUI.Create(props: {
-	ShopName: string,
+	Name: string,
 	ScreenGuiName: string,
 })
 	local shopScreenGui = Instance.new("ScreenGui")
@@ -16,7 +16,7 @@ function ShopGUI.Create(props: {
 	shopScreenGui.ResetOnSpawn = false
 	shopScreenGui.Enabled = false
 
-	local mainPanel = MainUIPanel.Create({ Name = "Crew Shop", Parent = shopScreenGui })
+	local mainPanel = MainUIPanel.Create({ Name = props.Name, Parent = shopScreenGui })
 
 	SingleGridLayout.Create({ Name = "ItemContainer", Parent = mainPanel.Main })
 

@@ -311,7 +311,6 @@ end
 
 local entityDetails = Events.GetRemote(Events.RemoteNames.OpenEntityDetails)
 if entityDetails then entityDetails.OnClientEvent:Connect(function(data)
-	print(`data: {data}`)
 	clearExistingData()
 
 	if data then

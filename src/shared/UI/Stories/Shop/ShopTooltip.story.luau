@@ -20,6 +20,7 @@ local function story(target)
 		ItemName = "Flynn's Hammer",
 		ItemDescription = "A crew member specialized in Transporting Fish from the Port to the Market.",
 		ItemStats = {},
+		ItemId = "999",
 		Parent = target,
 	})
 

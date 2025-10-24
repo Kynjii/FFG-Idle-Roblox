@@ -1,7 +1,5 @@
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
-local Events = require(ReplicatedStorage.Shared.Events.Events)
 local MainUIPanel = require(ReplicatedStorage.Shared.UI.Components.Frames.MainUIPanel)
 local SingleGridLayout = require(ReplicatedStorage.Shared.UI.Components.GridLayouts.SingleGridLayout)
 local Tooltip = require(ReplicatedStorage.Shared.UI.Components.Tooltips.Tooltip)
@@ -18,7 +16,7 @@ function PlayerInventory.Create(props: {
 	shopScreenGui.ResetOnSpawn = false
 	shopScreenGui.Enabled = false
 
-	local mainPanel = MainUIPanel.Create({ Name = "Inventory", Parent = shopScreenGui })
+	local mainPanel = MainUIPanel.Create({ Name = props.Name, Parent = shopScreenGui })
 
 	SingleGridLayout.Create({ Name = "ItemContainer", Parent = mainPanel.Main })
 

@@ -385,18 +385,6 @@ function DataService.SaveHelper(player: Player, helper: HelperType.HelperData): 
 
 	return true
 end
-
-function DataService.SaveTutorialHelper(player: Player, helper: HelperType.HelperData): boolean
-	local profile = getProfile(player, stateTypes.Helper)
-	if not profile then return false end
-
-	profile.Data.TutorialHelpers[helper.Id] = helper
-
-	local replica = DataService.Replicas[player]
-	if replica then replica:Set({ "TutorialHelpers" }, profile.Data.TutorialHelpers) end
-
-	return true
-end
 -- //!SECTION
 
 -- //SECTION - SHOPS

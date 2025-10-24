@@ -145,7 +145,7 @@ end
 function Tutorial.Update(player: Player, teamId: number?)
 	if not player or not teamId then return end
 
-	if not Tutorial.PlayerProgress[player] then print("No player found in tutorial player progress") end
+	if not Tutorial.PlayerProgress[player] then error("No player found in tutorial player progress") end
 
 	local currentStage = Tutorial.PlayerProgress[player]
 	local maxStage = 4

@@ -177,7 +177,7 @@ function Helper.CreateStateData(player: Player, currencyType: string, existingSt
 
 	-- Calculate default stats based on quality and job
 	state.Stats = state.Stats or generateStats(state.JobCategory, 1, state.QualityId)
-	state.BaseCost = state.BaseCost or ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, state.QualityId, state.RealmId)
+	state.BaseCost = state.BaseCost and state.BaseCost ~= DEFAULTS.BaseCost or ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, state.QualityId, state.RealmId)
 	state.UpgradeCost = state.UpgradeCost or ClassCalculators.CalculateUpgradeCost(state.BaseCost, state.Level, state.QualityId, state.RealmId)
 
 	state.IsPurchased = state.IsPurchased or false
@@ -330,11 +330,7 @@ function Helper.Serialize(self: Helper): { [string]: any }
 end
 
 function Helper.Save(self: Helper): ()
-	if self.IsTutorialHelper then
-		DataService.SaveTutorialHelper(self.Player, self:Serialize())
-	else
-		DataService.SaveHelper(self.Player, self:Serialize())
-	end
+	DataService.SaveHelper(self.Player, self:Serialize())
 end
 -- //!SECTION
 

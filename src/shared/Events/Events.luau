@@ -12,6 +12,8 @@ Events.RemoteNames = {
 	OpenHelperShop = "OpenHelperShop",
 	HelperPurchased = "HelperPurchased",
 	PrepareHelperShop = "PrepareHelperShop",
+	UpdateUI = "UpdateUI",
+	OpenInventory = "OpenInventory",
 }
 
 Events.BindableNames = {

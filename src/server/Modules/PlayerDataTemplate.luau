@@ -1,6 +1,3 @@
-local ServerScriptService = game:GetService("ServerScriptService")
-local TutorialHelpers = require(ServerScriptService.Server.Game.Tutorial.TutorialHelpers)
-
 local realmBuffs = {
 	-- FISH
 	Fish_Percent = { Name = "Fish_Percent", Label = "Fish Value", BaseValue = 0.05, Type = "Production", Scope = "Helper", IsPlus = true },
@@ -83,7 +80,7 @@ return {
 		},
 	},
 	Currencies = {
-		Gold = 1100,
+		Gold = 1500,
 	},
 	CompletedTutorial = false,
 	TutorialStageComplete = {
@@ -92,5 +89,4 @@ return {
 		[3] = false, -- Storage
 		[4] = false, -- Helpers
 	},
-	TutorialHelpers = TutorialHelpers,
 }

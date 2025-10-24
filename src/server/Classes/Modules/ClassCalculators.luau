@@ -42,7 +42,7 @@ local function getStageTimeReductionFraction(stageIndex: number): number
 end
 
 --=============================
--- Base / cost (kept as-is)
+-- Base / cost
 --=============================
 
 function ClassCalculator.CalculateBaseValue(baseValue: number, tier: number, realmNum: number)

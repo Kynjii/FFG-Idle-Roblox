@@ -6,6 +6,12 @@ local Events = require(ReplicatedStorage.Shared.Events.Events)
 
 local Tooltip = {}
 
+-- Helper for handling Purchase/Upgrade via tooltip
+local function handleButtonClick(itemId: string): ()
+	local purchaseEvent = Events.GetRemote(Events.RemoteNames.HelperPurchased)
+	if purchaseEvent then purchaseEvent:FireServer(itemId) end
+end
+
 function Tooltip.Create(props: {
 	BackgroundColor3: Color3?,
 	Size: UDim2,
@@ -17,6 +23,7 @@ function Tooltip.Create(props: {
 	ItemName: string,
 	ItemDescription: string,
 	ItemStats: { [number]: { [string]: any } }?,
+	ItemId: string,
 	Parent: Instance?,
 })
 	-- //SECTION - Shop Tooltip Container
@@ -302,7 +309,7 @@ function Tooltip.Create(props: {
 
 	local baseSize = buyButton.Size
 	buyButton.Activated:Connect(function()
-		--
+		handleButtonClick(props.ItemId)
 	end)
 	buyButton.MouseEnter:Connect(function()
 		AnimateButtonHover.Enter(buyButton, baseSize)
@@ -319,7 +326,7 @@ function Tooltip.Create(props: {
 	buttonTxt.TextScaled = true
 	buttonTxt.Text = "Purchase"
 	buttonTxt.Font = FFGEnum.THEME.font
-	buttonTxt.Size = buyButton.Size + UDim2.fromScale(0, 0.5)
+	buttonTxt.Size = UDim2.fromScale(0.9, 0.9)
 	buttonTxt.Parent = buyButton
 	-- //!SECTION
 
@@ -345,6 +352,7 @@ function Tooltip.Initialize(parentInstance: Instance)
 		ItemName = "",
 		ItemStats = {},
 		ItemQualityId = 1,
+		ItemId = "999",
 		Parent = parentInstance,
 		Size = UDim2.fromScale(0.3, 1),
 		Rounded = FFGEnum.THEME.button.cornerRadius,
@@ -361,8 +369,8 @@ function Tooltip.Initialize(parentInstance: Instance)
 		Stats: { [number]: string }?,
 	}
 
-	local bindableEvent = Events.GetBindableEvent(Events.BindableNames.ShowShopTooltip)
-	if bindableEvent then bindableEvent.Event:Connect(function(data: itemData)
+	local openTooltipEvent = Events.GetBindableEvent(Events.BindableNames.ShowShopTooltip)
+	if openTooltipEvent then openTooltipEvent.Event:Connect(function(data: itemData)
 		if not data then
 			error("Not data was passed when attempting to open shop tooltip", data)
 			return
@@ -376,12 +384,17 @@ function Tooltip.Initialize(parentInstance: Instance)
 			ItemImage = data.ItemImage,
 			ItemStats = data.ItemStats,
 			ItemQualityId = data.ItemQualityId,
+			ItemId = data.ItemId,
 			Size = UDim2.fromScale(0.3, 1),
 			Rounded = FFGEnum.THEME.button.cornerRadius,
 			Visible = true,
 			Parent = parentInstance,
 		})
 	end) end
+	-- //!SECTION
+
+	-- //SECTION - Remotes
+
 	-- //!SECTION
 end
 

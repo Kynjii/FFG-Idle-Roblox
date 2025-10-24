@@ -2,10 +2,12 @@ local CollectionService = game:GetService("CollectionService")
 local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
 local Helper = require(ServerScriptService.Server.Classes.Helper)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
 local EventListeners = require(ServerScriptService.Server.Classes.Modules.EventListeners)
 local ProximityPrompt = require(ServerScriptService.Server.Classes.Modules.ProximityPrompt)
+local Tutorial = require(ServerScriptService.Server.Game.Tutorial.Tutorial)
 local SetInterval = require(ServerScriptService.Server.Modules.SetInterval)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Trove = require(ReplicatedStorage.Packages.Trove)
@@ -38,7 +40,7 @@ type ShopState = {
 	Inventory: { [string]: HelperType.HelperData },
 }
 
-function HelperShopManager.New(shopState: ShopState, player: Player, teamId: number, TutorialHelpers: { HelperType.HelperData }?): HelperShopManager
+function HelperShopManager.New(shopState: ShopState, player: Player, teamId: number): HelperShopManager
 	local self = setmetatable({} :: HelperShopManager, HelperShopManager)
 
 	self.Entity = FFGEnum.CLASS.ENTITY_NAME.Shop
@@ -47,7 +49,6 @@ function HelperShopManager.New(shopState: ShopState, player: Player, teamId: num
 	self.Owner = self.Owner or player.UserId
 	self.TeamId = teamId
 	self.ShopModel = self:FindShopModel(teamId)
-	self.TutorialState = TutorialHelpers
 
 	self.CurrentPeriod = math.floor(os.time() / REFRESH_INTERVAL)
 	self.PeriodEnd = (self.CurrentPeriod + 1) * REFRESH_INTERVAL
@@ -75,14 +76,23 @@ function HelperShopManager.FindShopModel(self: HelperShopManager, teamId: number
 	return nil
 end
 
-function HelperShopManager.Purchasehelper(self: HelperShopManager, helperState: HelperType.HelperData): ()
-	if not DataService.CanAfford(self.Player, helperState.CurrencyType, helperState.BaseCost or 0) then return end
+function HelperShopManager.Purchasehelper(self: HelperShopManager, helperId: string): ()
+	local helperInShop = TableUtil.Find(self.Inventory, function(helper: HelperType.HelperData)
+		return helper.Id == helperId
+	end) :: HelperType.HelperData
 
-	local helperClass = Helper.New(helperState, self.Player, self.TeamId)
+	if not helperInShop or helperInShop.IsPurchased then return end
+
+	if not DataService.CanAfford(self.Player, helperInShop.CurrencyType, helperInShop.BaseCost or 0) then return end
+	if not self.CompletedTutorial then Tutorial.Update(self.Player, self.TeamId) end
+
+	local helperClass = Helper.New(helperInShop, self.Player, self.TeamId)
 	helperClass:Purchase()
 	helperClass:Save()
 
 	DataService.Spend(self.Player, helperClass.CurrencyType, helperClass.BaseCost)
+
+	Events.FireEvent(Events.RemoteNames.UpdateUI, self.Player)
 end
 
 function HelperShopManager.GetTimeRemaining(self: HelperShopManager)
@@ -119,46 +129,14 @@ function HelperShopManager.RestockShop(self: HelperShopManager)
 
 	local preparedData = {}
 
-	if not self.CompletedTutorial then
-		for i, tutHelper in pairs(self.TutorialState) do
-			local helper = Helper.CreateStateData(self.Player, "Gold", tutHelper)
-			preparedData[helper.Id] = helper
-		end
-	else
-		for i = 1, INVENTORY_AMOUNT do
-			local helper = Helper.CreateStateData(self.Player, "Gold")
-			preparedData[helper.Id] = helper
-		end
+	for i = 1, INVENTORY_AMOUNT do
+		local helper = Helper.CreateStateData(self.Player, "Gold")
+		preparedData[helper.Id] = helper
 	end
 
 	self.Inventory = preparedData
 	Events.FireEvent(Events.RemoteNames.PrepareHelperShop, self.Player, HttpService:JSONEncode(preparedData))
 end
-
--- //SECTION - Tutorial Handling
-function HelperShopManager.HandleTutorialState(self): boolean
-	local isCompleted: boolean = DataService.CompletedTutorial(self.Player)
-	if isCompleted then return true end
-
-	local numOfHelpersRemaining: number = 0
-	for _, tutorialHelper in pairs(self.TutorialState) do
-		if tutorialHelper.IsPurchased then return end
-		numOfHelpersRemaining += 1
-
-		if numOfHelpersRemaining == 0 then
-			isCompleted = true
-			break
-		end
-	end
-
-	if isCompleted then
-		DataService.SaveTutorialState(self.Player, 4)
-		return true
-	end
-
-	return false
-end
--- //!SECTION
 
 -- //SECTION - UI Setup
 function HelperShopManager.Initialize(self: HelperShopManager): ()
@@ -207,7 +185,6 @@ function HelperShopManager.Serialize(self: HelperShopManager): { [string]: any }
 		Entity = self.Entity,
 		Id = self.Id,
 		Owner = self.Owner,
-		TutorialState = self.TutorialState,
 		Inventory = self.Inventory,
 		CompletedTutorial = self.CompletedTutorial,
 	}
