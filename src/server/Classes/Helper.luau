@@ -200,9 +200,8 @@ function Helper.Purchase(self: Helper): ()
 	self.Model = self._cleaner and self._cleaner:Add(helperModel and helperModel:Clone())
 	self.CurrentAssignment = FFGEnum.JOB_ASSIGNMENTS.Unassigned
 
+	print("purchased, saving now")
 	self:Save()
-
-	if self.Tier == 1 then Tutorial.Update(self.Player, self.TeamId) end
 end
 
 function Helper.Upgrade(self: Helper): ()

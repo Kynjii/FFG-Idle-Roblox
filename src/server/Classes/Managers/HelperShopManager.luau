@@ -38,6 +38,11 @@ local INVENTORY_AMOUNT: number = 6
 
 type ShopState = {
 	Inventory: { [string]: HelperType.HelperData },
+	Entity: string,
+	Id: string,
+	Owner: number,
+	CompletedTutorial: boolean,
+	PeriodEnd: number,
 }
 
 function HelperShopManager.New(shopState: ShopState, player: Player, teamId: number): HelperShopManager
@@ -54,9 +59,12 @@ function HelperShopManager.New(shopState: ShopState, player: Player, teamId: num
 	self.PeriodEnd = (self.CurrentPeriod + 1) * REFRESH_INTERVAL
 	self.TimeRemaining = self.PeriodEnd - os.time()
 	self.Inventory = shopState and shopState.Inventory or {}
-	self.CompletedTutorial = shopState and shopState.CompletedTutorial or self:HandleTutorialState()
+	self.CompletedTutorial = shopState and shopState.CompletedTutorial or DataService.CompletedTutorial(self.Player)
 
-	if dictCount(self.Inventory) == 0 then self:RestockShop() end
+	if dictCount(self.Inventory) == 0 or shopState.PeriodEnd < self.CurrentPeriod then
+		print("need to restock:", dictCount(self.Inventory) == 0, shopState.PeriodEnd < self.CurrentPeriod)
+		self:RestockShop()
+	end
 
 	self._cleaner = Trove.new()
 
@@ -88,7 +96,6 @@ function HelperShopManager.Purchasehelper(self: HelperShopManager, helperId: str
 
 	local helperClass = Helper.New(helperInShop, self.Player, self.TeamId)
 	helperClass:Purchase()
-	helperClass:Save()
 
 	DataService.Spend(self.Player, helperClass.CurrencyType, helperClass.BaseCost)
 
@@ -187,6 +194,7 @@ function HelperShopManager.Serialize(self: HelperShopManager): { [string]: any }
 		Owner = self.Owner,
 		Inventory = self.Inventory,
 		CompletedTutorial = self.CompletedTutorial,
+		PeriodEnd = self.PeriodEnd,
 	}
 end
 
