@@ -88,8 +88,10 @@ function MainUIPanel.Create(props: {
 		local screenGUI = detailsContainer:FindFirstAncestorWhichIsA("ScreenGui")
 		if screenGUI then screenGUI.Enabled = false end
 		if Lighting then
-			local blur = Lighting:FindFirstChild("Blur")
-			if blur then blur:Destroy() end
+			local children = Lighting:GetChildren()
+			for _, instance: Instance in pairs(children) do
+				if instance.Name == "Blur" then instance:Destroy() end
+			end
 		end
 
 		local tooltip = detailsContainer:FindFirstChild("ShopTooltip", true)
