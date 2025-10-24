@@ -13,7 +13,10 @@ Events.RemoteNames = {
 	HelperPurchased = "HelperPurchased",
 	PrepareHelperShop = "PrepareHelperShop",
 	UpdateUI = "UpdateUI",
-	OpenInventory = "OpenInventory",
+}
+
+Events.RemoteFunctionNames = {
+	GetInventory = "GetInventory",
 }
 
 Events.BindableNames = {
@@ -21,8 +24,9 @@ Events.BindableNames = {
 	CloseUIWindow = "CloseUIWindow",
 }
 
-local FOLDER_NAME = "Events"
-local FOLDER_NAME_BINDABLES = "Bindables"
+local FOLDER_NAME = "RME"
+local FOLDER_NAME_BINDABLES = "BEV"
+local FOLDER_NAME_REMOTE_FUNCS = "RFN"
 
 function Events.InitOnServer()
 	assert(RunService:IsServer(), "InitOnServer must be called from the server")
@@ -40,6 +44,21 @@ function Events.InitOnServer()
 			local ev = Instance.new("RemoteEvent")
 			ev.Name = remoteName
 			ev.Parent = remoteFolder
+		end
+	end
+
+	local remoteFnFolder = ReplicatedStorage:FindFirstChild(FOLDER_NAME_REMOTE_FUNCS)
+	if not remoteFnFolder then
+		remoteFnFolder = Instance.new("Folder")
+		remoteFnFolder.Name = FOLDER_NAME_REMOTE_FUNCS
+		remoteFnFolder.Parent = ReplicatedStorage
+	end
+
+	for _, remoteFnName in pairs(Events.RemoteFunctionNames) do
+		if not remoteFnFolder:FindFirstChild(remoteFnName) then
+			local ev = Instance.new("RemoteFunction")
+			ev.Name = remoteFnName
+			ev.Parent = remoteFnFolder
 		end
 	end
 
@@ -76,6 +95,15 @@ function Events.GetBindableEvent(name: string): BindableEvent?
 	if ev and ev:IsA("BindableEvent") then return ev end
 
 	return folder:WaitForChild(name, 5) :: BindableEvent
+end
+
+function Events.GetRemoteFn(name: string): RemoteFunction?
+	local folder = ReplicatedStorage:WaitForChild(FOLDER_NAME_REMOTE_FUNCS, 10)
+	if not folder then return nil end
+	local ev = folder:FindFirstChild(name)
+	if ev and ev:IsA("RemoteFunction") then return ev end
+
+	return folder:WaitForChild(name, 5) :: RemoteFunction
 end
 
 function Events.FireBindableEvent(name: string, data: any)

@@ -144,7 +144,7 @@ end
 -- //!SECTION
 
 -- //SECTION - Static to generate data for shops
-function Helper.CreateStateData(player: Player, currencyType: string, existingState: HelperType.HelperData?)
+function Helper.CreateStateData(player: Player, currencyType: string)
 	local state: HelperType.HelperData = {}
 
 	-- Start with default stats as base
@@ -152,19 +152,12 @@ function Helper.CreateStateData(player: Player, currencyType: string, existingSt
 		state[key] = value
 	end
 
-	-- used for tutorial helpers that come with some pre-defined stats
-	if existingState then
-		for key, value in pairs(existingState) do
-			state[key] = value
-		end
-	end
-
 	-- Calculate derived properties
 	state.Player = state.Player or player
 	state.Owner = state.Owner or player.UserId
 	state.Id = state.Id or HttpService:GenerateGUID(false)
 	state.JobCategory = state.JobCategory or chooseJob()
-	state.Name = state.Name or grabName(state.JobCategory)
+	state.Name = state.Name and state.Name ~= DEFAULTS.Name or grabName(state.JobCategory)
 	state.CurrencyType = state.CurrencyType or currencyType
 	state.Description = state.Description or DESCRIPTION[state.JobCategory]
 

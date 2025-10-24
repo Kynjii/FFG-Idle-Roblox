@@ -18,6 +18,9 @@ local main: Instance
 local inventoryItemsContainer: Instance
 local screenGui: ScreenGui
 
+local hudInventoryButton = playerGui:WaitForChild("Inventory"):FindFirstChild("InventoryButton", true) :: ImageButton
+print(hudInventoryButton)
+
 task.spawn(function()
 	inventoryUI = PlayerInventory.Create({ Name = "Inventory", ScreenGuiName = "PlayerInventory" })
 	inventoryUI.Parent = playerGui
@@ -27,7 +30,7 @@ task.spawn(function()
 	main = inventoryDetailsUI:WaitForChild("Main", 10) :: Frame
 	inventoryItemsContainer = main:WaitForChild("ItemContainer", 10) :: ScrollingFrame
 
-	screenGui = player.PlayerGui.HelperShop
+	screenGui = player.PlayerGui.PlayerInventory
 end)
 
 function createitemComponent(helper: HelperType.HelperData)
@@ -66,18 +69,9 @@ local itemComponents = {}
 function updateUI()
 	if inventoryItemsContainer then
 		for k, item in pairs(playerInventory) do
-			if item.IsPurchased then
-				if itemComponents[item.Id] then
-					local itemComponent: Instance = itemComponents[item.Id].Component
-					itemComponents[item.Id] = nil
-					itemComponent:Destroy()
-					return
-				end
-			else
-				if itemComponents[item.Id] then return end
-				local itemComponent = createitemComponent(item)
-				itemComponents[item.Id] = { Component = itemComponent, Item = item }
-			end
+			if itemComponents[item.Id] then return end
+			local itemComponent = createitemComponent(item)
+			itemComponents[item.Id] = { Component = itemComponent, Item = item }
 		end
 	end
 end
@@ -90,18 +84,13 @@ function populateDetailsUI()
 	updateUI()
 end
 
-local inventoryDetails = Events.GetRemote(Events.RemoteNames.OpenInventory)
-if inventoryDetails then inventoryDetails.OnClientEvent:Connect(function(data)
+local getInventoryFn = Events.GetRemoteFn(Events.RemoteFunctionNames.GetInventory)
+if hudInventoryButton and getInventoryFn then hudInventoryButton.Activated:Connect(function()
+	local data = getInventoryFn:InvokeServer()
 	if data then
-		local decodedData = HttpService:JSONDecode(data)
-		playerInventory = decodedData
+		playerInventory = data
 
 		populateDetailsUI()
 		screenGui.Enabled = true
 	end
-end) end
-
-local updateUIEvent = Events.GetRemote(Events.RemoteNames.UpdateUI)
-if updateUIEvent then updateUIEvent.OnClientEvent:Connect(function()
-	updateUI()
 end) end

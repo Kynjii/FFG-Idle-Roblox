@@ -14,6 +14,7 @@ local Trove = require(ReplicatedStorage.Packages.Trove)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
+local SecToMins = require(ReplicatedStorage.Shared.Utils.SecToMins)
 
 local function dictCount(t)
 	local n = 0
@@ -61,13 +62,11 @@ function HelperShopManager.New(shopState: ShopState, player: Player, teamId: num
 	self.Inventory = shopState and shopState.Inventory or {}
 	self.CompletedTutorial = shopState and shopState.CompletedTutorial or DataService.CompletedTutorial(self.Player)
 
-	if dictCount(self.Inventory) == 0 or shopState.PeriodEnd < self.CurrentPeriod then
-		print("need to restock:", dictCount(self.Inventory) == 0, shopState.PeriodEnd < self.CurrentPeriod)
-		self:RestockShop()
-	end
+	if dictCount(self.Inventory) == 0 then self:RestockShop() end
 
 	self._cleaner = Trove.new()
 
+	self.CountdownTimer = self:CreateRefreshBillboard()
 	self:StartRefreshMonitor()
 
 	self:AttachEventListeners()
@@ -75,7 +74,7 @@ function HelperShopManager.New(shopState: ShopState, player: Player, teamId: num
 	return self
 end
 
-function HelperShopManager.FindShopModel(self: HelperShopManager, teamId: number): Instance?
+function HelperShopManager.FindShopModel(self: HelperShopManager, teamId: number): Model?
 	for _, taggedShop: Instance in ipairs(taggedShops) do
 		local taggedShopTeamId = taggedShop:GetAttribute(FFGEnum.ATTRIBUTES.TeamId)
 		if taggedShopTeamId == teamId then return taggedShop end
@@ -123,6 +122,7 @@ function HelperShopManager.StartRefreshMonitor(self: HelperShopManager)
 		self:SetCurrentPeriod()
 		self:SetPeriodEnd()
 		self:SetTimeRemaining()
+		self:UpdateRefreshBillboard()
 
 		if self.TimeRemaining <= 0 then
 			if not self.CompletedTutorial then return end
@@ -143,6 +143,34 @@ function HelperShopManager.RestockShop(self: HelperShopManager)
 
 	self.Inventory = preparedData
 	Events.FireEvent(Events.RemoteNames.PrepareHelperShop, self.Player, HttpService:JSONEncode(preparedData))
+end
+
+function HelperShopManager.CreateRefreshBillboard(self: HelperShopManager)
+	local billboard = Instance.new("BillboardGui")
+	billboard.Adornee = self.ShopModel.PrimaryPart
+	billboard.Size = UDim2.fromScale(10, 10)
+	billboard.AlwaysOnTop = true
+	billboard.MaxDistance = 150
+	billboard.ResetOnSpawn = false
+	billboard.ExtentsOffsetWorldSpace = Vector3.new(0, 1.5, 0)
+	billboard.Parent = self.ShopModel.PrimaryPart
+
+	local countdownTimer = Instance.new("TextLabel")
+	countdownTimer.Size = UDim2.fromScale(1, 1)
+	countdownTimer.Font = FFGEnum.THEME.font
+	countdownTimer.TextColor3 = FFGEnum.THEME.color.white
+	countdownTimer.TextScaled = true
+	countdownTimer.BackgroundTransparency = 1
+	local timerText = SecToMins.GetString(self.TimeRemaining)
+	countdownTimer.Text = timerText or ""
+	countdownTimer.Parent = billboard
+
+	return countdownTimer
+end
+
+function HelperShopManager.UpdateRefreshBillboard(self: HelperShopManager)
+	local timerText = SecToMins.GetString(self.TimeRemaining)
+	if self.CountdownTimer then self.CountdownTimer.Text = timerText or "" end
 end
 
 -- //SECTION - UI Setup

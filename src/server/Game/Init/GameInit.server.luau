@@ -87,9 +87,7 @@ local function PlayerAdded(player: Player)
 				if stageProgress then Tutorial.Show(player, teamId, stageProgress) end
 			end
 
-			TeamManager.AssignBuildingsManager(profile.Data, player, teamId)
-			TeamManager.AssignChainManagers(profile.Data, player, teamId)
-			TeamManager.AssignHelperShopManager(profile.Data, player, teamId)
+			TeamManager.AssignManagers(profile, player, teamId)
 
 			Badges.CheckAlphaBadgeStatus(player)
 		else
