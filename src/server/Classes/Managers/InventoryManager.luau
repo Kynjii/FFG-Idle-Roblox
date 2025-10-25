@@ -27,12 +27,10 @@ function InventoryManager.New(InventoryState: { HelperType.HelperData }, player:
 end
 
 function InventoryManager.AttachEventListeners(self: InventoryManager)
-	-- //TODO - do proper (temp)
+	self.Inventory = DataService.GetPlayerInventory(self.Player)
 
-	self.Inventory = DataService.GetInventory(self.Player)
-
-	local getInventoryEvent = Events.GetRemoteFn(Events.RemoteFunctionNames.GetInventory)
-	if getInventoryEvent then getInventoryEvent.OnServerInvoke = function(player: Player)
+	local getPlayerInventoryEvent = Events.GetRemoteFn(Events.RemoteFunctionNames.GetPlayerInventory)
+	if getPlayerInventoryEvent then getPlayerInventoryEvent.OnServerInvoke = function(player: Player)
 		if self.Player ~= player or self.Owner ~= player.UserId then return end
 		return self.Inventory
 	end end

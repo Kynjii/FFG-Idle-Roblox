@@ -54,7 +54,7 @@ function PP.CreatePP(proximityPrompt: ProximityPrompt, class: Boat | Tender | Po
 	else
 		class._cleaner:Add(proximityPrompt.Triggered:Connect(function(player)
 			if player.UserId ~= class.Owner then
-				print("Not the owner", player.UserId, class.Owner)
+				error("Not the owner", player.UserId, class.Owner, class)
 				return
 			end
 

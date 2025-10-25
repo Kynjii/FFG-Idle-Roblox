@@ -29,7 +29,7 @@ local stateTypes = {
 	GetTutorialState = "get Tutorial",
 	ResetData = "Reset",
 	HelperShop = "save Helper Shop",
-	GetInventory = "get Inventory",
+	getPlayerInventory = "get Player Inventory",
 }
 
 local function getProfile(player: Player, stateType: string): any | boolean
@@ -412,8 +412,8 @@ end
 -- //!SECTION
 
 -- //SECTION - INVENTORY
-function DataService.GetInventory(player: Player)
-	local profile = getProfile(player, stateTypes.GetInventory)
+function DataService.GetPlayerInventory(player: Player)
+	local profile = getProfile(player, stateTypes.getPlayerInventory)
 	if not profile then return false end
 
 	local hasRealms = getRealms(profile)
