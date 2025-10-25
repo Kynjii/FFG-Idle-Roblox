@@ -187,12 +187,12 @@ end
 function TeamManager.CleanupPlayer(userId: number): ()
 	local chainList = TeamManager.ChainManagers[userId]
 	local buildingList = TeamManager.BuildingsManager[userId]
-	local helperList = TeamManager.HelperShopManager[userId]
+	local helperShopList = TeamManager.HelperShopManager[userId]
 	local inventoryList = TeamManager.InventoryManager[userId]
 
 	if chainList then listClean(chainList, userId, managerTypes.Chain) end
 	if buildingList then listClean(buildingList, userId, managerTypes.Building) end
-	if helperList then listClean(helperList, userId, managerTypes.Shop) end
+	if helperShopList then listClean(helperShopList, userId, managerTypes.Shop) end
 	if inventoryList then listClean(inventoryList, userId, managerTypes.Inventory) end
 end
 

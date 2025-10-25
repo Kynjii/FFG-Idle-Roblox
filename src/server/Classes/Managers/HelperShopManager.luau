@@ -16,14 +16,6 @@ local Events = require(ReplicatedStorage.Shared.Events.Events)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
 local SecToMins = require(ReplicatedStorage.Shared.Utils.SecToMins)
 
-local function dictCount(t)
-	local n = 0
-	for _ in pairs(t or {}) do
-		n += 1
-	end
-	return n
-end
-
 -- //SECTION - Tagged Entities within Workspace
 local taggedShops = CollectionService:GetTagged("HelperShop")
 -- //!SECTION
@@ -33,9 +25,9 @@ HelperShopManager.__index = HelperShopManager
 
 type HelperShopManager = typeof(setmetatable({}, HelperShopManager))
 
-local REFRESH_INTERVAL: number = 60 * 15
+local REFRESH_INTERVAL: number = 60 * 5
 
-local INVENTORY_AMOUNT: number = 6
+local INVENTORY_AMOUNT: number = 10
 
 type ShopState = {
 	Inventory: { [string]: HelperType.HelperData },
@@ -59,10 +51,11 @@ function HelperShopManager.New(shopState: ShopState, player: Player, teamId: num
 	self.CurrentPeriod = math.floor(os.time() / REFRESH_INTERVAL)
 	self.PeriodEnd = (self.CurrentPeriod + 1) * REFRESH_INTERVAL
 	self.TimeRemaining = self.PeriodEnd - os.time()
-	self.Inventory = shopState and shopState.Inventory or {}
-	self.CompletedTutorial = shopState and shopState.CompletedTutorial or DataService.CompletedTutorial(self.Player)
 
-	if dictCount(self.Inventory) == 0 then self:RestockShop() end
+	self.Inventory = shopState and shopState.Inventory or nil
+	self:HandleStock(shopState)
+
+	self.CompletedTutorial = shopState and shopState.CompletedTutorial or DataService.CompletedTutorial(self.Player)
 
 	self._cleaner = Trove.new()
 
@@ -72,6 +65,20 @@ function HelperShopManager.New(shopState: ShopState, player: Player, teamId: num
 	self:AttachEventListeners()
 
 	return self
+end
+
+function HelperShopManager.HandleStock(self: HelperShopManager, shopState): ()
+	-- If for some reason the inventory didn't save or it's a first time player that has no saved data, stock the shop
+	if not self.Inventory then
+		self:RestockShop()
+	else
+		-- If the shop is within the same time period as when it was saved, don't restock (prevent exploits)
+		if self.CurrentPeriod == shopState.CurrentPeriod then
+			return
+		else
+			self:RestockShop()
+		end
+	end
 end
 
 function HelperShopManager.FindShopModel(self: HelperShopManager, teamId: number): Model?
@@ -99,10 +106,8 @@ function HelperShopManager.Purchasehelper(self: HelperShopManager, helperId: str
 	DataService.Spend(self.Player, helperClass.CurrencyType, helperClass.BaseCost)
 
 	Events.FireEvent(Events.RemoteNames.UpdateUI, self.Player)
-end
 
-function HelperShopManager.GetTimeRemaining(self: HelperShopManager)
-	print(self.TimeRemaining)
+	self:Save()
 end
 
 function HelperShopManager.SetCurrentPeriod(self: HelperShopManager)
@@ -140,6 +145,8 @@ function HelperShopManager.RestockShop(self: HelperShopManager)
 
 	self.Inventory = preparedData
 	Events.FireEvent(Events.RemoteNames.PrepareHelperShop, self.Player, HttpService:JSONEncode(preparedData))
+
+	self:Save()
 end
 
 function HelperShopManager.CreateRefreshBillboard(self: HelperShopManager)
@@ -220,7 +227,7 @@ function HelperShopManager.Serialize(self: HelperShopManager): { [string]: any }
 		Owner = self.Owner,
 		Inventory = self.Inventory,
 		CompletedTutorial = self.CompletedTutorial,
-		PeriodEnd = self.PeriodEnd,
+		CurrentPeriod = self.CurrentPeriod,
 	}
 end
 

@@ -16,7 +16,7 @@ Events.RemoteNames = {
 }
 
 Events.RemoteFunctionNames = {
-	GetInventory = "GetInventory",
+	GetPlayerInventory = "GetPlayerInventory",
 }
 
 Events.BindableNames = {

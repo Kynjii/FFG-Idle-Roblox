@@ -4,10 +4,10 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
-local Replica = require(ReplicatedStorage.Shared.ReplicaClient)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
 local ShopGUI = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopGUI)
 local ShopItem = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopItem)
+local Tooltip = require(ReplicatedStorage.Shared.UI.Components.Tooltips.Tooltip)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 
 local player = Players.LocalPlayer
@@ -30,6 +30,10 @@ task.spawn(function()
 
 	screenGui = player.PlayerGui.HelperShop
 end)
+
+function clearExistingTooltip()
+	Tooltip.ClearExisting()
+end
 
 function createShopitemComponent(helper: HelperType.HelperData)
 	local preparedStatData: { [number]: { [string]: any } }? = {}
@@ -72,8 +76,7 @@ function handleClosingShopDetailsUI()
 	while true do
 		local distance = player:DistanceFromCharacter(originalPosition)
 		if distance >= 8 then
-			local tooltip = main:FindFirstChild("ShopTooltip", true)
-			if tooltip then tooltip:Destroy() end
+			clearExistingTooltip()
 			ShopGUI.CloseShop(screenGui)
 			break
 		end
@@ -83,19 +86,19 @@ function handleClosingShopDetailsUI()
 end
 
 function updateUI()
+	clearExistingTooltip()
+
+	for _, component: Instance in pairs(itemComponents) do
+		component:Destroy()
+	end
+
 	if shopItemsContainer then
 		for k, item in pairs(shopData) do
 			if item.IsPurchased then
-				if itemComponents[item.Id] then
-					local itemComponent: Instance = itemComponents[item.Id].Component
-					itemComponents[item.Id] = nil
-					itemComponent:Destroy()
-					return
-				end
+				return
 			else
-				if itemComponents[item.Id] then return end
 				local itemComponent = createShopitemComponent(item)
-				itemComponents[item.Id] = { Component = itemComponent, Item = item }
+				itemComponents[item.Id] = itemComponent
 			end
 		end
 	end

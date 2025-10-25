@@ -5,11 +5,20 @@ local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 
 local Tooltip = {}
+Tooltip.Existing = nil
 
 -- Helper for handling Purchase/Upgrade via tooltip
 local function handleButtonClick(itemId: string): ()
 	local purchaseEvent = Events.GetRemote(Events.RemoteNames.HelperPurchased)
 	if purchaseEvent then purchaseEvent:FireServer(itemId) end
+end
+
+function Tooltip.ClearExisting(): ()
+	if Tooltip.Existing then
+		local existing = Tooltip.Existing
+		existing:Destroy()
+		Tooltip.Existing = nil
+	end
 end
 
 function Tooltip.Create(props: {
@@ -344,21 +353,7 @@ function Tooltip.Create(props: {
 	return shopTooltipContainer
 end
 
-function Tooltip.Initialize(parentInstance: Instance)
-	local tooltip = Tooltip.Create({
-		ItemImage = "",
-		ItemBaseCost = "",
-		ItemDescription = "",
-		ItemName = "",
-		ItemStats = {},
-		ItemQualityId = 1,
-		ItemId = "999",
-		Parent = parentInstance,
-		Size = UDim2.fromScale(0.3, 1),
-		Rounded = FFGEnum.THEME.button.cornerRadius,
-		Visible = false,
-	})
-
+function Tooltip.Initialize()
 	-- //SECTION - Bindables
 	type itemData = {
 		Image: string,
@@ -376,8 +371,9 @@ function Tooltip.Initialize(parentInstance: Instance)
 			return
 		end
 
-		if tooltip then tooltip:Destroy() end
-		tooltip = Tooltip.Create({
+		Tooltip.ClearExisting()
+
+		Tooltip.Existing = Tooltip.Create({
 			ItemBaseCost = data.ItemBaseCost,
 			ItemDescription = data.ItemDescription,
 			ItemName = data.ItemName,
@@ -388,13 +384,11 @@ function Tooltip.Initialize(parentInstance: Instance)
 			Size = UDim2.fromScale(0.3, 1),
 			Rounded = FFGEnum.THEME.button.cornerRadius,
 			Visible = true,
-			Parent = parentInstance,
+			Parent = data.Parent,
 		})
 	end) end
-	-- //!SECTION
 
-	-- //SECTION - Remotes
-
+	print(Tooltip.Existing)
 	-- //!SECTION
 end
 

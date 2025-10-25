@@ -20,7 +20,7 @@ function ShopGUI.Create(props: {
 
 	SingleGridLayout.Create({ Name = "ItemContainer", Parent = mainPanel.Main })
 
-	Tooltip.Initialize(mainPanel.Main)
+	Tooltip.Initialize()
 
 	return shopScreenGui
 end
@@ -34,8 +34,7 @@ function ShopGUI.CloseShop(mainFrame)
 		end
 	end
 
-	local tooltip = mainFrame:FindFirstChild("ShopTooltip", true)
-	if tooltip then tooltip:Destroy() end
+	Tooltip.ClearExisting()
 end
 
 return ShopGUI

@@ -4,8 +4,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
-local PlayerInventory = require(ReplicatedStorage.Shared.UI.Components.Inventory.PlayerInventory)
+local ShopGUI = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopGUI)
 local ShopItem = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopItem)
+local Tooltip = require(ReplicatedStorage.Shared.UI.Components.Tooltips.Tooltip)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 
 local player = Players.LocalPlayer
@@ -20,7 +21,7 @@ local screenGui: ScreenGui
 local hudInventoryButton = playerGui:WaitForChild("Inventory"):FindFirstChild("InventoryButton", true) :: ImageButton
 
 task.spawn(function()
-	inventoryUI = PlayerInventory.Create({ Name = "Inventory", ScreenGuiName = "PlayerInventory" })
+	inventoryUI = ShopGUI.Create({ Name = "Inventory", ScreenGuiName = "PlayerInventory" })
 	inventoryUI.Parent = playerGui
 
 	inventoryDetailsUI = inventoryUI:WaitForChild("DetailsContainer", 10) :: Frame
@@ -30,6 +31,10 @@ task.spawn(function()
 
 	screenGui = player.PlayerGui.PlayerInventory
 end)
+
+function clearExistingTooltip()
+	Tooltip.ClearExisting()
+end
 
 function createitemComponent(helper: HelperType.HelperData)
 	local preparedStatData: { [number]: { [string]: any } }? = {}
@@ -65,6 +70,8 @@ local playerInventory: { [string]: any } = {}
 local itemComponents = {}
 
 function updateUI()
+	clearExistingTooltip()
+
 	if inventoryItemsContainer then
 		for k, item in pairs(playerInventory) do
 			if itemComponents[item.Id] then return end
@@ -82,7 +89,7 @@ function populateDetailsUI()
 	updateUI()
 end
 
-local getInventoryFn = Events.GetRemoteFn(Events.RemoteFunctionNames.GetInventory)
+local getInventoryFn = Events.GetRemoteFn(Events.RemoteFunctionNames.GetPlayerInventory)
 if hudInventoryButton and getInventoryFn then hudInventoryButton.Activated:Connect(function()
 	if screenGui.Enabled then
 		screenGui.Enabled = false

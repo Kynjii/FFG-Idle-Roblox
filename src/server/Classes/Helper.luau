@@ -153,7 +153,6 @@ function Helper.CreateStateData(player: Player, currencyType: string)
 	end
 
 	-- Calculate derived properties
-	state.Player = state.Player or player
 	state.Owner = state.Owner or player.UserId
 	state.Id = state.Id or HttpService:GenerateGUID(false)
 	state.JobCategory = state.JobCategory or chooseJob()
@@ -163,7 +162,6 @@ function Helper.CreateStateData(player: Player, currencyType: string)
 
 	-- Define quality first
 	state.QualityId = state.QualityId or chooseQuality()
-	state.Quality = FFGEnum.QUALITIES[state.QualityId]
 
 	-- Get correct image
 	state.ItemImage = state.ItemImage or FFGEnum.JOB_ASSETS[state.JobCategory]
@@ -193,7 +191,6 @@ function Helper.Purchase(self: Helper): ()
 	self.Model = self._cleaner and self._cleaner:Add(helperModel and helperModel:Clone())
 	self.CurrentAssignment = FFGEnum.JOB_ASSIGNMENTS.Unassigned
 
-	print("purchased, saving now")
 	self:Save()
 end
 

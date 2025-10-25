@@ -166,6 +166,7 @@ local function ShopItem(
 				ItemDescription = props.ItemDescription,
 				ItemStats = props.ItemStats,
 				ItemQualityId = props.ItemQualityId,
+				Parent = props.ShopInstance,
 			}
 
 			Events.FireBindableEvent(Events.BindableNames.ShowShopTooltip, itemData)
