@@ -3,6 +3,7 @@ local StarterPlayer = game:GetService("StarterPlayer")
 local AnimateButtonHover = require(StarterPlayer.StarterPlayerScripts.Client.HUD.Utils.AnimateButtonHover)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
+local Button = require(ReplicatedStorage.Shared.UI.Components.Buttons.Button)
 
 local Tooltip = {}
 Tooltip.Existing = {}
@@ -322,19 +323,11 @@ function Tooltip.Create(props: {
 	imageButtonContainer.Size = UDim2.fromScale(1, 0.3)
 	imageButtonContainer.Parent = bottomContainer
 
-	local buyButton = Instance.new("ImageButton")
-	buyButton.BackgroundTransparency = 1
-	buyButton.PressedImage = FFGEnum.THEME.button.white
-	buyButton.Image = FFGEnum.THEME.button.white
-	buyButton.HoverImage = FFGEnum.THEME.button.white
-	buyButton.ResampleMode = Enum.ResamplerMode.Pixelated
-	buyButton.ImageColor3 = FFGEnum.THEME.shop.shopItem.buttonColor
-	buyButton.ScaleType = Enum.ScaleType.Slice
-	buyButton.SliceCenter = Rect.new(32, 83, 32, 83)
-	buyButton.LayoutOrder = 99
-	buyButton.AnchorPoint = FFGEnum.THEME.alignment.anchor.bottom
-	buyButton.Position = FFGEnum.THEME.alignment.position.bottom
-	buyButton.Size = UDim2.fromScale(1, 0.8)
+	local buyButton = Button.Create({
+		color = "Green",
+		text = "Buy",
+		size = UDim2.fromScale(1, 1),
+	})
 	buyButton.Parent = imageButtonContainer
 
 	local baseSize = buyButton.Size
@@ -347,17 +340,6 @@ function Tooltip.Create(props: {
 	buyButton.MouseLeave:Connect(function()
 		AnimateButtonHover.Leave(buyButton, baseSize)
 	end)
-
-	local buttonTxt = Instance.new("TextLabel")
-	buttonTxt.Position = UDim2.fromScale(0.5, 0.45)
-	buttonTxt.AnchorPoint = Vector2.new(0.5, 0.5)
-	buttonTxt.TextColor3 = FFGEnum.THEME.color.white
-	buttonTxt.BackgroundTransparency = 1
-	buttonTxt.TextScaled = true
-	buttonTxt.Text = props.IsPurchased and "Manage" or "Purchase"
-	buttonTxt.Font = FFGEnum.THEME.bigFont
-	buttonTxt.Size = UDim2.fromScale(0.9, 0.9)
-	buttonTxt.Parent = buyButton
 	-- //!SECTION
 
 	-- //!SECTION

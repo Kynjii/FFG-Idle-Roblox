@@ -11,18 +11,16 @@ local props = {
 
 local function story(target)
 	local item = ShopItem({
-		ItemImage = "rbxassetid://135112095865386",
-		BackgroundColor3 = props.BackgroundColor3,
-		BackgroundTransparency = props.BackgroundTransparency,
-		Size = UDim2.fromOffset(100, 100),
+		ItemImage = "rbxassetid://115795857064062",
+		Size = UDim2.fromOffset(150, 200),
 		Rounded = FFGEnum.THEME.button.cornerRadius,
 		HoverEffect = props.HoverEffect,
-		Visible = props.Visible,
 		ScaleType = Enum.ScaleType.Slice,
-		SliceCenter = Rect.new(32, 83, 32, 83),
+		SliceCenter = Rect.new(83, 83, 94, 105),
 		ItemBaseCost = "1.1k",
 		ItemName = "hammer_01",
 		ItemId = "Hammer",
+		ItemQualityId = 2,
 		ItemDescription = "",
 		Parent = target,
 		ShopInstance = target,

@@ -10,7 +10,7 @@ function SingleGridLayout.Create(props: {
 	scrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	scrollingFrame.BackgroundTransparency = 1
 	scrollingFrame.CanvasSize = UDim2.fromScale(0, 4)
-	scrollingFrame.Position = UDim2.fromScale(0.5, 0.533006)
+	scrollingFrame.Position = UDim2.fromScale(0.5, 0.5)
 	scrollingFrame.ScrollBarImageColor3 = Color3.new()
 	scrollingFrame.ScrollBarThickness = 0
 	scrollingFrame.ScrollingDirection = Enum.ScrollingDirection.Y
@@ -19,7 +19,7 @@ function SingleGridLayout.Create(props: {
 
 	local uiGridLayout = Instance.new("UIGridLayout")
 	uiGridLayout.Name = "UIGridLayout"
-	uiGridLayout.CellSize = UDim2.fromScale(0.15, 0.3)
+	uiGridLayout.CellSize = UDim2.fromScale(0.15, 0.4)
 	uiGridLayout.CellPadding = UDim2.fromScale(0.05, 0.05)
 	uiGridLayout.FillDirection = Enum.FillDirection.Horizontal
 	uiGridLayout.FillDirectionMaxCells = 5

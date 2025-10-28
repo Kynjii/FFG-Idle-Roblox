@@ -144,6 +144,7 @@ FFGEnum.UI = {
 		Fishing = "rbxassetid://77902342248833",
 		Inventory = "rbxassetid://103276014090684",
 		CrewManagement = "rbxassetid://118792170900331",
+		Gold = "rbxassetid://113802680310061",
 	},
 	Frames = {
 		MainUIPanel = "rbxassetid://95574095879865",
@@ -155,9 +156,13 @@ FFGEnum.UI = {
 		LeftHoverTab = "rbxassetid://122393201136941",
 	},
 	Buttons = {
-		--
+		Green = {
+			ScaleType = Rect.new(25, 64, 39, 161),
+			Image = "rbxassetid://128292351912310",
+		},
 	},
 	Items = {
+		Hovered = "rbxassetid://119714101000238",
 		BackgroundQualityId = { [1] = "rbxassetid://94138515421739", [2] = "rbxassetid://78206843085783", [3] = "rbxassetid://125653281446487", [4] = "rbxassetid://113686615974215", [5] = "rbxassetid://130543839885527", [6] = "rbxassetid://104966714958616" },
 	},
 }
