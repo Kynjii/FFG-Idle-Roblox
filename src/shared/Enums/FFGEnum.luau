@@ -136,6 +136,29 @@ FFGEnum.CURRENCY_TYPES = {
 	Gold = "Gold",
 }
 
+FFGEnum.UI = {
+	Icons = {
+		Transporting = "rbxassetid://95580835468179",
+		Mining = "rbxassetid://74868423178075",
+		Woodcutting = "rbxassetid://83412324614307",
+		Fishing = "rbxassetid://77902342248833",
+		Inventory = "rbxassetid://103276014090684",
+		CrewManagement = "rbxassetid://118792170900331",
+	},
+	Frames = {
+		MainUIPanel = "rbxassetid://95574095879865",
+	},
+	Tabs = {
+		RightTab = "rbxassetid://132317085020730",
+		RightHoverTab = "rbxassetid://117556452240179",
+		LeftTab = "rbxassetid://93554848747790",
+		LeftHoverTab = "rbxassetid://122393201136941",
+	},
+	Buttons = {
+		--
+	},
+}
+
 FFGEnum.BUFFS = {
 	FISH = {
 		Fish_Percent = "Fish_Percent",
@@ -179,7 +202,8 @@ FFGEnum.BUFFS = {
 }
 
 FFGEnum.THEME = {
-	font = Enum.Font.FredokaOne,
+	bigFont = Enum.Font.Bangers,
+	normalFont = Enum.Font.FredokaOne,
 
 	color = {
 		primary_900 = Color3.fromHex("#fc8500"),
@@ -291,6 +315,10 @@ FFGEnum.THEME = {
 		hoverImage = "rbxassetid://80427328338898",
 		pressedImage = "rbxassetid://72623624680339",
 		cornerRadius = UDim.new(0.1),
+	},
+
+	tab = {
+		red = Color3.fromRGB(152, 0, 5),
 	},
 
 	shop = {

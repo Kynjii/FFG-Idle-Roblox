@@ -1,6 +1,8 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
+
+local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Replica = require(ReplicatedStorage.Shared.ReplicaClient)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
@@ -39,10 +41,14 @@ local function setCurrency(name: string, v: number)
 	else
 		currencyLabel = currencyTemplate:Clone() :: TextLabel
 		currencyLabel.Name = name .. "_LabelClone"
-		currencyLabel.Parent = currencyTemplate.Parent
+		currencyLabel.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
+		currencyLabel.Position = UDim2.fromScale(0.539, 0.526)
+		currencyLabel.Size = UDim2.fromScale(0.9, 1.053)
+		currencyLabel.Font = FFGEnum.THEME.font
+		currencyLabel.TextScaled = true
 		currencyLabel.Visible = true
-		currencyLabel.Size = UDim2.fromScale(0.628, 0.702)
 		currencyLabels[name] = currencyLabel
+		currencyLabel.Parent = currencyTemplate.Parent
 	end
 
 	animate(currencyLabel)

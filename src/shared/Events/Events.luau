@@ -13,11 +13,12 @@ Events.RemoteNames = {
 	HelperPurchased = "HelperPurchased",
 	PrepareHelperShop = "PrepareHelperShop",
 	UpdateUI = "UpdateUI",
-	OpenJobManagementPanel = "OpenJobManagementPanel",
+	OpenCrewManagementPanel = "OpenCrewManagementPanel",
 }
 
 Events.RemoteFunctionNames = {
 	GetPlayerInventory = "GetPlayerInventory",
+	GetCrewManagementState = "GetCrewManagementState",
 }
 
 Events.BindableNames = {

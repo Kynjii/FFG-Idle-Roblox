@@ -13,22 +13,16 @@ local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
-local helperShopUI: Instance
-local shopDetailsUI: Instance
 local main: Instance
 local shopItemsContainer: Instance
 local screenGui: ScreenGui
 
 task.spawn(function()
-	helperShopUI = ShopGUI.Create({ Name = "Crew Shop", ScreenGuiName = "HelperShop" })
-	helperShopUI.Parent = playerGui
+	screenGui = ShopGUI.Create({ screenGuiName = "HelperShop", shopName = "CREW SHOP" })
+	screenGui.Parent = playerGui
 
-	shopDetailsUI = helperShopUI:WaitForChild("DetailsContainer", 10) :: Frame
-
-	main = shopDetailsUI:WaitForChild("Main", 10) :: Frame
-	shopItemsContainer = main:WaitForChild("ItemContainer", 10) :: ScrollingFrame
-
-	screenGui = player.PlayerGui.HelperShop
+	main = screenGui:FindFirstChild("Main", true) :: Frame
+	if main then shopItemsContainer = main:WaitForChild("ItemContainer", 10) :: ScrollingFrame end
 end)
 
 function clearExistingTooltip()

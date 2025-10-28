@@ -95,7 +95,7 @@ function Tooltip.Create(props: {
 	itemLabel.Position = FFGEnum.THEME.alignment.position.textFrameHeaderCenter
 	itemLabel.TextStrokeTransparency = 0
 	itemLabel.Text = props.ItemName
-	itemLabel.Font = FFGEnum.THEME.font
+	itemLabel.Font = FFGEnum.THEME.bigFont
 	if props.ItemQualityId then
 		itemLabel.TextColor3 = FFGEnum.QUALITIES[props.ItemQualityId].Color
 	else
@@ -181,7 +181,7 @@ function Tooltip.Create(props: {
 	priceLabel.Name = "ItemBaseCost"
 	priceLabel.LayoutOrder = 1
 	priceLabel.Text = props.ItemBaseCost
-	priceLabel.Font = FFGEnum.THEME.font
+	priceLabel.Font = FFGEnum.THEME.bigFont
 	priceLabel.TextColor3 = FFGEnum.THEME.intent.notice
 	priceLabel.TextStrokeTransparency = 0
 	priceLabel.TextScaled = true
@@ -198,7 +198,7 @@ function Tooltip.Create(props: {
 	descriptionLabel.TextColor3 = FFGEnum.THEME.color.white
 	descriptionLabel.TextWrapped = true
 	descriptionLabel.TextScaled = true
-	descriptionLabel.Font = FFGEnum.THEME.font
+	descriptionLabel.Font = FFGEnum.THEME.normalFont
 	descriptionLabel.BackgroundTransparency = 1
 	descriptionLabel.Size = UDim2.fromScale(0.9, 0.35)
 	descriptionLabel.Parent = itemInfoContainer
@@ -293,7 +293,7 @@ function Tooltip.Create(props: {
 			statElementLabel.TextWrapped = true
 			statElementLabel.TextScaled = true
 			statElementLabel.LayoutOrder = 1
-			statElementLabel.Font = FFGEnum.THEME.font
+			statElementLabel.Font = FFGEnum.THEME.normalFont
 			statElementLabel.BackgroundTransparency = 1
 			statElementLabel.Size = UDim2.fromScale(0.5, 1)
 			statElementLabel.Parent = statFrameContainer
@@ -306,7 +306,7 @@ function Tooltip.Create(props: {
 			statElementValue.TextWrapped = true
 			statElementValue.TextScaled = true
 			statElementValue.LayoutOrder = 2
-			statElementValue.Font = FFGEnum.THEME.font
+			statElementValue.Font = FFGEnum.THEME.normalFont
 			statElementValue.BackgroundTransparency = 1
 			statElementValue.Size = UDim2.fromScale(0.5, 1)
 			statElementValue.Parent = statFrameContainer
@@ -355,7 +355,7 @@ function Tooltip.Create(props: {
 	buttonTxt.BackgroundTransparency = 1
 	buttonTxt.TextScaled = true
 	buttonTxt.Text = props.IsPurchased and "Manage" or "Purchase"
-	buttonTxt.Font = FFGEnum.THEME.font
+	buttonTxt.Font = FFGEnum.THEME.bigFont
 	buttonTxt.Size = UDim2.fromScale(0.9, 0.9)
 	buttonTxt.Parent = buyButton
 	-- //!SECTION

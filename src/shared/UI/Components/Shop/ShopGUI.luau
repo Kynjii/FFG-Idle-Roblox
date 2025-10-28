@@ -7,22 +7,17 @@ local Tooltip = require(ReplicatedStorage.Shared.UI.Components.Tooltips.Tooltip)
 local ShopGUI = {}
 
 function ShopGUI.Create(props: {
-	Name: string,
-	ScreenGuiName: string,
+	screenGuiName: string,
+	shopName: string,
 })
-	local shopScreenGui = Instance.new("ScreenGui")
-	shopScreenGui.Name = props.ScreenGuiName
-	shopScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	shopScreenGui.ResetOnSpawn = false
-	shopScreenGui.Enabled = false
+	local screenGui = MainUIPanel.Create({ screenGuiName = props.screenGuiName, panelName = props.shopName })
 
-	local mainPanel = MainUIPanel.Create({ Name = props.Name, Parent = shopScreenGui })
-
-	SingleGridLayout.Create({ Name = "ItemContainer", Parent = mainPanel.Main })
+	local main = screenGui:FindFirstChild("Main", true)
+	if main then SingleGridLayout.Create({ Name = "ItemContainer", Parent = main }) end
 
 	Tooltip.Initialize()
 
-	return shopScreenGui
+	return screenGui
 end
 
 function ShopGUI.CloseShop(mainFrame)

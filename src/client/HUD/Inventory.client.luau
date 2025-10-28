@@ -12,24 +12,18 @@ local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
-local inventoryUI: Instance
-local inventoryDetailsUI: Instance
 local main: Instance
 local inventoryItemsContainer: Instance
 local screenGui: ScreenGui
-
-local hudInventoryButton = playerGui:WaitForChild("Inventory"):FindFirstChild("InventoryButton", true) :: ImageButton
+local inventoryButtonScreenGui = playerGui:WaitForChild("InventoryButton")
+local hudInventoryButton = inventoryButtonScreenGui:FindFirstChild("OpenButton", true) :: ImageButton
 
 task.spawn(function()
-	inventoryUI = ShopGUI.Create({ Name = "Inventory", ScreenGuiName = "PlayerInventory" })
-	inventoryUI.Parent = playerGui
+	screenGui = ShopGUI.Create({ screenGuiName = "PlayerInventory", shopName = "INVENTORY" })
+	screenGui.Parent = playerGui
 
-	inventoryDetailsUI = inventoryUI:WaitForChild("DetailsContainer", 10) :: Frame
-
-	main = inventoryDetailsUI:WaitForChild("Main", 10) :: Frame
-	inventoryItemsContainer = main:WaitForChild("ItemContainer", 10) :: ScrollingFrame
-
-	screenGui = player.PlayerGui.PlayerInventory
+	main = screenGui:FindFirstChild("Main", true) :: Frame
+	if main then inventoryItemsContainer = main:WaitForChild("ItemContainer", 10) :: ScrollingFrame end
 end)
 
 function clearExistingTooltip()
@@ -92,7 +86,7 @@ function populateDetailsUI()
 end
 
 local getInventoryFn = Events.GetRemoteFn(Events.RemoteFunctionNames.GetPlayerInventory)
-if hudInventoryButton and getInventoryFn then hudInventoryButton.Activated:Connect(function()
+hudInventoryButton.Activated:Connect(function()
 	if screenGui.Enabled then
 		screenGui.Enabled = false
 		if Lighting then
@@ -109,4 +103,4 @@ if hudInventoryButton and getInventoryFn then hudInventoryButton.Activated:Conne
 		populateDetailsUI()
 		screenGui.Enabled = true
 	end
-end) end
+end)

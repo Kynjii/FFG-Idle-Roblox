@@ -1,80 +1,132 @@
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
+
+local PanelTab = require(script.Parent.PanelTab)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local AnimateButtonHover = require(StarterPlayer.StarterPlayerScripts.Client.HUD.Utils.AnimateButtonHover)
 local MainUIPanel = {}
 
-function MainUIPanel.Create(props: {
+type TabsData = {
 	Name: string,
-	Parent: Instance,
+	Index: number,
+	Icon: string?,
+}
+
+type TabProp = {
+	hasTabs: boolean,
+	tabs: { [number]: TabsData },
+}
+
+function MainUIPanel.Create(props: {
+	screenGuiName: string,
+	panelName: string,
+	panelTabs: TabProp?,
 })
-	local detailsContainer = Instance.new("Frame")
-	detailsContainer.Visible = true
-	detailsContainer.Name = "DetailsContainer"
-	detailsContainer.AnchorPoint = Vector2.new(0.5, 0.5)
-	detailsContainer.BackgroundTransparency = 1
-	detailsContainer.Position = UDim2.fromScale(0.5, 0.5)
-	detailsContainer.Size = UDim2.fromScale(1, 1)
-	detailsContainer.Parent = props.Parent
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.Name = props.screenGuiName
+	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	screenGui.ResetOnSpawn = false
+	screenGui.Enabled = false
+
+	local panelContainer = Instance.new("Frame")
+	panelContainer.Name = "PanelContainer"
+	panelContainer.AnchorPoint = Vector2.new(0.5, 0.5)
+	panelContainer.BackgroundTransparency = 1
+	panelContainer.Position = UDim2.fromScale(0.5, 0.5)
+	panelContainer.Size = UDim2.fromScale(0.619, 0.7)
+	panelContainer.ZIndex = 0
+	panelContainer.Parent = screenGui
+
+	local panelBG = Instance.new("ImageLabel")
+	panelBG.Name = "PanelBG"
+	panelBG.AnchorPoint = Vector2.new(0.5, 0.5)
+	panelBG.BackgroundTransparency = 1
+	panelBG.Image = FFGEnum.UI.Frames.MainUIPanel
+	panelBG.Position = UDim2.fromScale(0.5, 0.5)
+	panelBG.ScaleType = Enum.ScaleType.Slice
+	panelBG.Size = UDim2.fromScale(1, 1)
+	panelBG.SliceCenter = Rect.new(20, 33, 29, 73)
+	panelBG.ZIndex = 0
+	panelBG.Parent = panelContainer
+
+	local tabContainer = Instance.new("Frame")
+	tabContainer.Name = "TabContainer"
+	tabContainer.AnchorPoint = Vector2.new(0.5, 0.5)
+	tabContainer.BackgroundTransparency = 1
+	tabContainer.Position = UDim2.fromScale(-0.035, 0.520888)
+	tabContainer.Size = UDim2.fromScale(0.071, 0.778777)
+	tabContainer.Parent = panelContainer
+
+	local uIListLayout = Instance.new("UIListLayout")
+	uIListLayout.Name = "UIListLayout"
+	uIListLayout.Padding = UDim.new(0.01, 0)
+	uIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	uIListLayout.Parent = tabContainer
+
+	if props.panelTabs and props.panelTabs.hasTabs then
+		for _, tab in pairs(props.panelTabs.tabs) do
+			PanelTab.Create({
+				Name = tab.Name,
+				Parent = tabContainer,
+				LayoutOrder = tab.Index,
+				Icon = tab.Icon,
+			})
+		end
+	end
 
 	local main = Instance.new("Frame")
 	main.Name = "Main"
 	main.AnchorPoint = Vector2.new(0.5, 0.5)
-	main.BackgroundColor3 = FFGEnum.THEME.color.panel
-	main.Position = UDim2.fromScale(0.490615, 0.518226)
-	main.Size = UDim2.fromScale(0.499, 0.611)
-	main.Parent = detailsContainer
+	main.BackgroundTransparency = 1
+	main.Position = UDim2.fromScale(0.5, 0.5)
+	main.Size = UDim2.fromScale(1, 1)
+	main.Parent = panelContainer
 
-	local uICorner = Instance.new("UICorner")
-	uICorner.Name = "UICorner"
-	uICorner.CornerRadius = UDim.new(0.07, 0)
-	uICorner.Parent = main
+	local panelNameContainer = Instance.new("Frame")
+	panelNameContainer.Name = "PanelNameContainer"
+	panelNameContainer.AnchorPoint = Vector2.new(0.5, 0.5)
+	panelNameContainer.BackgroundTransparency = 1
+	panelNameContainer.Position = UDim2.fromScale(0.500531, 0.0642202)
+	panelNameContainer.Size = UDim2.fromScale(1, 0.0868755)
+	panelNameContainer.Parent = main
+
+	local textLabel = Instance.new("TextLabel")
+	textLabel.Name = "TextLabel"
+	textLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+	textLabel.BackgroundTransparency = 1
+	textLabel.Font = FFGEnum.THEME.font
+	textLabel.Position = UDim2.fromScale(0.5, 0.5)
+	textLabel.Size = UDim2.fromScale(1, 1)
+	textLabel.Text = props.panelName
+	textLabel.TextColor3 = Color3.new(1, 1, 1)
+	textLabel.TextScaled = true
+	textLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 	local uIStroke = Instance.new("UIStroke")
 	uIStroke.Name = "UIStroke"
-	uIStroke.Color = FFGEnum.THEME.shop.shopItem.bgColor
-	uIStroke.Thickness = 5
-	uIStroke.Parent = main
+	uIStroke.LineJoinMode = Enum.LineJoinMode.Bevel
+	uIStroke.Thickness = 2.4
+	uIStroke.Parent = textLabel
 
-	local title = Instance.new("Frame")
-	title.Name = "Title"
-	title.BackgroundColor3 = FFGEnum.THEME.color.primary_900
-	title.AnchorPoint = Vector2.new(0.5, 0.5)
-	title.Position = UDim2.fromScale(0.176558, -0.03)
-	title.Size = UDim2.fromScale(0.252294, 0.124159)
-	title.ZIndex = 2
+	textLabel.Parent = panelNameContainer
 
-	local title1 = Instance.new("TextLabel")
-	title1.Name = "Title"
-	title1.AnchorPoint = Vector2.new(0.5, 0.5)
-	title1.BackgroundTransparency = 1
-	title1.Font = Enum.Font.FredokaOne
-	title1.Position = UDim2.fromScale(0.5, 0.5)
-	title1.Size = UDim2.fromScale(0.9, 0.9)
-	title1.Text = props.Name
-	title1.TextColor3 = Color3.new(1, 1, 1)
-	title1.TextScaled = true
-	title1.TextStrokeTransparency = 0.7
-	title1.Parent = title
+	local innerWindow = Instance.new("Frame")
+	innerWindow.Name = "InnerWindow"
+	innerWindow.AnchorPoint = Vector2.new(0.5, 0.5)
+	innerWindow.BackgroundTransparency = 1
+	innerWindow.LayoutOrder = 2
+	innerWindow.Position = UDim2.fromScale(0.500531, 0.568048)
+	innerWindow.Size = UDim2.fromScale(1, 0.863903)
+	innerWindow.ZIndex = 10
+	innerWindow.Parent = main
 
-	local uICornerTitle = Instance.new("UICorner")
-	uICornerTitle.Name = "UICorner"
-	uICornerTitle.CornerRadius = UDim.new(0.2, 0)
-	uICornerTitle.Parent = title1
-
-	local uICorner1 = Instance.new("UICorner")
-	uICorner1.Name = "UICorner"
-	uICorner1.CornerRadius = UDim.new(0.2, 0)
-	uICorner1.Parent = title
-
-	local uIStroke1 = Instance.new("UIStroke")
-	uIStroke1.Name = "UIStroke"
-	uIStroke1.Color = FFGEnum.THEME.shop.shopItem.bgColor
-	uIStroke1.Thickness = FFGEnum.THEME.shop.shopItem.outlineThickness
-	uIStroke1.Parent = title
-
-	title.Parent = main
+	local container = Instance.new("Frame")
+	container.Name = "Container"
+	container.AnchorPoint = Vector2.new(0.5, 0.5)
+	container.BackgroundTransparency = 1
+	container.Position = UDim2.fromScale(0.497595, 0.512493)
+	container.Size = UDim2.fromScale(1, 0.888397)
 
 	local closeButton = Instance.new("ImageButton")
 	closeButton.Name = "CloseButton"
@@ -85,17 +137,13 @@ function MainUIPanel.Create(props: {
 
 	local baseSize = closeButton.Size
 	closeButton.Activated:Connect(function()
-		local screenGUI = detailsContainer:FindFirstAncestorWhichIsA("ScreenGui")
-		if screenGUI then screenGUI.Enabled = false end
+		if screenGui then screenGui.Enabled = false end
 		if Lighting then
 			local children = Lighting:GetChildren()
 			for _, instance: Instance in pairs(children) do
 				if instance.Name == "Blur" then instance:Destroy() end
 			end
 		end
-
-		local tooltip = detailsContainer:FindFirstChild("ShopTooltip", true)
-		if tooltip then tooltip:Destroy() end
 	end)
 
 	closeButton.MouseEnter:Connect(function()
@@ -117,24 +165,24 @@ function MainUIPanel.Create(props: {
 	uIStroke2.Thickness = FFGEnum.THEME.shop.shopItem.outlineThickness
 	uIStroke2.Parent = closeButton
 
-	local textLabel = Instance.new("TextLabel")
-	textLabel.Name = "TextLabel"
-	textLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-	textLabel.BackgroundTransparency = 1
-	textLabel.Font = Enum.Font.FredokaOne
-	textLabel.Position = UDim2.fromScale(0.5, 0.5)
-	textLabel.Size = UDim2.fromScale(0.480769, 0.634615)
-	textLabel.Text = "X"
-	textLabel.TextColor3 = Color3.new(1, 1, 1)
-	textLabel.TextScaled = true
-	textLabel.TextStrokeTransparency = 0
+	local closeButtonX = Instance.new("TextLabel")
+	closeButtonX.Name = "TextLabel"
+	closeButtonX.AnchorPoint = Vector2.new(0.5, 0.5)
+	closeButtonX.BackgroundTransparency = 1
+	closeButtonX.Font = FFGEnum.THEME.font
+	closeButtonX.Position = UDim2.fromScale(0.5, 0.5)
+	closeButtonX.Size = UDim2.fromScale(0.480769, 0.634615)
+	closeButtonX.Text = "X"
+	closeButtonX.TextColor3 = Color3.new(1, 1, 1)
+	closeButtonX.TextScaled = true
+	closeButtonX.TextStrokeTransparency = 0
 
 	local uIStroke3 = Instance.new("UIStroke")
 	uIStroke3.Name = "UIStroke"
 	uIStroke3.Thickness = 2
-	uIStroke3.Parent = textLabel
+	uIStroke3.Parent = closeButtonX
 
-	textLabel.Parent = closeButton
+	closeButtonX.Parent = closeButton
 
 	local uIAspectRatioConstraint1 = Instance.new("UIAspectRatioConstraint")
 	uIAspectRatioConstraint1.Name = "UIAspectRatioConstraint"
@@ -142,7 +190,7 @@ function MainUIPanel.Create(props: {
 
 	closeButton.Parent = main
 
-	return detailsContainer
+	return screenGui
 end
 
 return MainUIPanel

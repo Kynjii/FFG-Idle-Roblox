@@ -42,7 +42,7 @@ textLabel.Transparency = 1
 textLabel.TextTransparency = 0
 textLabel.TextStrokeTransparency = 0
 textLabel.TextStrokeColor3 = Color3.fromRGB(0)
-textLabel.Font = Enum.Font.FredokaOne
+textLabel.Font = Enum.Font.Bangers
 textLabel.TextColor3 = Color3.fromHex("#55b5de")
 textLabel.Text = "Loading game"
 textLabel.TextScaled = true
@@ -57,7 +57,7 @@ textLabel2.Transparency = 1
 textLabel2.TextTransparency = 0
 textLabel2.TextStrokeTransparency = 0
 textLabel2.TextStrokeColor3 = Color3.fromRGB(0)
-textLabel2.Font = Enum.Font.FredokaOne
+textLabel2.Font = Enum.Font.Bangers
 textLabel2.TextColor3 = Color3.fromHex("#55b5de")
 textLabel2.Text = ""
 textLabel2.TextScaled = true
@@ -89,9 +89,14 @@ task.wait(5) -- Force screen to appear for a minimum number of seconds
 task.cancel(textUpdater)
 textUpdater = nil
 
-local playerGUIChildren = playerGui:GetChildren()
-for _, screenGUI in pairs(playerGUIChildren) do
-	if screenGUI.Name == "HUD" or screenGUI.Name == "Inventory" then screenGUI.Enabled = true end
+local hudElements = playerGui:GetChildren()
+local elementsToShow = {
+	HUD = "HUD",
+	InventoryButton = "InventoryButton",
+	CrewManagementButton = "CrewManagementButton",
+}
+for _, screenGUI: ScreenGui in pairs(hudElements) do
+	if elementsToShow[screenGUI.Name] then screenGUI.Enabled = true end
 end
 
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, true)
