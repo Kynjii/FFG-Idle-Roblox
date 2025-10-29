@@ -14,9 +14,6 @@ Events.RemoteNames = {
 	PrepareHelperShop = "PrepareHelperShop",
 	UpdateUI = "UpdateUI",
 	OpenCrewManagementPanel = "OpenCrewManagementPanel",
-	HelperAtGatheringLoc = "HelperAtGatheringLoc",
-	HelperStuck = "HelperStuck",
-	HelperAtUnloadingLoc = "HelperAtUnloadingLoc",
 	AssignJob = "AssignJob",
 }
 
@@ -28,6 +25,9 @@ Events.RemoteFunctionNames = {
 Events.BindableNames = {
 	ShowTooltip = "ShowTooltip",
 	CloseUIWindow = "CloseUIWindow",
+	HelperAtGatheringLoc = "HelperAtGatheringLoc",
+	HelperStuck = "HelperStuck",
+	HelperAtUnloadingLoc = "HelperAtUnloadingLoc",
 }
 
 local FOLDER_NAME = "RME"
@@ -113,7 +113,6 @@ function Events.GetRemoteFn(name: string): RemoteFunction?
 end
 
 function Events.FireBindableEvent(name: string, data: any)
-	assert(RunService:IsClient(), "FireEvent must be called from the client")
 	local folder = ReplicatedStorage:FindFirstChild(FOLDER_NAME_BINDABLES)
 	local ev = folder and folder:FindFirstChild(name)
 	if ev and ev:IsA("BindableEvent") then

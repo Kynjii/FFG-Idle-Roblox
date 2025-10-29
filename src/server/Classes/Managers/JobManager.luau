@@ -3,7 +3,6 @@ local ServerScriptService = game:GetService("ServerScriptService")
 
 local Helper = require(ServerScriptService.Server.Classes.Helper)
 local Pathfinding = require(ServerScriptService.Server.Classes.Modules.Pathfinding)
-local Jobs = require(ServerScriptService.Server.Modules.Jobs.Jobs)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Trove = require(ReplicatedStorage.Packages.Trove)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
@@ -16,35 +15,51 @@ type JobManager = typeof(setmetatable({}, JobManager))
 
 function JobManager.New(helperState, player: Player, teamId: number): JobManager
 	local self = setmetatable({} :: JobManager, JobManager)
-
+	print(helperState)
 	self.Player = player
 	self.Owner = self.Owner or player.UserId
 	self.TeamId = teamId
 
+	print(player, self.Player)
 	self.Helpers = {}
 
 	self._cleaner = Trove.new()
 
+	self:CreateHelpers(helperState)
+	self:AssignJobs(player)
+
 	self:AttachEventListeners()
-
-	for _, helper in pairs(helperState) do
-		local helperClass = Helper.New(helper, player, teamId)
-		self.Helpers[helperClass.Id] = helperClass
-
-		if helperClass.CurrentAssignment ~= "" then helperClass:AssignJob(helperClass.CurrentAssignment, false) end
-	end
 
 	return self
 end
 
-function JobManager.AssignHelper(self: JobManager, helperId: number, jobId: number): ()
+function JobManager.CreateHelpers(self: JobManager, helperState)
+	for _, helper in pairs(helperState) do
+		local helperClass = Helper.New(helper, self.Player, self.TeamId)
+		self.Helpers[helperClass.Id] = helperClass
+	end
+
+	print(self.Helpers)
+end
+
+function JobManager.AssignJobs(self: JobManager, player: Player)
+	for _, helper in pairs(self.Helpers) do
+		self:AssignHelper(helper.Id, helper.CurrentAssignment, player)
+	end
+end
+
+function JobManager.AssignHelper(self: JobManager, helperId: number, jobId: number, player: Player?): ()
 	if not helperId or not jobId then return end
 
 	local helper = self.Helpers and self.Helpers[helperId] or nil
 	if not helper then
-		local inventory = DataService.GetPlayerInventory(self.Player)
+		local inventory = DataService.GetPlayerInventory(self.Player or player)
+		if not inventory then return end
+		print(inventory)
 		local savedHelperState = inventory[helperId]
+		print(savedHelperState, helperId)
 		local newHelperClass = Helper.New(savedHelperState, self.Player, self.TeamId)
+		print(self.Helpers)
 		self.Helpers[newHelperClass.Id] = newHelperClass
 		helper = newHelperClass
 	end
@@ -58,10 +73,6 @@ end
 function JobManager.StartJob(self: JobManager, helper: HelperType.HelperInstance, jobId: number)
 	print(helper.Model)
 	if not helper or not helper.Model then return end
-
-	local startPos: Vector3 = Jobs.Data[jobId].Location
-
-	if startPos then helper.Model:MoveTo(startPos) end
 
 	if helper.ResourceInStorage > 0 then
 		-- begin unload
@@ -82,21 +93,21 @@ function JobManager.AttachEventListeners(self: JobManager): ()
 	end) end
 
 	-- Remote Events for handling job cycle
-	local helperAtGatheringLoc = Events.GetRemote(Events.RemoteNames.HelperAtGatheringLoc)
-	if helperAtGatheringLoc then helperAtGatheringLoc.OnServerEvent:Connect(function()
+	local helperAtGatheringLoc = Events.GetBindableEvent(Events.BindableNames.HelperAtGatheringLoc)
+	if helperAtGatheringLoc then helperAtGatheringLoc.Event:Connect(function(data)
 		print("I'm Here!")
 	end) end
 
-	local helperAtUnloadingLoc = Events.GetRemote(Events.RemoteNames.HelperAtUnloadingLoc)
-	if helperAtUnloadingLoc then helperAtUnloadingLoc.OnServerEvent:Connect(function(helperId, helperJobId)
+	local helperAtUnloadingLoc = Events.GetBindableEvent(Events.BindableNames.HelperAtUnloadingLoc)
+	if helperAtUnloadingLoc then helperAtUnloadingLoc.Event:Connect(function(helperId, helperJobId)
 		local helper = self.Helpers[helperId]
 		print(helper)
 		self:StartJob(helper, helperJobId)
 	end) end
 
-	local helperStuck = Events.GetRemote(Events.RemoteNames.HelperStuck)
+	local helperStuck = Events.GetBindableEvent(Events.BindableNames.HelperStuck)
 	if helperStuck then
-		helperStuck.OnServerEvent:Connect(function()
+		helperStuck.Event:Connect(function()
 			-- helperStuck | send after ~30 seconds of it not reaching it's destination and reset
 		end)
 	end

@@ -172,7 +172,7 @@ function Helper.CreateStateData(player: Player, currencyType: string)
 
 	state.IsPurchased = state.IsPurchased or false
 
-	state.CurrentAssignment = state.CurrentAssignment or ""
+	state.CurrentAssignment = state.CurrentAssignment or 0
 
 	return state
 end
@@ -206,18 +206,24 @@ function Helper.CreateModel(self: Helper)
 			end
 		end
 	end
+
+	local startPos: Vector3 = Jobs.Data[self.CurrentAssignment].Location
+	if startPos then
+		self.Model:MoveTo(startPos)
+		Events.FireBindableEvent(Events.BindableNames.HelperAtUnloadingLoc, self.Player, self.Id, self.CurrentAssignment)
+	end
 end
 
 function Helper.AssignJob(self: Helper, jobId: number, isNewJob: boolean)
 	if not self:CanAssignJob(jobId) then return false end
-	self:CreateModel()
 
 	if isNewJob then
 		self.ResourceInStorage = 0
 		self.CurrentAssignment = jobId
 	end
 
-	Events.FireEvent(Events.RemoteNames.HelperAtUnloadingLoc, self.Player, self.Id, self.CurrentAssignment)
+	self:CreateModel()
+
 	self:Save()
 	return true
 end
@@ -361,9 +367,6 @@ end
 
 -- //SECTION - Cleanup
 function Helper.Destroy(self: Helper)
-	self:Hide()
-	self:CannotCollide()
-
 	pcall(function()
 		self:Save()
 	end)
@@ -374,7 +377,6 @@ function Helper.Destroy(self: Helper)
 	end
 
 	self.Player = nil :: any
-	self.Model = nil :: any
 end
 -- //!SECTION
 

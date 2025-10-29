@@ -48,7 +48,13 @@ function PathFinding.GoGatherSpot(jobId: number, npcModel: Model, player: Player
 		end
 		print(hasReachedGoal)
 
-		if hasReachedGoal then Events.FireEvent(Events.RemoteNames.HelperAtGatheringLoc, player) end
+		if hasReachedGoal then
+			local helperAtGatheringLocationEvent = Events.GetBindableEvent(Events.BindableNames.HelperAtGatheringLoc)
+			if helperAtGatheringLocationEvent then
+				print("firing!")
+				Events.FireBindableEvent(Events.BindableNames.HelperAtGatheringLoc, hasReachedGoal)
+			end
+		end
 	end
 end
 
