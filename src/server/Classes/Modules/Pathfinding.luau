@@ -1,49 +1,55 @@
--- local PFS = game:GetService("PathfindingService")
+local PFS = game:GetService("PathfindingService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 
--- local npc = script.Parent
--- local humanoid = npc:WaitForChild("Humanoid")
+local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
+local Events = require(ReplicatedStorage.Shared.Events.Events)
+local Jobs = require(ServerScriptService.Server.Modules.Jobs.Jobs)
 
--- local pathParts = {
--- 	[1] = game.Workspace:WaitForChild("GoalPart_1"),
--- 	[2] = game.Workspace:WaitForChild("GoalPart_2"),
--- 	[3] = game.Workspace:WaitForChild("GoalPart_3"),
--- 	[4] = game.Workspace:WaitForChild("GoalPart_4"),
--- 	[5] = game.Workspace:WaitForChild("GoalPart_5"),
--- }
+local PathFinding = {}
 
--- //TODO -
--- 1. Add waypoints to the Island
--- 2. Assign them to particular lanes
--- 3. Ensure that when returning, to reverse path
+function PathFinding.GetRoute(jobId: number)
+	return Jobs.Data[jobId].Route
+end
 
--- if pathParts then
--- 	for _, pathPart in ipairs(pathParts) do
--- 		local path = PFS:CreatePath({
--- 			AgentRadius = 3,
--- 			Costs = {
--- 				FencePost = 100,
--- 			},
--- 		})
+function PathFinding.GoGatherSpot(jobId: number, npcModel: Model, player: Player)
+	local npc = npcModel
+	local humanoid: Humanoid = npc:WaitForChild("Humanoid")
 
--- 		local success, errorMessage = pcall(function()
--- 			path:ComputeAsync(npc.PrimaryPart.Position, pathPart.Position)
--- 		end)
+	local route = PathFinding.GetRoute(jobId)
+	local reversed = TableUtil.Reverse(route)
+	if reversed then
+		local hasReachedGoal = false
 
--- 		if success then
--- 			for _, waypoint in pairs(path:GetWaypoints()) do
--- 				local part = Instance.new("Part")
--- 				part.Material = "Neon"
--- 				part.Anchored = true
--- 				part.CanCollide = false
--- 				part.Shape = "Ball"
--- 				part.Position = waypoint.Position
--- 				part.Parent = game.Workspace
+		for i, pathPart in ipairs(reversed) do
+			if i == 1 then continue end
+			local path = PFS:CreatePath({
+				AgentCanJump = true,
+				AgentCanClimb = true,
+				AgentRadius = 3,
+			})
 
--- 				humanoid:MoveTo(waypoint.Position)
--- 				humanoid.MoveToFinished:Wait()
--- 			end
--- 		else
--- 			warn(errorMessage)
--- 		end
--- 	end
--- end
+			local success, errorMessage = pcall(function()
+				path:ComputeAsync(npc.PrimaryPart.Position, pathPart)
+			end)
+
+			if success and path.Status == Enum.PathStatus.Success then
+				for _, waypoint in ipairs(path:GetWaypoints()) do
+					if waypoint.Action == Enum.PathWaypointAction.Jump then humanoid.Jump = true end
+
+					humanoid:MoveTo(waypoint.Position)
+					humanoid.MoveToFinished:Wait()
+				end
+			else
+				warn(errorMessage)
+			end
+
+			if i == #reversed then hasReachedGoal = true end
+		end
+		print(hasReachedGoal)
+
+		if hasReachedGoal then Events.FireEvent(Events.RemoteNames.HelperAtGatheringLoc, player) end
+	end
+end
+
+return PathFinding

@@ -4,12 +4,12 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local Trove = require(ReplicatedStorage.Packages.Trove)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
-local EventListeners = require(ServerScriptService.Server.Classes.Modules.EventListeners)
 local HelperCalculators = require(ServerScriptService.Server.Classes.Modules.HelperCalculators)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
 local Jobs = require(ServerScriptService.Server.Modules.Jobs.Jobs)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
+local Events = require(ReplicatedStorage.Shared.Events.Events)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
 
 -- //SECTION - Helper Data
@@ -138,8 +138,6 @@ function Helper.New(state: HelperType.HelperData, player: Player, teamId: number
 
 	self._cleaner = Trove.new()
 
-	self:AttachEventListeners()
-
 	return self
 end
 -- //!SECTION
@@ -185,7 +183,7 @@ function Helper.GetAssignments(self: Helper)
 	return
 end
 
-function Helper.CanAssignJob(self: Helper, jobId: string): boolean
+function Helper.CanAssignJob(self: Helper, jobId: number): boolean
 	local jobInfo = Jobs.Data[jobId]
 	if not jobInfo then return false end
 
@@ -202,18 +200,24 @@ function Helper.CreateModel(self: Helper)
 	if clonedModel then
 		local modelChildren = clonedModel:GetChildren()
 		for _, part: Instance in pairs(modelChildren) do
-			if part:IsA("MeshPart") or part:IsA("Part") and part.Name ~= "HumanoidRootPart" then part.Transparency = 0 end
+			if part:IsA("MeshPart") or part:IsA("Part") then
+				if part.Name ~= "HumanoidRootPart" then part.Transparency = 0 end
+				part.Anchored = false
+			end
 		end
 	end
 end
 
-function Helper.AssignJob(self: Helper, jobId: string)
+function Helper.AssignJob(self: Helper, jobId: number, isNewJob: boolean)
 	if not self:CanAssignJob(jobId) then return false end
 	self:CreateModel()
 
-	self.ResourceInStorage = 0
-	self.CurrentAssignment = jobId
+	if isNewJob then
+		self.ResourceInStorage = 0
+		self.CurrentAssignment = jobId
+	end
 
+	Events.FireEvent(Events.RemoteNames.HelperAtUnloadingLoc, self.Player, self.Id, self.CurrentAssignment)
 	self:Save()
 	return true
 end
@@ -352,13 +356,6 @@ end
 
 function Helper.Save(self: Helper): ()
 	DataService.SaveHelper(self.Player, self:Serialize())
-end
--- //!SECTION
-
--- //SECTION - Event Listeners
-function Helper.AttachEventListeners(self: Helper)
-	-- //TODO -
-	-- EventListeners.Attach(self :: any)
 end
 -- //!SECTION
 

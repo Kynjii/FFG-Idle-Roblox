@@ -45,7 +45,7 @@ local function setCurrency(name: string, v: number)
 		currencyLabel.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
 		currencyLabel.Position = UDim2.fromScale(0.539, 0.526)
 		currencyLabel.Size = UDim2.fromScale(0.9, 0.9)
-		currencyLabel.Font = FFGEnum.THEME.bigFont
+		currencyLabel.Font = FFGEnum.THEME.normalFont
 		currencyLabel.TextScaled = true
 		currencyLabel.Visible = true
 		currencyLabel.Parent = currencyTemplate.Parent

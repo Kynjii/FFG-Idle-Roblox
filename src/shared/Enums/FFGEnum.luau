@@ -58,6 +58,8 @@ FFGEnum.ATTRIBUTES = {
 	BuildingId = "BuildingId",
 	BuildingName = "BuildingName",
 	JobId = "JobId",
+	PathStep = "PathStep",
+	UnloadLoc = "UnloadLoc",
 }
 
 FFGEnum.CLASS = {

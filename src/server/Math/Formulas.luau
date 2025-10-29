@@ -1,13 +1,7 @@
---!strict
--- Server/Math/Formulas.lua
-
--- =========================
--- Core progression knobs
--- =========================
-
+-- //SECTION - Progression knobs
 local MAX_LEVEL = 100
 
--- Level thresholds where you "promote" to the next stage (1-indexed stage)
+-- Level thresholds when "promoted" to the next stage (1-indexed stage)
 local PROMO_LEVEL = { 1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 }
 
 -- Early stages: earnings > costs ; Later stages: costs > earnings
@@ -28,11 +22,9 @@ local EARN_BONUS = {
 	[9] = 0.12,
 	[10] = 0.15,
 }
+-- //!SECTION
 
--- =========================
--- Helpers (internal)
--- =========================
-
+-- //SECTION - Helpers (internal)
 local function stageForLevel(level: number): number
 	level = math.clamp(level, 1, MAX_LEVEL)
 	local stage = 1
@@ -68,11 +60,9 @@ local function buildMultipliers(ratePerStage: { number }, bonusPerStage: { [numb
 	end
 	return mult
 end
+-- //!SECTION
 
--- =========================
--- Cumulative level multipliers
--- =========================
-
+-- //SECTION - Cumulative level multipliers
 local EARN_MULT = buildMultipliers(EARN_RATE, EARN_BONUS) -- index by level
 local COST_MULT = buildMultipliers(COST_RATE, nil) -- index by level
 
@@ -83,11 +73,9 @@ for s = 1, STAGE_COUNT do
 	local lvlAtStage = PROMO_LEVEL[s]
 	STAGE_EARN_MULT[s] = EARN_MULT[lvlAtStage]
 end
+-- //!SECTION
 
--- =========================
--- Economy baselines
--- =========================
-
+-- //SECTION - Economy baselines
 local FORMULAS = {
 	-- Core progression
 	MAX_LEVEL = MAX_LEVEL,
@@ -120,7 +108,7 @@ local FORMULAS = {
 	BUILDING = { BaseCost = 1500 },
 	HELPER = { BaseCost = 1000 },
 
-	-- Tier (rarity) curve used elsewhere in your economy
+	-- Tier (rarity) curve used elsewhere in the economy
 	TIER_MULTIPLIER = {
 		[1] = 1,
 		[2] = 8,
@@ -130,13 +118,14 @@ local FORMULAS = {
 		[6] = 200,
 	},
 }
+-- //!SECTION
 
 -- =========================
 -- Additive per-level growth (before Stage/Quality)
 -- =========================
 
-FORMULAS.PER_LEVEL_STORAGE_ADD = 3.0 -- +3 storage / level
-FORMULAS.PER_LEVEL_FPS_ADD = 0.5 -- +0.5 FPS   / level
+FORMULAS.PER_LEVEL_STORAGE_ADD = 30.0 -- +30 storage / level
+FORMULAS.PER_LEVEL_FPS_ADD = 10 -- +10 FPS   / level
 
 -- =========================
 -- Time-stat tuning (Stage → % faster)
