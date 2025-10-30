@@ -84,20 +84,30 @@ function JobManager.BeginGathering(self: JobManager, helper: HelperType.HelperDa
 	if waitTime then
 		local timePassed = 0
 		local finished = false
-		local timer: thread = task.spawn(function()
-			while not finished do
-				if timePassed >= waitTime then finished = true end
-				timePassed += 1
-				print("gathering")
-				-- updated progress
-				task.wait(1)
+
+		local gatheringTask = task.spawn(function()
+			while not finished and helper and self.Player do
+				if timePassed >= waitTime then
+					finished = true
+				else
+					timePassed += 1
+					print("gathering")
+					-- updated progress
+					task.wait(1)
+				end
+			end
+
+			if finished then
+				print("gathering complete!")
+				-- Continue to next phase of job or fire completion event
+			else
+				print("gathering cancelled")
 			end
 		end)
 
-		if finished then
-			print("cancelling")
-			task.cancel(timer)
-		end
+		if helper._cleaner then helper._cleaner:Add(function()
+			task.cancel(gatheringTask)
+		end) end
 	end
 end
 
