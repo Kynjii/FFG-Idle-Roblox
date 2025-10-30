@@ -129,6 +129,7 @@ function PB.UpdatePB(class: Boat | Tender | PortStorage | Building)
 
 	-- Progress Bar
 	if typedClass.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Building then
+		typedClass.PBDetails.StorageLabel.TextColor3 = FFGEnum.THEME.color.white
 		typedClass.PBDetails.StorageLabel.Text = FormatNumber(typedClass.FishInStorage) .. "/" .. FormatNumber(typedClass.CurrentMaxStorage)
 		ProgressBar.Update(typedClass.PBDetails.ProgressBar, typedClass.FishInStorage, typedClass.CurrentMaxStorage)
 	else
