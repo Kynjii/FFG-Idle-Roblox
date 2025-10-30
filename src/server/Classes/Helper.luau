@@ -241,6 +241,8 @@ function Helper.CreateModel(self: Helper)
 
 					namePlate.RichText = true
 					namePlate.Text = string.format("<font color='rgb(%s)'>%s</font> | <font color='rgb(%s)'>%s</font>", qualityColor, helperName, stageColor, stageLabel)
+
+					part.Enabled = true
 				end
 			end
 		end

@@ -1,8 +1,10 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
+local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
 local Helper = require(ServerScriptService.Server.Classes.Helper)
 local Pathfinding = require(ServerScriptService.Server.Classes.Modules.Pathfinding)
+local SetInterval = require(ServerScriptService.Server.Modules.SetInterval)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Trove = require(ReplicatedStorage.Packages.Trove)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
@@ -50,16 +52,19 @@ function JobManager.AssignHelper(self: JobManager, helperId: number, jobId: numb
 	if not helper then
 		local inventory = DataService.GetPlayerInventory(self.Player or player)
 		if not inventory then return end
-		print(inventory)
+
 		local savedHelperState = inventory[helperId]
-		print(savedHelperState, helperId)
 		local newHelperClass = Helper.New(savedHelperState, self.Player, self.TeamId)
-		print(self.Helpers)
+
 		self.Helpers[newHelperClass.Id] = newHelperClass
+
 		helper = newHelperClass
 	end
 
-	if helper and helper.AssignJob then helper:AssignJob(jobId, true) end
+	if helper and helper.AssignJob then
+		local isNewAssignment = true
+		helper:AssignJob(jobId, isNewAssignment)
+	end
 end
 
 function JobManager.StartJob(self: JobManager, helper: HelperType.HelperInstance, jobId: number)
@@ -68,7 +73,31 @@ function JobManager.StartJob(self: JobManager, helper: HelperType.HelperInstance
 	if helper.ResourceInStorage > 0 then
 		-- begin unload
 	else
-		Pathfinding.GoGatherSpot(jobId, helper.Model, self.Player)
+		Pathfinding.GoGatherSpot(jobId, helper.Id, helper.Model, self.Player)
+	end
+end
+
+function JobManager.BeginGathering(self: JobManager, helper: HelperType.HelperData)
+	if not helper then return end
+
+	local waitTime: number = helper.Stats and helper.Stats.LoadTime
+	if waitTime then
+		local timePassed = 0
+		local finished = false
+		local timer: thread = task.spawn(function()
+			while not finished do
+				if timePassed >= waitTime then finished = true end
+				timePassed += 1
+				print("gathering")
+				-- updated progress
+				task.wait(1)
+			end
+		end)
+
+		if finished then
+			print("cancelling")
+			task.cancel(timer)
+		end
 	end
 end
 
@@ -86,7 +115,12 @@ function JobManager.AttachEventListeners(self: JobManager): ()
 	-- Remote Events for handling job cycle
 	local helperAtGatheringLoc = Events.GetBindableEvent(Events.BindableNames.HelperAtGatheringLoc)
 	if helperAtGatheringLoc then helperAtGatheringLoc.Event:Connect(function(data)
-		print("I'm Here!")
+		local helperId = data.Id
+		local jobId = data.JobId
+		local helper = self.Helpers[helperId]
+		if not helper then return end
+
+		self:BeginGathering(helper)
 	end) end
 
 	local helperAtUnloadingLoc = Events.GetBindableEvent(Events.BindableNames.HelperAtUnloadingLoc)

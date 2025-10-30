@@ -1,8 +1,18 @@
 local HelperType = {}
 
 export type HelperStats = {
-	Storage: number?,
-	WalkSpeed: number?,
+	Storage: number,
+	WalkSpeed: number,
+	LoadTime: number,
+	CatchRate: number?,
+	Luck: number?,
+	CastTime: number?,
+	WoodYield: number?,
+	CritChance: number?,
+	SwingRate: number?,
+	OreYield: number?,
+	FishValue: number?,
+	FishStorage: number?,
 }
 
 export type HelperData = {
