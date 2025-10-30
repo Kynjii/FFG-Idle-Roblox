@@ -105,6 +105,13 @@ FFGEnum.JOB_CATEGORY = {
 	Transporting = "Transporting",
 }
 
+FFGEnum.RESOURCE_TYPE = {
+	Fishing = "OpenFish",
+	Woodcutting = "Wood",
+	Mining = "Ore",
+	Transporting = "Fish",
+}
+
 FFGEnum.JOB_NAMES = {
 	Fishing = "Fisher",
 	Woodcutting = "Woodcutter",

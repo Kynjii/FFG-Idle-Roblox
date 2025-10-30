@@ -127,6 +127,8 @@ function Helper.New(state: HelperType.HelperData, player: Player, teamId: number
 	self.QualityId = state.QualityId
 	self.Quality = FFGEnum.QUALITIES[self.QualityId]
 
+	self.ResourceType = state.ResourceType or FFGEnum.RESOURCE_TYPE[self.JobCategory]
+
 	-- Calculate default stats based on quality and job
 	self.Stats = state.Stats or generateStats(self.JobCategory, self.Level, self.QualityId) :: HelperType.HelperStats
 	self.BaseCost = state.BaseCost or ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, self.QualityId, self.RealmId)
@@ -162,6 +164,8 @@ function Helper.CreateStateData(player: Player, currencyType: string)
 
 	-- Get correct image
 	state.ItemImage = state.ItemImage or FFGEnum.JOB_ASSETS[state.JobCategory]
+
+	state.ResourceType = FFGEnum.RESOURCE_TYPE[state.JobCategory]
 
 	-- Calculate default stats based on quality and job
 	state.Stats = state.Stats or generateStats(state.JobCategory, 1, state.QualityId)

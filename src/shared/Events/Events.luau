@@ -22,16 +22,25 @@ Events.RemoteFunctionNames = {
 	GetCrewManagementState = "GetCrewManagementState",
 }
 
+Events.BindableFunctionNames = {
+	GatherResource = {
+		Fish = "Fish",
+		Ore = "Ore",
+		Wood = "Wood",
+		OpenFish = "OpenFish",
+	},
+}
+
 Events.BindableNames = {
 	ShowTooltip = "ShowTooltip",
 	CloseUIWindow = "CloseUIWindow",
 	HelperAtGatheringLoc = "HelperAtGatheringLoc",
-	HelperStuck = "HelperStuck",
 	HelperAtUnloadingLoc = "HelperAtUnloadingLoc",
 }
 
 local FOLDER_NAME = "RME"
 local FOLDER_NAME_BINDABLES = "BEV"
+local FOLDER_NAME_BINDABLE_FUNCS = "BFN"
 local FOLDER_NAME_REMOTE_FUNCS = "RFN"
 
 function Events.InitOnServer()
@@ -110,6 +119,15 @@ function Events.GetRemoteFn(name: string): RemoteFunction?
 	if ev and ev:IsA("RemoteFunction") then return ev end
 
 	return folder:WaitForChild(name, 5) :: RemoteFunction
+end
+
+function Events.GetBindableFn(name: string): BindableFunction?
+	local folder = ReplicatedStorage:WaitForChild(FOLDER_NAME_BINDABLE_FUNCS, 10)
+	if not folder then return nil end
+	local ev = folder:FindFirstChild(name)
+	if ev and ev:IsA("BindableFunction") then return ev end
+
+	return folder:WaitForChild(name, 5) :: BindableFunction
 end
 
 function Events.FireBindableEvent(name: string, data: any)

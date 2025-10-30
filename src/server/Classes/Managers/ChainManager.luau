@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local Trove = require(ReplicatedStorage.Packages.Trove)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
+local Events = require(ReplicatedStorage.Shared.Events.Events)
 local ChainManagerType = require(ReplicatedStorage.Shared.Types.Managers.ChainManagerType)
 local Boat = require(ServerScriptService.Server.Classes.Boat)
 local PortStorage = require(ServerScriptService.Server.Classes.PortStorage)
@@ -170,6 +171,19 @@ function ChainManager.AttachAttListeners(self: ChainManagerInstance)
 				self:HandleBuildingEvent(upgradedBuilding)
 			end))
 		end
+	end
+
+	if self.LaneStorage then
+		local helperGatherBindableFn: BindableFunction? = Events.GetBindableFn(Events.BindableFunctionNames.GatherResource.Fish)
+		if helperGatherBindableFn then helperGatherBindableFn.OnInvoke = function(availableStorage)
+			local helperStorage = availableStorage
+			local storage = self.LaneStorage
+			local availableFishInStorage = storage.FishInStorage
+
+			local amount = math.min(helperStorage, availableFishInStorage)
+			storage:RemoveFish(amount)
+			return amount
+		end end
 	end
 end
 

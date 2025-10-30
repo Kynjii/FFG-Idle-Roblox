@@ -38,6 +38,7 @@ export type HelperData = {
 	_cleaner: any?,
 	Player: Player,
 	Description: string,
+	ResourceType: string,
 }
 
 export type HelperInstance = {

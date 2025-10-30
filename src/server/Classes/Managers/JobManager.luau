@@ -6,6 +6,7 @@ local Pathfinding = require(ServerScriptService.Server.Classes.Modules.Pathfindi
 local ProgressBar = require(ServerScriptService.Server.Modules.Tweens.ProgressBar)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Trove = require(ReplicatedStorage.Packages.Trove)
+local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
 
@@ -66,18 +67,8 @@ function JobManager.AssignHelper(self: JobManager, helperId: number, jobId: numb
 	end
 end
 
-function JobManager.StartJob(self: JobManager, helper: HelperType.HelperInstance, jobId: number)
-	if not helper or not helper.Model then return end
-
-	if helper.ResourceInStorage > 0 then
-		-- begin unload
-	else
-		Pathfinding.GoGatherSpot(jobId, helper.Id, helper.Model, self.Player)
-	end
-end
-
-function JobManager.BeginGathering(self: JobManager, helper: HelperType.HelperData)
-	if not helper then return end
+function JobManager.BeginAction(self: JobManager, actionType: string, helper: HelperType.HelperInstance, jobId: number)
+	local isGatherAction = actionType == "Gather"
 
 	local helperProgressBillboard: BillboardGui? = helper.Model and helper.Model:FindFirstChild("HelperProgress")
 	local progressBarFrame
@@ -92,7 +83,7 @@ function JobManager.BeginGathering(self: JobManager, helper: HelperType.HelperDa
 		local timePassed = 0
 		local finished = false
 
-		local gatheringTask = task.spawn(function()
+		local actionTask = task.spawn(function()
 			while not finished and helper and self.Player do
 				if timePassed >= waitTime then
 					finished = true
@@ -107,8 +98,20 @@ function JobManager.BeginGathering(self: JobManager, helper: HelperType.HelperDa
 
 			if finished then
 				ProgressBar.Hide(helperProgressBillboard)
-				print("gathering complete!")
-				-- Continue to next phase of job or fire completion event
+				if isGatherAction then
+					local getResource = Events.GetBindableFn(Events.BindableFunctionNames.GatherResource[helper.ResourceType])
+					print(getResource)
+					if getResource then
+						local resourceAmount: number = getResource:Invoke(helper.Stats.Storage)
+						if resourceAmount then helper:AddResource(resourceAmount) end
+						Pathfinding.GoUnloadSpot(jobId, helper.Id, helper.Model, self.Player)
+					end
+				else
+					local amount = helper.ResourceInStorage
+					DataService.Spend(self.Player, FFGEnum.CURRENCY_TYPES.Gold, amount)
+					helper:RemoveResource(helper.ResourceInStorage)
+					self:StartJob(helper, jobId)
+				end
 			else
 				ProgressBar.Hide(helperProgressBillboard)
 				print("gathering cancelled")
@@ -116,9 +119,31 @@ function JobManager.BeginGathering(self: JobManager, helper: HelperType.HelperDa
 		end)
 
 		if helper._cleaner then helper._cleaner:Add(function()
-			task.cancel(gatheringTask)
+			task.cancel(actionTask)
 		end) end
 	end
+end
+
+function JobManager.BeginUnloading(self: JobManager, helper: HelperType.HelperData, jobId: number)
+	local actionType = "Unload"
+	self:BeginAction(actionType, helper, jobId)
+end
+
+function JobManager.StartJob(self: JobManager, helper: HelperType.HelperInstance, jobId: number)
+	if not helper or not helper.Model then return end
+
+	if helper.ResourceInStorage > 0 then
+		self:BeginUnloading(helper, jobId)
+	else
+		Pathfinding.GoGatherSpot(jobId, helper.Id, helper.Model, self.Player)
+	end
+end
+
+function JobManager.BeginGathering(self: JobManager, helper: HelperType.HelperData, jobId: number)
+	if not helper then return end
+
+	local actionType = "Gather"
+	self:BeginAction(actionType, helper, jobId)
 end
 
 -- //SECTION - Event Listeners
@@ -140,7 +165,7 @@ function JobManager.AttachEventListeners(self: JobManager): ()
 		local helper = self.Helpers[helperId]
 		if not helper then return end
 
-		self:BeginGathering(helper)
+		self:BeginGathering(helper, jobId)
 	end) end
 
 	local helperAtUnloadingLoc = Events.GetBindableEvent(Events.BindableNames.HelperAtUnloadingLoc)
@@ -152,13 +177,6 @@ function JobManager.AttachEventListeners(self: JobManager): ()
 
 		self:StartJob(helper, jobId)
 	end) end
-
-	local helperStuck = Events.GetBindableEvent(Events.BindableNames.HelperStuck)
-	if helperStuck then
-		helperStuck.Event:Connect(function()
-			-- helperStuck | send after ~30 seconds of it not reaching it's destination and reset
-		end)
-	end
 end
 -- //!SECTION
 
