@@ -109,7 +109,7 @@ function JobManager.BeginAction(self: JobManager, actionType: string, helper: He
 					Events.FireBindableEvent(Events.BindableNames.GetStorageFish, data)
 				else
 					local amount = helper.ResourceInStorage
-					DataService.Spend(self.Player, FFGEnum.CURRENCY_TYPES.Gold, amount)
+					DataService.Earn(self.Player, FFGEnum.CURRENCY_TYPES.Gold, amount)
 					helper:RemoveResource(helper.ResourceInStorage)
 					self:StartJob(helper, jobId)
 				end
