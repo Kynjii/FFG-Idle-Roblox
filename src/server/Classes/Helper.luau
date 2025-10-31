@@ -394,7 +394,12 @@ function Helper.AttachEventListeners(self: Helper)
 		if self.Player ~= player or self.Owner ~= player.UserId then return end
 		if helperId ~= self.Id then return end
 
+		if not DataService.CanAfford(self.Player, self.CurrencyType, self.BaseCost or 0) then return end
+		DataService.Spend(self.Player, self.CurrencyType, self.BaseCost)
+
 		self:Upgrade()
+		local helperDataEvent = Events.GetRemote(Events.RemoteNames.HelperData)
+		if helperDataEvent then helperDataEvent:FireClient(player, self:Serialize()) end
 	end)) end
 end
 -- //!SECTION

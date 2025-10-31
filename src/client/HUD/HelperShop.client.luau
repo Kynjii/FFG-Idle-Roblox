@@ -130,6 +130,8 @@ if prepareShopEvent then prepareShopEvent.OnClientEvent:Connect(function(data)
 end) end
 
 local updateUIEvent = Events.GetRemote(Events.RemoteNames.UpdateUI)
-if updateUIEvent then updateUIEvent.OnClientEvent:Connect(function()
+if updateUIEvent then updateUIEvent.OnClientEvent:Connect(function(helperId)
+	if not helperId then return end
+	if shopData[helperId] then shopData[helperId] = nil end
 	updateUI()
 end) end

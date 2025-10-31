@@ -64,6 +64,8 @@ export type HelperInstance = {
 	Model: Model?,
 	_cleaner: any?,
 	ClearStorage: () -> (),
+	Upgrade: () -> (),
+	Purchasehelper: (number) -> (),
 }
 
 export type HelperModule = {

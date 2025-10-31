@@ -48,7 +48,7 @@ if crewManagementButton and getCrewManagementState then crewManagementButton.Act
 	if screenGui.Enabled then
 		screenGui.Enabled = false
 		if Lighting then
-			local blur = Lighting:FindFirstChild("Blur")
+			local blur = Lighting:FindFirstChild("BlurEffect")
 			if blur then blur:Destroy() end
 		end
 		return

@@ -64,8 +64,8 @@ end
 local playerInventory: { [string]: any } = {}
 local itemComponents = {}
 
-function updateUI()
-	clearExistingTooltip()
+function updateUI(keepTooltip: boolean)
+	if not keepTooltip then clearExistingTooltip() end
 
 	for _, component: Instance in pairs(itemComponents) do
 		component:Destroy()
@@ -81,12 +81,12 @@ function updateUI()
 	end
 end
 
-function populateDetailsUI()
+function populateDetailsUI(keepTooltip: boolean?)
 	if not playerInventory then return end
 	local blur = Instance.new("BlurEffect")
 	blur.Parent = Lighting
 
-	updateUI()
+	updateUI(keepTooltip)
 end
 
 local getInventoryFn = Events.GetRemoteFn(Events.RemoteFunctionNames.GetPlayerInventory)
@@ -94,7 +94,7 @@ hudInventoryButton.Activated:Connect(function()
 	if screenGui.Enabled then
 		screenGui.Enabled = false
 		if Lighting then
-			local blur = Lighting:FindFirstChild("Blur")
+			local blur = Lighting:FindFirstChild("BlurEffect")
 			if blur then blur:Destroy() end
 		end
 		return
@@ -108,3 +108,11 @@ hudInventoryButton.Activated:Connect(function()
 		screenGui.Enabled = true
 	end
 end)
+
+local freshHelperData = Events.GetRemote(Events.RemoteNames.HelperData)
+if freshHelperData then freshHelperData.OnClientEvent:Connect(function(helperData: HelperType.HelperData)
+	if playerInventory[helperData.Id] then playerInventory[helperData.Id] = helperData end
+
+	local keepTooltip = true
+	populateDetailsUI(keepTooltip)
+end) end
