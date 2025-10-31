@@ -249,13 +249,13 @@ function updateButtonState()
 
 	if enable then
 		details.upgradeButton.Active = true
-		details.upgradeButton.ImageColor3 = FFGEnum.THEME.color.green
-		details.upgradeButton.HoverImage = FFGEnum.THEME.button.hoverImage
-		details.upgradeButton.PressedImage = FFGEnum.THEME.button.pressedImage
+		details.upgradeButton.Image = "rbxassetid://117523854412152"
+		details.upgradeButton.HoverImage = "rbxassetid://106924732482845"
+		details.upgradeButton.PressedImage = "rbxassetid://106924732482845"
 		details.upgradeButton.Interactable = true
 	else
 		details.upgradeButton.Active = false
-		details.upgradeButton.ImageColor3 = FFGEnum.THEME.color.white
+		details.upgradeButton.Image = "rbxassetid://120715593495406"
 		details.upgradeButton.HoverImage = ""
 		details.upgradeButton.PressedImage = ""
 		details.upgradeButton.Interactable = false

@@ -292,7 +292,7 @@ FFGEnum.THEME = {
 		teal = Color3.fromRGB(67, 170, 139),
 		tealBlue = Color3.fromRGB(77, 144, 142),
 		slateBlue = Color3.fromRGB(87, 117, 144),
-		blue = Color3.fromRGB(39, 125, 161),
+		blue = Color3.fromRGB(62, 200, 255),
 
 		white = Color3.fromRGB(255, 255, 255),
 		black = Color3.fromRGB(20, 20, 20),

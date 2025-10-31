@@ -206,7 +206,7 @@ function Tooltip.Create(props: {
 	descriptionLabel.Text = props.ItemDescription or ""
 	descriptionLabel.TextColor3 = FFGEnum.THEME.color.textMuted
 	descriptionLabel.TextWrapped = true
-	descriptionLabel.Font = FFGEnum.THEME.normalFont
+	descriptionLabel.Font = FFGEnum.THEME.bigFont
 	descriptionLabel.BackgroundTransparency = 1
 	descriptionLabel.Size = UDim2.fromScale(1, 0.7)
 	descriptionLabel.Parent = addInfoContainer
@@ -345,7 +345,7 @@ function Tooltip.Create(props: {
 
 	local buyButton = Button.Create({
 		color = props.IsPurchased and "Purple" or "Green",
-		text = props.IsPurchased and "Assign" or "Buy",
+		text = props.IsPurchased and "Assign" or "Purchase",
 		size = UDim2.fromScale(1, 1),
 	})
 	buyButton.Parent = buyButtonContainer
