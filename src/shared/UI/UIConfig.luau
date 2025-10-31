@@ -92,29 +92,37 @@ function UIConfig.computeFontSize(token: TextToken): (number, number, number)
 end
 
 -- Attach/refresh UITextSizeConstraint; set TextScaled and LineHeight
-function UIConfig.applyTextConstraints(textObj: TextLabel | TextButton, token: TextToken)
-	local target, minV, maxV = UIConfig.computeFontSize(token)
-	textObj.TextScaled = true
-	textObj.TextSize = target
-	textObj.LineHeight = (UIConfig.Text :: any).LineHeight
+function UIConfig.applyTextConstraints(textObj: TextLabel | TextButton, token: "title" | "h1" | "h2" | "body" | "caption")
+	local okToken = (UIConfig.Text :: any)[token] and token or "body"
 
-	local constraint = textObj:FindFirstChildOfClass("UITextSizeConstraint") :: UITextSizeConstraint
+	local target, minV, maxV = UIConfig.computeFontSize(okToken)
+
+	target = math.clamp(math.floor(target + 0.5), 1, 200)
+	minV = math.clamp(math.floor(minV + 0.5), 1, 200)
+	maxV = math.clamp(math.floor(maxV + 0.5), 1, 200)
+
+	if minV > maxV then
+		minV, maxV = maxV, minV
+	end
+
+	target = math.clamp(target, minV, maxV)
+
+	local constraint = textObj:FindFirstChildOfClass("UITextSizeConstraint")
 	if not constraint then
 		constraint = Instance.new("UITextSizeConstraint")
 		constraint.Parent = textObj
 	end
-	constraint.MinTextSize = minV
+
 	constraint.MaxTextSize = maxV
+	constraint.MinTextSize = minV
+
+	textObj.TextScaled = true
+	textObj.TextSize = target
+	textObj.LineHeight = (UIConfig.Text :: any).LineHeight
 end
 
 -- Panel look: pixel-consistent corners & strokes
 function UIConfig.applyPanelStyle(frame: Frame | TextLabel | ImageLabel, panelColor: Color3?)
-	local b: SizeBand = band()
-
-	local corner = frame:FindFirstChildOfClass("UICorner") or Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, UIConfig.CornerPx[b])
-	corner.Parent = frame
-
 	local bg = frame:FindFirstChildOfClass("ImageLabel") or Instance.new("ImageLabel")
 	bg.Image = FFGEnum.UI.Frames.InnerPanel
 	bg.BackgroundTransparency = 1

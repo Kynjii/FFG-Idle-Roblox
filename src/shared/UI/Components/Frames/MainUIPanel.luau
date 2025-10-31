@@ -57,12 +57,12 @@ function MainUIPanel.Create(props: {
 	tabContainer.Name = "TabContainer"
 	tabContainer.AnchorPoint = Vector2.new(0.5, 0.5)
 	tabContainer.BackgroundTransparency = 1
-	tabContainer.Position = UDim2.fromScale(-0.035, 0.55)
+	tabContainer.Position = UDim2.fromScale(-0.035, 0.6)
 	tabContainer.Size = UDim2.fromScale(0.071, 0.778777)
 	tabContainer.Parent = panelContainer
 
 	local uIListLayout = Instance.new("UIListLayout")
-	UIConfig.setGap(uIListLayout, "S")
+	UIConfig.setGap(uIListLayout, "XS")
 	uIListLayout.Name = "UIListLayout"
 	uIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	uIListLayout.Parent = tabContainer

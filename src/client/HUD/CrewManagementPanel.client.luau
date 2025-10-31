@@ -18,9 +18,6 @@ task.spawn(function()
 		hasTabs = true,
 		tabs = {
 			{ Name = "TransportingTab", Index = 1, Icon = FFGEnum.UI.Icons.Transporting },
-			{ Name = "MiningTab", Index = 2, Icon = FFGEnum.UI.Icons.Mining },
-			{ Name = "WoodcuttingTab", Index = 3, Icon = FFGEnum.UI.Icons.Woodcutting },
-			{ Name = "FishingTab", Index = 4, Icon = FFGEnum.UI.Icons.Fishing },
 		},
 	} })
 	screenGui.Parent = playerGui
