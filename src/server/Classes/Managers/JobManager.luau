@@ -16,7 +16,7 @@ JobManager.__index = JobManager
 
 export type JobManager = typeof(setmetatable({}, JobManager))
 export type JobState = {
-	[number]: { IsAvailable: boolean },
+	[number]: number,
 }
 
 function JobManager.New(helperState, player: Player, teamId: number): JobManager
@@ -47,7 +47,7 @@ end
 
 function JobManager.AssignJobs(self: JobManager, player: Player): ()
 	for _, helper in pairs(self.Helpers) do
-		self:AssignHelper(helper.Id, helper.CurrentAssignment, player)
+		if helper.CurrentAssignment > 0 then self:AssignHelper(helper.Id, helper.CurrentAssignment, player) end
 	end
 end
 
@@ -55,39 +55,18 @@ function JobManager.GenerateJobState(self: JobManager): ()
 	local jobSlots = Jobs.GetMaxSlots()
 
 	for i, slotNum in ipairs(jobSlots) do
-		self.JobState[i] = {}
-		local maxSlots = slotNum
-
-		for s = 1, maxSlots do
-			self.JobState[i][s] = { IsAvailable = false }
-		end
+		self.JobState[i] = slotNum
 	end
-
-	print(self.JobState)
 end
 
 function JobManager.NumOfSlotsAvailable(self: JobManager, jobId: number): number
 	local jobState: JobState = self.JobState[jobId]
-	local slotNumber = 0
-
-	for i, slot in ipairs(jobState) do
-		if slot.IsAvailable then
-			slotNumber += i
-		end
-	end
-
-	return slotNumber
+	return jobState
 end
 
 function JobManager.AssignSlot(self: JobManager, jobId: number): ()
 	local jobState: JobState = self.JobState[jobId]
-
-	for i, slot in ipairs(jobState) do
-		if not slot.IsAvailable then
-			slot.IsAvailable = true
-			break
-		end
-	end
+	jobState -= 1
 end
 
 function JobManager.AssignHelper(self: JobManager, helperId: number, jobId: number, player: Player?): ()
@@ -98,10 +77,6 @@ function JobManager.AssignHelper(self: JobManager, helperId: number, jobId: numb
 	end
 
 	local helper = self.Helpers and self.Helpers[helperId] or nil
-
-	-- To handle the case were the Helper is somehow not in the inventory when assignment is attempted.
-	-- This is likely due to how it used to be handled, potential remove
-	-- //TODO - reminder
 	local isNewAssignment = true
 	if not helper then
 		local inventory = DataService.GetPlayerInventory(self.Player or player)
@@ -113,14 +88,12 @@ function JobManager.AssignHelper(self: JobManager, helperId: number, jobId: numb
 		self.Helpers[newHelperClass.Id] = newHelperClass
 
 		helper = newHelperClass
-	else
-		isNewAssignment = false
 	end
+
+	if helper.CurrentAssignment > 0 then isNewAssignment = false end
 
 	self:AssignSlot(jobId)
 	helper:AssignJob(jobId, isNewAssignment)
-
-	print(self.JobState)
 end
 
 function JobManager.BeginAction(self: JobManager, actionType: string, helper: HelperType.HelperInstance, jobId: number)
