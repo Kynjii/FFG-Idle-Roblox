@@ -154,6 +154,7 @@ FFGEnum.UI = {
 	},
 	Frames = {
 		MainUIPanel = "rbxassetid://95574095879865",
+		InnerPanel = "rbxassetid://132276661423012",
 	},
 	Tabs = {
 		RightTab = "rbxassetid://132317085020730",
@@ -295,6 +296,11 @@ FFGEnum.THEME = {
 
 		white = Color3.fromRGB(255, 255, 255),
 		black = Color3.fromRGB(20, 20, 20),
+		textBody = Color3.fromHex("#F2F4F8"),
+		textMuted = Color3.fromHex("#C8D4E8"),
+		textGold = Color3.fromHex("#FFD54F"),
+		textOrange = Color3.fromHex("#FFB74D"),
+		textMagenta = Color3.fromHex("#F26DF9"),
 	},
 
 	intent = {
@@ -353,7 +359,7 @@ FFGEnum.THEME = {
 	alignment = {
 		position = {
 			center = UDim2.fromScale(0.5, 0.5),
-			frameHeader = UDim2.fromScale(0.5, -0.08),
+			frameHeader = UDim2.fromScale(0.5, 0),
 			top = UDim2.fromScale(0.5, 0),
 			bottom = UDim2.fromScale(0.5, 1),
 			textCenter = UDim2.fromScale(0.5, 0.45),

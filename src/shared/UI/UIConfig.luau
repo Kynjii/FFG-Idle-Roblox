@@ -1,6 +1,9 @@
 local RunService = game:GetService("RunService")
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 
 local camera = workspace.CurrentCamera
 local playerGui: PlayerGui? = nil
@@ -50,7 +53,7 @@ end
 
 -- //SECTION - Tokens
 
-UIConfig.Padding = { XS = 0.008, S = 0.012, M = 0.016, L = 0.024, XL = 0.032 } -- scale units
+UIConfig.Padding = { XS = 0.001, S = 0.03, M = 0.05, L = 0.08, XL = 0.1 } -- scale units
 
 UIConfig.Text = {
 	-- min, max per band + relative scale to body
@@ -105,17 +108,24 @@ function UIConfig.applyTextConstraints(textObj: TextLabel | TextButton, token: T
 end
 
 -- Panel look: pixel-consistent corners & strokes
-function UIConfig.applyPanelStyle(frame: Frame | TextLabel | ImageLabel)
+function UIConfig.applyPanelStyle(frame: Frame | TextLabel | ImageLabel, panelColor: Color3?)
 	local b: SizeBand = band()
 
 	local corner = frame:FindFirstChildOfClass("UICorner") or Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, UIConfig.CornerPx[b])
 	corner.Parent = frame
 
-	local stroke = frame:FindFirstChildOfClass("UIStroke") or Instance.new("UIStroke")
-	stroke.Thickness = UIConfig.StrokePx[b]
-	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	stroke.Parent = frame
+	local bg = frame:FindFirstChildOfClass("ImageLabel") or Instance.new("ImageLabel")
+	bg.Image = FFGEnum.UI.Frames.InnerPanel
+	bg.BackgroundTransparency = 1
+	bg.ImageColor3 = panelColor or FFGEnum.THEME.color.blue
+	bg.ScaleType = Enum.ScaleType.Slice
+	bg.SliceCenter = Rect.new(35, 35, 35, 35)
+	bg.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
+	bg.Position = FFGEnum.THEME.alignment.position.center
+	bg.ZIndex = 0
+	bg.Size = UDim2.fromScale(1, 1)
+	bg.Parent = frame
 end
 
 -- Safe area helper: for ScreenGui with IgnoreGuiInset = true

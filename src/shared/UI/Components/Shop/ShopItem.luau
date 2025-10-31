@@ -1,5 +1,4 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UserInputService = game:GetService("UserInputService")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
@@ -90,14 +89,15 @@ local function ShopItem(
 
 	-- //SECTION - Item Name
 	local itemName = Instance.new("TextLabel")
+	itemName.Name = "ItemName"
 	itemName.Font = FFGEnum.THEME.bigFont
-	itemName.TextScaled = true
 	itemName.Size = UDim2.fromScale(1, 0.2)
 	itemName.BackgroundTransparency = 1
 	itemName.TextColor3 = FFGEnum.THEME.color.white
 	itemName.LayoutOrder = 1
 	itemName.Text = props.ItemName
-	UIConfig.applyTextConstraints(itemName, "title")
+	UIConfig.applyTextConstraints(itemName, "body")
+	itemName.TextScaled = true
 	itemName.Parent = mainContainer
 	-- //!SECTION
 
@@ -159,12 +159,12 @@ local function ShopItem(
 	ItemBaseCostTxt.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
 	ItemBaseCostTxt.TextColor3 = FFGEnum.THEME.color.white
 	ItemBaseCostTxt.BackgroundTransparency = 1
-	ItemBaseCostTxt.TextScaled = true
 	ItemBaseCostTxt.LayoutOrder = 2
 	ItemBaseCostTxt.Text = props.ItemBaseCost
 	ItemBaseCostTxt.Font = FFGEnum.THEME.bigFont
 	ItemBaseCostTxt.Size = UDim2.fromScale(0.5, 0.9)
 	UIConfig.applyTextConstraints(ItemBaseCostTxt, "body")
+	ItemBaseCostTxt.TextScaled = true
 	ItemBaseCostTxt.Parent = priceContainerInner
 
 	local priceContainerList = Instance.new("UIListLayout")

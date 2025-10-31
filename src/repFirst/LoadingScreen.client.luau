@@ -62,7 +62,7 @@ textLabel2.TextColor3 = Color3.fromHex("#55b5de")
 textLabel2.Text = ""
 textLabel2.TextScaled = true
 textLabel2.TextXAlignment = Enum.TextXAlignment.Left
-textLabel2.TextYAlignment = Enum.TextYAlignment.Top
+textLabel2.TextYAlignment = Enum.TextYAlignment.Bottom
 textLabel2.Parent = textFrame
 
 textFrame.Parent = screenGui

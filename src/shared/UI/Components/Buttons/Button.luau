@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
+local UIConfig = require(ReplicatedStorage.Shared.UI.UIConfig)
 local Button = {}
 
 local buttonImages = {
@@ -19,7 +20,7 @@ local buttonImages = {
 }
 
 function Button.Create(props: {
-	color: string,
+	color: "Green" | "Blue" | "BlueGray" | "Gray" | "Orange" | "Purple" | "Red" | "SkyBlue" | "White" | "Yellow",
 	text: string?,
 	size: UDim2?,
 })
@@ -37,7 +38,6 @@ function Button.Create(props: {
 	if props.text then
 		local buttonText = Instance.new("TextLabel")
 		buttonText.Font = FFGEnum.THEME.bigFont
-		buttonText.TextScaled = true
 		buttonText.Text = props.text
 		buttonText.TextColor3 = FFGEnum.THEME.color.white
 		buttonText.BackgroundTransparency = 1
@@ -45,6 +45,8 @@ function Button.Create(props: {
 		buttonText.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
 		buttonText.Position = FFGEnum.THEME.alignment.position.center
 		buttonText.Parent = button
+		UIConfig.applyTextConstraints(buttonText, "h2")
+		buttonText.TextScaled = true
 	end
 
 	return button

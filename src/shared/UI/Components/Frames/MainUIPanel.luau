@@ -111,9 +111,9 @@ function MainUIPanel.Create(props: {
 	textLabel.Size = UDim2.fromScale(1, 1)
 	textLabel.Text = props.panelName
 	textLabel.TextColor3 = Color3.new(1, 1, 1)
-	textLabel.TextScaled = true
 	textLabel.TextXAlignment = Enum.TextXAlignment.Left
 	UIConfig.applyTextConstraints(textLabel, "h1")
+	textLabel.TextScaled = true
 
 	local uIStroke = Instance.new("UIStroke")
 	uIStroke.Name = "UIStroke"
@@ -128,8 +128,8 @@ function MainUIPanel.Create(props: {
 	innerWindow.AnchorPoint = Vector2.new(0.5, 0.5)
 	innerWindow.BackgroundTransparency = 1
 	innerWindow.LayoutOrder = 2
-	innerWindow.Position = UDim2.fromScale(0.500531, 0.568048)
-	innerWindow.Size = UDim2.fromScale(1, 0.863903)
+	innerWindow.Position = UDim2.fromScale(0.5, 0.55)
+	innerWindow.Size = UDim2.fromScale(1, 0.8)
 	innerWindow.ZIndex = 10
 	UIConfig.applyPanelStyle(innerWindow)
 	innerWindow.Parent = main
