@@ -211,7 +211,7 @@ local function ShopItem(
 	end)
 
 	UIConfig.observeViewport(function()
-		UIConfig.applyTextConstraints(itemName, "title")
+		UIConfig.applyTextConstraints(itemName, "body")
 		UIConfig.applyTextConstraints(ItemBaseCostTxt, "body")
 	end)
 

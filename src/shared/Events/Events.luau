@@ -15,6 +15,7 @@ Events.RemoteNames = {
 	UpdateUI = "UpdateUI",
 	OpenCrewManagementPanel = "OpenCrewManagementPanel",
 	AssignJob = "AssignJob",
+	HelperUpgraded = "HelperUpgraded",
 }
 
 Events.RemoteFunctionNames = {
