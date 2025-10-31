@@ -437,7 +437,6 @@ function PortStorage.Serialize(self: PortStorage): { [string]: any }
 		UpgradeStage = self.UpgradeStage,
 		Level = self.Level,
 		IsPurchased = self.IsPurchased,
-		NextLvlMaxStorage = self.NextLvlMaxStorage,
 		FishInStorage = self.FishInStorage,
 		StorageFull = self.StorageFull,
 	}
