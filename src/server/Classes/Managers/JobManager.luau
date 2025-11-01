@@ -205,8 +205,11 @@ function JobManager.AttachEventListeners(self: JobManager): ()
 	-- Remote Events for handling job cycle
 	local helperAtGatheringLoc = Events.GetBindableEvent(Events.BindableNames.HelperAtGatheringLoc)
 	if helperAtGatheringLoc then helperAtGatheringLoc.Event:Connect(function(data)
-		local helperId = data.Id
-		local jobId = data.JobId
+		local helperId: string = data.Id
+		local jobId: number = data.JobId
+		local player: Player = data.Player
+
+		if self.Player ~= player or self.Owner ~= player.UserId then return end
 		local helper = self.Helpers[helperId]
 		if not helper then return end
 
@@ -215,8 +218,11 @@ function JobManager.AttachEventListeners(self: JobManager): ()
 
 	local helperAtUnloadingLoc = Events.GetBindableEvent(Events.BindableNames.HelperAtUnloadingLoc)
 	if helperAtUnloadingLoc then helperAtUnloadingLoc.Event:Connect(function(data)
-		local helperId = data.Id
-		local jobId = data.JobId
+		local helperId: string = data.Id
+		local jobId: number = data.JobId
+		local player: Player = data.Player
+
+		if self.Player ~= player or self.Owner ~= player.UserId then return end
 		local helper = self.Helpers[helperId]
 		if not helper then return end
 
@@ -226,14 +232,14 @@ function JobManager.AttachEventListeners(self: JobManager): ()
 	-- //TODO - Perhaps change the name, it's confusing. This is the chainmanager sending fish to me
 	local sendStorageFish = Events.GetBindableEvent(Events.BindableNames.SendStorageFish)
 	if sendStorageFish then sendStorageFish.Event:Connect(function(data: SendStorageFishData)
-		local player = data.Player
-		if player ~= self.Player then return end
+		local helperId: string = data.HelperId
+		local jobId: number = data.JobId
+		local player: Player = data.Player
 
-		local helperId = data.HelperId
+		if self.Player ~= player or self.Owner ~= player.UserId then return end
 		local helper = self.Helpers[helperId]
 		if not helper then return end
 
-		local jobId = data.JobId
 		if helper.CurrentAssignment ~= jobId then return end
 
 		local amount = data.Amount

@@ -257,7 +257,7 @@ function Helper.CreateModel(self: Helper)
 	local startPos: Vector3 = Jobs.Data[self.CurrentAssignment].Location
 	if startPos then
 		self.Model:MoveTo(startPos)
-		Events.FireBindableEvent(Events.BindableNames.HelperAtUnloadingLoc, { Id = self.Id, JobId = self.CurrentAssignment })
+		Events.FireBindableEvent(Events.BindableNames.HelperAtUnloadingLoc, { Id = self.Id, JobId = self.CurrentAssignment, Player = self.Player })
 	end
 end
 

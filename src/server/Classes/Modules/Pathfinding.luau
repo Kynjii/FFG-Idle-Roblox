@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 
 local SimplePath = require(ServerScriptService.Server.Libs.SimplePath)
@@ -12,7 +13,7 @@ function PathFinding.GetRoute(jobId: number)
 	return Jobs.Data[jobId].Route
 end
 
-local function pathfindToDestinations(npc, humanoid, helperId, destinations, completionEvent, jobId)
+local function pathfindToDestinations(npc, helperId, destinations, completionEvent, jobId, player)
 	local function createPathToDestination()
 		local agentParameters = {
 			AgentCanJump = true,
@@ -30,7 +31,8 @@ local function pathfindToDestinations(npc, humanoid, helperId, destinations, com
 	end
 
 	local path = createPathToDestination()
-	path.Visualize = true
+	local IsStudio = RunService:IsStudio()
+	if IsStudio then path.Visualize = true end
 	local goalNum = 1
 	local destination = destinations[goalNum]
 
@@ -51,14 +53,13 @@ local function pathfindToDestinations(npc, humanoid, helperId, destinations, com
 			path:Run(destination)
 		else
 			-- Fire completion event
-			if Events.GetBindableEvent(completionEvent) then Events.FireBindableEvent(completionEvent, { Id = helperId, JobId = jobId }) end
+			if Events.GetBindableEvent(completionEvent) then Events.FireBindableEvent(completionEvent, { Id = helperId, JobId = jobId, Player = player }) end
 		end
 	end)
 end
 
 function PathFinding.GoGatherSpot(jobId: number, helperId: string, npcModel: Model, player: Player)
 	local npc = npcModel
-	local humanoid: Humanoid = npc:WaitForChild("Humanoid")
 
 	if not npc.PrimaryPart then
 		warn("NPC has no primary part")
@@ -77,16 +78,15 @@ function PathFinding.GoGatherSpot(jobId: number, helperId: string, npcModel: Mod
 	if #reversed > 1 then
 		table.remove(reversed, 1)
 	else
-		Events.FireBindableEvent(Events.BindableNames.HelperAtGatheringLoc, { Id = helperId, JobId = jobId })
+		Events.FireBindableEvent(Events.BindableNames.HelperAtGatheringLoc, { Id = helperId, JobId = jobId, Player = player })
 		return
 	end
 
-	pathfindToDestinations(npc, humanoid, helperId, reversed, Events.BindableNames.HelperAtGatheringLoc, jobId)
+	pathfindToDestinations(npc, helperId, reversed, Events.BindableNames.HelperAtGatheringLoc, jobId, player)
 end
 
 function PathFinding.GoUnloadSpot(jobId: number, helperId: string, npcModel: Model, player: Player)
 	local npc = npcModel
-	local humanoid: Humanoid = npc:WaitForChild("Humanoid")
 
 	if not npc.PrimaryPart then
 		warn("NPC has no primary part")
@@ -104,11 +104,11 @@ function PathFinding.GoUnloadSpot(jobId: number, helperId: string, npcModel: Mod
 	if #route > 1 then
 		table.remove(route, 1)
 	else
-		Events.FireBindableEvent(Events.BindableNames.HelperAtUnloadingLoc, { Id = helperId, JobId = jobId })
+		Events.FireBindableEvent(Events.BindableNames.HelperAtUnloadingLoc, { Id = helperId, JobId = jobId, Player = player })
 		return
 	end
 
-	pathfindToDestinations(npc, humanoid, helperId, route, Events.BindableNames.HelperAtUnloadingLoc, jobId)
+	pathfindToDestinations(npc, helperId, route, Events.BindableNames.HelperAtUnloadingLoc, jobId, player)
 end
 
 return PathFinding
