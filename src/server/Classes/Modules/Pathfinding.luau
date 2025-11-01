@@ -1,8 +1,7 @@
-local PFS = game:GetService("PathfindingService")
-local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
+local SimplePath = require(ServerScriptService.Server.Libs.SimplePath)
 local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local Jobs = require(ServerScriptService.Server.Modules.Jobs.Jobs)
@@ -13,11 +12,9 @@ function PathFinding.GetRoute(jobId: number)
 	return Jobs.Data[jobId].Route
 end
 
--- Shared pathfinding function to reduce code duplication
 local function pathfindToDestinations(npc, humanoid, helperId, destinations, completionEvent, jobId)
-	-- Function to create path to a single destination
-	local function createPathToDestination(startPos, destination)
-		local path = PFS:CreatePath({
+	local function createPathToDestination()
+		local agentParameters = {
 			AgentCanJump = true,
 			AgentCanClimb = true,
 			AgentRadius = 2,
@@ -25,119 +22,37 @@ local function pathfindToDestinations(npc, humanoid, helperId, destinations, com
 			Costs = {
 				Water = math.huge,
 			},
-		})
+		}
 
-		-- Use task.spawn instead of coroutines for async operations
-		local pathSuccess = false
-		local waypoints = nil
+		local path = SimplePath.new(npc, agentParameters)
 
-		task.spawn(function()
-			local success, errorMessage = pcall(function()
-				path:ComputeAsync(startPos, destination)
-			end)
-
-			if success and path.Status == Enum.PathStatus.Success then
-				waypoints = path:GetWaypoints()
-				pathSuccess = true
-			else
-				warn("Pathfinding failed:", errorMessage or path.Status)
-				-- Try direct movement as fallback
-				waypoints = { { Position = destination, Action = Enum.PathWaypointAction.Walk } }
-				pathSuccess = true
-			end
-		end)
-
-		-- Wait for path computation with timeout
-		local timeoutStart = tick()
-		while not pathSuccess and tick() - timeoutStart < 2 do
-			RunService.Heartbeat:Wait()
-		end
-
-		if not pathSuccess then
-			-- Fallback to direct movement immediately
-			return { { Position = destination, Action = Enum.PathWaypointAction.Walk } }
-		end
-
-		return waypoints
+		return path
 	end
 
-	-- Improved movement function with smoother transitions
-	local function moveAlongWaypoints(waypoints, destinationIndex)
-		if not waypoints or #waypoints == 0 then return false end
+	local path = createPathToDestination()
+	path.Visualize = true
+	local goalNum = 1
+	local destination = destinations[goalNum]
 
-		local currentWaypointIndex = 1
+	path.Blocked:Connect(function()
+		path:Run(destination)
+	end)
 
-		-- Movement loop with better performance
-		while currentWaypointIndex <= #waypoints do
-			if not npc.Parent or not humanoid.Parent then return false end
+	path.Error:Connect(function(errorType)
+		path:Run(destination)
+	end)
 
-			local waypoint = waypoints[currentWaypointIndex]
+	path:Run(destination)
 
-			-- Handle jump waypoints
-			if waypoint.Action == Enum.PathWaypointAction.Jump then humanoid.Jump = true end
-
-			-- Move to waypoint
-			humanoid:MoveTo(waypoint.Position)
-
-			-- Wait for movement or timeout
-			local moveStartTime = tick()
-			local moveTimeout = 8
-			local reachedWaypoint = false
-
-			while not reachedWaypoint and tick() - moveStartTime < moveTimeout do
-				if not npc.Parent or not humanoid.Parent then return false end
-
-				-- Check if close to current waypoint
-				local distanceToWaypoint = (npc.PrimaryPart.Position - waypoint.Position).Magnitude
-
-				-- More aggressive waypoint completion - reduces stopping
-				if distanceToWaypoint < 6 then
-					reachedWaypoint = true
-				elseif tick() - moveStartTime > 1 and distanceToWaypoint > 20 then
-					-- If NPC is far away after 1 second, it might be stuck
-					warn("Helper", helperId, "might be stuck, skipping waypoint", currentWaypointIndex)
-					reachedWaypoint = true
-				end
-
-				-- Use Heartbeat for better performance
-				RunService.Heartbeat:Wait()
-			end
-
-			if not reachedWaypoint then warn("Helper", helperId, "timed out at waypoint", currentWaypointIndex) end
-
-			currentWaypointIndex = currentWaypointIndex + 1
+	path.Reached:Connect(function()
+		goalNum += 1
+		if destinations[goalNum] then
+			destination = destinations[goalNum]
+			path:Run(destination)
+		else
+			-- Fire completion event
+			if Events.GetBindableEvent(completionEvent) then Events.FireBindableEvent(completionEvent, { Id = helperId, JobId = jobId }) end
 		end
-
-		return true
-	end
-
-	-- Main pathfinding loop
-	task.spawn(function()
-		for i, destination in ipairs(destinations) do
-			if not npc.Parent or not humanoid.Parent then
-				warn("Helper", helperId, "was destroyed during pathfinding")
-				return
-			end
-
-			-- Create path from current position to destination
-			local waypoints = createPathToDestination(npc.PrimaryPart.Position, destination)
-
-			if not waypoints then
-				warn("Failed to create path to destination", i, "for helper", helperId)
-				return
-			end
-
-			-- Move along the waypoints for this destination
-			local success = moveAlongWaypoints(waypoints, i)
-
-			if not success then
-				warn("Failed to complete movement to destination", i, "for helper", helperId)
-				return
-			end
-		end
-
-		-- Fire completion event
-		if Events.GetBindableEvent(completionEvent) then Events.FireBindableEvent(completionEvent, { Id = helperId, JobId = jobId }) end
 	end)
 end
 
