@@ -96,7 +96,7 @@ local function ShopItem(
 	itemName.TextColor3 = FFGEnum.THEME.color.white
 	itemName.LayoutOrder = 1
 	itemName.Text = props.ItemName
-	UIConfig.applyTextConstraints(itemName, "body")
+	UIConfig.ApplyTextConstraints(itemName, "body")
 	itemName.Parent = mainContainer
 	-- //!SECTION
 
@@ -108,7 +108,7 @@ local function ShopItem(
 	item.BackgroundTransparency = 1
 	item.Size = UDim2.fromScale(0.6, 0.6)
 	item.ZIndex = 2
-	UIConfig.applyAspect(item)
+	UIConfig.ApplyAspect(item)
 	item.Parent = mainContainer
 	-- //!SECTION
 
@@ -162,7 +162,7 @@ local function ShopItem(
 	ItemBaseCostTxt.Text = props.ItemBaseCost
 	ItemBaseCostTxt.Font = FFGEnum.THEME.bigFont
 	ItemBaseCostTxt.Size = UDim2.fromScale(0.5, 0.9)
-	UIConfig.applyTextConstraints(ItemBaseCostTxt, "body")
+	UIConfig.ApplyTextConstraints(ItemBaseCostTxt, "body")
 	ItemBaseCostTxt.Parent = priceContainerInner
 
 	local priceContainerList = Instance.new("UIListLayout")
@@ -210,9 +210,9 @@ local function ShopItem(
 		hoverImage.Visible = false
 	end)
 
-	UIConfig.observeViewport(function()
-		UIConfig.applyTextConstraints(itemName, "body")
-		UIConfig.applyTextConstraints(ItemBaseCostTxt, "body")
+	UIConfig.ObserveViewport(function()
+		UIConfig.ApplyTextConstraints(itemName, "body")
+		UIConfig.ApplyTextConstraints(ItemBaseCostTxt, "body")
 	end)
 
 	return shopItemContainer

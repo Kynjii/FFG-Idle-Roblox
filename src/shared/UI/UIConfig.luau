@@ -9,7 +9,9 @@ local camera = workspace.CurrentCamera
 local playerGui: PlayerGui? = nil
 
 pcall(function()
-	if RunService:IsRunning() and Players.LocalPlayer then playerGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui") end
+	if RunService:IsRunning() and Players.LocalPlayer then
+		playerGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
+	end
 end)
 
 -- Detect if we're in a plugin / UILabs context
@@ -22,7 +24,7 @@ export type SizeBand = "S" | "M" | "L"
 
 local UIConfig = {}
 
-function UIConfig.getPlayerGui(): PlayerGui?
+function UIConfig.GetPlayerGui(): PlayerGui?
 	if playerGui and playerGui.Parent then return playerGui end
 	if isUILabs() then
 		warn("[UIConfig] Running under UILabs or Studio — PlayerGui unavailable, using fallback")
@@ -80,7 +82,7 @@ local function currentShortSide(): number
 end
 
 -- Body target ~ shortSide/40, clamped per band; other tokens scale off body
-function UIConfig.computeFontSize(token: TextToken): (number, number, number)
+function UIConfig.ComputeFontSize(token: TextToken): (number, number, number)
 	local b: SizeBand = band()
 	local t = UIConfig.Text :: any
 	local tokenSpec = t[token]
@@ -92,10 +94,13 @@ function UIConfig.computeFontSize(token: TextToken): (number, number, number)
 end
 
 -- Attach/refresh UITextSizeConstraint; set TextScaled and LineHeight
-function UIConfig.applyTextConstraints(textObj: TextLabel | TextButton, token: "title" | "h1" | "h2" | "body" | "caption")
+function UIConfig.ApplyTextConstraints(
+	textObj: TextLabel | TextButton,
+	token: "title" | "h1" | "h2" | "body" | "caption"
+)
 	local okToken = (UIConfig.Text :: any)[token] and token or "body"
 
-	local target, minV, maxV = UIConfig.computeFontSize(okToken)
+	local target, minV, maxV = UIConfig.ComputeFontSize(okToken)
 
 	target = math.clamp(math.floor(target + 0.5), 1, 200)
 	minV = math.clamp(math.floor(minV + 0.5), 1, 200)
@@ -122,7 +127,7 @@ function UIConfig.applyTextConstraints(textObj: TextLabel | TextButton, token: "
 end
 
 -- Panel look: pixel-consistent corners & strokes
-function UIConfig.applyPanelStyle(frame: Frame | TextLabel | ImageLabel, panelColor: Color3?)
+function UIConfig.ApplyPanelStyle(frame: Frame | TextLabel | ImageLabel, panelColor: Color3?)
 	local bg = frame:FindFirstChildOfClass("ImageLabel") or Instance.new("ImageLabel")
 	bg.Image = FFGEnum.UI.Frames.InnerPanel
 	bg.BackgroundTransparency = 1
@@ -138,7 +143,7 @@ end
 
 -- Safe area helper: for ScreenGui with IgnoreGuiInset = true
 -- Applies UIPadding (Scale) approximately matching the device inset.
-function UIConfig.applySafeAreaPadding(container: Instance)
+function UIConfig.ApplySafeAreaPadding(container: Instance)
 	-- If IgnoreGuiInset=true, call this once on root container.
 	local insetTopLeft, insetBottomRight = GuiService:GetGuiInset()
 	-- Convert pixel inset to scale, relative to current viewport
@@ -160,7 +165,7 @@ function UIConfig.applySafeAreaPadding(container: Instance)
 end
 
 -- Set padding tokens on a UIPadding / UIListLayout
-function UIConfig.setPadding(pad: UIPadding, token: "XS" | "S" | "M" | "L" | "XL")
+function UIConfig.SetPadding(pad: UIPadding, token: "XS" | "S" | "M" | "L" | "XL")
 	local s = (UIConfig.Padding :: any)[token]
 	pad.PaddingTop = UDim.new(s, 0)
 	pad.PaddingBottom = UDim.new(s, 0)
@@ -168,7 +173,7 @@ function UIConfig.setPadding(pad: UIPadding, token: "XS" | "S" | "M" | "L" | "XL
 	pad.PaddingRight = UDim.new(s, 0)
 end
 
-function UIConfig.setGap(layout: UIListLayout | UIGridLayout, token: "XS" | "S" | "M" | "L" | "XL")
+function UIConfig.SetGap(layout: UIListLayout | UIGridLayout, token: "XS" | "S" | "M" | "L" | "XL")
 	local s = (UIConfig.Padding :: any)[token]
 	if layout:IsA("UIGridLayout") then
 		layout.CellPadding = UDim2.new(s, 0, s, 0)
@@ -180,13 +185,38 @@ end
 -- //!SECTION
 
 -- //SECTION - Aspect Constraints
-function UIConfig.applyAspect(frame: Frame, ratio: number?, axis: Enum.DominantAxis?)
-	local aspect = frame:FindFirstChildOfClass("UIAspectRatioConstraint") or Instance.new("UIAspectRatioConstraint")
+function UIConfig.ApplyAspect(frame: Frame, ratio: number?, axis: Enum.DominantAxis?)
+	local aspect = frame:FindFirstChildOfClass("UIAspectRatioConstraint")
+		or Instance.new("UIAspectRatioConstraint")
 	aspect.AspectRatio = ratio or 1 -- default: square
 	aspect.DominantAxis = axis or Enum.DominantAxis.Width
 	aspect.AspectType = Enum.AspectType.ScaleWithParentSize
 	aspect.Parent = frame
 end
+
+-- //SECTION - Apply List
+function UIConfig.ApplyList(
+	frame: Frame,
+	axis: Enum.FillDirection?,
+	options: {
+		HAlign: Enum.HorizontalAlignment?,
+		VAlign: Enum.VerticalAlignment?,
+		HFlex: Enum.UIFlexAlignment?,
+		VFlex: Enum.UIFlexAlignment?,
+	}?
+): UIListLayout
+	local list = Instance.new("UIListLayout")
+	list.FillDirection = axis or Enum.FillDirection.Horizontal
+	if options and options.HAlign then list.HorizontalAlignment = options.HAlign end
+	if options and options.VAlign then list.VerticalAlignment = options.VAlign end
+	if options and options.HFlex then list.HorizontalFlex = options.HFlex end
+	if options and options.VFlex then list.VerticalFlex = options.VFlex end
+	list.SortOrder = Enum.SortOrder.LayoutOrder
+	list.Parent = frame
+
+	return list
+end
+-- //!SECTION
 
 -- //!SECTION
 
@@ -195,7 +225,7 @@ local connections: { RBXScriptConnection } = {}
 
 -- Reapply callback whenever the size band may change
 -- Supply a function that re-applies constraints to the current UI.
-function UIConfig.observeViewport(onUpdate: () -> ())
+function UIConfig.ObserveViewport(onUpdate: () -> ())
 	-- Disconnect prior observers
 	for _, c in ipairs(connections) do
 		c:Disconnect()
@@ -211,15 +241,17 @@ function UIConfig.observeViewport(onUpdate: () -> ())
 	)
 
 	-- Camera viewport change
-	if camera then table.insert(
-		connections,
-		camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
-			onUpdate()
-		end)
-	) end
+	if camera then
+		table.insert(
+			connections,
+			camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+				onUpdate()
+			end)
+		)
+	end
 
 	-- Some UIs are recreated under PlayerGui; watch top-level ScreenGuis if needed
-	local pg = UIConfig.getPlayerGui()
+	local pg = UIConfig.GetPlayerGui()
 	if pg then
 		table.insert(
 			connections,

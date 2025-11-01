@@ -20,7 +20,16 @@ local buttonImages = {
 }
 
 function Button.Create(props: {
-	color: "Green" | "Blue" | "BlueGray" | "Gray" | "Orange" | "Purple" | "Red" | "SkyBlue" | "White" | "Yellow",
+	color: "Green"
+		| "Blue"
+		| "BlueGray"
+		| "Gray"
+		| "Orange"
+		| "Purple"
+		| "Red"
+		| "SkyBlue"
+		| "White"
+		| "Yellow",
 	text: string?,
 	size: UDim2?,
 })
@@ -45,7 +54,7 @@ function Button.Create(props: {
 		buttonText.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
 		buttonText.Position = FFGEnum.THEME.alignment.position.center
 		buttonText.Parent = button
-		UIConfig.applyTextConstraints(buttonText, "h2")
+		UIConfig.ApplyTextConstraints(buttonText, "h2")
 	end
 
 	return button

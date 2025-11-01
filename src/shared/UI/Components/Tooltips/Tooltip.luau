@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
-local AnimateButtonHover = require(StarterPlayer.StarterPlayerScripts.Client.HUD.Utils.AnimateButtonHover)
+local AnimateButtonHover =
+	require(StarterPlayer.StarterPlayerScripts.Client.HUD.Utils.AnimateButtonHover)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local Button = require(ReplicatedStorage.Shared.UI.Components.Buttons.Button)
@@ -93,7 +94,7 @@ function Tooltip.Create(props: {
 	else
 		itemLabel.TextColor3 = FFGEnum.THEME.color.white
 	end
-	UIConfig.applyTextConstraints(itemLabel, "h1")
+	UIConfig.ApplyTextConstraints(itemLabel, "h1")
 	itemLabel.Parent = frameHeader
 	-- //!SECTION
 	-- //!SECTION
@@ -119,7 +120,7 @@ function Tooltip.Create(props: {
 	mainContainerUIList.VerticalAlignment = Enum.VerticalAlignment.Top
 	mainContainerUIList.VerticalFlex = Enum.UIFlexAlignment.SpaceEvenly
 	mainContainerUIList.Parent = mainContainer
-	UIConfig.setGap(mainContainerUIList, "XS")
+	UIConfig.SetGap(mainContainerUIList, "XS")
 	-- //!SECTION
 
 	-- //SECTION - Item Info Container
@@ -172,7 +173,7 @@ function Tooltip.Create(props: {
 	priceContainerList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	priceContainerList.SortOrder = Enum.SortOrder.LayoutOrder
 	priceContainerList.VerticalAlignment = Enum.VerticalAlignment.Center
-	UIConfig.setGap(priceContainerList, "S")
+	UIConfig.SetGap(priceContainerList, "S")
 	priceContainerList.Parent = priceContainer
 
 	local icon = Instance.new("ImageLabel")
@@ -182,7 +183,7 @@ function Tooltip.Create(props: {
 	icon.Image = FFGEnum.UI.Icons.Gold
 	icon.LayoutOrder = 1
 	icon.Size = UDim2.fromScale(0.15, 0.15)
-	UIConfig.applyAspect(icon)
+	UIConfig.ApplyAspect(icon)
 	icon.Parent = priceContainer
 
 	local priceLabel = Instance.new("TextLabel")
@@ -196,7 +197,7 @@ function Tooltip.Create(props: {
 	priceLabel.TextStrokeTransparency = 0
 	priceLabel.BackgroundTransparency = 1
 	priceLabel.Parent = priceContainer
-	UIConfig.applyTextConstraints(priceLabel, "h2")
+	UIConfig.ApplyTextConstraints(priceLabel, "h2")
 	-- //!SECTION
 
 	-- //SECTION - Item Description
@@ -210,7 +211,7 @@ function Tooltip.Create(props: {
 	descriptionLabel.BackgroundTransparency = 1
 	descriptionLabel.Size = UDim2.fromScale(1, 0.7)
 	descriptionLabel.Parent = addInfoContainer
-	UIConfig.applyTextConstraints(descriptionLabel, "caption")
+	UIConfig.ApplyTextConstraints(descriptionLabel, "caption")
 	-- //!SECTION
 
 	-- //SECTION - Item Stats
@@ -230,7 +231,7 @@ function Tooltip.Create(props: {
 	statsContainer.Position = FFGEnum.THEME.alignment.position.center
 	statsContainer.Size = UDim2.fromScale(1, 0.7)
 	statsContainer.Parent = bottomContainer
-	UIConfig.applyPanelStyle(statsContainer, FFGEnum.THEME.color.white)
+	UIConfig.ApplyPanelStyle(statsContainer, FFGEnum.THEME.color.white)
 
 	local bottomContainerUIList = Instance.new("UIListLayout")
 	bottomContainerUIList.Name = "UIListLayout"
@@ -254,12 +255,12 @@ function Tooltip.Create(props: {
 	statsContainerUIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	statsContainerUIList.SortOrder = Enum.SortOrder.LayoutOrder
 	statsContainerUIList.Parent = innerStatsContainer
-	UIConfig.setGap(statsContainerUIList, "XL")
+	UIConfig.SetGap(statsContainerUIList, "XL")
 
 	local statsContainerUIPadding = Instance.new("UIPadding")
 	statsContainerUIPadding.Name = "StatsContainerUIPadding"
 	statsContainerUIPadding.Parent = innerStatsContainer
-	UIConfig.setPadding(statsContainerUIPadding, "XL")
+	UIConfig.SetPadding(statsContainerUIPadding, "XL")
 
 	local statOrder = {
 		Storage = 1,
@@ -303,7 +304,7 @@ function Tooltip.Create(props: {
 			statElementLabel.BackgroundTransparency = 1
 			statElementLabel.Size = UDim2.fromScale(0.5, 1)
 			statElementLabel.Parent = statFrameContainer
-			UIConfig.applyTextConstraints(statElementLabel, "body")
+			UIConfig.ApplyTextConstraints(statElementLabel, "body")
 
 			local statElementValue = Instance.new("TextLabel")
 			statElementValue.Name = `{stat.Label}_Value`
@@ -316,7 +317,7 @@ function Tooltip.Create(props: {
 			statElementValue.BackgroundTransparency = 1
 			statElementValue.Size = UDim2.fromScale(0.5, 1)
 			statElementValue.Parent = statFrameContainer
-			UIConfig.applyTextConstraints(statElementValue, "body")
+			UIConfig.ApplyTextConstraints(statElementValue, "body")
 		end
 	end
 	-- //!SECTION
@@ -332,7 +333,7 @@ function Tooltip.Create(props: {
 	buttonGrid.FillDirection = Enum.FillDirection.Horizontal
 	buttonGrid.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	buttonGrid.CellSize = UDim2.fromScale(1, 1)
-	UIConfig.setGap(buttonGrid, "S")
+	UIConfig.SetGap(buttonGrid, "S")
 	buttonGrid.Parent = buttonContainer
 
 	-- Buy Button
@@ -373,10 +374,10 @@ function Tooltip.Create(props: {
 	uiListLayout.Parent = itemInfoContainer
 	-- -- //!SECTION
 
-	UIConfig.observeViewport(function()
-		UIConfig.applyTextConstraints(itemLabel, "h1")
-		UIConfig.applyTextConstraints(priceLabel, "h2")
-		UIConfig.applyTextConstraints(descriptionLabel, "body")
+	UIConfig.ObserveViewport(function()
+		UIConfig.ApplyTextConstraints(itemLabel, "h1")
+		UIConfig.ApplyTextConstraints(priceLabel, "h2")
+		UIConfig.ApplyTextConstraints(descriptionLabel, "body")
 	end)
 
 	return tooltipContainer
@@ -396,28 +397,30 @@ function Tooltip.Initialize()
 	}
 
 	local openTooltipEvent = Events.GetBindableEvent(Events.BindableNames.ShowTooltip)
-	if openTooltipEvent then openTooltipEvent.Event:Connect(function(data: itemData)
-		if not data then
-			error("Not data was passed when attempting to open tooltip", data)
-			return
-		end
+	if openTooltipEvent then
+		openTooltipEvent.Event:Connect(function(data: itemData)
+			if not data then
+				error("Not data was passed when attempting to open tooltip", data)
+				return
+			end
 
-		Tooltip.ClearExisting(data.Owner)
+			Tooltip.ClearExisting(data.Owner)
 
-		Tooltip.Existing[data.Owner] = Tooltip.Create({
-			ItemBaseCost = data.ItemBaseCost,
-			ItemDescription = data.ItemDescription,
-			ItemName = data.ItemName,
-			ItemImage = data.ItemImage,
-			ItemStats = data.ItemStats,
-			ItemQualityId = data.ItemQualityId,
-			ItemId = data.ItemId,
-			IsPurchased = data.IsPurchased or false,
-			Size = UDim2.fromScale(0.3, 1),
-			Visible = true,
-			Parent = data.Parent,
-		})
-	end) end
+			Tooltip.Existing[data.Owner] = Tooltip.Create({
+				ItemBaseCost = data.ItemBaseCost,
+				ItemDescription = data.ItemDescription,
+				ItemName = data.ItemName,
+				ItemImage = data.ItemImage,
+				ItemStats = data.ItemStats,
+				ItemQualityId = data.ItemQualityId,
+				ItemId = data.ItemId,
+				IsPurchased = data.IsPurchased or false,
+				Size = UDim2.fromScale(0.3, 1),
+				Visible = true,
+				Parent = data.Parent,
+			})
+		end)
+	end
 	-- //!SECTION
 end
 

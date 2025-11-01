@@ -1,4 +1,4 @@
-std = "roblox+luau"
+std = "roblox"
 
 [[rules]]
 name = "unused_variable"
