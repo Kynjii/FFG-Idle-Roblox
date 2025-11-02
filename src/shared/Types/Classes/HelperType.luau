@@ -22,6 +22,7 @@ export type HelperData = {
 	Owner: number?,
 	Name: string, -- display
 	Level: number,
+	MaxLevel: number,
 	CurrencyType: string,
 	ItemImage: string,
 	JobCategory: string,
@@ -49,6 +50,7 @@ export type HelperInstance = {
 	Owner: number?,
 	Name: string, -- display
 	Level: number,
+	MaxLevel: number,
 	CurrencyType: string,
 	ItemImage: string,
 	JobCategory: string,

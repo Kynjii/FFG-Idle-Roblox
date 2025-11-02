@@ -24,10 +24,10 @@ local DESCRIPTION = {
 	Transporting = "A crew member specialized in Transporting Fish from the Port to the Market.",
 }
 
-local helperFolder: Instance = game.Workspace:WaitForChild("Helpers", true)
-local helperModel: Model
+local helperFolder: Instance = game.Workspace:WaitForChild("Helpers")
+local helperModel
 if helperFolder then
-	helperModel = helperFolder:FindFirstChild("HelperTemplate")
+	helperModel = helperFolder:FindFirstChild("HelperTemplate") :: Model
 	if not helperModel then error("Unable to locate the helperModel") end
 end
 
@@ -68,7 +68,7 @@ local function grabName(jobCategory)
 end
 
 local function chooseQuality()
-	local function getRandomQuality()
+	local function getRandomQuality(): number?
 		local totalWeight: number = 0
 		for _, data in pairs(FFGEnum.QUALITIES) do
 			totalWeight += data.DropChance
@@ -82,10 +82,10 @@ local function chooseQuality()
 			if randomValue <= cumulative then return qualityId end
 		end
 
-		return nil, nil
+		return nil
 	end
 
-	local qualityId: number = getRandomQuality()
+	local qualityId: number? = getRandomQuality()
 	return qualityId
 end
 
@@ -215,36 +215,24 @@ function Helper.CreateModel(self: Helper)
 			end
 
 			if part.Name == "HelperName" then
-				local namePlate: TextLabel = part:FindFirstChild("Name")
-				local playerNameLabel: TextLabel = part:FindFirstChild("PlayerName")
-				if namePlate and playerNameLabel then
-					local function colorToRgbString(c)
-						if typeof(c) == "Color3" then
-							local r = math.floor(c.R * 255 + 0.5)
-							local g = math.floor(c.G * 255 + 0.5)
-							local b = math.floor(c.B * 255 + 0.5)
-							return string.format("%d,%d,%d", r, g, b)
-						elseif typeof(c) == "string" then
-							return c
-						elseif typeof(c) == "table" then
-							return table.concat(c, ",")
-						else
-							return "255,255,255"
-						end
-					end
+				local helperNameLabel: TextLabel = part:FindFirstChild("Name")
+				local helperQualityLabel: TextLabel = part:FindFirstChild("Quality")
+				local helperLevelLabel: TextLabel = part:FindFirstChild("Level", true)
+				local helperStageLabel: TextLabel = part:FindFirstChild("Stage", true)
 
-					local playerName = (typeof(self.Player) == "Instance" and self.Player.Name) or tostring(self.Player)
+				if helperNameLabel and helperQualityLabel and helperLevelLabel and helperStageLabel then
 					local helperName = tostring(self.Name)
-					local qualityColor = colorToRgbString(FFGEnum.QUALITIES[self.QualityId].Color)
-					local stageColor = colorToRgbString(FFGEnum.STAGES[self.UpgradeStage].Color)
-					local stageLabel = tostring(FFGEnum.STAGES[self.UpgradeStage].Label)
 
-					playerNameLabel.RichText = true
-					playerNameLabel.Font = FFGEnum.THEME.normalFont
-					playerNameLabel.Text = playerName
+					helperNameLabel.Font = FFGEnum.THEME.bigFont
+					helperNameLabel.Text = helperName
 
-					namePlate.RichText = true
-					namePlate.Text = string.format("<font color='rgb(%s)'>%s</font> | <font color='rgb(%s)'>%s</font>", qualityColor, helperName, stageColor, stageLabel)
+					helperLevelLabel.Text = `Level {self.Level}`
+
+					helperQualityLabel.Text = FFGEnum.QUALITIES[self.QualityId].Label
+					helperQualityLabel.TextColor3 = FFGEnum.QUALITIES[self.QualityId].Color
+
+					helperStageLabel.Text = FFGEnum.STAGES[self.UpgradeStage].Label
+					helperStageLabel.TextColor3 = FFGEnum.STAGES[self.UpgradeStage].Color
 
 					part.Enabled = true
 				end
@@ -390,17 +378,19 @@ end
 -- //SECTION - Event Listeners
 function Helper.AttachEventListeners(self: Helper)
 	local helperUpgraded = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
-	if helperUpgraded then self._cleaner:Add(helperUpgraded.OnServerEvent:Connect(function(player: Player, helperId: string)
-		if self.Player ~= player or self.Owner ~= player.UserId then return end
-		if helperId ~= self.Id then return end
+	if helperUpgraded then
+		self._cleaner:Add(helperUpgraded.OnServerEvent:Connect(function(player: Player, helperId: string)
+			if self.Player ~= player or self.Owner ~= player.UserId then return end
+			if helperId ~= self.Id then return end
 
-		if not DataService.CanAfford(self.Player, self.CurrencyType, self.BaseCost or 0) then return end
-		DataService.Spend(self.Player, self.CurrencyType, self.BaseCost)
+			if not DataService.CanAfford(self.Player, self.CurrencyType, self.BaseCost or 0) then return end
+			DataService.Spend(self.Player, self.CurrencyType, self.BaseCost)
 
-		self:Upgrade()
-		local helperDataEvent = Events.GetRemote(Events.RemoteNames.HelperData)
-		if helperDataEvent then helperDataEvent:FireClient(player, self:Serialize()) end
-	end)) end
+			self:Upgrade()
+			local helperDataEvent = Events.GetRemote(Events.RemoteNames.HelperData)
+			if helperDataEvent then helperDataEvent:FireClient(player, self:Serialize()) end
+		end))
+	end
 end
 -- //!SECTION
 
