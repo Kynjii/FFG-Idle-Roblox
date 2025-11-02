@@ -61,12 +61,11 @@ end
 
 function JobManager.NumOfSlotsAvailable(self: JobManager, jobId: number): number
 	local jobState: JobState = self.JobState[jobId]
-	return jobState
+	return typeof(jobState) == "number" and jobState or -1
 end
 
 function JobManager.AssignSlot(self: JobManager, jobId: number): ()
 	if not jobId then return end
-	print(jobId, self.JobState)
 	local jobState: JobState = self.JobState[jobId]
 	jobState -= 1
 end
@@ -75,6 +74,9 @@ function JobManager.AssignHelper(self: JobManager, helperId: number, jobId: numb
 	if not helperId or not jobId then return end
 	if self:NumOfSlotsAvailable(jobId) == 0 then
 		print("No JobSlots available for JobId: ", jobId)
+		return
+	elseif self:NumOfSlotsAvailable(jobId) == -1 then
+		error("No Jobstate: ", self.JobState)
 		return
 	end
 

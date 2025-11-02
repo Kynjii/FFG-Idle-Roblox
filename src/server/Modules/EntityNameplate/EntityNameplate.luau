@@ -45,9 +45,10 @@ function EntityNameplate.Create(props: {
 	quality.Font = FFGEnum.THEME.bigFont
 	quality.LayoutOrder = 1
 	quality.Position = UDim2.fromScale(0.5, 0.5)
-	quality.Size = UDim2.fromScale(1, 0.15)
+	quality.Size = UDim2.fromScale(1, 0.3)
 	quality.Text = FFGEnum.QUALITIES[props.QualityId].Label or ""
 	quality.TextColor3 = FFGEnum.QUALITIES[props.QualityId].Color or Color3.new(1, 1, 1)
+	quality.TextStrokeTransparency = 0.7
 	UIConfig.ApplyTextConstraints(quality, "body")
 	quality.Parent = helperName
 
@@ -57,7 +58,7 @@ function EntityNameplate.Create(props: {
 	infoContainer.BackgroundTransparency = 1
 	infoContainer.LayoutOrder = 3
 	infoContainer.Position = UDim2.fromScale(0.5, 0.5)
-	infoContainer.Size = UDim2.fromScale(0.5, 0.15)
+	infoContainer.Size = UDim2.fromScale(0.5, 0.3)
 	UIConfig.ApplyList(infoContainer, Enum.FillDirection.Horizontal, { HAlign = Enum.HorizontalAlignment.Center, HFlex = Enum.UIFlexAlignment.SpaceBetween, VAlign = Enum.VerticalAlignment.Center })
 
 	local level = Instance.new("TextLabel")
@@ -67,7 +68,7 @@ function EntityNameplate.Create(props: {
 	level.Font = FFGEnum.THEME.bigFont
 	level.LayoutOrder = 1
 	level.Position = UDim2.fromScale(0.5, 0.5)
-	level.Size = UDim2.fromScale(0.5, 0.5)
+	level.Size = UDim2.fromScale(0.5, 1)
 	level.Text = `Level {props.Level}`
 	level.TextColor3 = Color3.fromRGB(0, 255, 0)
 	level.TextStrokeTransparency = 0.7
@@ -81,7 +82,7 @@ function EntityNameplate.Create(props: {
 	stage.BackgroundTransparency = 1
 	stage.Font = FFGEnum.THEME.bigFont
 	stage.LayoutOrder = 2
-	stage.Position = UDim2.fromScale(0.5, 0.5)
+	stage.Position = UDim2.fromScale(0.5, 1)
 	stage.RichText = true
 	stage.Size = UDim2.fromScale(0.5, 0.5)
 	stage.Text = FFGEnum.STAGES[props.UpgradeStage].Label
@@ -92,6 +93,13 @@ function EntityNameplate.Create(props: {
 	stage.Parent = infoContainer
 
 	infoContainer.Parent = helperName
+
+	UIConfig.ObserveViewport(function()
+		UIConfig.ApplyTextConstraints(name, "h1")
+		UIConfig.ApplyTextConstraints(quality, "body")
+		UIConfig.ApplyTextConstraints(level, "caption")
+		UIConfig.ApplyTextConstraints(stage, "caption")
+	end)
 
 	return helperName
 end

@@ -223,6 +223,7 @@ function AvailableJobListItem.Create(props: {
 
 	assignButton.Activated:Connect(function()
 		-- //TODO - Replace with proper selection of helper, currently this just assigns the first one it finds
+		-- //TODO - Probably best to request current helperState from JobManager instead of directly
 		if #props.Slots.AssignedHelpers == 3 then return end
 		local getPlayerInventory = Events.GetRemoteFn(Events.RemoteFunctionNames.GetPlayerInventory)
 
@@ -233,7 +234,8 @@ function AvailableJobListItem.Create(props: {
 					local typedHelper = helper :: HelperType.HelperInstance
 					if typedHelper.CurrentAssignment > 0 then continue end
 
-					Events.FireEvent(Events.RemoteNames.AssignJob, props.Player, typedHelper)
+					local assignJobEvent = Events.GetRemote(Events.RemoteNames.AssignJob)
+					if assignJobEvent then assignJobEvent:FireServer(typedHelper.Id, props.Id) end
 				end
 			end
 		end

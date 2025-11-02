@@ -9,6 +9,7 @@ local HelperCalculators = require(ServerScriptService.Server.Classes.Modules.Hel
 local CollisionGroups = require(ServerScriptService.Server.Game.CollisionGroups.CollisionGroups)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
+local EntityNameplate = require(ServerScriptService.Server.Modules.EntityNameplate.EntityNameplate)
 local Jobs = require(ServerScriptService.Server.Modules.Jobs.Jobs)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
@@ -111,7 +112,7 @@ function Helper.New(state: HelperType.HelperData, player: Player, teamId: number
 	end
 
 	-- Calculate derived properties
-	self.Entity = state.Entity or self.Entity or DEFAULTS.Entity
+	self.Entity = state.Entity or DEFAULTS.Entity
 	self.Player = player
 	self.RealmId = state.RealmId
 	self.Owner = state.Owner or self.Owner or player.UserId
@@ -213,31 +214,11 @@ function Helper.CreateModel(self: Helper)
 				local humanoid: Humanoid = part
 				humanoid.WalkSpeed = self.Stats and self.Stats.WalkSpeed
 			end
-
-			if part.Name == "HelperName" then
-				local helperNameLabel: TextLabel = part:FindFirstChild("Name")
-				local helperQualityLabel: TextLabel = part:FindFirstChild("Quality")
-				local helperLevelLabel: TextLabel = part:FindFirstChild("Level", true)
-				local helperStageLabel: TextLabel = part:FindFirstChild("Stage", true)
-
-				if helperNameLabel and helperQualityLabel and helperLevelLabel and helperStageLabel then
-					local helperName = tostring(self.Name)
-
-					helperNameLabel.Font = FFGEnum.THEME.bigFont
-					helperNameLabel.Text = helperName
-
-					helperLevelLabel.Text = `Level {self.Level}`
-
-					helperQualityLabel.Text = FFGEnum.QUALITIES[self.QualityId].Label
-					helperQualityLabel.TextColor3 = FFGEnum.QUALITIES[self.QualityId].Color
-
-					helperStageLabel.Text = FFGEnum.STAGES[self.UpgradeStage].Label
-					helperStageLabel.TextColor3 = FFGEnum.STAGES[self.UpgradeStage].Color
-
-					part.Enabled = true
-				end
-			end
 		end
+
+		local nameplate = EntityNameplate.Create({ Adornee = clonedModel, Level = self.Level, Name = self.Name, QualityId = self.QualityId, UpgradeStage = self.UpgradeStage })
+		nameplate.Enabled = true
+		nameplate.Parent = clonedModel
 
 		CollisionGroups.SetNpcCollisionGroup(clonedModel)
 	end

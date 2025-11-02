@@ -112,7 +112,7 @@ Jobs.Data = {
 function Jobs.GetMaxSlots(): { [number]: number }
 	local data = {}
 	for i, job in ipairs(Jobs.Data) do
-		data[i] = job.MaxSlots
+		data[i] = job.Slots.MaxSlots
 	end
 
 	return data
