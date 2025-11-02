@@ -22,7 +22,7 @@ local function story(target)
 	})
 	local frame = Instance.new("Frame")
 	frame.Size = UDim2.new(0, 1920, 0, 1080)
-	frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	frame.BackgroundColor3 = Color3.fromRGB(58, 56, 211)
 	frame.Parent = target
 
 	panel.Parent = frame

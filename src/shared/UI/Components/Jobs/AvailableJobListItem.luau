@@ -160,7 +160,7 @@ function AvailableJobListItem.Create(props: {
 			lockedIcon.Name = "lockedIcon"
 			lockedIcon.Size = UDim2.fromScale(0.2, 0.2)
 			lockedIcon.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
-			lockedIcon.Position = UDim2.fromScale(0.4, 0.5)
+			lockedIcon.Position = UDim2.fromScale(0.35, 0.5)
 			lockedIcon.BackgroundTransparency = 1
 			lockedIcon.ZIndex = 5
 			lockedIcon.Image = FFGEnum.UI.Icons.PadLock
@@ -191,9 +191,8 @@ function AvailableJobListItem.Create(props: {
 				buttonText = "+"
 			end
 
-			local actionButton = Button.Create({ color = buttonColor, currencyType = buttonCurrency, text = buttonText })
+			local actionButton = Button.Create({ Color = buttonColor, CurrencyType = buttonCurrency, Text = buttonText, Size = UDim2.fromScale(0.2, 1) })
 			actionButton.Position = UDim2.fromScale(0.9, 0.5)
-			actionButton.Size = UDim2.fromScale(0.2, 1)
 			actionButton.Name = isLocked and "UnassignButon" or isLocked and "PuchaseButton" or ""
 			actionButton.Parent = slot
 		end

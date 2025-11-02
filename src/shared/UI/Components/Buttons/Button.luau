@@ -1,5 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterPlayer = game:GetService("StarterPlayer")
 
+local AnimateButtonHover = require(StarterPlayer.StarterPlayerScripts.Client.HUD.Utils.AnimateButtonHover)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local UIConfig = require(ReplicatedStorage.Shared.UI.UIConfig)
 local Button = {}
@@ -20,27 +22,26 @@ local buttonImages = {
 }
 
 function Button.Create(props: {
-	color: "Green" | "Blue" | "BlueGray" | "Gray" | "Orange" | "Purple" | "Red" | "SkyBlue" | "White" | "Yellow",
-	text: string?,
-	size: UDim2?,
-	currencyType: "None" | "Gold",
+	Color: "Green" | "Blue" | "BlueGray" | "Gray" | "Orange" | "Purple" | "Red" | "SkyBlue" | "White" | "Yellow",
+	Text: string?,
+	Size: UDim2?,
+	CurrencyType: "None" | "Gold",
 })
 	local button = Instance.new("ImageButton")
-	button.Image = buttonImages.squareColor[props.color] or ""
+	button.Image = buttonImages.squareColor[props.Color] or ""
 	button.PressedImage = buttonImages.squareColor.Blue
-	button.HoverImage = buttonImages.squareColor.Blue
 	button.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
 	button.Position = FFGEnum.THEME.alignment.position.center
 	button.ScaleType = Enum.ScaleType.Slice
 	button.SliceCenter = Rect.new(25, 64, 39, 161)
 	button.BackgroundTransparency = 1
-	button.Size = props.size or UDim2.fromScale(1, 1)
+	button.Size = props.Size or UDim2.fromScale(1, 1)
 
 	local buttonText: TextLabel?
-	if props.text then
+	if props.Text then
 		buttonText = Instance.new("TextLabel")
 		buttonText.Font = FFGEnum.THEME.bigFont
-		buttonText.Text = props.text
+		buttonText.Text = props.Text
 		buttonText.LayoutOrder = 2
 		buttonText.TextColor3 = FFGEnum.THEME.color.white
 		buttonText.BackgroundTransparency = 1
@@ -51,7 +52,7 @@ function Button.Create(props: {
 		UIConfig.ApplyTextConstraints(buttonText, "body")
 	end
 
-	if props.currencyType == "Gold" then
+	if props.CurrencyType == "Gold" then
 		local currencyIcon = Instance.new("ImageLabel")
 		currencyIcon.Image = FFGEnum.UI.Icons.Gold
 		currencyIcon.LayoutOrder = 1
@@ -66,6 +67,15 @@ function Button.Create(props: {
 
 		UIConfig.ApplyList(button, Enum.FillDirection.Horizontal, { HAlign = Enum.HorizontalAlignment.Center, VAlign = Enum.VerticalAlignment.Center })
 	end
+
+	local baseSize = props.Size
+	button.MouseEnter:Connect(function()
+		AnimateButtonHover.Enter(button, baseSize)
+	end)
+
+	button.MouseLeave:Connect(function()
+		AnimateButtonHover.Leave(button, baseSize)
+	end)
 
 	return button
 end
