@@ -13,6 +13,9 @@ local UIConfig = require(ReplicatedStorage.Shared.UI.UIConfig)
 local AvailableJobListItem = {}
 
 function AvailableJobListItem.Create(props: {
+	Id: number,
+	Category: "Fishing" | "Woodcutting" | "Mining" | "Transporting",
+	Label: string,
 	Slots: {
 		MaxSlots: number,
 		LockedSlots: number,
@@ -20,7 +23,6 @@ function AvailableJobListItem.Create(props: {
 			[number]: { Name: string, Level: number, QualityId: number },
 		},
 	},
-	JobId: number,
 	Player: Player,
 })
 	local availableJobTemplate = Instance.new("Frame")
@@ -64,10 +66,10 @@ function AvailableJobListItem.Create(props: {
 	textLabel.Font = FFGEnum.THEME.bigFont
 	textLabel.Position = UDim2.fromScale(0.5, 0.5)
 	textLabel.Size = UDim2.fromScale(0.49, 0.2)
-	textLabel.Text = Jobs.Data[props.JobId].Label or ""
+	textLabel.Text = Jobs.Data[props.Id].Label or ""
 	textLabel.TextColor3 = Color3.new(1, 1, 1)
 	textLabel.TextSize = 14
-	UIConfig.ApplyTextConstraints(textLabel, "h1")
+	UIConfig.ApplyTextConstraints(textLabel, "body")
 	textLabel.Parent = container
 
 	local mainContainer = Instance.new("Frame")
@@ -76,7 +78,7 @@ function AvailableJobListItem.Create(props: {
 	mainContainer.BackgroundTransparency = 1
 	mainContainer.AutomaticSize = Enum.AutomaticSize.Y
 	mainContainer.LayoutOrder = 2
-	UIConfig.ApplyList(mainContainer, Enum.FillDirection.Horizontal, { VAlign = Enum.VerticalAlignment.Center })
+	UIConfig.ApplyList(mainContainer, Enum.FillDirection.Horizontal, { VAlign = Enum.VerticalAlignment.Center, HFlex = Enum.UIFlexAlignment.SpaceBetween })
 	mainContainer.Parent = container
 
 	local slotContainer = Instance.new("Frame")
@@ -112,7 +114,7 @@ function AvailableJobListItem.Create(props: {
 		local slot = Instance.new("Frame")
 		slot.Name = "SlotListItem"
 		slot.BackgroundTransparency = 1
-		slot.Size = UDim2.fromScale(1, 0.3)
+		slot.Size = UDim2.fromScale(1, 0.4)
 
 		local slotMainContainer = Instance.new("Frame")
 		slotMainContainer.ZIndex = 5

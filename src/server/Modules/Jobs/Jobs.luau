@@ -40,7 +40,11 @@ Jobs.Data = {
 		Label = "Pier 1",
 		Location = getJobLocation(1),
 		Route = getJobRoute(1),
-		MaxSlots = 3,
+		Slots = {
+			MaxSlots = 3,
+			LockedSlots = 2,
+			AssignedHelpers = {},
+		},
 	},
 	[2] = {
 		Id = 2,
@@ -48,7 +52,11 @@ Jobs.Data = {
 		Label = "Pier 2",
 		Location = getJobLocation(2),
 		Route = getJobRoute(2),
-		MaxSlots = 3,
+		Slots = {
+			MaxSlots = 3,
+			LockedSlots = 2,
+			AssignedHelpers = {},
+		},
 	},
 	[3] = {
 		Id = 3,
@@ -56,7 +64,11 @@ Jobs.Data = {
 		Label = "Pier 3",
 		Location = getJobLocation(3),
 		Route = getJobRoute(3),
-		MaxSlots = 3,
+		Slots = {
+			MaxSlots = 3,
+			LockedSlots = 2,
+			AssignedHelpers = {},
+		},
 	},
 	[4] = {
 		Id = 4,
@@ -64,7 +76,11 @@ Jobs.Data = {
 		Label = "Pier 4",
 		Location = getJobLocation(4),
 		Route = getJobRoute(4),
-		MaxSlots = 3,
+		Slots = {
+			MaxSlots = 3,
+			LockedSlots = 2,
+			AssignedHelpers = {},
+		},
 	},
 	[5] = {
 		Id = 5,
@@ -72,7 +88,11 @@ Jobs.Data = {
 		Label = "Pier 5",
 		Location = getJobLocation(5),
 		Route = getJobRoute(5),
-		MaxSlots = 3,
+		Slots = {
+			MaxSlots = 3,
+			LockedSlots = 2,
+			AssignedHelpers = {},
+		},
 	},
 	[6] = {
 		Id = 6,
@@ -80,7 +100,11 @@ Jobs.Data = {
 		Label = "Pier 6",
 		Location = getJobLocation(6),
 		Route = getJobRoute(6),
-		MaxSlots = 3,
+		Slots = {
+			MaxSlots = 3,
+			LockedSlots = 2,
+			AssignedHelpers = {},
+		},
 	},
 }
 

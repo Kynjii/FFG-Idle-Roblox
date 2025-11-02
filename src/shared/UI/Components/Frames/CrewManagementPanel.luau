@@ -1,16 +1,12 @@
---!strict
-local AvailableJobListItem = require("../Jobs/AvailableJobListItem")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
+
+local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
+local Jobs = require(ServerScriptService.Server.Modules.Jobs.Jobs)
+local AvailableJobListItem = require(ReplicatedStorage.Shared.UI.Components.Jobs.AvailableJobListItem)
 local CrewManagementPanel = {}
 
 function CrewManagementPanel.Create(props: {
-	Slots: {
-		MaxSlots: number,
-		LockedSlots: number,
-		AssignedHelpers: {
-			[number]: { Name: string, Level: number, QualityId: number },
-		},
-	},
-	JobId: number,
 	Player: Player,
 })
 	local crewManagementContainer = Instance.new("Frame")
@@ -49,8 +45,16 @@ function CrewManagementPanel.Create(props: {
 
 	availableJobs.Parent = crewManagementContainer
 
-	local availableJob = AvailableJobListItem.Create(props)
-	availableJob.Parent = availableJobs
+	-- Handle Available Jobs
+	for id, job in ipairs(Jobs.Data) do
+		local jobData = job
+
+		local preparedData = TableUtil.Copy(jobData)
+		preparedData.Player = props.Player
+		local availableJob = AvailableJobListItem.Create(preparedData)
+		availableJob.LayoutOrder = id
+		availableJob.Parent = availableJobs
+	end
 
 	local availableCrew = Instance.new("ScrollingFrame")
 	availableCrew.Name = "AvailableCrew"
@@ -77,7 +81,7 @@ function CrewManagementPanel.Create(props: {
 	uIPadding7.PaddingTop = UDim.new(0.03, 0)
 	uIPadding7.Parent = availableCrew
 
-	-- component goes here
+	-- available helpers component goes here
 	local frame18 = Instance.new("Frame")
 	frame18.Name = "Frame"
 	frame18.AnchorPoint = Vector2.new(0.5, 0.5)
