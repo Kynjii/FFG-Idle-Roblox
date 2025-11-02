@@ -1,8 +1,10 @@
 --!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local StarterPlayer = game:GetService("StarterPlayer")
 
 local Jobs = require(ServerScriptService.Server.Modules.Jobs.Jobs)
+local AnimateButtonHover = require(StarterPlayer.StarterPlayerScripts.Client.HUD.Utils.AnimateButtonHover)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
@@ -203,12 +205,22 @@ function AvailableJobListItem.Create(props: {
 	local assignButton = Instance.new("ImageButton")
 	assignButton.Name = "AssignButton"
 	assignButton.LayoutOrder = 2
-	assignButton.AnchorPoint = Vector2.new(0.5, 0.5)
+	assignButton.Position = UDim2.fromScale(0.8, 0.5)
 	assignButton.BackgroundTransparency = 1
 	assignButton.Image = "rbxassetid://119147831935362"
 	assignButton.ScaleType = Enum.ScaleType.Fit
-	assignButton.Size = UDim2.fromScale(0.3, 0.5)
+	assignButton.Size = UDim2.fromScale(0.2, 0.5)
+	UIConfig.ApplyAspect(assignButton, 16 / 9)
 	assignButton.Parent = mainContainer
+
+	local baseSize = assignButton.Size
+	assignButton.MouseEnter:Connect(function()
+		AnimateButtonHover.Enter(assignButton, baseSize)
+	end)
+
+	assignButton.MouseLeave:Connect(function()
+		AnimateButtonHover.Leave(assignButton, baseSize)
+	end)
 
 	assignButton.Activated:Connect(function()
 		-- //TODO - Replace with proper selection of helper, currently this just assigns the first one it finds

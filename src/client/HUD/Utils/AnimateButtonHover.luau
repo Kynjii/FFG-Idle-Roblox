@@ -3,7 +3,7 @@ local ButtonHover = {}
 
 function ButtonHover.Enter(button: ImageButton | TextButton, baseSize: UDim2)
 	local tweenGoal = {
-		Size = baseSize + UDim2.fromScale(0.01, 0.05),
+		Size = baseSize + UDim2.fromScale(0.01, 0.01),
 	}
 
 	local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out)
