@@ -20,9 +20,9 @@ function ProgressBar.Create(props: {
 		if props.Adornee then billBoard.Adornee = props.Adornee end
 		billBoard.Enabled = false
 		billBoard.LightInfluence = 1
-		billBoard.MaxDistance = 100
+		billBoard.MaxDistance = FFGEnum.THEME.Nameplate.MaxDistance
 		billBoard.ResetOnSpawn = false
-		billBoard.Size = UDim2.fromScale(1.5, 0.35)
+		billBoard.Size = UDim2.fromScale(10, 2.5)
 		billBoard.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		UIConfig.ApplyList(billBoard, Enum.FillDirection.Vertical, { HAlign = Enum.HorizontalAlignment.Center })
 	end

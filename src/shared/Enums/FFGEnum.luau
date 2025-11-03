@@ -343,6 +343,10 @@ FFGEnum.THEME = {
 	strokeTransparency = 0.25,
 	hoverStrokeColor = Color3.fromRGB(67, 170, 139),
 
+	Nameplate = {
+		MaxDistance = 80,
+	},
+
 	sizes = {
 		button = UDim2.fromScale(0.40, 0.10),
 		panel = UDim2.fromScale(0.80, 0.50),

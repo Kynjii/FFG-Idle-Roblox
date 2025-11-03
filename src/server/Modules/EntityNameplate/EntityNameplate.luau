@@ -17,9 +17,9 @@ function EntityNameplate.Create(props: {
 	if props.Adornee then entityName.Adornee = props.Adornee end
 	entityName.Enabled = false
 	entityName.LightInfluence = 1
-	entityName.MaxDistance = 50
+	entityName.MaxDistance = FFGEnum.THEME.Nameplate.MaxDistance
 	entityName.ResetOnSpawn = false
-	entityName.Size = UDim2.fromScale(1.5, 0.5)
+	entityName.Size = UDim2.fromScale(10, 5)
 	entityName.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 	local frameContainer = Instance.new("Frame")
@@ -78,7 +78,7 @@ function EntityNameplate.Create(props: {
 	infoContainer.BackgroundTransparency = 1
 	infoContainer.LayoutOrder = 3
 	infoContainer.Position = UDim2.fromScale(0.5, 0.5)
-	infoContainer.Size = UDim2.fromScale(0.5, 0.3)
+	infoContainer.Size = UDim2.fromScale(0.8, 0.3)
 	UIConfig.ApplyList(infoContainer, Enum.FillDirection.Horizontal, { HAlign = Enum.HorizontalAlignment.Center, HFlex = Enum.UIFlexAlignment.SpaceBetween, VAlign = Enum.VerticalAlignment.Center })
 
 	local level = Instance.new("TextLabel")

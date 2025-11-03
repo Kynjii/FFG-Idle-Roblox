@@ -54,7 +54,7 @@ function PB.CreatePB(pbModel: Model, class: Boat | Tender | PortStorage | Buildi
 	priceBillboard.Name = "PriceBillboard"
 	priceBillboard.AlwaysOnTop = true
 	priceBillboard.Enabled = true
-	priceBillboard.MaxDistance = 100
+	priceBillboard.MaxDistance = FFGEnum.THEME.Nameplate.MaxDistance
 	priceBillboard.ResetOnSpawn = false
 	priceBillboard.Adornee = button
 	priceBillboard.ExtentsOffsetWorldSpace = Vector3.new(70, 0, 0)
