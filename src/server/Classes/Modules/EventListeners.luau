@@ -73,6 +73,7 @@ function EventListeners.Attach(class: Boat | Tender | PortStorage | Building)
 	if typedClass.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Shop then
 		local function handleStateUpdate(player)
 			local canProceed = checkTutorialState(player)
+			print("canProceed", canProceed)
 			if not canProceed then return end
 
 			-- See if the player can afford the state update (purchase / upgrade)
@@ -91,39 +92,67 @@ function EventListeners.Attach(class: Boat | Tender | PortStorage | Building)
 			end
 
 			-- Update UIs
-			typedClass:UpdatePurchaseBoardUI()
+			typedClass:UpdatepurchaseButtonUI()
 			typedClass:Save()
 		end
 
-		-- Purchased Event
+		-- Purchased Event (from Client)
 		local purchasedEvent = Events.GetRemote(Events.RemoteNames.EntityPurchased)
-		if purchasedEvent then typedClass._cleaner:Add(purchasedEvent.OnServerEvent:Connect(function(player: Player, entityId: string)
-			if typedClass.Player ~= player or typedClass.Owner ~= player.UserId then return end
-			if typedClass.Id ~= entityId then return end
+		if purchasedEvent then
+			typedClass._cleaner:Add(purchasedEvent.OnServerEvent:Connect(function(player: Player, entityId: string)
+				if typedClass.Player ~= player or typedClass.Owner ~= player.UserId then return end
+				if typedClass.Id ~= entityId then return end
 
-			handleStateUpdate(player)
-		end)) end
+				handleStateUpdate(player)
+			end))
+		end
 
-		-- Upgraded Event
+		-- Purchased Event (from server)
+		local purchasedBindableEvent = Events.GetBindableEvent(Events.BindableNames.PurchaseEntity)
+		if purchasedBindableEvent then
+			typedClass._cleaner:Add(purchasedBindableEvent.Event:Connect(function(data: { Id: string, Player: Player })
+				if typedClass.Player ~= data.Player or typedClass.Owner ~= data.Player.UserId then return end
+				if typedClass.Id ~= data.Id then return end
+
+				handleStateUpdate(data.Player)
+			end))
+		end
+
+		-- Upgraded Event (from Client)
 		local upgradedEvent = Events.GetRemote(Events.RemoteNames.EntityUpgraded)
-		if upgradedEvent then typedClass._cleaner:Add(upgradedEvent.OnServerEvent:Connect(function(player: Player, entityId: string)
-			if typedClass.Player ~= player or typedClass.Owner ~= player.UserId then return end
-			if typedClass.Id ~= entityId then return end
+		if upgradedEvent then
+			typedClass._cleaner:Add(upgradedEvent.OnServerEvent:Connect(function(player: Player, entityId: string)
+				if typedClass.Player ~= player or typedClass.Owner ~= player.UserId then return end
+				if typedClass.Id ~= entityId then return end
 
-			handleStateUpdate(player)
-		end)) end
+				handleStateUpdate(player)
+			end))
+		end
+
+		-- Upgraded Event (from server)
+		local upgradedBindableEvent = Events.GetBindableEvent(Events.BindableNames.UpgradeEntity)
+		if upgradedBindableEvent then
+			typedClass._cleaner:Add(upgradedBindableEvent.Event:Connect(function(player: Player, entityId: string)
+				if typedClass.Player ~= player or typedClass.Owner ~= player.UserId then return end
+				if typedClass.Id ~= entityId then return end
+
+				handleStateUpdate(player)
+			end))
+		end
 		-- //!SECTION
 	else
 		-- Shop Item Purchased
 		local itemPurchased = Events.GetRemote(Events.RemoteNames.HelperPurchased)
-		if itemPurchased then typedClass._cleaner:Add(itemPurchased.OnServerEvent:Connect(function(player: Player, helperId: string)
-			if typedClass.Player ~= player or typedClass.Owner ~= player.UserId then return end
+		if itemPurchased then
+			typedClass._cleaner:Add(itemPurchased.OnServerEvent:Connect(function(player: Player, helperId: string)
+				if typedClass.Player ~= player or typedClass.Owner ~= player.UserId then return end
 
-			local canProceed = checkTutorialState(player)
-			if not canProceed then return end
+				local canProceed = checkTutorialState(player)
+				if not canProceed then return end
 
-			typedClass:Purchasehelper(helperId)
-		end)) end
+				typedClass:Purchasehelper(helperId)
+			end))
+		end
 	end
 end
 

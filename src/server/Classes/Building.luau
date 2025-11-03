@@ -6,8 +6,7 @@ local Trove = require(ReplicatedStorage.Packages.Trove)
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
 local EventListeners = require(ServerScriptService.Server.Classes.Modules.EventListeners)
-local ProximityPrompt = require(ServerScriptService.Server.Classes.Modules.ProximityPrompt)
-local PurchaseBoard = require(ServerScriptService.Server.Classes.Modules.PurchaseBoard)
+local PurchaseButton = require(ServerScriptService.Server.Classes.Modules.PurchaseButton)
 local Buffs = require(ServerScriptService.Server.Math.Buffs)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
@@ -110,9 +109,12 @@ function Building.New(state: { [string]: any }?, player: Player, model: Model, r
 	self.BuildingBuff = realmBuffs[BUILDING_BUFFS[self.BuildingName]]
 	if not self.BuildingBuff.CurrentValue then self.BuildingBuff.CurrentValue = self.IsPurchased and Buffs.CalculateLevelBuffValue(self.UpgradeStage, self.Level, self.BuildingBuff) or nil end
 
-	self.PurchaseBoard, self.PBDetails = self:SetupPurchaseBoard()
+	self.PurchaseButton, self.PBDetails = self:SetupPurchaseButton()
 
 	self._cleaner = Trove.new()
+
+	if self.PurchaseButton then self:SetButtonLogic() end
+	self.ButtonDebounce = false
 
 	self.Upgraded = self._cleaner:Add(Signal.new())
 	self.Purchased = self._cleaner:Add(Signal.new())
@@ -146,7 +148,7 @@ function Building.Upgrade(self: Building): ()
 	self:UpdateBuffValue()
 
 	self.UpgradeCost = self:CalculateUpgradeCost()
-	self:UpdatePurchaseBoardUI()
+	self:UpdatepurchaseButtonUI()
 	if self.Upgraded then self.Upgraded:Fire(self) end
 	self:Save()
 end
@@ -189,30 +191,24 @@ function Building.Initialize(self: Building)
 
 	self:UpdateVisualModel()
 
-	-- Setup UI components
-	if self.PurchaseBoard then self:SetupProximityPrompt(self.PurchaseBoard) end
-
 	self:Save()
 end
 
-function Building.SetupPurchaseBoard(self: Building): (Model, { [string]: any })
-	local purchaseBoard = self.Model:WaitForChild("Purchase_Board") :: Model
-	return PurchaseBoard.CreatePB(purchaseBoard, self :: any)
+function Building.SetupPurchaseButton(self: Building): (Model, { [string]: any })
+	local purchaseButton = self.Model:WaitForChild("Purchase_Button") :: Model
+	return PurchaseButton.CreatePB(purchaseButton, self :: any)
 end
 
-function Building.UpdatePurchaseBoardUI(self: Building, reset: boolean?): ()
+function Building.UpdatepurchaseButtonUI(self: Building, reset: boolean?): ()
 	if reset then
-		PurchaseBoard.ResetPB(self.PurchaseBoard)
+		PurchaseButton.Destroy(self.PurchaseButton)
 	else
-		PurchaseBoard.UpdatePB(self :: any)
+		PurchaseButton.UpdatePB(self :: any)
 	end
 end
 
-function Building.SetupProximityPrompt(self: Building, purchaseBoard: Model): ()
-	local proximityPrompt = self._cleaner and self._cleaner:Add(Instance.new("ProximityPrompt"))
-	proximityPrompt.Parent = purchaseBoard
-
-	ProximityPrompt.CreatePP(proximityPrompt, self :: any)
+function Building.SetButtonLogic(self: Building): ()
+	PurchaseButton.CreateLogic(self)
 end
 -- //!SECTION
 
@@ -342,7 +338,7 @@ function Building.Destroy(self: Building): ()
 	self:Hide()
 	self:CannotCollide()
 	self:RemovePreviousVisualModel()
-	self:UpdatePurchaseBoardUI(true)
+	self:UpdatepurchaseButtonUI(true)
 
 	pcall(function()
 		self:Save()

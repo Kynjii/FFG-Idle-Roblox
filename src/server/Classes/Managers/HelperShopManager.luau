@@ -6,7 +6,6 @@ local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
 local Helper = require(ServerScriptService.Server.Classes.Helper)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
 local EventListeners = require(ServerScriptService.Server.Classes.Modules.EventListeners)
-local ProximityPrompt = require(ServerScriptService.Server.Classes.Modules.ProximityPrompt)
 local Tutorial = require(ServerScriptService.Server.Game.Tutorial.Tutorial)
 local SetInterval = require(ServerScriptService.Server.Modules.SetInterval)
 local DataService = require(ServerScriptService.Server.Services.DataService)
@@ -201,7 +200,29 @@ function HelperShopManager.SetupProximityPrompt(self: HelperShopManager, model: 
 	local proximityPrompt: ProximityPrompt = self._cleaner and self._cleaner:Add(Instance.new("ProximityPrompt"))
 	proximityPrompt.Parent = model
 
-	ProximityPrompt.CreatePP(proximityPrompt, self :: any)
+	proximityPrompt.HoldDuration = 0
+	proximityPrompt.MaxActivationDistance = self.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Shop and 5 or 15
+	proximityPrompt.MaxIndicatorDistance = proximityPrompt.MaxActivationDistance * 5
+	proximityPrompt.ObjectText = "Open"
+	proximityPrompt.ActionText = `{self.Entity}`
+
+	if self.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Shop then
+		self._cleaner:Add(proximityPrompt.Triggered:Connect(function(player)
+			if player.UserId ~= self.Owner then return end
+			if self.Level == self.MaxLevel then return end
+
+			Events.FireEvent(Events.RemoteNames.OpenEntityDetails, self.Player, self)
+		end))
+	else
+		self._cleaner:Add(proximityPrompt.Triggered:Connect(function(player)
+			if player.UserId ~= self.Owner then return end
+
+			local shopInventory = self.Inventory or {}
+			Events.FireEvent(Events.RemoteNames.OpenHelperShop, self.Player, HttpService:JSONEncode(shopInventory))
+		end))
+	end
+
+	return proximityPrompt
 end
 -- //!SECTION
 

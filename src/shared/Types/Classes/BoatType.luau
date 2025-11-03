@@ -32,7 +32,7 @@ export type BoatData = {
 	Animations: { [string]: any }?,
 	VisualModels: { [number]: Model }?,
 	CurrentVisualModel: Model?,
-	PurchaseBoard: Model,
+	purchaseButton: Model,
 	PBDetails: { [string]: any }?,
 	ClonedBillboard: Instance?,
 	_cleaner: any?,

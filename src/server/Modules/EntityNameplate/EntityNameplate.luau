@@ -16,7 +16,6 @@ function EntityNameplate.Create(props: {
 	helperName.AlwaysOnTop = true
 	if props.Adornee then helperName.Adornee = props.Adornee end
 	helperName.Enabled = false
-	helperName.ExtentsOffsetWorldSpace = Vector3.new(0, 3, 0)
 	helperName.LightInfluence = 1
 	helperName.MaxDistance = 100
 	helperName.ResetOnSpawn = false

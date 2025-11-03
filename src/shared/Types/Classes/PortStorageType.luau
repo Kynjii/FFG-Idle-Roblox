@@ -28,7 +28,7 @@ export type PortStorageData = {
 	VisualModels: { [number]: Model }?,
 	CurrentVisualModel: Model?,
 	TakeFishPrompt: ProximityPrompt?,
-	PurchaseBoard: Model,
+	purchaseButton: Model,
 	PBDetails: { [string]: any }?,
 	ClonedBillboard: Instance?,
 	_cleaner: any?,

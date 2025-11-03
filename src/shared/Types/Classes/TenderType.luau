@@ -37,7 +37,7 @@ export type TenderData = {
 	VisualModels: { [number]: Model }?,
 	CurrentVisualModel: Model?,
 	Buffs: { [string]: any },
-	PurchaseBoard: Model,
+	purchaseButton: Model,
 	PBDetails: { [string]: any }?,
 	ClonedBillboard: Instance?,
 	_cleaner: any?,

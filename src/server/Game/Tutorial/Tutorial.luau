@@ -21,7 +21,7 @@ local function FindBoatPB(teamId: number): Model?
 		local taggedBoatTier = taggedBoat:GetAttribute(FFGEnum.ATTRIBUTES.Tier)
 		local taggedBoatTeamId = taggedBoat:GetAttribute(FFGEnum.ATTRIBUTES.TeamId)
 		if taggedBoatTeamId == teamId and taggedBoatTier == 1 then
-			local pb = taggedBoat:FindFirstChild("Purchase_Board")
+			local pb = taggedBoat:FindFirstChild("Purchase_Button")
 			return pb
 		end
 	end
@@ -34,7 +34,7 @@ local function FindTenderPB(teamId: number): Model?
 		local taggedTenderTier = taggedTender:GetAttribute(FFGEnum.ATTRIBUTES.Tier)
 		local taggedTenderTeamId = taggedTender:GetAttribute(FFGEnum.ATTRIBUTES.TeamId)
 		if taggedTenderTeamId == teamId and taggedTenderTier == 1 then
-			local pb = taggedTender:FindFirstChild("Purchase_Board")
+			local pb = taggedTender:FindFirstChild("Purchase_Button")
 			return pb
 		end
 	end
@@ -47,7 +47,7 @@ local function FindStoragePB(teamId: number): Model?
 		local taggedStorageUnitTier = taggedStorageUnit:GetAttribute(FFGEnum.ATTRIBUTES.Tier)
 		local taggedStorageUnitTeamId = taggedStorageUnit:GetAttribute(FFGEnum.ATTRIBUTES.TeamId)
 		if taggedStorageUnitTeamId == teamId and taggedStorageUnitTier == 1 then
-			local pb = taggedStorageUnit:FindFirstChild("Purchase_Board")
+			local pb = taggedStorageUnit:FindFirstChild("Purchase_Button")
 			return pb
 		end
 	end
@@ -64,11 +64,11 @@ local function FindHelperShop(teamId: number): Model?
 	return nil
 end
 
-local function assignBeam(player: Player, purchaseBoard: Model)
-	if not player or not purchaseBoard then return end
+local function assignBeam(player: Player, purchaseButton: Model)
+	if not player or not purchaseButton then return end
 
 	local character = player.Character
-	local partToConnect = purchaseBoard.PrimaryPart
+	local partToConnect = purchaseButton.PrimaryPart
 
 	if character and partToConnect then
 		local att0 = Tutorial.PlayerTrove[player]:Add(Instance.new("Attachment"))
@@ -138,8 +138,8 @@ function Tutorial.Show(player: Player, teamId: number, stageProgress: number)
 
 	if stage then Tutorial.PlayerProgress[player] = stage end
 
-	local purchaseBoard = models[stage]()
-	assignBeam(player, purchaseBoard)
+	local purchaseButton = models[stage]()
+	assignBeam(player, purchaseButton)
 end
 
 function Tutorial.Update(player: Player, teamId: number?)

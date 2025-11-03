@@ -5,8 +5,7 @@ local Trove = require(ReplicatedStorage.Packages.Trove)
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
 local EventListeners = require(ServerScriptService.Server.Classes.Modules.EventListeners)
-local ProximityPrompt = require(ServerScriptService.Server.Classes.Modules.ProximityPrompt)
-local PurchaseBoard = require(ServerScriptService.Server.Classes.Modules.PurchaseBoard)
+local PurchaseButton = require(ServerScriptService.Server.Classes.Modules.PurchaseButton)
 local Tutorial = require(ServerScriptService.Server.Game.Tutorial.Tutorial)
 local PortStorageType = require(ReplicatedStorage.Shared.Types.Classes.PortStorageType)
 local Buffs = require(ServerScriptService.Server.Math.Buffs)
@@ -90,7 +89,7 @@ function PortStorage.New(state: { [string]: any }?, player: Player, model: Model
 	self.VisualModels = self:GetVisualModels()
 	self.CurrentVisualModel = nil
 
-	self.PurchaseBoard, self.PBDetails = self:SetupPurchaseBoard()
+	self.PurchaseButton, self.PBDetails = self:SetupPurchaseButton()
 
 	-- Warnings
 	self.ClonedBillboard = nil
@@ -100,6 +99,9 @@ function PortStorage.New(state: { [string]: any }?, player: Player, model: Model
 	self.FishModel = DeepWait(self.Model, "FishInStorage", "Base")
 
 	self._cleaner = Trove.new()
+
+	if self.PurchaseButton then self:SetButtonLogic() end
+	self.ButtonDebounce = false
 
 	self:AttachEventListeners()
 
@@ -122,7 +124,7 @@ function PortStorage.RecalculateAll(self: PortStorage)
 	self.UpgradeCost = self:CalculateUpgradeCost()
 	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
 
-	self:UpdatePurchaseBoardUI()
+	self:UpdatepurchaseButtonUI()
 end
 -- //!SECTION
 
@@ -172,7 +174,7 @@ function PortStorage.AddFish(self: PortStorage, amount: number): ()
 		self:UpdateStorageStatus(true)
 	end
 
-	self:UpdatePurchaseBoardUI()
+	self:UpdatepurchaseButtonUI()
 	self:UpdateFishModel()
 end
 
@@ -180,7 +182,7 @@ function PortStorage.RemoveFish(self: PortStorage, amount: number): ()
 	self.FishInStorage = math.max(self.FishInStorage :: number - amount, 0)
 	self:UpdateStorageStatus(false)
 
-	self:UpdatePurchaseBoardUI()
+	self:UpdatepurchaseButtonUI()
 	self:UpdateFishModel()
 
 	self:Save()
@@ -269,31 +271,26 @@ function PortStorage.Initialize(self: PortStorage): ()
 
 	self:UpdateVisualModel()
 
-	-- Setup UI components
-	if self.PurchaseBoard then self:SetupProximityPrompt(self.PurchaseBoard) end
 	if self.IsPurchased then self.TakeFishPrompt = self:SetupFishRemovalPrompt() end
 	self:UpdateFishModel()
 end
 
-function PortStorage.SetupPurchaseBoard(self: PortStorage): (Model, { [string]: any })
-	local purchaseBoard = self.Model:WaitForChild("Purchase_Board")
+function PortStorage.SetupPurchaseButton(self: PortStorage): (Model, { [string]: any })
+	local purchaseButton = self.Model:WaitForChild("Purchase_Button")
 
-	return PurchaseBoard.CreatePB(purchaseBoard, self :: any)
+	return PurchaseButton.CreatePB(purchaseButton, self :: any)
 end
 
-function PortStorage.UpdatePurchaseBoardUI(self: PortStorage, reset: boolean?)
+function PortStorage.UpdatepurchaseButtonUI(self: PortStorage, reset: boolean?)
 	if reset then
-		PurchaseBoard.ResetPB(self.PurchaseBoard)
+		PurchaseButton.Destroy(self.PurchaseButton)
 	else
-		PurchaseBoard.UpdatePB(self :: any)
+		PurchaseButton.UpdatePB(self :: any)
 	end
 end
 
-function PortStorage.SetupProximityPrompt(self: PortStorage, purchaseBoard: Model): ()
-	local proximityPrompt: ProximityPrompt = self._cleaner and self._cleaner:Add(Instance.new("ProximityPrompt"))
-	proximityPrompt.Parent = purchaseBoard
-
-	ProximityPrompt.CreatePP(proximityPrompt, self :: any)
+function PortStorage.SetButtonLogic(self: PortStorage): ()
+	PurchaseButton.CreateLogic(self)
 end
 
 function PortStorage.SetupFishRemovalPrompt(self: PortStorage)
@@ -341,10 +338,10 @@ function PortStorage.ShowStorageFullBillboard(self: PortStorage): ()
 
 	local billboard: BillboardGui = game.Workspace.BillBoards:FindFirstChild("StorageFullAlert", true)
 
-	if billboard and self.PurchaseBoard.PrimaryPart then
+	if billboard and self.PurchaseButton.PrimaryPart then
 		local clone: BillboardGui = billboard:Clone()
-		clone.Parent = self.PurchaseBoard.PrimaryPart
-		clone.Adornee = self.PurchaseBoard.PrimaryPart
+		clone.Parent = self.PurchaseButton.PrimaryPart
+		clone.Adornee = self.PurchaseButton.PrimaryPart
 		clone.Name = "StorageFullAlert_Clone"
 
 		local canvasGroup = clone:FindFirstChild("CanvasGroup") :: CanvasGroup
@@ -507,7 +504,7 @@ function PortStorage.Destroy(self: PortStorage)
 	self:Hide()
 	self:CannotCollide()
 	self:RemovePreviousVisualModel()
-	self:UpdatePurchaseBoardUI(true)
+	self:UpdatepurchaseButtonUI(true)
 	self:DestroyStorageFullBillboard()
 
 	pcall(function()

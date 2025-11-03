@@ -12,8 +12,7 @@ local Animator = require(ServerScriptService.Server.Classes.Modules.Animator)
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
 local EventListeners = require(ServerScriptService.Server.Classes.Modules.EventListeners)
-local ProximityPrompt = require(ServerScriptService.Server.Classes.Modules.ProximityPrompt)
-local PurchaseBoard = require(ServerScriptService.Server.Classes.Modules.PurchaseBoard)
+local PurchaseButton = require(ServerScriptService.Server.Classes.Modules.PurchaseButton)
 local Tutorial = require(ServerScriptService.Server.Game.Tutorial.Tutorial)
 local TenderType = require(ReplicatedStorage.Shared.Types.Classes.TenderType)
 local Buffs = require(ServerScriptService.Server.Math.Buffs)
@@ -108,7 +107,7 @@ function Tender.New(state: { [string]: any }?, player: Player, model: Model, tea
 	-- Travel Time calcs
 	self.CurrentTravelTime = self:CalculateTravelTime()
 
-	self.PurchaseBoard, self.PBDetails = self:SetupPurchaseBoard()
+	self.PurchaseButton, self.PBDetails = self:SetupPurchaseButton()
 
 	-- Warnings
 	self.ClonedBillboard = nil
@@ -118,6 +117,9 @@ function Tender.New(state: { [string]: any }?, player: Player, model: Model, tea
 	self.MoveTween = nil
 
 	self._cleaner = Trove.new()
+
+	if self.PurchaseButton then self:SetButtonLogic() end
+	self.ButtonDebounce = false
 
 	self:AttachEventListeners()
 	return self
@@ -142,7 +144,7 @@ function Tender.RecalculateAll(self: Tender)
 	self.LoadTime = self:CalculateLoadTime()
 	self.CurrentTravelTime = self:CalculateTravelTime()
 
-	self:UpdatePurchaseBoardUI()
+	self:UpdatepurchaseButtonUI()
 end
 -- //!SECTION
 
@@ -303,7 +305,7 @@ function Tender.AddFish(self: Tender, amount: number)
 		self:UpdateStorageStatus(true)
 	end
 
-	self:UpdatePurchaseBoardUI()
+	self:UpdatepurchaseButtonUI()
 	self:Save()
 end
 
@@ -311,7 +313,7 @@ function Tender.RemoveFish(self: Tender, amount: number)
 	self.FishInStorage = math.max(self.FishInStorage - amount, 0)
 
 	self:UpdateStorageStatus(false)
-	self:UpdatePurchaseBoardUI()
+	self:UpdatepurchaseButtonUI()
 	self:Save()
 end
 
@@ -334,34 +336,28 @@ function Tender.Initialize(self: Tender)
 	self:UpdateVisualModel()
 	self:StartAnimation()
 
-	-- Setup UI components
-	if self.PurchaseBoard then self:SetupProximityPrompt(self.PurchaseBoard) end
-
 	-- Apply attributes for ChainManager
 	if self.IsPurchased then
 		if self.Model.PrimaryPart then self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.IsPurchased, self.IsPurchased) end
 	end
 end
 
-function Tender.SetupPurchaseBoard(self: Tender): (Model, { [string]: any })
-	local purchaseBoard = self.Model:WaitForChild("Purchase_Board")
+function Tender.SetupPurchaseButton(self: Tender): (Model, { [string]: any })
+	local purchaseButton = self.Model:WaitForChild("Purchase_Button")
 
-	return PurchaseBoard.CreatePB(purchaseBoard, self :: any)
+	return PurchaseButton.CreatePB(purchaseButton, self :: any)
 end
 
-function Tender.UpdatePurchaseBoardUI(self: Tender, reset: boolean?)
+function Tender.UpdatepurchaseButtonUI(self: Tender, reset: boolean?)
 	if reset then
-		PurchaseBoard.ResetPB(self.PurchaseBoard)
+		PurchaseButton.Destroy(self.PurchaseButton)
 	else
-		PurchaseBoard.UpdatePB(self :: any)
+		PurchaseButton.UpdatePB(self :: any)
 	end
 end
 
-function Tender.SetupProximityPrompt(self: Tender, purchaseBoard: Model): ()
-	local proximityPrompt: ProximityPrompt = self._cleaner and self._cleaner:Add(Instance.new("ProximityPrompt"))
-	proximityPrompt.Parent = purchaseBoard
-
-	ProximityPrompt.CreatePP(proximityPrompt, self :: any)
+function Tender.SetButtonLogic(self: Tender): ()
+	PurchaseButton.CreateLogic(self)
 end
 
 function Tender.ShowFishPopUp(self: Tender, amount: number)
@@ -384,10 +380,10 @@ function Tender.ShowTenderStoppedBillboard(self: Tender): ()
 	if self.ClonedBillboard then return end
 
 	local billboard: BillboardGui = game.Workspace.BillBoards:FindFirstChild("TenderStopped", true)
-	if billboard and self.PurchaseBoard.PrimaryPart then
+	if billboard and self.PurchaseButton.PrimaryPart then
 		local clone: BillboardGui = billboard:Clone()
-		clone.Parent = self.PurchaseBoard.PrimaryPart
-		clone.Adornee = self.PurchaseBoard.PrimaryPart
+		clone.Parent = self.PurchaseButton.PrimaryPart
+		clone.Adornee = self.PurchaseButton.PrimaryPart
 		clone.Name = "TenderStopped_Clone"
 
 		local canvasGroup: CanvasGroup = clone:FindFirstChild("CanvasGroup") :: CanvasGroup
@@ -561,7 +557,7 @@ function Tender.Destroy(self: Tender)
 	self:Hide()
 	self:CannotCollide()
 	self:RemovePreviousVisualModel()
-	self:UpdatePurchaseBoardUI(true)
+	self:UpdatepurchaseButtonUI(true)
 	self:DestroyTenderStoppedBillboard()
 
 	pcall(function()

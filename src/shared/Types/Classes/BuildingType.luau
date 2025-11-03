@@ -34,7 +34,7 @@ export type BuildingData = {
 	VisualRoot: any,
 	VisualModels: { [number]: Model }?,
 	CurrentVisualModel: Model?,
-	PurchaseBoard: Model,
+	purchaseButton: Model,
 	PBDetails: { [string]: any }?,
 	_cleaner: any?,
 	Buffs: { [string]: any },

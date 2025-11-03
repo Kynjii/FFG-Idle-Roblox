@@ -6,8 +6,7 @@ local Animator = require(ServerScriptService.Server.Classes.Modules.Animator)
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
 local EventListeners = require(ServerScriptService.Server.Classes.Modules.EventListeners)
-local ProximityPrompt = require(ServerScriptService.Server.Classes.Modules.ProximityPrompt)
-local PurchaseBoard = require(ServerScriptService.Server.Classes.Modules.PurchaseBoard)
+local PurchaseButton = require(ServerScriptService.Server.Classes.Modules.PurchaseButton)
 local Tutorial = require(ServerScriptService.Server.Game.Tutorial.Tutorial)
 local BoatType = require(ReplicatedStorage.Shared.Types.Classes.BoatType)
 local Buffs = require(ServerScriptService.Server.Math.Buffs)
@@ -99,12 +98,15 @@ function Boat.New(state: { [string]: any }?, player: Player, model: Model, teamI
 	self.VisualModels = self:GetVisualModels()
 	self.CurrentVisualModel = nil
 
-	self.PurchaseBoard, self.PBDetails = self:SetupPurchaseBoard()
+	self.PurchaseButton, self.PBDetails = self:SetupPurchaseButton()
 
 	-- Warnings
 	self.ClonedBillboard = nil
 
 	self._cleaner = Trove.new()
+
+	if self.PurchaseButton then self:SetButtonLogic() end
+	self.ButtonDebounce = false
 
 	self:AttachEventListeners()
 
@@ -129,7 +131,7 @@ function Boat.RecalculateAll(self: Boat): ()
 	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
 	self.CurrentFPS, self.NextFPS = self:CalculateFPS()
 
-	self:UpdatePurchaseBoardUI()
+	self:UpdatepurchaseButtonUI()
 end
 -- //!SECTION
 
@@ -220,14 +222,16 @@ end
 
 -- //SECTION - Handling Fish
 function Boat.StartFishing(self: Boat): ()
-	if self._cleaner then self._cleaner:Add(SetInterval(function()
-		if not self:IsStorageFull() then
-			self:AddFish(self.CurrentFPS)
-			self:UpdatePurchaseBoardUI()
-		else
-			self:UpdateStorageStatus(true)
-		end
-	end, 1)) end
+	if self._cleaner then
+		self._cleaner:Add(SetInterval(function()
+			if not self:IsStorageFull() then
+				self:AddFish(self.CurrentFPS)
+				self:UpdatepurchaseButtonUI()
+			else
+				self:UpdateStorageStatus(true)
+			end
+		end, 1))
+	end
 end
 
 function Boat.AddFish(self: Boat, amount: number): ()
@@ -276,33 +280,27 @@ function Boat.Initialize(self: Boat): ()
 	self:UpdateVisualModel()
 	self:StartAnimation()
 
-	-- Setup UI components
-	if self.PurchaseBoard then self:SetupProximityPrompt(self.PurchaseBoard) end
-
 	if self.IsPurchased then task.delay(1, function()
 		self:StartFishing()
 	end) end
 end
 
-function Boat.SetupPurchaseBoard(self: Boat): (Model, { [string]: any })
-	local purchaseBoard = self.Model:WaitForChild("Purchase_Board") :: Model
+function Boat.SetupPurchaseButton(self: Boat): (Model, { [string]: any })
+	local purchaseButton = self.Model:WaitForChild("Purchase_Button") :: Model
 
-	return PurchaseBoard.CreatePB(purchaseBoard, self :: any)
+	return PurchaseButton.CreatePB(purchaseButton, self :: any)
 end
 
-function Boat.UpdatePurchaseBoardUI(self: Boat, reset: boolean?): ()
+function Boat.UpdatepurchaseButtonUI(self: Boat, reset: boolean?): ()
 	if reset then
-		PurchaseBoard.ResetPB(self.PurchaseBoard)
+		PurchaseButton.Destroy(self.PurchaseButton)
 	else
-		PurchaseBoard.UpdatePB(self :: any)
+		PurchaseButton.UpdatePB(self :: any)
 	end
 end
 
-function Boat.SetupProximityPrompt(self: Boat, purchaseBoard: Model): ()
-	local proximityPrompt: ProximityPrompt = self._cleaner and self._cleaner:Add(Instance.new("ProximityPrompt"))
-	proximityPrompt.Parent = purchaseBoard
-
-	ProximityPrompt.CreatePP(proximityPrompt, self :: any)
+function Boat.SetButtonLogic(self: Boat): ()
+	PurchaseButton.CreateLogic(self)
 end
 
 function Boat.ShowFishPopUp(self: Boat, amount: number): ()
@@ -329,10 +327,10 @@ function Boat.ShowStorageFullBillboard(self: Boat): ()
 	if self.ClonedBillboard then return end
 
 	local billboard: BillboardGui = game.Workspace.BillBoards:FindFirstChild("StorageFullAlert", true)
-	if billboard and self.PurchaseBoard.PrimaryPart then
+	if billboard and self.PurchaseButton.PrimaryPart then
 		local clone: BillboardGui = billboard:Clone()
-		clone.Parent = self.PurchaseBoard.PrimaryPart
-		clone.Adornee = self.PurchaseBoard.PrimaryPart
+		clone.Parent = self.PurchaseButton.PrimaryPart
+		clone.Adornee = self.PurchaseButton.PrimaryPart
 		clone.Name = "StorageFullAlert_Clone"
 
 		local canvasGroup = clone:FindFirstChild("CanvasGroup") :: CanvasGroup
@@ -500,7 +498,7 @@ function Boat.Destroy(self: Boat)
 	self:Hide()
 	self:CannotCollide()
 	self:RemovePreviousVisualModel()
-	self:UpdatePurchaseBoardUI(true)
+	self:UpdatepurchaseButtonUI(true)
 	self:DestroyStorageFullBillboard()
 
 	pcall(function()

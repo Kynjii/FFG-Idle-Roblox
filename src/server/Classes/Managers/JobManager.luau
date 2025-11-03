@@ -4,12 +4,12 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Helper = require(ServerScriptService.Server.Classes.Helper)
 local Pathfinding = require(ServerScriptService.Server.Classes.Modules.Pathfinding)
 local Jobs = require(ServerScriptService.Server.Modules.Jobs.Jobs)
-local ProgressBar = require(ServerScriptService.Server.Modules.Tweens.ProgressBar)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Trove = require(ReplicatedStorage.Packages.Trove)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
+local ProgressBar = require(ReplicatedStorage.Shared.UI.Components.ProgressBar)
 
 local JobManager = {}
 JobManager.__index = JobManager
