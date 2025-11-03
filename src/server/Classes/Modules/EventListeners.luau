@@ -115,6 +115,15 @@ function EventListeners.Attach(class: Boat | Tender | PortStorage | Building)
 				handleStateUpdate(data.Player)
 			end))
 		end
+
+		local updateStateEvent = Events.GetBindableEvent(Events.BindableNames.UpdateState)
+		if updateStateEvent then
+			typedClass._cleaner:Add(updateStateEvent.Event:Connect(function(player: Player)
+				if typedClass.Player ~= player or typedClass.Owner ~= player.UserId then return end
+
+				typedClass:UpdatepurchaseButtonUI()
+			end))
+		end
 		-- //!SECTION
 	else
 		-- Shop Item Purchased

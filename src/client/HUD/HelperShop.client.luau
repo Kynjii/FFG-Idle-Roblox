@@ -108,26 +108,30 @@ function populateDetailsUI()
 end
 
 local shopDetails = Events.GetRemote(Events.RemoteNames.OpenHelperShop)
-if shopDetails then shopDetails.OnClientEvent:Connect(function(data)
-	if data then
-		local decodedData = HttpService:JSONDecode(data)
-		shopData = decodedData
+if shopDetails then
+	shopDetails.OnClientEvent:Connect(function(data)
+		if data then
+			local decodedData = HttpService:JSONDecode(data)
+			shopData = decodedData
 
-		populateDetailsUI()
-		screenGui.Enabled = true
-		task.spawn(function()
-			handleClosingShopDetailsUI()
-		end)
-	end
-end) end
+			populateDetailsUI()
+			screenGui.Enabled = true
+			task.spawn(function()
+				handleClosingShopDetailsUI()
+			end)
+		end
+	end)
+end
 
 local prepareShopEvent = Events.GetRemote(Events.RemoteNames.PrepareHelperShop)
-if prepareShopEvent then prepareShopEvent.OnClientEvent:Connect(function(data)
-	if not data then return end
-	local decodedData = HttpService:JSONDecode(data)
-	shopData = decodedData
-	updateUI()
-end) end
+if prepareShopEvent then
+	prepareShopEvent.OnClientEvent:Connect(function(data)
+		if not data then return end
+		local decodedData = HttpService:JSONDecode(data)
+		shopData = decodedData
+		updateUI()
+	end)
+end
 
 local updateUIEvent = Events.GetRemote(Events.RemoteNames.UpdateUI)
 if updateUIEvent then updateUIEvent.OnClientEvent:Connect(function(helperId)

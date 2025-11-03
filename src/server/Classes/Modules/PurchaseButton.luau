@@ -82,7 +82,11 @@ function PB.CreatePB(pbModel: Model, class: Boat | Tender | PortStorage | Buildi
 	local qualityLabel = pbDetails:FindFirstChild("Quality", true)
 
 	if button then
-		if not DataService.CanAfford(class.Player, "Gold", not typedClass.IsPurchased and typedClass.BaseCost or typedClass.UpgradeCost) then button.Color = FFGEnum.THEME.color.red end
+		if not DataService.CanAfford(class.Player, "Gold", not typedClass.IsPurchased and typedClass.BaseCost or typedClass.UpgradeCost) then
+			button.Color = FFGEnum.THEME.color.red
+		else
+			button.Color = FFGEnum.THEME.color.green
+		end
 	end
 
 	local hasProgressBar = purchaseButton:FindFirstChild("ProgressBarContainer") or purchaseButton:FindFirstChild("ProgressContainer")

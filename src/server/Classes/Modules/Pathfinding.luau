@@ -22,6 +22,7 @@ local function pathfindToDestinations(npc, helperId, destinations, completionEve
 			AgentHeight = 5,
 			Costs = {
 				Water = math.huge,
+				PierLeg = 900,
 			},
 		}
 

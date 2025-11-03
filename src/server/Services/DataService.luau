@@ -2,6 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local Economy = require(ServerScriptService.Server.Analytics.Economy)
 local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
+local Events = require(ReplicatedStorage.Shared.Events.Events)
 local BuildingType = require(ReplicatedStorage.Shared.Types.Classes.BuildingType)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
@@ -180,6 +181,8 @@ function DataService.Earn(player: Player, currencyType: string, amount: number)
 
 	local replica = DataService.Replicas[player]
 	if replica then replica:Set({ "Currencies", currencyType }, newValue) end
+
+	Events.FireBindableEvent(Events.BindableNames.UpdateState, player)
 end
 
 function DataService.CanAfford(player: Player, currencyType: string, amount: number)
@@ -209,6 +212,8 @@ function DataService.Spend(player: Player, currencyType: string, amount: number)
 
 	local replica = DataService.Replicas[player]
 	if replica then replica:Set({ "Currencies", currencyType }, newValue) end
+
+	Events.FireBindableEvent(Events.BindableNames.UpdateState, player)
 end
 
 function DataService.ClearProfileData(player: Player, profile)

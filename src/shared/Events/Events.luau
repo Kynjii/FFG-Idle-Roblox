@@ -47,8 +47,9 @@ Events.BindableNames = {
 	GetStorageFish = "RequestStorageFish",
 	SendStorageFish = "SendStorageFish",
 
-	-- Entity Purchase/Upgrade
+	-- Entity Purchase/Upgrade/State
 	PurchaseEntity = "PurchaseEntity",
+	UpdateState = "UpdateState",
 }
 
 local FOLDER_NAME = "RME"

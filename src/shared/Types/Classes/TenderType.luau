@@ -63,6 +63,7 @@ export type TenderInstance = {
 	-- Essential Methods (called by other modules)
 	Initialize: (self: TenderInstance) -> (),
 	Destroy: (self: TenderInstance) -> (),
+	UpdatepurchaseButtonUI: (self: TenderInstance) -> (),
 
 	-- Allow any other properties/methods for internal use
 	[string]: any,
