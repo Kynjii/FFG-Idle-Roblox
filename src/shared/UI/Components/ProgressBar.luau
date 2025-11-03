@@ -22,7 +22,7 @@ function ProgressBar.Create(props: {
 		billBoard.LightInfluence = 1
 		billBoard.MaxDistance = 100
 		billBoard.ResetOnSpawn = false
-		billBoard.Size = UDim2.fromOffset(150, 35)
+		billBoard.Size = UDim2.fromScale(1.5, 0.35)
 		billBoard.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 		UIConfig.ApplyList(billBoard, Enum.FillDirection.Vertical, { HAlign = Enum.HorizontalAlignment.Center })
 	end

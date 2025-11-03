@@ -19,7 +19,7 @@ function EntityNameplate.Create(props: {
 	entityName.LightInfluence = 1
 	entityName.MaxDistance = 50
 	entityName.ResetOnSpawn = false
-	entityName.Size = UDim2.fromOffset(150, 50)
+	entityName.Size = UDim2.fromScale(1.5, 0.5)
 	entityName.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 	local frameContainer = Instance.new("Frame")

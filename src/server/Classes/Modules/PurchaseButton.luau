@@ -58,7 +58,7 @@ function PB.CreatePB(pbModel: Model, class: Boat | Tender | PortStorage | Buildi
 	priceBillboard.ResetOnSpawn = false
 	priceBillboard.Adornee = button
 	priceBillboard.ExtentsOffsetWorldSpace = Vector3.new(70, 0, 0)
-	priceBillboard.Size = UDim2.fromOffset(150, 35)
+	priceBillboard.Size = UDim2.fromScale(2, 4)
 	priceBillboard.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	priceBillboard.Parent = button
 
