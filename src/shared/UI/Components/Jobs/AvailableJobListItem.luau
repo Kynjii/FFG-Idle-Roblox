@@ -17,7 +17,7 @@ function AvailableJobListItem.Create(props: {
 		MaxSlots: number,
 		LockedSlots: number,
 		AssignedHelpers: {
-			[number]: { Name: string, Level: number, QualityId: number },
+			[number]: { Id: string, Name: string, Level: number, QualityId: number },
 		},
 	},
 	Player: Player,
@@ -195,6 +195,18 @@ function AvailableJobListItem.Create(props: {
 			local actionButton = Button.Create({ Color = buttonColor, CurrencyType = buttonCurrency, Text = buttonText, Size = UDim2.fromScale(0.2, 1) })
 			actionButton.Position = UDim2.fromScale(0.9, 0.5)
 			actionButton.Name = isLocked and "UnassignButon" or isLocked and "PuchaseButton" or ""
+
+			actionButton.Activated:Connect(function()
+				if not isTaken or not isLocked then
+					local helperData = props.Slots.AssignedHelpers[i]
+					if helperData then
+						local assignJobEvent = Events.GetRemote(Events.RemoteNames.AssignJob)
+						local unassignedJobId = 0
+						if assignJobEvent then assignJobEvent:FireServer(helperData.Id, unassignedJobId) end
+					end
+				end
+			end)
+
 			actionButton.Parent = slot
 		end
 
@@ -221,10 +233,13 @@ function AvailableJobListItem.Create(props: {
 		AnimateButtonHover.Leave(assignButton, baseSize)
 	end)
 
+	-- Quick Assign (assigns the first helper it finds)
 	assignButton.Activated:Connect(function()
-		-- //TODO - Replace with proper selection of helper, currently this just assigns the first one it finds
-		-- //TODO - Probably best to request current helperState from JobManager instead of directly
-		if #props.Slots.AssignedHelpers == 3 then return end
+		local numOfAssignedHelpers = #props.Slots.AssignedHelpers
+		if numOfAssignedHelpers == props.Slots.MaxSlots then return end
+		local availableSlots = (props.Slots.MaxSlots - lockedSlots) - numOfAssignedHelpers
+		if availableSlots == 0 then return end
+
 		local getPlayerInventory = Events.GetRemoteFn(Events.RemoteFunctionNames.GetPlayerInventory)
 
 		if getPlayerInventory then
@@ -236,6 +251,7 @@ function AvailableJobListItem.Create(props: {
 
 					local assignJobEvent = Events.GetRemote(Events.RemoteNames.AssignJob)
 					if assignJobEvent then assignJobEvent:FireServer(typedHelper.Id, props.Id) end
+					break
 				end
 			end
 		end

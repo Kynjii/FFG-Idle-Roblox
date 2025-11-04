@@ -166,6 +166,8 @@ FFGEnum.UI = {
 		RightHoverTab = "rbxassetid://117556452240179",
 		LeftTab = "rbxassetid://93554848747790",
 		LeftHoverTab = "rbxassetid://122393201136941",
+		BaseColor = Color3.fromRGB(152, 0, 5),
+		SelectedColor = Color3.fromRGB(235, 16, 23),
 	},
 	Buttons = {
 		Green = {

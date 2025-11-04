@@ -5,6 +5,8 @@ local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 
 local taggedJobLocations = CollectionService:GetTagged("JobLocation")
 
+export type AssignedHelper = { [number]: { Id: string, Name: string, Level: number, QualityId: number } }
+
 export type JobState = {
 	Id: number,
 	Category: "Fishing" | "Woodcutting" | "Mining" | "Transporting",
@@ -14,9 +16,7 @@ export type JobState = {
 	Slots: {
 		MaxSlots: number,
 		LockedSlots: number,
-		AssignedHelpers: {
-			[number]: { Name: string, Level: number, QualityId: number },
-		},
+		AssignedHelpers: AssignedHelper,
 	},
 	Player: Player,
 }

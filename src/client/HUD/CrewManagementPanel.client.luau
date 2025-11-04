@@ -16,6 +16,10 @@ local crewManagementButton = crewManagementButtonScreenGui:FindFirstChild("OpenB
 local screenGui: ScreenGui
 
 local getJobDataEvent = Events.GetRemoteFn(Events.RemoteFunctionNames.GetJobData)
+local crewState: { [string]: any } = {}
+
+type Tab = "Fishing" | "Woodcutting" | "Mining" | "Transporting"
+local selectedTab: Tab = "Transporting"
 
 function clearExistingTooltip()
 	Tooltip.ClearExisting(player.UserId)
@@ -31,8 +35,21 @@ function updateCrewMngPanelUI()
 	if innerWindow then
 		if getJobDataEvent then
 			local jobsData = getJobDataEvent:InvokeServer()
-			local crewManagementPanel = CrewManagementPanel.Create(player, jobsData)
+			local crewManagementPanel = CrewManagementPanel.Create(player, jobsData, crewState, selectedTab)
 			crewManagementPanel.Parent = innerWindow
+		end
+	end
+
+	local tabContainer = screenGui:FindFirstChild("TabContainer", true)
+	if tabContainer then
+		local children = tabContainer:GetChildren()
+		for _, instance in pairs(children) do
+			if not instance:IsA("ImageButton") then continue end
+			if instance.Name == selectedTab then
+				instance.ImageColor3 = FFGEnum.UI.Tabs.SelectedColor
+			else
+				instance.ImageColor3 = FFGEnum.UI.Tabs.BaseColor
+			end
 		end
 	end
 end
@@ -44,7 +61,7 @@ task.spawn(function()
 		panelTabs = {
 			hasTabs = true,
 			tabs = {
-				{ Name = "TransportingTab", Index = 1, Icon = FFGEnum.UI.Icons.Transporting },
+				{ Name = "Transporting", Index = 1, Icon = FFGEnum.UI.Icons.Transporting },
 			},
 		},
 	})
@@ -52,8 +69,6 @@ task.spawn(function()
 
 	updateCrewMngPanelUI()
 end)
-
-local crewState: { [string]: any } = {}
 
 function populateDetailsUI()
 	if not crewState then return end
@@ -69,7 +84,7 @@ if crewManagementButton and getCrewManagementState then
 		if screenGui.Enabled then
 			screenGui.Enabled = false
 			if Lighting then
-				local blur = Lighting:FindFirstChild("BlurEffect")
+				local blur = Lighting:FindFirstChild("Blur")
 				if blur then blur:Destroy() end
 			end
 			return
@@ -87,5 +102,11 @@ end
 
 local updateUIEvent = Events.GetRemote(Events.RemoteNames.UpdateJobManagementUI)
 if updateUIEvent then updateUIEvent.OnClientEvent:Connect(function()
+	updateCrewMngPanelUI()
+end) end
+
+local tabSelectedEvent = Events.GetBindableEvent(Events.BindableNames.TabSelected)
+if tabSelectedEvent then tabSelectedEvent.Event:Connect(function(tabName)
+	selectedTab = tabName
 	updateCrewMngPanelUI()
 end) end

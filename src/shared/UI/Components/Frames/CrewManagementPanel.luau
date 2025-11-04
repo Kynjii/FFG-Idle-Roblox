@@ -1,10 +1,12 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
+local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
+local AvailableHelperListItem = require(ReplicatedStorage.Shared.UI.Components.Jobs.AvailableHelperListItem)
 local AvailableJobListItem = require(ReplicatedStorage.Shared.UI.Components.Jobs.AvailableJobListItem)
 local CrewManagementPanel = {}
 
-function CrewManagementPanel.Create(player: Player, jobsData)
+function CrewManagementPanel.Create(player: Player, jobsData, crewData, jobCategory: "Fishing" | "Woodcutting" | "Mining" | "Transporting")
 	local crewManagementContainer = Instance.new("Frame")
 	crewManagementContainer.Name = "CrewManagementContainer"
 	crewManagementContainer.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -48,7 +50,6 @@ function CrewManagementPanel.Create(player: Player, jobsData)
 	-- Handle Available Jobs
 	for id, job in ipairs(jobsData) do
 		local jobData = job
-
 		local preparedData = TableUtil.Copy(jobData)
 		preparedData.Player = player
 		local availableJob = AvailableJobListItem.Create(preparedData)
@@ -81,16 +82,19 @@ function CrewManagementPanel.Create(player: Player, jobsData)
 	uIPadding7.PaddingTop = UDim.new(0.03, 0)
 	uIPadding7.Parent = availableCrew
 
-	-- available helpers component goes here
-	local frame18 = Instance.new("Frame")
-	frame18.Name = "Frame"
-	frame18.AnchorPoint = Vector2.new(0.5, 0.5)
-	frame18.BackgroundColor3 = Color3.new(1, 1, 1)
-	frame18.BorderColor3 = Color3.new()
-	frame18.BorderSizePixel = 0
-	frame18.Position = UDim2.fromScale(0.5, 0.5)
-	frame18.Size = UDim2.fromScale(1, 1)
-	frame18.Parent = availableCrew
+	-- Handle available helpers
+	local index = 1
+	for _, helper in pairs(crewData) do
+		local helperData: HelperType.HelperInstance = helper
+		if helperData.CurrentAssignment > 0 then continue end
+		if helperData.JobCategory ~= jobCategory then continue end
+
+		local availableHelper = AvailableHelperListItem.Create(helperData)
+		availableHelper.LayoutOrder = index
+		availableHelper.Parent = availableCrew
+
+		index += 1
+	end
 
 	availableCrew.Parent = crewManagementContainer
 

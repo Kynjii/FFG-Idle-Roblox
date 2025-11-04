@@ -35,12 +35,9 @@ export type HelperData = {
 	IsPurchased: boolean,
 	BaseCost: number?,
 	UpgradeCost: number?,
-	Model: Model?,
-	_cleaner: any?,
 	Player: Player,
 	Description: string,
 	ResourceType: string,
-	ClearStorage: () -> (),
 }
 
 export type HelperInstance = {

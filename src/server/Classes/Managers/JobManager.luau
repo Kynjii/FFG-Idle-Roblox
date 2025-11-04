@@ -37,6 +37,9 @@ end
 
 function JobManager.CreateHelpers(self: JobManager, helperState)
 	for _, helper in pairs(helperState) do
+		local existing = self.Helpers[helper.Id] or nil
+		if existing then continue end
+
 		local helperClass = Helper.New(helper, self.Player, self.TeamId)
 		self.Helpers[helperClass.Id] = helperClass
 	end
@@ -48,10 +51,18 @@ function JobManager.AssignJobs(self: JobManager): ()
 	end
 end
 
+function JobManager.GetAssignedHelpersForJob(self: JobManager, jobId: number)
+	local job: Jobs.JobState = self.JobState[jobId]
+	if job then return job.Slots.AssignedHelpers end
+	return nil
+end
+
 function JobManager.NumOfSlotsAvailable(self: JobManager, jobId: number): number
 	local job: Jobs.JobState = self.JobState[jobId]
 	if job then
-		local assignedHelpers = job.Slots.AssignedHelpers
+		local assignedHelpers = self:GetAssignedHelpersForJob(jobId)
+		if not assignedHelpers then assignedHelpers = {} end
+
 		local maxSlots = job.Slots.MaxSlots
 		local lockedSlots = job.Slots.LockedSlots
 
@@ -65,33 +76,61 @@ function JobManager.NumOfSlotsAvailable(self: JobManager, jobId: number): number
 	return -1
 end
 
-function JobManager.UpdateJobState(self: JobManager, jobId: number, helper: HelperType.HelperInstance)
+function JobManager.UpdateNewJobState(self: JobManager, jobId: number, helper: HelperType.HelperInstance)
+	local currentJob = helper.CurrentAssignment
+
+	-- If the helper is changing jobs
+	if currentJob ~= jobId then
+		-- update old jobstate by removing the helper and save
+		local oldJob: Jobs.JobState = self.JobState[currentJob]
+		if oldJob then
+			local assignedHelpersTable = oldJob.Slots.AssignedHelpers
+
+			for i, assignedHelper: Jobs.AssignedHelper in ipairs(assignedHelpersTable) do
+				if assignedHelper.Id == helper.Id then assignedHelpersTable[i] = nil end
+			end
+
+			DataService.SaveJobState(self.Player, oldJob)
+		end
+	end
+
+	-- then we update the new state
 	local job: Jobs.JobState = self.JobState[jobId]
 	if job then
 		local assignedHelpersTable = job.Slots.AssignedHelpers
 
+		-- Prevents duplicates
+		for i, assignedHelper: Jobs.AssignedHelper in ipairs(assignedHelpersTable) do
+			if assignedHelper.Id == helper.Id then return end
+		end
+
 		local preparedData = {
+			Id = helper.Id,
 			Name = helper:GetName(),
 			Level = helper.Level,
 			QualityId = helper.QualityId,
 		}
 		assignedHelpersTable[#assignedHelpersTable + 1] = preparedData
-		print(job)
 		DataService.SaveJobState(self.Player, job)
 	end
 end
 
 function JobManager.AssignHelper(self: JobManager, helperId: number, jobId: number): ()
 	if not helperId or not jobId then return end
-	if self:NumOfSlotsAvailable(jobId) == 0 then
-		print("No JobSlots available for JobId: ", jobId)
-		return
-	elseif self:NumOfSlotsAvailable(jobId) == -1 then
-		error("No Jobstate: ", self.JobState)
-		return
+	local helper = self.Helpers and self.Helpers[helperId] or nil
+
+	if jobId ~= 0 then
+		if not helper or helper and helper.CurrentAssignment ~= jobId then
+			if self:NumOfSlotsAvailable(jobId) == 0 then
+				print("No JobSlots available for JobId: ", jobId)
+				return
+			elseif self:NumOfSlotsAvailable(jobId) == -1 then
+				error("No Jobstate or assignedHelpers: ", self.JobState)
+				return
+			end
+		end
 	end
 
-	local helper = self.Helpers and self.Helpers[helperId] or nil
 	local isNewAssignment = true
 	if not helper then
 		local inventory = DataService.GetPlayerInventory(self.Player)
@@ -105,10 +144,11 @@ function JobManager.AssignHelper(self: JobManager, helperId: number, jobId: numb
 		helper = newHelperClass
 	end
 
-	if helper.CurrentAssignment > 0 then isNewAssignment = false end
+	if helper.CurrentAssignment == jobId then isNewAssignment = false end
+
+	if isNewAssignment then self:UpdateNewJobState(jobId, helper) end
 
 	helper:AssignJob(jobId, isNewAssignment)
-	self:UpdateJobState(jobId, helper)
 end
 
 function JobManager.BeginAction(self: JobManager, actionType: string, helper: HelperType.HelperInstance, jobId: number)
@@ -212,18 +252,30 @@ function JobManager.AttachEventListeners(self: JobManager): ()
 	-- Remote events for assigning helper to a job
 	local assignJobEvent = Events.GetRemote(Events.RemoteNames.AssignJob)
 	if assignJobEvent then
-		assignJobEvent.OnServerEvent:Connect(function(player: Player, helperId: string, jobId: number)
+		self._cleaner:Add(assignJobEvent.OnServerEvent:Connect(function(player: Player, helperId: string, jobId: number)
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
 			if not helperId or not jobId then return end
 
 			self:AssignHelper(helperId, jobId)
-		end)
+		end))
+	end
+
+	-- Remote event to update internal state when helpers are purchased
+	local helperPurchased = Events.GetBindableEvent(Events.BindableNames.PurchasedHelper)
+	if helperPurchased then
+		self._cleaner:Add(helperPurchased.Event:Connect(function(data)
+			local player: Player = data.Player
+			if self.Player ~= player or self.Owner ~= player.UserId then return end
+
+			local helperState = DataService.GetPlayerInventory(self.Player)
+			self:CreateHelpers(helperState)
+		end))
 	end
 
 	-- Remote Events for handling job cycle
 	local helperAtGatheringLoc = Events.GetBindableEvent(Events.BindableNames.HelperAtGatheringLoc)
 	if helperAtGatheringLoc then
-		helperAtGatheringLoc.Event:Connect(function(data)
+		self._cleaner:Add(helperAtGatheringLoc.Event:Connect(function(data)
 			local helperId: string = data.Id
 			local jobId: number = data.JobId
 			local player: Player = data.Player
@@ -233,12 +285,12 @@ function JobManager.AttachEventListeners(self: JobManager): ()
 			if not helper then return end
 
 			self:BeginGathering(helper, jobId)
-		end)
+		end))
 	end
 
 	local helperAtUnloadingLoc = Events.GetBindableEvent(Events.BindableNames.HelperAtUnloadingLoc)
 	if helperAtUnloadingLoc then
-		helperAtUnloadingLoc.Event:Connect(function(data)
+		self._cleaner:Add(helperAtUnloadingLoc.Event:Connect(function(data)
 			local helperId: string = data.Id
 			local jobId: number = data.JobId
 			local player: Player = data.Player
@@ -248,13 +300,13 @@ function JobManager.AttachEventListeners(self: JobManager): ()
 			if not helper then return end
 
 			self:StartJob(helper, jobId)
-		end)
+		end))
 	end
 
 	-- //TODO - Perhaps change the name, it's confusing. This is the chainmanager sending fish to me
 	local sendStorageFish = Events.GetBindableEvent(Events.BindableNames.SendStorageFish)
 	if sendStorageFish then
-		sendStorageFish.Event:Connect(function(data: SendStorageFishData)
+		self._cleaner:Add(sendStorageFish.Event:Connect(function(data: SendStorageFishData)
 			local helperId: string = data.HelperId
 			local jobId: number = data.JobId
 			local player: Player = data.Player
@@ -268,12 +320,12 @@ function JobManager.AttachEventListeners(self: JobManager): ()
 			local amount = data.Amount
 			if amount then helper:AddResource(amount) end
 			Pathfinding.GoUnloadSpot(jobId, helper.Id, helper.Model, self.Player)
-		end)
+		end))
 	end
 
 	local jobDataEvent = Events.GetRemoteFn(Events.RemoteFunctionNames.GetJobData)
 	if jobDataEvent then jobDataEvent.OnServerInvoke = function(player: Player)
-		return Jobs.Data
+		return self.JobState
 	end end
 end
 -- //!SECTION

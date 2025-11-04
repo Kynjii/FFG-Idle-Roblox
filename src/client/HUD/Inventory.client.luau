@@ -94,7 +94,7 @@ hudInventoryButton.Activated:Connect(function()
 	if screenGui.Enabled then
 		screenGui.Enabled = false
 		if Lighting then
-			local blur = Lighting:FindFirstChild("BlurEffect")
+			local blur = Lighting:FindFirstChild("Blur")
 			if blur then blur:Destroy() end
 		end
 		return
@@ -110,9 +110,11 @@ hudInventoryButton.Activated:Connect(function()
 end)
 
 local freshHelperData = Events.GetRemote(Events.RemoteNames.HelperData)
-if freshHelperData then freshHelperData.OnClientEvent:Connect(function(helperData: HelperType.HelperData)
-	if playerInventory[helperData.Id] then playerInventory[helperData.Id] = helperData end
+if freshHelperData then
+	freshHelperData.OnClientEvent:Connect(function(helperData: HelperType.HelperData)
+		if playerInventory[helperData.Id] then playerInventory[helperData.Id] = helperData end
 
-	local keepTooltip = true
-	populateDetailsUI(keepTooltip)
-end) end
+		local keepTooltip = true
+		populateDetailsUI(keepTooltip)
+	end)
+end

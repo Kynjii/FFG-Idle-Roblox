@@ -51,6 +51,12 @@ Events.BindableNames = {
 	-- Entity Purchase/Upgrade/State
 	PurchaseEntity = "PurchaseEntity",
 	UpdateState = "UpdateState",
+
+	-- Helper Purchase
+	PurchasedHelper = "PurchasedHelper",
+
+	-- Tab selection
+	TabSelected = "TabSelected",
 }
 
 local FOLDER_NAME = "RME"

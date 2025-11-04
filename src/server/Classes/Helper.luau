@@ -240,18 +240,23 @@ function Helper.CreateModel(self: Helper)
 	end
 end
 
-function Helper.AssignJob(self: Helper, jobId: number, isNewJob: boolean)
-	if not self:CanAssignJob(jobId) then return false end
+function Helper.AssignJob(self: Helper, jobId: number, isNewJob: boolean): ()
+	if jobId > 0 then
+		if not self:CanAssignJob(jobId) then return end
+	end
 
 	if isNewJob then
 		self.ResourceInStorage = 0
 		self.CurrentAssignment = jobId
 	end
 
-	self:CreateModel()
+	if self.CurrentAssignment > 0 then
+		self:CreateModel()
+	else
+		if self.Model then self.Model:Destroy() end
+	end
 
 	self:Save()
-	return true
 end
 -- //!SECTION
 

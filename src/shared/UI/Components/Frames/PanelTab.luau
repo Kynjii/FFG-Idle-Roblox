@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
+local Events = require(ReplicatedStorage.Shared.Events.Events)
 local PanelTab = {}
 
 function PanelTab.Create(props: {
@@ -15,7 +16,7 @@ function PanelTab.Create(props: {
 	tab.BackgroundTransparency = 1
 	tab.HoverImage = FFGEnum.UI.Tabs.LeftHoverTab
 	tab.Image = FFGEnum.UI.Tabs.LeftTab
-	tab.ImageColor3 = Color3.fromRGB(152, 0, 5)
+	tab.ImageColor3 = FFGEnum.UI.Tabs.BaseColor
 	tab.Position = UDim2.fromScale(0.5, 0.5)
 	tab.ScaleType = Enum.ScaleType.Slice
 	tab.Size = UDim2.fromScale(1, 0.136934)
@@ -37,6 +38,10 @@ function PanelTab.Create(props: {
 
 	bG.Parent = tab
 	tab.Parent = props.Parent
+
+	tab.Activated:Connect(function()
+		Events.FireBindableEvent(Events.BindableNames.TabSelected, props.Name)
+	end)
 
 	return tab
 end
