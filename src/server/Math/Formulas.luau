@@ -108,6 +108,7 @@ local FORMULAS = {
 	STORAGE = { BaseCost = 200, BaseStorage = 200 },
 	BUILDING = { BaseCost = 1500 },
 	HELPER = { BaseCost = 1000 },
+	JOBSLOT = { BaseCost = 1300 },
 
 	-- Tier (rarity) curve used elsewhere in the economy
 	TIER_MULTIPLIER = {

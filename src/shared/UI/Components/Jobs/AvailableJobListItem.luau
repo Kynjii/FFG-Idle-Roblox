@@ -197,13 +197,18 @@ function AvailableJobListItem.Create(props: {
 			actionButton.Name = isLocked and "UnassignButon" or isLocked and "PuchaseButton" or ""
 
 			actionButton.Activated:Connect(function()
-				if not isTaken or not isLocked then
+				if isTaken then
 					local helperData = props.Slots.AssignedHelpers[i]
 					if helperData then
 						local assignJobEvent = Events.GetRemote(Events.RemoteNames.AssignJob)
 						local unassignedJobId = 0
 						if assignJobEvent then assignJobEvent:FireServer(helperData.Id, unassignedJobId) end
 					end
+				end
+
+				if isLocked then
+					local buySlotEvent = Events.GetRemote(Events.RemoteNames.PurchaseJobSlot)
+					if buySlotEvent then buySlotEvent:FireServer(props.Id) end
 				end
 			end)
 

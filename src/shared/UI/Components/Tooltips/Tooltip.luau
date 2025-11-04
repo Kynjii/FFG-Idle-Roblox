@@ -100,25 +100,12 @@ function Tooltip.Create(props: {
 	-- //SECTION Holds all the main elements
 	local mainContainer = Instance.new("Frame")
 	mainContainer.Name = "Main"
-	mainContainer.Size = UDim2.fromScale(0.9, 0.9)
-	mainContainer.Position = FFGEnum.THEME.alignment.position.center
-	mainContainer.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
+	mainContainer.Size = UDim2.fromScale(0.9, 0.8)
+	mainContainer.Position = FFGEnum.THEME.alignment.position.bottom
+	mainContainer.AnchorPoint = FFGEnum.THEME.alignment.anchor.bottom
 	mainContainer.BackgroundTransparency = 1
 	mainContainer.Parent = tooltipContainer
-
-	local uIPadding = Instance.new("UIPadding")
-	uIPadding.Name = "MainContainerPadding"
-	uIPadding.PaddingTop = UDim.new(0.16, 0)
-	uIPadding.Parent = mainContainer
-
-	local mainContainerUIList = Instance.new("UIListLayout")
-	mainContainerUIList.Name = "MainContainerUIList"
-	mainContainerUIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	mainContainerUIList.SortOrder = Enum.SortOrder.LayoutOrder
-	mainContainerUIList.VerticalAlignment = Enum.VerticalAlignment.Top
-	mainContainerUIList.VerticalFlex = Enum.UIFlexAlignment.SpaceEvenly
-	mainContainerUIList.Parent = mainContainer
-	UIConfig.SetGap(mainContainerUIList, "XS")
+	UIConfig.ApplyList(mainContainer, Enum.FillDirection.Vertical, { HAlign = Enum.HorizontalAlignment.Center, VAlign = Enum.VerticalAlignment.Center })
 	-- //!SECTION
 
 	-- //SECTION - Item Info Container
@@ -128,17 +115,7 @@ function Tooltip.Create(props: {
 	itemInfoContainer.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
 	itemInfoContainer.BackgroundTransparency = 1
 	itemInfoContainer.Parent = mainContainer
-
-	local itemInfoUIList = Instance.new("UIListLayout")
-	itemInfoUIList.Name = "itemInfoUIList"
-	itemInfoUIList.FillDirection = Enum.FillDirection.Horizontal
-	itemInfoUIList.HorizontalFlex = Enum.UIFlexAlignment.SpaceAround
-	itemInfoUIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	itemInfoUIList.VerticalAlignment = Enum.VerticalAlignment.Center
-	itemInfoUIList.Padding = UDim.new(0.05, 0)
-	itemInfoUIList.SortOrder = Enum.SortOrder.LayoutOrder
-	itemInfoUIList.VerticalFlex = Enum.UIFlexAlignment.None
-	itemInfoUIList.Parent = itemInfoContainer
+	UIConfig.ApplyList(itemInfoContainer, Enum.FillDirection.Horizontal, { HFlex = Enum.UIFlexAlignment.SpaceAround, HAlign = Enum.HorizontalAlignment.Center, VAlign = Enum.VerticalAlignment.Center })
 
 	local addInfoContainer = Instance.new("Frame")
 	addInfoContainer.Name = "AddInfoContainer"
@@ -148,42 +125,12 @@ function Tooltip.Create(props: {
 	addInfoContainer.LayoutOrder = 2
 	addInfoContainer.BackgroundTransparency = 1
 	addInfoContainer.Parent = itemInfoContainer
-
-	local addInfoContainerList = Instance.new("UIListLayout")
-	addInfoContainerList.Name = "AddInfoContainerList"
-	addInfoContainerList.FillDirection = Enum.FillDirection.Vertical
-	addInfoContainerList.VerticalAlignment = Enum.VerticalAlignment.Center
-	addInfoContainerList.SortOrder = Enum.SortOrder.LayoutOrder
-	addInfoContainerList.Parent = addInfoContainer
-
-	-- //SECTION - Item Price
-	local priceContainer = Instance.new("Frame")
-	priceContainer.Name = "ItemPriceContainer"
-	priceContainer.Size = UDim2.fromScale(1, 0.3)
-	priceContainer.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
-	priceContainer.Position = FFGEnum.THEME.alignment.position.center
-	priceContainer.BackgroundTransparency = 1
-	priceContainer.Parent = addInfoContainer
-	UIConfig.ApplyList(priceContainer, Enum.FillDirection.Horizontal, { HAlign = Enum.HorizontalAlignment.Center, VAlign = Enum.VerticalAlignment.Center })
-
-	local priceLabel = Instance.new("TextLabel")
-	priceLabel.Name = "ItemCost"
-	priceLabel.LayoutOrder = 2
-	priceLabel.Text = props.IsPurchased and "Upgrade" or "Purchase"
-	priceLabel.AutomaticSize = Enum.AutomaticSize.X
-	priceLabel.Font = FFGEnum.THEME.bigFont
-	priceLabel.TextColor3 = FFGEnum.THEME.color.textGold
-	priceLabel.TextXAlignment = Enum.TextXAlignment.Left
-	priceLabel.TextStrokeTransparency = 0
-	priceLabel.BackgroundTransparency = 1
-	priceLabel.Parent = priceContainer
-	UIConfig.ApplyTextConstraints(priceLabel, "h2")
-	-- //!SECTION
+	UIConfig.ApplyList(addInfoContainer, Enum.FillDirection.Vertical, { VAlign = Enum.VerticalAlignment.Bottom })
 
 	-- //SECTION - Item Description
 	local descriptionLabel = Instance.new("TextLabel")
 	descriptionLabel.Name = "ItemDescription"
-	descriptionLabel.LayoutOrder = 2
+	descriptionLabel.LayoutOrder = 3
 	descriptionLabel.Text = props.ItemDescription or ""
 	descriptionLabel.TextColor3 = FFGEnum.THEME.color.textMuted
 	descriptionLabel.TextWrapped = true
@@ -194,14 +141,30 @@ function Tooltip.Create(props: {
 	UIConfig.ApplyTextConstraints(descriptionLabel, "caption")
 	-- //!SECTION
 
+	-- //SECTION - Quality Label
+	local qualityLabel = Instance.new("TextLabel")
+	qualityLabel.Name = "QualityLabel"
+	qualityLabel.LayoutOrder = 2
+	qualityLabel.Position = FFGEnum.THEME.alignment.position.center
+	qualityLabel.Size = UDim2.fromScale(1, 0.2)
+	qualityLabel.Text = FFGEnum.QUALITIES[props.ItemQualityId].Label or ""
+	qualityLabel.TextColor3 = FFGEnum.QUALITIES[props.ItemQualityId].Color or Color3.new(1, 1, 1)
+	qualityLabel.TextStrokeTransparency = 0.7
+	qualityLabel.Font = FFGEnum.THEME.bigFont
+	qualityLabel.BackgroundTransparency = 1
+	qualityLabel.Parent = addInfoContainer
+	UIConfig.ApplyTextConstraints(qualityLabel, "caption")
+	-- //!SECTION
+
 	-- //SECTION - Item Stats
 	local bottomContainer = Instance.new("Frame")
 	bottomContainer.Name = "BottomContainer"
 	bottomContainer.LayoutOrder = 3
 	bottomContainer.AnchorPoint = Vector2.new(0.5, 0.5)
 	bottomContainer.BackgroundTransparency = 1
-	bottomContainer.Size = UDim2.fromScale(1, 0.4)
+	bottomContainer.Size = UDim2.fromScale(1, 0.5)
 	bottomContainer.Parent = mainContainer
+	UIConfig.ApplyList(bottomContainer, Enum.FillDirection.Vertical, { HAlign = Enum.HorizontalAlignment.Center, VAlign = Enum.VerticalAlignment.Center, VFlex = Enum.UIFlexAlignment.SpaceBetween })
 
 	local statsContainer = Instance.new("Frame")
 	statsContainer.Name = "StatsContainer"
@@ -209,17 +172,9 @@ function Tooltip.Create(props: {
 	statsContainer.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
 	statsContainer.LayoutOrder = 3
 	statsContainer.Position = FFGEnum.THEME.alignment.position.center
-	statsContainer.Size = UDim2.fromScale(1, 0.7)
+	statsContainer.Size = UDim2.fromScale(1, 0.6)
 	statsContainer.Parent = bottomContainer
 	UIConfig.ApplyPanelStyle(statsContainer, FFGEnum.THEME.color.white)
-
-	local bottomContainerUIList = Instance.new("UIListLayout")
-	bottomContainerUIList.Name = "UIListLayout"
-	bottomContainerUIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	bottomContainerUIList.Padding = UDim.new(0.05, 0)
-	bottomContainerUIList.SortOrder = Enum.SortOrder.LayoutOrder
-	bottomContainerUIList.VerticalAlignment = Enum.VerticalAlignment.Bottom
-	bottomContainerUIList.Parent = bottomContainer
 
 	local innerStatsContainer = Instance.new("Frame")
 	innerStatsContainer.Name = "StatsContainer"
@@ -298,15 +253,34 @@ function Tooltip.Create(props: {
 			statElementValue.Size = UDim2.fromScale(0.5, 1)
 			statElementValue.Parent = statFrameContainer
 			UIConfig.ApplyTextConstraints(statElementValue, "body")
+
+			UIConfig.ObserveViewport(function()
+				UIConfig.ApplyTextConstraints(statElementValue, "body")
+				UIConfig.ApplyTextConstraints(statElementLabel, "body")
+			end)
 		end
 	end
 	-- //!SECTION
+
+	local purchaseTypeLabel = Instance.new("TextLabel")
+	purchaseTypeLabel.Name = "PurchaseTypeLabel"
+	purchaseTypeLabel.LayoutOrder = 3
+	purchaseTypeLabel.Size = UDim2.fromScale(1, 0.1)
+	purchaseTypeLabel.Text = props.IsPurchased and "Upgrade" or "Purchase"
+	purchaseTypeLabel.AutomaticSize = Enum.AutomaticSize.X
+	purchaseTypeLabel.Font = FFGEnum.THEME.bigFont
+	purchaseTypeLabel.TextColor3 = FFGEnum.THEME.color.textGold
+	purchaseTypeLabel.TextXAlignment = Enum.TextXAlignment.Center
+	purchaseTypeLabel.TextStrokeTransparency = 0
+	purchaseTypeLabel.BackgroundTransparency = 1
+	purchaseTypeLabel.Parent = bottomContainer
+	UIConfig.ApplyTextConstraints(purchaseTypeLabel, "h2")
 
 	-- //SECTION - Buttons
 	local buttonContainer = Instance.new("Frame")
 	buttonContainer.BackgroundTransparency = 1
 	buttonContainer.LayoutOrder = 3
-	buttonContainer.Size = UDim2.fromScale(1, 0.3)
+	buttonContainer.Size = UDim2.fromScale(1, 0.2)
 	buttonContainer.Parent = bottomContainer
 
 	local buttonGrid = Instance.new("UIGridLayout")
@@ -351,8 +325,9 @@ function Tooltip.Create(props: {
 
 	UIConfig.ObserveViewport(function()
 		UIConfig.ApplyTextConstraints(itemLabel, "h1")
-		UIConfig.ApplyTextConstraints(priceLabel, "h2")
 		UIConfig.ApplyTextConstraints(descriptionLabel, "body")
+		UIConfig.ApplyTextConstraints(purchaseTypeLabel, "h2")
+		UIConfig.ApplyTextConstraints(qualityLabel, "caption")
 	end)
 
 	return tooltipContainer

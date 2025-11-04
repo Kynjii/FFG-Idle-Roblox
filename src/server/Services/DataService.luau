@@ -169,10 +169,13 @@ function DataService.Earn(player: Player, currencyType: string, amount: number)
 		return
 	end
 
+	print(amount)
 	local current = tonumber(profile.Data.Currencies[currencyType]) or 0
+	print(current)
 	local buffedDiff = calculateBuffedAmount(player, amount)
 
 	local newValue = current + buffedDiff
+	print(newValue, current, buffedDiff)
 	profile.Data.Currencies[currencyType] = newValue
 
 	Economy.Log(player, Economy.FlowType.CurrencyAdd, currencyType, amount, newValue, Economy.TransactionType.Gameplay)

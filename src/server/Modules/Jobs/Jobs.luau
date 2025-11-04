@@ -9,6 +9,7 @@ export type AssignedHelper = { [number]: { Id: string, Name: string, Level: numb
 
 export type JobState = {
 	Id: number,
+	Tier: number,
 	Category: "Fishing" | "Woodcutting" | "Mining" | "Transporting",
 	Label: string,
 	Location: Vector3?,
@@ -17,6 +18,7 @@ export type JobState = {
 		MaxSlots: number,
 		LockedSlots: number,
 		AssignedHelpers: AssignedHelper,
+		UnlockCost: number?,
 	},
 	Player: Player,
 }
@@ -25,6 +27,7 @@ local Jobs = {}
 Jobs.Data = {
 	[1] = {
 		Id = 1,
+		Tier = 1,
 		Category = FFGEnum.JOB_CATEGORY.Transporting,
 		Label = "Pier 1",
 		Slots = {
@@ -35,6 +38,7 @@ Jobs.Data = {
 	},
 	[2] = {
 		Id = 2,
+		Tier = 2,
 		Category = FFGEnum.JOB_CATEGORY.Transporting,
 		Label = "Pier 2",
 		Slots = {
@@ -45,6 +49,7 @@ Jobs.Data = {
 	},
 	[3] = {
 		Id = 3,
+		Tier = 3,
 		Category = FFGEnum.JOB_CATEGORY.Transporting,
 		Label = "Pier 3",
 		Slots = {
@@ -55,6 +60,7 @@ Jobs.Data = {
 	},
 	[4] = {
 		Id = 4,
+		Tier = 4,
 		Category = FFGEnum.JOB_CATEGORY.Transporting,
 		Label = "Pier 4",
 		Slots = {
@@ -65,6 +71,7 @@ Jobs.Data = {
 	},
 	[5] = {
 		Id = 5,
+		Tier = 5,
 		Category = FFGEnum.JOB_CATEGORY.Transporting,
 		Label = "Pier 5",
 		Slots = {
@@ -75,6 +82,7 @@ Jobs.Data = {
 	},
 	[6] = {
 		Id = 6,
+		Tier = 6,
 		Category = FFGEnum.JOB_CATEGORY.Transporting,
 		Label = "Pier 6",
 		Slots = {

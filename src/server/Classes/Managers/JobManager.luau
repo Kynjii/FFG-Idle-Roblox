@@ -1,8 +1,11 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
+local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
 local Helper = require(ServerScriptService.Server.Classes.Helper)
+local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
 local Pathfinding = require(ServerScriptService.Server.Classes.Modules.Pathfinding)
+local Formulas = require(ServerScriptService.Server.Math.Formulas)
 local Jobs = require(ServerScriptService.Server.Modules.Jobs.Jobs)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Trove = require(ReplicatedStorage.Packages.Trove)
@@ -17,14 +20,17 @@ JobManager.__index = JobManager
 
 type JobManager = typeof(setmetatable({} :: JobManagerType.JobManagerInstance, JobManager))
 
-function JobManager.New(helperState: { [string]: HelperType.HelperInstance }, jobState: { [number]: Jobs.JobState }, player: Player, teamId: number): JobManager
+function JobManager.New(helperState: { [string]: HelperType.HelperInstance }, jobState: { [number]: Jobs.JobState }, player: Player, teamId: number, realmId: number): JobManager
 	local self = setmetatable({} :: JobManager, JobManager)
 	self.Player = player
 	self.Owner = self.Owner or player.UserId
 	self.TeamId = teamId
+	self.RealmId = realmId
 
 	self.Helpers = {}
 	self.JobState = jobState
+
+	self:CalculateSlotUnlockCost()
 
 	self._cleaner = Trove.new()
 
@@ -55,6 +61,16 @@ function JobManager.GetAssignedHelpersForJob(self: JobManager, jobId: number)
 	local job: Jobs.JobState = self.JobState[jobId]
 	if job then return job.Slots.AssignedHelpers end
 	return nil
+end
+
+function JobManager.CalculateSlotUnlockCost(self: JobManager)
+	if not self.JobState then return end
+
+	for _, job in ipairs(self.JobState) do
+		local jobSlots = job.Slots
+		jobSlots.UnlockCost = ClassCalculators.CalculateBaseValue(Formulas.JOBSLOT.BaseCost, job.Tier, self.RealmId)
+		DataService.SaveJobState(self.Player, job)
+	end
 end
 
 function JobManager.NumOfSlotsAvailable(self: JobManager, jobId: number): number
@@ -111,6 +127,28 @@ function JobManager.UpdateNewJobState(self: JobManager, jobId: number, helper: H
 			QualityId = helper.QualityId,
 		}
 		assignedHelpersTable[#assignedHelpersTable + 1] = preparedData
+		DataService.SaveJobState(self.Player, job)
+	end
+end
+
+function JobManager.PurchaseJobSlot(self: JobManager, jobId: number)
+	local job: Jobs.JobState = self.JobState[jobId]
+	if job then
+		local jobSlots = job.Slots
+		local lockedSlots = jobSlots.LockedSlots
+		local amount = jobSlots.UnlockCost
+		if not amount then return end
+
+		if lockedSlots == 0 then
+			error("All locked slots are already unlocked", job)
+			return
+		end
+
+		if not DataService.CanAfford(self.Player, FFGEnum.CURRENCY_TYPES.Gold, amount) then return end
+		DataService.Spend(self.Player, FFGEnum.CURRENCY_TYPES.Gold, amount)
+
+		job.Slots.LockedSlots = lockedSlots - 1
+
 		DataService.SaveJobState(self.Player, job)
 	end
 end
@@ -257,6 +295,17 @@ function JobManager.AttachEventListeners(self: JobManager): ()
 			if not helperId or not jobId then return end
 
 			self:AssignHelper(helperId, jobId)
+		end))
+	end
+
+	-- Remote event to handle purchasing of job slots
+	local purchaseJobSlotEvent = Events.GetRemote(Events.RemoteNames.PurchaseJobSlot)
+	if purchaseJobSlotEvent then
+		self._cleaner:Add(purchaseJobSlotEvent.OnServerEvent:Connect(function(player: Player, jobId: number)
+			if self.Player ~= player or self.Owner ~= player.UserId then return end
+			if not jobId then return end
+
+			self:PurchaseJobSlot(jobId)
 		end))
 	end
 

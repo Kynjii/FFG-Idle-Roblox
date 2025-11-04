@@ -96,7 +96,10 @@ function HelperShopManager.Purchasehelper(self: HelperShopManager, helperId: str
 	if not helperInShop or helperInShop.IsPurchased then return end
 
 	if not DataService.CanAfford(self.Player, helperInShop.CurrencyType, helperInShop.BaseCost or 0) then return end
-	if not self.CompletedTutorial then Tutorial.Update(self.Player, self.TeamId) end
+	if not self.CompletedTutorial then
+		Tutorial.Update(self.Player, self.TeamId)
+		self.CompletedTutorial = DataService.CompletedTutorial(self.Player)
+	end
 
 	local helperClass = Helper.New(helperInShop, self.Player, self.TeamId)
 	helperClass:Purchase()

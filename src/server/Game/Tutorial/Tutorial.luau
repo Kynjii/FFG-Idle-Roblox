@@ -64,7 +64,7 @@ local function FindHelperShop(teamId: number): Model?
 	return nil
 end
 
-local function assignBeam(player: Player, purchaseButton: Model)
+local function AssignBeam(player: Player, purchaseButton: Model)
 	if not player or not purchaseButton then return end
 
 	local character = player.Character
@@ -139,7 +139,7 @@ function Tutorial.Show(player: Player, teamId: number, stageProgress: number)
 	if stage then Tutorial.PlayerProgress[player] = stage end
 
 	local purchaseButton = models[stage]()
-	assignBeam(player, purchaseButton)
+	AssignBeam(player, purchaseButton)
 end
 
 function Tutorial.Update(player: Player, teamId: number?)
