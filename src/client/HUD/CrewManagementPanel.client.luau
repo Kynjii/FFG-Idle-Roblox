@@ -9,15 +9,19 @@ local CrewManagementPanel = require(ReplicatedStorage.Shared.UI.Components.Frame
 local MainUIPanel = require(ReplicatedStorage.Shared.UI.Components.Frames.MainUIPanel)
 local Tooltip = require(ReplicatedStorage.Shared.UI.Components.Tooltips.Tooltip)
 
+-- Elements
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local crewManagementButtonScreenGui = playerGui:WaitForChild("CrewManagementButton")
 local crewManagementButton = crewManagementButtonScreenGui:FindFirstChild("OpenButton", true) :: ImageButton
 local screenGui: ScreenGui
 
+-- Events
 local getJobDataEvent = Events.GetRemoteFn(Events.RemoteFunctionNames.GetJobData)
-local crewState: { [string]: any } = {}
+local getCrewManagementState = Events.GetRemoteFn(Events.RemoteFunctionNames.GetPlayerInventory)
 
+-- State
+local crewState: { [string]: any } = {}
 type Tab = "Fishing" | "Woodcutting" | "Mining" | "Transporting"
 local selectedTab: Tab = "Transporting"
 
@@ -33,8 +37,15 @@ function updateCrewMngPanelUI()
 	if crewManagementContainer then crewManagementContainer:Destroy() end
 
 	if innerWindow then
-		if getJobDataEvent then
+		if getJobDataEvent and getCrewManagementState then
+			-- Get Crewstate
+			local data = getCrewManagementState:InvokeServer()
+			if data then crewState = data end
+
+			-- Get Job Data
 			local jobsData = getJobDataEvent:InvokeServer()
+
+			-- Recreate window
 			local crewManagementPanel = CrewManagementPanel.Create(player, jobsData, crewState, selectedTab)
 			crewManagementPanel.Parent = innerWindow
 		end
@@ -78,7 +89,6 @@ function populateDetailsUI()
 	updateCrewMngPanelUI()
 end
 
-local getCrewManagementState = Events.GetRemoteFn(Events.RemoteFunctionNames.GetPlayerInventory)
 if crewManagementButton and getCrewManagementState then
 	crewManagementButton.Activated:Connect(function()
 		if screenGui.Enabled then
