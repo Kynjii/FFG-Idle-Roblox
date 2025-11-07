@@ -12,8 +12,8 @@ Tooltip.Existing = {}
 -- Helper for handling Purchase/Upgrade via tooltip
 local function handleButtonClick(itemId: string, isPurchased: boolean): ()
 	if isPurchased then
-		local helperUpgraded = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
-		if helperUpgraded then helperUpgraded:FireServer(itemId) end
+		local upgradeHelper = Events.GetRemote(Events.RemoteNames.UpgradeHelper)
+		if upgradeHelper then upgradeHelper:FireServer(itemId) end
 	else
 		local purchaseEvent = Events.GetRemote(Events.RemoteNames.HelperPurchased)
 		if purchaseEvent then purchaseEvent:FireServer(itemId) end

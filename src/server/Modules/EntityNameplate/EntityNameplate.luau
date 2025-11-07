@@ -179,7 +179,7 @@ function EntityNameplate.Create(props: Props)
 	infoContainer.Parent = frameContainer
 
 	-- Event for handling Helper upgrades
-	-- local freshHelperData = Events.GetRemote(Events.RemoteNames.HelperData)
+	-- local freshHelperData = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
 	-- if freshHelperData then
 	-- 	freshHelperData.OnClientEvent:Connect(function(helperData: HelperType.HelperData)
 	-- 		if not props.JobCategory or props.JobCategory == "None" then return end

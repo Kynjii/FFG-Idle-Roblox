@@ -4,22 +4,27 @@ local RunService = game:GetService("RunService")
 local Events = {}
 
 Events.RemoteNames = {
+	-- HUD Messages
+	LootNotification = "LootNotification",
 	WarningMsg = "WarningMsg",
+
+	-- Open UIs
 	OpenEntityDetails = "OpenEntityDetails",
-	EntityPurchased = "EntityPurchased",
-	GameReset = "GameReset",
 	OpenHelperShop = "OpenHelperShop",
-	HelperPurchased = "HelperPurchased",
+	OpenCrewManagementPanel = "OpenCrewManagementPanel",
+
+	-- Update UIs
 	PrepareHelperShop = "PrepareHelperShop",
 	UpdateHelperShopUI = "UpdateHelperShopUI",
-	OpenCrewManagementPanel = "OpenCrewManagementPanel",
-	AssignJob = "AssignJob",
-	HelperUpgraded = "HelperUpgraded",
-	HelperData = "HelperData",
-	PlayerReady = "PlayerReady",
-	UpdateJobManagementUI = "UpdateJobManagementUI",
 	PurchaseJobSlot = "PurchaseJobSlot",
-	LootNotification = "LootNotification",
+	EntityPurchased = "EntityPurchased",
+	HelperPurchased = "HelperPurchased",
+	UpgradeHelper = "UpgradeHelper",
+	UpdateJobManagementUI = "UpdateJobManagementUI",
+
+	-- Helpers
+	HelperUpgraded = "HelperUpgraded",
+	AssignJob = "AssignJob",
 }
 
 Events.RemoteFunctionNames = {

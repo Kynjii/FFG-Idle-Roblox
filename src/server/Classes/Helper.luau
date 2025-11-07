@@ -404,17 +404,20 @@ end
 
 -- //SECTION - Event Listeners
 function Helper.AttachEventListeners(self: Helper)
-	local helperUpgraded = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
-	if helperUpgraded then
-		self._cleaner:Add(helperUpgraded.OnServerEvent:Connect(function(player: Player, helperId: string)
+	local upgradeHelper = Events.GetRemote(Events.RemoteNames.UpgradeHelper)
+	if upgradeHelper then
+		self._cleaner:Add(upgradeHelper.OnServerEvent:Connect(function(player: Player, helperId: string)
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
 			if helperId ~= self.Id then return end
 
-			if not DataService.CanAfford(self.Player, self.CurrencyType, self.BaseCost or 0) then return end
+			if not DataService.CanAfford(self.Player, self.CurrencyType, self.BaseCost or 0) then
+				-- //TODO - Send event to hud for a message
+				return
+			end
 			DataService.Spend(self.Player, self.CurrencyType, self.BaseCost)
 
 			self:Upgrade()
-			local helperDataEvent = Events.GetRemote(Events.RemoteNames.HelperData)
+			local helperDataEvent = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
 			if helperDataEvent then helperDataEvent:FireClient(player, self:Serialize()) end
 		end))
 	end

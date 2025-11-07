@@ -110,9 +110,9 @@ hudInventoryButton.Activated:Connect(function()
 	end
 end)
 
-local freshHelperData = Events.GetRemote(Events.RemoteNames.HelperData)
-if freshHelperData then
-	freshHelperData.OnClientEvent:Connect(function(helperData: HelperType.HelperData)
+local helperUpgradedEvent = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
+if helperUpgradedEvent then
+	helperUpgradedEvent.OnClientEvent:Connect(function(helperData: HelperType.HelperData)
 		if playerInventory[helperData.Id] then playerInventory[helperData.Id] = helperData end
 
 		local keepTooltip = true

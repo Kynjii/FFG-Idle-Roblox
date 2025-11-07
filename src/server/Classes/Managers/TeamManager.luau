@@ -158,7 +158,6 @@ function TeamManager.AssignTeam(player: Player): number?
 			player.Neutral = false
 
 			player:LoadCharacter()
-			Events.FireEvent(Events.RemoteNames.PlayerReady, player)
 			return i
 		end
 	end
