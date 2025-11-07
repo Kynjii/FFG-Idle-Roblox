@@ -34,6 +34,7 @@ function ProgressBar.Create(props: {
 	progressContainer.BackgroundTransparency = 1
 	progressContainer.LayoutOrder = 3
 	progressContainer.Size = UDim2.fromScale(1, 1)
+	UIConfig.ApplyAspect(progressContainer, 10)
 
 	local progressBG = Instance.new("ImageLabel")
 	progressBG.Name = "ProgressBG"
