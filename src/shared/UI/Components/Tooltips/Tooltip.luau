@@ -140,6 +140,7 @@ function Tooltip.Create(props: {
 	descriptionLabel.Font = FFGEnum.THEME.bigFont
 	descriptionLabel.BackgroundTransparency = 1
 	descriptionLabel.Size = UDim2.fromScale(1, 0.7)
+	UIConfig.ApplyTextConstraints(descriptionLabel, "body")
 	descriptionLabel.Parent = addInfoContainer
 	-- //!SECTION
 
@@ -241,6 +242,7 @@ function Tooltip.Create(props: {
 			statElementLabel.Font = FFGEnum.THEME.bigFont
 			statElementLabel.BackgroundTransparency = 1
 			statElementLabel.Size = UDim2.fromScale(0.5, 1)
+			UIConfig.ApplyTextConstraints(statElementLabel, "body")
 			statElementLabel.Parent = statFrameContainer
 
 			local statType = Format.GetStatType(stat.Label)
@@ -257,6 +259,7 @@ function Tooltip.Create(props: {
 			statElementValue.Font = FFGEnum.THEME.bigFont
 			statElementValue.BackgroundTransparency = 1
 			statElementValue.Size = UDim2.fromScale(0.5, 1)
+			UIConfig.ApplyTextConstraints(statElementValue, "body")
 			statElementValue.Parent = statFrameContainer
 		end
 	end
@@ -309,6 +312,10 @@ function Tooltip.Create(props: {
 	uiListLayout.VerticalFlex = Enum.UIFlexAlignment.SpaceEvenly
 	uiListLayout.Parent = itemInfoContainer
 	-- -- //!SECTION
+
+	UIConfig.ObserveViewport(function()
+		UIConfig.ApplyTextConstraints(descriptionLabel, "body")
+	end)
 
 	return tooltipContainer
 end

@@ -3,7 +3,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
-local UIConfig = require(ReplicatedStorage.Shared.UI.UIConfig)
 local ProgressBar = {}
 
 function ProgressBar.Create(props: {
