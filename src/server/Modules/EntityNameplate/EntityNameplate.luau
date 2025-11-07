@@ -7,7 +7,9 @@ local BuildingType = require(ReplicatedStorage.Shared.Types.Classes.BuildingType
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
 local PortStorageType = require(ReplicatedStorage.Shared.Types.Classes.PortStorageType)
 local TenderType = require(ReplicatedStorage.Shared.Types.Classes.TenderType)
+local ProgressBar = require(ReplicatedStorage.Shared.UI.Components.ProgressBar)
 local UIConfig = require(ReplicatedStorage.Shared.UI.UIConfig)
+local Format = require(ReplicatedStorage.Shared.Utils.Format)
 
 -- //SECTION - TYPES
 type Boat = BoatType.BoatInstance
@@ -28,28 +30,26 @@ EntityNameplate.JobIconImage = {
 }
 
 export type Props = {
-	Id: string,
-	Name: string,
-	QualityId: number,
-	Level: number,
-	UpgradeStage: number,
-	JobCategory: "Fishing" | "Woodcutting" | "Mining" | "Transporting" | "None",
-	MaxStorage: number?,
-	FPS: number?,
+	EntityData: Boat | Tender | PortStorage | Building | Helper,
 	Adornee: Instance?,
+	HasProgressBar: boolean?,
 }
 
 function EntityNameplate.Create(props: Props)
-	local entityName = Instance.new("BillboardGui")
-	entityName.Name = "EntityNameplate"
-	entityName.AlwaysOnTop = true
-	if props.Adornee then entityName.Adornee = props.Adornee end
-	entityName.Enabled = false
-	entityName.LightInfluence = 1
-	entityName.MaxDistance = FFGEnum.THEME.Nameplate.MaxDistance
-	entityName.ResetOnSpawn = false
-	entityName.Size = UDim2.fromScale(10, 5)
-	entityName.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	local entity = props.EntityData
+	local qualityId = entity.QualityId or entity.Tier
+	local jobCategory = entity.JobCategory or entity.Entity or "None"
+
+	local entityBillboard = Instance.new("BillboardGui")
+	entityBillboard.Name = "EntityNameplate"
+	entityBillboard.AlwaysOnTop = true
+	if props.Adornee then entityBillboard.Adornee = props.Adornee end
+	entityBillboard.Enabled = false
+	entityBillboard.LightInfluence = 1
+	entityBillboard.MaxDistance = FFGEnum.THEME.Nameplate.MaxDistance
+	entityBillboard.ResetOnSpawn = false
+	entityBillboard.Size = UDim2.fromScale(10, 5)
+	entityBillboard.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 	local frameContainer = Instance.new("Frame")
 	frameContainer.Name = "Main"
@@ -57,7 +57,7 @@ function EntityNameplate.Create(props: Props)
 	frameContainer.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
 	frameContainer.Position = FFGEnum.THEME.alignment.position.center
 	frameContainer.Size = UDim2.fromScale(1, 1)
-	frameContainer.Parent = entityName
+	frameContainer.Parent = entityBillboard
 	UIConfig.ApplyList(frameContainer, Enum.FillDirection.Vertical, { HAlign = Enum.HorizontalAlignment.Center, VAlign = Enum.VerticalAlignment.Center })
 
 	local nameplateBg = Instance.new("ImageLabel")
@@ -71,7 +71,7 @@ function EntityNameplate.Create(props: Props)
 	nameplateBg.Size = UDim2.fromScale(1, 1)
 	nameplateBg.ImageTransparency = 0.7
 	nameplateBg.Image = FFGEnum.UI.Frames.NameplateBackground
-	nameplateBg.Parent = entityName
+	nameplateBg.Parent = entityBillboard
 
 	local name = Instance.new("TextLabel")
 	name.Name = "Name"
@@ -81,7 +81,7 @@ function EntityNameplate.Create(props: Props)
 	name.LayoutOrder = 2
 	name.Position = UDim2.fromScale(0.5, 0.5)
 	name.Size = UDim2.fromScale(1, 0.3)
-	name.Text = props.Name or ""
+	name.Text = entity.Name or ""
 	name.TextColor3 = Color3.new(1, 1, 1)
 	name.TextStrokeTransparency = 0.7
 	name.TextScaled = true
@@ -96,8 +96,8 @@ function EntityNameplate.Create(props: Props)
 	quality.LayoutOrder = 1
 	quality.Position = UDim2.fromScale(0.5, 0.5)
 	quality.Size = UDim2.fromScale(1, 0.2)
-	quality.Text = FFGEnum.QUALITIES[props.QualityId].Label or ""
-	quality.TextColor3 = FFGEnum.QUALITIES[props.QualityId].Color or Color3.new(1, 1, 1)
+	quality.Text = FFGEnum.QUALITIES[qualityId].Label or ""
+	quality.TextColor3 = FFGEnum.QUALITIES[qualityId].Color or Color3.new(1, 1, 1)
 	quality.TextStrokeTransparency = 0.7
 	quality.TextScaled = true
 	UIConfig.AddPadding(quality, "L")
@@ -119,7 +119,7 @@ function EntityNameplate.Create(props: Props)
 	level.Font = FFGEnum.THEME.bigFont
 	level.LayoutOrder = 1
 	level.Size = UDim2.fromScale(0.33, 1)
-	level.Text = `Level {props.Level}`
+	level.Text = `Level {entity.Level}`
 	level.TextColor3 = Color3.fromRGB(0, 255, 0)
 	level.TextStrokeTransparency = 0.7
 	level.TextXAlignment = Enum.TextXAlignment.Left
@@ -136,11 +136,11 @@ function EntityNameplate.Create(props: Props)
 	jobInfoContainer.Parent = infoContainer
 	UIConfig.ApplyList(jobInfoContainer, Enum.FillDirection.Horizontal, { HAlign = Enum.HorizontalAlignment.Center, VAlign = Enum.VerticalAlignment.Center })
 
-	if props.JobCategory ~= "Building" then
+	if jobCategory ~= "Building" then
 		local jobInfoIcon = Instance.new("ImageLabel")
 		jobInfoIcon.Name = "JobInfoIcon"
 		jobInfoIcon.Size = UDim2.fromScale(0.5, 1)
-		jobInfoIcon.Image = EntityNameplate.JobIconImage[props.JobCategory] or EntityNameplate.JobIconImage.None
+		jobInfoIcon.Image = EntityNameplate.JobIconImage[jobCategory] or EntityNameplate.JobIconImage.None
 		jobInfoIcon.BackgroundTransparency = 1
 		jobInfoIcon.Parent = jobInfoContainer
 		UIConfig.ApplyAspect(jobInfoIcon)
@@ -152,7 +152,7 @@ function EntityNameplate.Create(props: Props)
 		jobInfoText.Font = FFGEnum.THEME.bigFont
 		jobInfoText.LayoutOrder = 1
 		jobInfoText.Size = UDim2.fromScale(0.5, 1)
-		jobInfoText.Text = props.JobCategory == FFGEnum.CLASS.ENTITY_NAME.Boat and `{props.FPS}/s` or props.MaxStorage or ""
+		jobInfoText.Text = jobCategory == FFGEnum.CLASS.ENTITY_NAME.Boat and `{entity.CurrentFPS}/s` or entity.CurrentMaxStorage or ""
 		jobInfoText.TextColor3 = FFGEnum.THEME.color.Blue
 		jobInfoText.TextStrokeTransparency = 0.7
 		jobInfoText.TextScaled = true
@@ -168,8 +168,8 @@ function EntityNameplate.Create(props: Props)
 	stage.Font = FFGEnum.THEME.bigFont
 	stage.LayoutOrder = 3
 	stage.Size = UDim2.fromScale(0.33, 1)
-	stage.Text = FFGEnum.STAGES[props.UpgradeStage].Label
-	stage.TextColor3 = FFGEnum.STAGES[props.UpgradeStage].Color or Color3.new(1, 1, 1)
+	stage.Text = FFGEnum.STAGES[entity.UpgradeStage].Label
+	stage.TextColor3 = FFGEnum.STAGES[entity.UpgradeStage].Color or Color3.new(1, 1, 1)
 	stage.TextStrokeTransparency = 0.7
 	stage.TextXAlignment = Enum.TextXAlignment.Right
 	stage.TextScaled = true
@@ -178,29 +178,33 @@ function EntityNameplate.Create(props: Props)
 
 	infoContainer.Parent = frameContainer
 
+	if props.HasProgressBar then EntityNameplate.CreateProgressBar(entityBillboard, entity) end
+
 	-- Event for handling Helper upgrades
-	-- local freshHelperData = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
-	-- if freshHelperData then
-	-- 	freshHelperData.OnClientEvent:Connect(function(helperData: HelperType.HelperData)
-	-- 		if not props.JobCategory or props.JobCategory == "None" then return end
-	-- 		if props.Id ~= helperData.Id then return end
+	local helperUpgradedEvent = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
+	if helperUpgradedEvent then
+		helperUpgradedEvent.OnClientEvent:Connect(function(helperData: HelperType.HelperData)
+			print(`helperData, {helperData}`)
+			if not jobCategory or jobCategory == "None" then return end
+			if entity.Id ~= helperData.Id then return end
 
-	-- 		EntityNameplate.Update(entityName, helperData)
-	-- 	end)
-	-- end
+			EntityNameplate.Update(entityBillboard, entity)
+		end)
+	end
 
-	-- -- Event for handling non-helper upgrades/purchases
-	-- local updateEvent = Events.GetRemote(Events.RemoteNames.EntityPurchased)
-	-- if updateEvent then
-	-- 	updateEvent.OnClientEvent:Connect(function(player: Player, entityData: Boat | Tender | PortStorage | Building)
-	-- 		if props.JobCategory and props.JobCategory ~= "None" then return end
-	-- 		if props.Id ~= entityData.Id then return end
+	-- Event for handling non-helper upgrades/purchases
+	local updateEvent = Events.GetRemote(Events.RemoteNames.EntityPurchased)
+	if updateEvent then
+		updateEvent.OnClientEvent:Connect(function(player: Player, entityData: Boat | Tender | PortStorage | Building)
+			print(`entityData, {entityData}`)
+			if jobCategory and jobCategory ~= "None" then return end
+			if entity.Id ~= entityData.Id then return end
 
-	-- 		EntityNameplate.Update(entityName, entityData)
-	-- 	end)
-	-- end
+			EntityNameplate.Update(entityBillboard, entityData)
+		end)
+	end
 
-	return entityName
+	return entityBillboard
 end
 
 function EntityNameplate.Update(entityBillboard: BillboardGui, class: Boat | Tender | PortStorage | Building | Helper)
@@ -238,7 +242,40 @@ function EntityNameplate.Update(entityBillboard: BillboardGui, class: Boat | Ten
 
 	if jobInfoIcon then jobInfoIcon.Image = EntityNameplate.JobIconImage[typedClass.JobCategory] or EntityNameplate.JobIconImage.None end
 
-	if jobInfoText then jobInfoText.Text = typedClass.JobCategory == FFGEnum.CLASS.ENTITY_NAME.Boat and `{typedClass.FPS}/s` or typedClass.MaxStorage or "" end
+	if jobInfoText then jobInfoText.Text = typedClass.JobCategory == FFGEnum.CLASS.ENTITY_NAME.Boat and `{typedClass.FPS}/s` or typedClass.CurrentMaxStorage or "" end
+
+	local hasProgressBar = entityBillboard:FindFirstChild("ProgressContainer", true)
+	if hasProgressBar then EntityNameplate.UpdateProgress(hasProgressBar, class) end
+end
+
+function EntityNameplate.CreateProgressBar(parent: BillboardGui, class: Boat | Tender | PortStorage | Building | Helper)
+	local progressContainer = ProgressBar.Create({ Color = "Green", HasText = true, Adornee = parent })
+	progressContainer.Parent = parent
+
+	local progressBarText = progressContainer:FindFirstChild("ProgressBarText", true)
+
+	local progressBarFrame = progressContainer:FindFirstChild("ProgressBar", true)
+
+	if not class.IsPurchased then
+		progressContainer.Visible = false
+	else
+		progressContainer.Visible = true
+	end
+
+	if class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Building then
+		if progressBarText then progressBarText.Text = `{Format.CurrencyNumber(class.FishInStorage)} / {Format.CurrencyNumber(class.CurrentMaxStorage)}` end
+		if progressBarFrame then ProgressBar.Update(progressBarFrame, class.FishInStorage, class.CurrentMaxStorage) end
+	else
+		if progressContainer then progressContainer.Visible = false end
+	end
+end
+
+function EntityNameplate.UpdateProgress(progressBar: Frame, class)
+	local progressBarText = progressBar:FindFirstChild("ProgressBarText", true)
+
+	local progressBarFrame = progressBar:FindFirstChild("ProgressBar", true)
+	if progressBarText then progressBarText.Text = `{Format.CurrencyNumber(class.FishInStorage)} / {Format.CurrencyNumber(class.CurrentMaxStorage)}` end
+	if progressBarFrame then ProgressBar.Update(progressBarFrame, class.FishInStorage, class.CurrentMaxStorage) end
 end
 
 return EntityNameplate

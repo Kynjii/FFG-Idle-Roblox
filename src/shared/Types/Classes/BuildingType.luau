@@ -63,7 +63,7 @@ export type BuildingInstance = {
 
 	-- Allow any other properties/methods for internal use
 	[string]: any,
-}
+} & BuildingData
 
 export type BuildingModule = {
 	New: (state: { [string]: any }?, player: Player, model: Model) -> BuildingInstance,

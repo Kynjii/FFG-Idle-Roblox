@@ -11,8 +11,6 @@ local TenderType = require(ReplicatedStorage.Shared.Types.Classes.TenderType)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local BuildingType = require(ReplicatedStorage.Shared.Types.Classes.BuildingType)
-local ProgressBar = require(ReplicatedStorage.Shared.UI.Components.ProgressBar)
-local Format = require(ReplicatedStorage.Shared.Utils.Format)
 
 type Boat = BoatType.BoatInstance
 type Tender = TenderType.TenderInstance
@@ -40,15 +38,9 @@ function PB.CreatePB(pbModel: Model, class: Boat | Tender | PortStorage | Buildi
 	local button: Part = purchaseButton:FindFirstChild("Button")
 
 	local pbDetails = EntityNameplate.Create({
-		Name = typedClass.Name,
-		Id = typedClass.Id,
-		QualityId = typedClass.QualityId or typedClass.Tier,
-		UpgradeStage = typedClass.UpgradeStage,
+		EntityData = typedClass,
 		Adornee = billboardRoot,
-		Level = typedClass.Level,
-		JobCategory = typedClass.JobCategory or typedClass.Entity or "None",
-		MaxStorage = class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Building and typedClass.CurrentMaxStorage or nil,
-		FPS = class.Entity == FFGEnum.CLASS.ENTITY_NAME.Boat and typedClass.CurrentFPS or nil,
+		HasProgressBar = true,
 	})
 	pbDetails.Enabled = true
 	pbDetails.Parent = billboardRoot
@@ -72,9 +64,6 @@ function PB.CreatePB(pbModel: Model, class: Boat | Tender | PortStorage | Buildi
 		end
 	end
 
-	local hasProgressBar = billboardRoot:FindFirstChild("ProgressBarContainer") or billboardRoot:FindFirstChild("ProgressContainer")
-	if not hasProgressBar then PB.CreateProgressBar(billboardRoot, typedClass) end
-
 	-- Handle State based on IsPurchased
 	local infoContainer = billboardRoot:FindFirstChild("InfoContainer", true)
 	local uiList: UIListLayout = infoContainer:FindFirstChildWhichIsA("UIListLayout")
@@ -94,75 +83,6 @@ function PB.CreatePB(pbModel: Model, class: Boat | Tender | PortStorage | Buildi
 	end
 
 	return purchaseButton, pbDetails
-end
-
-function PB.CreateProgressBar(parent: Part, class)
-	local progressContainer = ProgressBar.Create({ Color = "Green", HasText = true, HasBillboard = true, Adornee = parent })
-	progressContainer.Parent = parent
-
-	local progressTypeIsFrame = typeof(progressContainer) == "Frame"
-
-	local progressBarText = progressContainer:FindFirstChild("ProgressBarText", true)
-
-	local progressBarFrame = progressContainer:FindFirstChild("ProgressBar", true)
-
-	if not class.IsPurchased then
-		if progressTypeIsFrame then
-			progressContainer.Visible = false
-		else
-			progressContainer.Enabled = false
-		end
-	else
-		if progressTypeIsFrame then
-			progressContainer.Visible = true
-		else
-			progressContainer.Enabled = true
-		end
-	end
-
-	if class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Building then
-		if progressBarText then progressBarText.Text = `{Format.CurrencyNumber(class.FishInStorage)} / {Format.CurrencyNumber(class.CurrentMaxStorage)}` end
-		if progressBarFrame then ProgressBar.Update(progressBarFrame, class.FishInStorage, class.CurrentMaxStorage) end
-	else
-		if progressContainer then
-			if progressTypeIsFrame then
-				progressContainer.Visible = false
-			else
-				progressContainer.Enabled = false
-			end
-		end
-	end
-end
-
-function PB.UpdatePB(class: Boat | Tender | PortStorage | Building)
-	local typedClass
-	if class.Entity == FFGEnum.CLASS.ENTITY_NAME.Boat then
-		typedClass = class :: Boat
-	elseif class.Entity == FFGEnum.CLASS.ENTITY_NAME.Tender then
-		typedClass = class :: Tender
-	elseif class.Entity == FFGEnum.CLASS.ENTITY_NAME.PortStorage then
-		typedClass = class :: PortStorage
-	elseif class.Entity == FFGEnum.CLASS.ENTITY_NAME.Building then
-		typedClass = class :: Building
-	else
-		error("Invalid entity passed to CreatePB")
-	end
-
-	PB.Destroy(class.PurchaseButton)
-	PB.CreatePB(typedClass.PurchaseButton, typedClass)
-
-	if class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Building then
-		local progressBar = class.PurchaseButton:FindFirstChild("ProgressBarContainer", true) or class.PurchaseButton:FindFirstChild("ProgressContainer", true)
-		if progressBar then PB.UpdateProgress(progressBar, typedClass) end
-	end
-end
-
-function PB.UpdateProgress(progressBar: Frame, class)
-	local progressBarText = progressBar:FindFirstChild("ProgressBarText", true)
-
-	local progressBarFrame = progressBar:FindFirstChild("ProgressBar", true)
-	if progressBarText then progressBarText.Text = `{Format.CurrencyNumber(class.FishInStorage)} / {Format.CurrencyNumber(class.CurrentMaxStorage)}` end
-	if progressBarFrame then ProgressBar.Update(progressBarFrame, class.FishInStorage, class.CurrentMaxStorage) end
 end
 
 function PB.Destroy(pbModel: Model)

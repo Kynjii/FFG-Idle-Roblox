@@ -67,7 +67,7 @@ export type TenderInstance = {
 
 	-- Allow any other properties/methods for internal use
 	[string]: any,
-}
+} & TenderData
 
 export type TenderModule = {
 	New: (state: { [string]: any }?, player: Player, model: Model) -> TenderInstance,

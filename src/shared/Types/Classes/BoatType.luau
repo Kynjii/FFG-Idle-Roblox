@@ -35,7 +35,7 @@ export type BoatData = {
 	purchaseButton: Model,
 	PBDetails: { [string]: any }?,
 	ClonedBillboard: Instance?,
-	_cleaner: any?,
+	_cleaner: any,
 	Buffs: { [string]: any },
 }
 
@@ -49,8 +49,8 @@ export type BoatInstance = {
 	IsPurchased: boolean,
 	FishInStorage: number?,
 	CurrentMaxStorage: number?,
-	CurrentFPS: number?,
-	StorageFull: boolean?,
+	CurrentFPS: number,
+	StorageFull: boolean,
 	Buffs: { [string]: any }?,
 	PBDetails: { [string]: any }?,
 
@@ -61,7 +61,7 @@ export type BoatInstance = {
 
 	-- Allow any other properties/methods for internal use
 	[string]: any,
-}
+} & BoatData
 
 export type BoatModule = {
 	New: (state: { [string]: any }?, player: Player, model: Model) -> BoatInstance,

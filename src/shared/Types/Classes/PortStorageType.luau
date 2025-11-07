@@ -58,7 +58,7 @@ export type StorageInstance = {
 
 	-- Allow any other properties/methods for internal use
 	[string]: any,
-}
+} & PortStorageData
 
 export type PortStorageModule = {
 	New: (state: { [string]: any }?, player: Player, model: Model) -> StorageInstance,

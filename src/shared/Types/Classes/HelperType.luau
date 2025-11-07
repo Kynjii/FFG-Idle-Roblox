@@ -68,7 +68,7 @@ export type HelperInstance = {
 	Upgrade: () -> (),
 	Purchasehelper: (number) -> (),
 	ShowGoldPopUp: (self: HelperInstance) -> (),
-}
+} & HelperData
 
 export type HelperModule = {
 	New: (state: { [string]: any }?, player: Player, teamId: number) -> HelperInstance,
