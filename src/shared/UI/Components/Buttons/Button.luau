@@ -27,6 +27,7 @@ function Button.Create(props: {
 	CurrencyType: "None" | "Gold",
 })
 	local button = Instance.new("ImageButton")
+	button.Name = "Button"
 	button.Image = buttonImages.squareColor[props.Color] or ""
 	button.PressedImage = buttonImages.squareColor.Blue
 	button.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
@@ -35,6 +36,7 @@ function Button.Create(props: {
 	button.SliceCenter = Rect.new(25, 64, 39, 161)
 	button.BackgroundTransparency = 1
 	button.Size = props.Size or UDim2.fromScale(1, 1)
+	UIConfig.AddPadding(button, "S")
 
 	local buttonText: TextLabel?
 	if props.Text then
@@ -44,11 +46,11 @@ function Button.Create(props: {
 		buttonText.LayoutOrder = 2
 		buttonText.TextColor3 = FFGEnum.THEME.color.white
 		buttonText.BackgroundTransparency = 1
+		buttonText.TextScaled = true
 		buttonText.Size = UDim2.fromScale(0.7, 1)
 		buttonText.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
 		buttonText.Position = FFGEnum.THEME.alignment.position.textCenter
 		buttonText.Parent = button
-		UIConfig.ApplyTextConstraints(buttonText, "caption")
 	end
 
 	if props.CurrencyType == "Gold" then

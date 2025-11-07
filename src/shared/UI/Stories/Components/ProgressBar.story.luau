@@ -5,7 +5,7 @@ local ProgressBar = require(ReplicatedStorage.Shared.UI.Components.ProgressBar)
 local function story(target)
 	local item = ProgressBar.Create({
 		Adornee = target,
-		Color = "WhiteTrape",
+		Color = "Green",
 		HasText = true,
 	})
 

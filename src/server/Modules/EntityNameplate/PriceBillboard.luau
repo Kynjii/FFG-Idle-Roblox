@@ -53,7 +53,7 @@ function PriceBillboard.Create(props: {
 	priceLabel.TextColor3 = FFGEnum.THEME.color.textGold
 	priceLabel.TextStrokeTransparency = 0.7
 	UIConfig.ApplyTextConstraints(priceLabel, "caption")
-	UIConfig.AddPadding(priceLabel, "M")
+	UIConfig.AddPadding(priceLabel, "L")
 	priceLabel.Parent = container
 
 	return priceBillboard

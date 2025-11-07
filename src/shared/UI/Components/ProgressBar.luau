@@ -7,7 +7,7 @@ local UIConfig = require(ReplicatedStorage.Shared.UI.UIConfig)
 local ProgressBar = {}
 
 function ProgressBar.Create(props: {
-	Color: "White" | "WhiteShiny" | "Blue" | "Yellow" | "Green" | "GreenShiny" | "RedTrape" | "BlueTrape" | "WhiteTrape",
+	Color: "Blue" | "Yellow" | "Green",
 	HasText: boolean?,
 	HasBillboard: boolean?,
 	Adornee: Instance?,
@@ -40,7 +40,7 @@ function ProgressBar.Create(props: {
 	progressBG.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
 	progressBG.BackgroundTransparency = 1
 	progressBG.ClipsDescendants = true
-	progressBG.Image = FFGEnum.UI.ProgressBar.BackgroundWhiteTrape
+	progressBG.Image = FFGEnum.UI.ProgressBar.BackgroundWhite.Asset
 	progressBG.ImageColor3 = FFGEnum.UI.ProgressBar.BackgroundColor
 	progressBG.Position = FFGEnum.THEME.alignment.position.center
 	progressBG.ScaleType = Enum.ScaleType.Slice
@@ -51,12 +51,12 @@ function ProgressBar.Create(props: {
 	progressBar.Name = "ProgressBar"
 	progressBar.AnchorPoint = Vector2.new(0, 0.5)
 	progressBar.BackgroundTransparency = 1
-	progressBar.Image = FFGEnum.UI.ProgressBar.InnerBar[props.Color] or FFGEnum.UI.ProgressBar.BackgroundWhiteTrape
-	if props.Color == "WhiteTrape" then progressBar.ImageColor3 = FFGEnum.THEME.color.green end
+	progressBar.Image = props.Color and FFGEnum.UI.ProgressBar.InnerBar.White.Asset
+	progressBar.ImageColor3 = props.Color and FFGEnum.THEME.color[props.Color]
 	progressBar.Position = UDim2.fromScale(0, 0.5)
 	progressBar.ScaleType = Enum.ScaleType.Slice
 	progressBar.Size = UDim2.fromScale(0.8, 1)
-	progressBar.SliceCenter = Rect.new(308, 9, 0, 33)
+	progressBar.SliceCenter = FFGEnum.UI.ProgressBar.InnerBar.White.SliceCenter
 	progressBar.ZIndex = 2
 	progressBar.Parent = progressBG
 

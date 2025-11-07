@@ -85,7 +85,7 @@ function EntityNameplate.Create(props: Props)
 	name.TextColor3 = Color3.new(1, 1, 1)
 	name.TextStrokeTransparency = 0.7
 	UIConfig.ApplyTextConstraints(name, "h1")
-	UIConfig.AddPadding(name, "M")
+	UIConfig.AddPadding(name, "L")
 	name.Parent = frameContainer
 
 	local quality = Instance.new("TextLabel")
@@ -100,7 +100,7 @@ function EntityNameplate.Create(props: Props)
 	quality.TextColor3 = FFGEnum.QUALITIES[props.QualityId].Color or Color3.new(1, 1, 1)
 	quality.TextStrokeTransparency = 0.7
 	UIConfig.ApplyTextConstraints(quality, "body")
-	UIConfig.AddPadding(quality, "M")
+	UIConfig.AddPadding(quality, "L")
 	quality.Parent = frameContainer
 
 	local infoContainer = Instance.new("Frame")
@@ -124,7 +124,7 @@ function EntityNameplate.Create(props: Props)
 	level.TextStrokeTransparency = 0.7
 	level.TextXAlignment = Enum.TextXAlignment.Left
 	UIConfig.ApplyTextConstraints(level, "caption")
-	UIConfig.AddPadding(level, "M")
+	UIConfig.AddPadding(level, "L")
 	level.Parent = infoContainer
 
 	local jobInfoContainer = Instance.new("Frame")
@@ -153,12 +153,12 @@ function EntityNameplate.Create(props: Props)
 		jobInfoText.LayoutOrder = 1
 		jobInfoText.Size = UDim2.fromScale(0.5, 1)
 		jobInfoText.Text = props.JobCategory == FFGEnum.CLASS.ENTITY_NAME.Boat and `{props.FPS}/s` or props.MaxStorage or ""
-		jobInfoText.TextColor3 = FFGEnum.THEME.color.blue
+		jobInfoText.TextColor3 = FFGEnum.THEME.color.Blue
 		jobInfoText.TextStrokeTransparency = 0.7
 		jobInfoText.TextXAlignment = Enum.TextXAlignment.Left
 		jobInfoText.Parent = jobInfoContainer
 		UIConfig.ApplyTextConstraints(jobInfoText, "caption")
-		UIConfig.AddPadding(jobInfoText, "M")
+		UIConfig.AddPadding(jobInfoText, "L")
 	end
 
 	local stage = Instance.new("TextLabel")
@@ -173,7 +173,7 @@ function EntityNameplate.Create(props: Props)
 	stage.TextStrokeTransparency = 0.7
 	stage.TextXAlignment = Enum.TextXAlignment.Right
 	UIConfig.ApplyTextConstraints(stage, "caption")
-	UIConfig.AddPadding(stage, "M")
+	UIConfig.AddPadding(stage, "L")
 	stage.Parent = infoContainer
 
 	infoContainer.Parent = frameContainer

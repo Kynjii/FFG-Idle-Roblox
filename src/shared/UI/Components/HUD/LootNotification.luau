@@ -23,13 +23,13 @@ function LootNotification.Create(props: Props)
 	bG.Name = "BG"
 	bG.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
 	bG.BackgroundTransparency = 1
-	bG.Image = FFGEnum.UI.ProgressBar.InnerBar.BlueTrape
+	bG.Image = FFGEnum.UI.ProgressBar.InnerBar.BlueTrape.Asset
 	bG.Position = FFGEnum.THEME.alignment.position.center
 	bG.Rotation = 180
 	bG.ImageColor3 = FFGEnum.THEME.button.pressedColor
 	bG.ScaleType = Enum.ScaleType.Slice
 	bG.Size = UDim2.fromScale(1, 1)
-	bG.SliceCenter = Rect.new(0, 9, 308, 33)
+	bG.SliceCenter = FFGEnum.UI.ProgressBar.InnerBar.BlueTrape.SliceCenter
 	bG.Parent = lootNotificationContainer
 
 	local lootContainer = Instance.new("Frame")

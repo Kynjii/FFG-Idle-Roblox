@@ -7,21 +7,21 @@ local EARN_RATE = { 1.30, 1.25, 1.20, 1.18, 1.15, 1.12, 1.10, 1.08, 1.06, 1.05, 
 local COST_RATE = { 1.18, 1.20, 1.22, 1.23, 1.24, 1.25, 1.26, 1.27, 1.28, 1.29, 1.30, 1.31, 1.32, 1.33, 1.34, 1.35 }
 
 local EARN_BONUS = {
-	[2] = 0.01,
-	[3] = 0.01,
-	[4] = 0.02,
-	[5] = 0.02,
-	[6] = 0.03,
-	[7] = 0.03,
-	[8] = 0.04,
-	[9] = 0.04,
-	[10] = 0.05,
-	[11] = 0.05,
-	[12] = 0.06,
-	[13] = 0.06,
-	[14] = 0.07,
-	[15] = 0.07,
-	[16] = 0.08,
+	[2] = 0.001,
+	[3] = 0.001,
+	[4] = 0.002,
+	[5] = 0.002,
+	[6] = 0.003,
+	[7] = 0.003,
+	[8] = 0.004,
+	[9] = 0.004,
+	[10] = 0.005,
+	[11] = 0.005,
+	[12] = 0.006,
+	[13] = 0.006,
+	[14] = 0.007,
+	[15] = 0.007,
+	[16] = 0.008,
 }
 -- //!SECTION
 
@@ -131,7 +131,7 @@ local FORMULAS = {
 -- =========================
 
 FORMULAS.PER_LEVEL_STORAGE_ADD = 30.0 -- +30 storage / level
-FORMULAS.PER_LEVEL_FPS_ADD = 5 -- +10 FPS   / level
+FORMULAS.PER_LEVEL_FPS_ADD = 5 -- +5 FPS   / level
 
 -- Add percentage-based per-level growth for compound excitement
 FORMULAS.PER_LEVEL_MULT = 1.02 -- 2% compound growth per level

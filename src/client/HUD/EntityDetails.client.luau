@@ -152,7 +152,7 @@ function updateStats()
 	if entityData.Entity == FFGEnum.CLASS.ENTITY_NAME.Boat then
 		details.Stats.CurrentFPSValue.Text = entityData.IsPurchased and Format.CurrencyNumber(entityData.CurrentFPS) or ""
 		details.Stats.NextFPSValue.Text = entityData.IsPurchased and "+" .. Format.CurrencyNumber(entityData.NextFPS - entityData.CurrentFPS) or ""
-		details.Stats.NextFPSValue.TextColor3 = FFGEnum.THEME.color.green
+		details.Stats.NextFPSValue.TextColor3 = FFGEnum.THEME.color.Green
 
 		local currentFPSParent = details.Stats.CurrentFPSValue:FindFirstAncestorWhichIsA("Frame")
 		currentFPSParent.Visible = entityData.IsPurchased and true
@@ -179,7 +179,7 @@ function updateStats()
 		-- STORAGE Stats
 		details.Stats.CurrentMaxStorageValue.Text = entityData.IsPurchased and Format.CurrencyNumber(entityData.CurrentMaxStorage) or ""
 		details.Stats.NextMaxStorageValue.Text = entityData.IsPurchased and "+" .. Format.CurrencyNumber(entityData.NextLvlMaxStorage - entityData.CurrentMaxStorage) or ""
-		details.Stats.NextMaxStorageValue.TextColor3 = FFGEnum.THEME.color.green
+		details.Stats.NextMaxStorageValue.TextColor3 = FFGEnum.THEME.color.Green
 
 		local currentMaxStorageParent = details.Stats.CurrentMaxStorageValue:FindFirstAncestorWhichIsA("Frame")
 		currentMaxStorageParent.Visible = entityData.IsPurchased and true
@@ -198,7 +198,7 @@ function updateStats()
 				details.Stats.CurrentBuffValue.Text = "-" .. Format.CurrencyNumber(entityData.BuildingBuff.CurrentValue * 100) .. "%" .. " " .. entityData.BuildingBuff.Label
 			end
 
-			details.Stats.CurrentBuffValue.TextColor3 = FFGEnum.THEME.color.green
+			details.Stats.CurrentBuffValue.TextColor3 = FFGEnum.THEME.color.Green
 			details.Stats.CurrentBuffValue.Visible = true
 		end
 	end

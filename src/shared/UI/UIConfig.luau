@@ -54,7 +54,7 @@ end
 
 -- //SECTION - Tokens
 
-UIConfig.Padding = { XS = 0.001, S = 0.03, M = 0.05, L = 0.08, XL = 0.1 } -- scale units
+UIConfig.Padding = { XS = 0.001, S = 0.01, M = 0.03, L = 0.05, XL = 0.1 } -- scale units
 
 UIConfig.Text = {
 	-- min, max per band + relative scale to body
@@ -129,7 +129,7 @@ function UIConfig.ApplyPanelStyle(frame: Frame | TextLabel | ImageLabel, panelCo
 	local bg = frame:FindFirstChildOfClass("ImageLabel") or Instance.new("ImageLabel")
 	bg.Image = FFGEnum.UI.Frames.InnerPanel
 	bg.BackgroundTransparency = 1
-	bg.ImageColor3 = panelColor or FFGEnum.THEME.color.blue
+	bg.ImageColor3 = panelColor or FFGEnum.THEME.color.Blue
 	bg.ScaleType = Enum.ScaleType.Slice
 	bg.SliceCenter = Rect.new(35, 35, 35, 35)
 	bg.AnchorPoint = FFGEnum.THEME.alignment.anchor.center

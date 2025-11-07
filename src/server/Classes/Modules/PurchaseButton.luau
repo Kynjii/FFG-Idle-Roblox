@@ -68,7 +68,7 @@ function PB.CreatePB(pbModel: Model, class: Boat | Tender | PortStorage | Buildi
 		if not DataService.CanAfford(class.Player, "Gold", not typedClass.IsPurchased and typedClass.BaseCost or typedClass.UpgradeCost) then
 			button.Color = FFGEnum.THEME.color.red
 		else
-			button.Color = FFGEnum.THEME.color.green
+			button.Color = FFGEnum.THEME.color.Green
 		end
 	end
 
@@ -97,7 +97,7 @@ function PB.CreatePB(pbModel: Model, class: Boat | Tender | PortStorage | Buildi
 end
 
 function PB.CreateProgressBar(parent: Part, class)
-	local progressContainer = ProgressBar.Create({ Color = "WhiteShiny", HasText = true, HasBillboard = true, Adornee = parent })
+	local progressContainer = ProgressBar.Create({ Color = "Green", HasText = true, HasBillboard = true, Adornee = parent })
 	progressContainer.Parent = parent
 
 	local progressTypeIsFrame = typeof(progressContainer) == "Frame"
@@ -148,25 +148,19 @@ function PB.UpdatePB(class: Boat | Tender | PortStorage | Building)
 		error("Invalid entity passed to CreatePB")
 	end
 
-	local purchaseButton = class.PurchaseButton
-	local billboardRoot = purchaseButton:FindFirstChild("BillboardRoot") :: Part
-	local nameplate = billboardRoot:FindFirstChild("EntityNameplate")
-	local button: Part = purchaseButton:FindFirstChild("Button")
-	local priceBillboard = button:FindFirstChild("PriceBillboard")
-	if nameplate then nameplate:Destroy() end
-	if priceBillboard then priceBillboard:Destroy() end
-
+	PB.Destroy(class.PurchaseButton)
 	PB.CreatePB(typedClass.PurchaseButton, typedClass)
 
-	local progressBar = purchaseButton:FindFirstChild("ProgressBarContainer") or purchaseButton:FindFirstChild("ProgressContainer")
-	if progressBar then PB.UpdateProgress(progressBar, typedClass) end
+	if class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Building then
+		local progressBar = class.PurchaseButton:FindFirstChild("ProgressBarContainer", true) or class.PurchaseButton:FindFirstChild("ProgressContainer", true)
+		if progressBar then PB.UpdateProgress(progressBar, typedClass) end
+	end
 end
 
 function PB.UpdateProgress(progressBar: Frame, class)
-	local progressContainer = progressBar:FindFirstAncestor("ProgressBarContainer")
-	local progressBarText = progressContainer:FindFirstChild("ProgressBarText", true)
+	local progressBarText = progressBar:FindFirstChild("ProgressBarText", true)
 
-	local progressBarFrame = progressContainer:FindFirstChild("ProgressBar", true)
+	local progressBarFrame = progressBar:FindFirstChild("ProgressBar", true)
 	if progressBarText then progressBarText.Text = `{Format.CurrencyNumber(class.FishInStorage)} / {Format.CurrencyNumber(class.CurrentMaxStorage)}` end
 	if progressBarFrame then ProgressBar.Update(progressBarFrame, class.FishInStorage, class.CurrentMaxStorage) end
 end
@@ -174,11 +168,11 @@ end
 function PB.Destroy(pbModel: Model)
 	local purchaseButton = pbModel
 	local billboardRoot = purchaseButton:FindFirstChild("BillboardRoot") :: Part
-	local nameplate = billboardRoot:FindFirstChild("HelperNameplate")
-	local progressBar = billboardRoot:FindFirstChild("ProgressBarContainer") or purchaseButton:FindFirstChild("ProgressContainer")
-
+	local nameplate = billboardRoot:FindFirstChild("EntityNameplate")
+	local button: Part = purchaseButton:FindFirstChild("Button")
+	local priceBillboard = button:FindFirstChild("PriceBillboard")
 	if nameplate then nameplate:Destroy() end
-	if progressBar then progressBar:Destroy() end
+	if priceBillboard then priceBillboard:Destroy() end
 end
 
 function PB.CreateLogic(class)

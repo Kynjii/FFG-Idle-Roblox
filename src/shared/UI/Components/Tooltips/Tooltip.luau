@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
+local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
 local Button = require(ReplicatedStorage.Shared.UI.Components.Buttons.Button)
 local UIConfig = require(ReplicatedStorage.Shared.UI.UIConfig)
 local Format = require(ReplicatedStorage.Shared.Utils.Format)
@@ -236,7 +237,7 @@ function Tooltip.Create(props: {
 			statElementLabel.TextColor3 = FFGEnum.THEME.color.black
 			statElementLabel.TextWrapped = true
 			statElementLabel.LayoutOrder = 1
-			statElementLabel.Font = FFGEnum.THEME.bigFont
+			statElementLabel.Font = FFGEnum.THEME.normalFont
 			statElementLabel.BackgroundTransparency = 1
 			statElementLabel.Size = UDim2.fromScale(0.5, 1)
 			statElementLabel.Parent = statFrameContainer
@@ -252,7 +253,7 @@ function Tooltip.Create(props: {
 			statElementValue.TextColor3 = FFGEnum.THEME.color.black
 			statElementValue.TextWrapped = true
 			statElementValue.LayoutOrder = 2
-			statElementValue.Font = FFGEnum.THEME.bigFont
+			statElementValue.Font = FFGEnum.THEME.normalFont
 			statElementValue.BackgroundTransparency = 1
 			statElementValue.Size = UDim2.fromScale(0.5, 1)
 			statElementValue.Parent = statFrameContainer
@@ -281,26 +282,13 @@ function Tooltip.Create(props: {
 	UIConfig.ApplyTextConstraints(purchaseTypeLabel, "h2")
 
 	-- //SECTION - Buttons
-	local buttonContainer = Instance.new("Frame")
-	buttonContainer.BackgroundTransparency = 1
-	buttonContainer.LayoutOrder = 3
-	buttonContainer.Size = UDim2.fromScale(1, 0.2)
-	buttonContainer.Parent = bottomContainer
-
-	local buttonGrid = Instance.new("UIGridLayout")
-	buttonGrid.FillDirection = Enum.FillDirection.Horizontal
-	buttonGrid.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	buttonGrid.CellSize = UDim2.fromScale(1, 1)
-	UIConfig.SetGap(buttonGrid, "S")
-	buttonGrid.Parent = buttonContainer
-
 	-- Buy Button
 	local buyButtonContainer = Instance.new("Frame")
 	buyButtonContainer.Name = "BuyButtonContainer"
 	buyButtonContainer.BackgroundTransparency = 1
 	buyButtonContainer.LayoutOrder = 3
-	buyButtonContainer.Size = UDim2.fromScale(1, 1)
-	buyButtonContainer.Parent = buttonContainer
+	buyButtonContainer.Size = UDim2.fromScale(1, 0.2)
+	buyButtonContainer.Parent = bottomContainer
 
 	local cost = props.IsPurchased and props.ItemUpgradeCost or props.ItemBaseCost
 	local buyButton = Button.Create({
@@ -340,14 +328,18 @@ end
 function Tooltip.Initialize()
 	-- //SECTION - Bindables
 	type itemData = {
-		Image: string,
-		Price: number,
-		Name: string,
-		Id: string,
+		ItemBaseCost: number,
+		ItemUpgradeCost: number,
+		ItemDescription: string,
+		ItemImage: string,
+		ItemQualityId: number,
+		ItemName: string,
+		ItemId: string,
 		Description: string,
-		Stats: { [number]: string }?,
+		ItemStats: HelperType.HelperStats?,
 		Owner: number,
 		IsPurchased: boolean?,
+		Parent: Instance,
 	}
 
 	local openTooltipEvent = Events.GetBindableEvent(Events.BindableNames.ShowTooltip)
