@@ -7,7 +7,7 @@ local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
 local ShopGUI = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopGUI)
 local ShopItem = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopItem)
 local Tooltip = require(ReplicatedStorage.Shared.UI.Components.Tooltips.Tooltip)
-local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
+local Format = require(ReplicatedStorage.Shared.Utils.Format)
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -44,7 +44,7 @@ function createitemComponent(helper: HelperType.HelperData)
 		ItemName = helper.Name,
 		ItemId = helper.Id,
 		ItemDescription = helper.Description,
-		ItemBaseCost = FormatNumber(helper.BaseCost),
+		ItemBaseCost = Format.CurrencyNumber(helper.BaseCost),
 		ItemStats = preparedStatData,
 		ItemQualityId = helper.QualityId,
 		ItemUpgradeCost = helper.UpgradeCost,

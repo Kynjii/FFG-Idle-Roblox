@@ -8,7 +8,7 @@ local TenderType = require(ReplicatedStorage.Shared.Types.Classes.TenderType)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
-local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
+local Format = require(ReplicatedStorage.Shared.Utils.Format)
 local Replica = require(ReplicatedStorage.Shared.ReplicaClient)
 local AnimateButtonHover = require(ReplicatedStorage.Shared.UI.AnimateButtonHover)
 
@@ -150,8 +150,8 @@ function updateStats()
 
 	-- Boat
 	if entityData.Entity == FFGEnum.CLASS.ENTITY_NAME.Boat then
-		details.Stats.CurrentFPSValue.Text = entityData.IsPurchased and FormatNumber(entityData.CurrentFPS) or ""
-		details.Stats.NextFPSValue.Text = entityData.IsPurchased and "+" .. FormatNumber(entityData.NextFPS - entityData.CurrentFPS) or ""
+		details.Stats.CurrentFPSValue.Text = entityData.IsPurchased and Format.CurrencyNumber(entityData.CurrentFPS) or ""
+		details.Stats.NextFPSValue.Text = entityData.IsPurchased and "+" .. Format.CurrencyNumber(entityData.NextFPS - entityData.CurrentFPS) or ""
 		details.Stats.NextFPSValue.TextColor3 = FFGEnum.THEME.color.green
 
 		local currentFPSParent = details.Stats.CurrentFPSValue:FindFirstAncestorWhichIsA("Frame")
@@ -163,8 +163,8 @@ function updateStats()
 
 	-- Tender
 	if entityData.Entity == FFGEnum.CLASS.ENTITY_NAME.Tender then
-		details.Stats.CurrentTravelTimeValue.Text = entityData.IsPurchased and FormatNumber(entityData.CurrentTravelTime) .. " secs" or ""
-		details.Stats.CurrentLoadTimeValue.Text = entityData.IsPurchased and FormatNumber(entityData.LoadTime) .. " secs" or ""
+		details.Stats.CurrentTravelTimeValue.Text = entityData.IsPurchased and Format.CurrencyNumber(entityData.CurrentTravelTime) .. " secs" or ""
+		details.Stats.CurrentLoadTimeValue.Text = entityData.IsPurchased and Format.CurrencyNumber(entityData.LoadTime) .. " secs" or ""
 
 		-- //TODO - Add next times to Tender and reflect here
 		local currentTTParent = details.Stats.CurrentTravelTimeValue:FindFirstAncestorWhichIsA("Frame")
@@ -177,8 +177,8 @@ function updateStats()
 	-- Non-Building
 	if entityData.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Building then
 		-- STORAGE Stats
-		details.Stats.CurrentMaxStorageValue.Text = entityData.IsPurchased and FormatNumber(entityData.CurrentMaxStorage) or ""
-		details.Stats.NextMaxStorageValue.Text = entityData.IsPurchased and "+" .. FormatNumber(entityData.NextLvlMaxStorage - entityData.CurrentMaxStorage) or ""
+		details.Stats.CurrentMaxStorageValue.Text = entityData.IsPurchased and Format.CurrencyNumber(entityData.CurrentMaxStorage) or ""
+		details.Stats.NextMaxStorageValue.Text = entityData.IsPurchased and "+" .. Format.CurrencyNumber(entityData.NextLvlMaxStorage - entityData.CurrentMaxStorage) or ""
 		details.Stats.NextMaxStorageValue.TextColor3 = FFGEnum.THEME.color.green
 
 		local currentMaxStorageParent = details.Stats.CurrentMaxStorageValue:FindFirstAncestorWhichIsA("Frame")
@@ -193,9 +193,9 @@ function updateStats()
 		if entityData.IsPurchased and entityData.BuildingBuff then
 			local isPlus = entityData.BuildingBuff.IsPlus
 			if isPlus then
-				details.Stats.CurrentBuffValue.Text = "+" .. (FormatNumber(entityData.BuildingBuff.CurrentValue * 100)) .. "%" .. " " .. entityData.BuildingBuff.Label
+				details.Stats.CurrentBuffValue.Text = "+" .. (Format.CurrencyNumber(entityData.BuildingBuff.CurrentValue * 100)) .. "%" .. " " .. entityData.BuildingBuff.Label
 			else
-				details.Stats.CurrentBuffValue.Text = "-" .. FormatNumber(entityData.BuildingBuff.CurrentValue * 100) .. "%" .. " " .. entityData.BuildingBuff.Label
+				details.Stats.CurrentBuffValue.Text = "-" .. Format.CurrencyNumber(entityData.BuildingBuff.CurrentValue * 100) .. "%" .. " " .. entityData.BuildingBuff.Label
 			end
 
 			details.Stats.CurrentBuffValue.TextColor3 = FFGEnum.THEME.color.green
@@ -253,7 +253,7 @@ function updateButtonState()
 	end
 
 	details.upgradeButton.TextLabel.Text = entityData.IsPurchased and "Upgrade" or "Purchase"
-	details.upgradeCostLabel.Text = FormatNumber(cost)
+	details.upgradeCostLabel.Text = Format.CurrencyNumber(cost)
 end
 
 function handleCloseClick()

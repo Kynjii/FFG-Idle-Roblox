@@ -345,8 +345,9 @@ function PortStorage.SetupFishRemovalPrompt(self: PortStorage)
 			self:RemoveFish(amount)
 
 			-- Spend the currency
-			DataService.Earn(player, FFGEnum.CURRENCY_TYPES.Gold, amount * 2)
-			self:ShowGoldPopUp(amount * 2)
+			local calculatedAmount = amount * Formulas.FISH_BASEVALUE
+			DataService.Earn(player, FFGEnum.CURRENCY_TYPES.Gold, calculatedAmount)
+			self:ShowGoldPopUp(calculatedAmount)
 
 			-- Save State
 			self:Save()

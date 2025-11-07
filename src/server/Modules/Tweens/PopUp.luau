@@ -2,7 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
-local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
+local Format = require(ReplicatedStorage.Shared.Utils.Format)
 local PopUp = {}
 
 local DEFAULTS = {
@@ -20,7 +20,7 @@ function PopUp.Animate(billboard: BillboardGui, textValue: number, imageLabel: I
 
 		billboard.StudsOffsetWorldSpace = Vector3.new(0, offsetValue - 8, 10)
 		text.Font = FFGEnum.THEME.bigFont
-		text.Text = "+" .. FormatNumber(textValue)
+		text.Text = "+" .. Format.CurrencyNumber(textValue)
 		text.TextColor3 = isGold and FFGEnum.THEME.color.textGold or Color3.fromRGB(0, 255, 0)
 
 		PopUp.AnimateBillboard(billboard)

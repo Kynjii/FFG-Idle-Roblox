@@ -3,6 +3,7 @@ local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local Button = require(ReplicatedStorage.Shared.UI.Components.Buttons.Button)
 local UIConfig = require(ReplicatedStorage.Shared.UI.UIConfig)
+local Format = require(ReplicatedStorage.Shared.Utils.Format)
 
 local Tooltip = {}
 Tooltip.Existing = {}
@@ -241,9 +242,12 @@ function Tooltip.Create(props: {
 			statElementLabel.Parent = statFrameContainer
 			UIConfig.ApplyTextConstraints(statElementLabel, "body")
 
+			local statType = Format.GetStatType(stat.Label)
+			local isDecimal = statType == "decimal"
+
 			local statElementValue = Instance.new("TextLabel")
 			statElementValue.Name = `{stat.Label}_Value`
-			statElementValue.Text = stat.Value
+			statElementValue.Text = isDecimal and Format.Percent(stat.Value) or stat.Value
 			statElementValue.TextXAlignment = Enum.TextXAlignment.Right
 			statElementValue.TextColor3 = FFGEnum.THEME.color.black
 			statElementValue.TextWrapped = true

@@ -5,7 +5,7 @@ local TweenService = game:GetService("TweenService")
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Replica = require(ReplicatedStorage.Shared.ReplicaClient)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
-local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
+local Format = require(ReplicatedStorage.Shared.Utils.Format)
 
 local player = Players.LocalPlayer
 local hud: Frame = DeepWait(player, "PlayerGui", "HUD", "Main")
@@ -55,7 +55,7 @@ local function setCurrency(name: string, v: number)
 	animate(currencyLabel)
 
 	currencyLabel.FontFace.Bold = true
-	currencyLabel.Text = FormatNumber(v)
+	currencyLabel.Text = Format.CurrencyNumber(v)
 end
 
 Replica.OnNew("PlayerState", function(replicaData)

@@ -102,6 +102,10 @@ local FORMULAS = {
 		return COST_MULT[math.clamp(level, 1, MAX_LEVEL)]
 	end,
 
+	-- Value of generic Fish (2 coins -> 1 Fish)
+
+	FISH_BASEVALUE = 2,
+
 	-- Entity baselines
 	BOAT = { BaseCost = 100, BaseStorage = 100, BaseFPS = 1 },
 	TENDER = { BaseCost = 100, BaseStorage = 200 },
@@ -193,23 +197,26 @@ FORMULAS.HELPER_PER_LEVEL_ADD = {
 }
 
 -- Stat types (decides math path for each stat)
+-- "up" = integer stats that scale up (Storage, CatchRate, etc.)
+-- "decimal" = decimal stats that should preserve precision (FishValue, Luck, CritChance, etc.)
+-- "timeDown" = time stats that scale down with quality/stage
 FORMULAS.HELPER_STAT_TYPES = {
 	-- Defaults
 	WalkSpeed = "up",
 	Storage = "up",
 	-- Fishing
 	CatchRate = "up",
-	Luck = "up",
+	Luck = "decimal",
 	CastTime = "timeDown",
 	-- Woodcutting
 	WoodYield = "up",
-	CritChance = "up",
+	CritChance = "decimal",
 	SwingRate = "timeDown",
 	-- Mining
 	OreYield = "up",
 	-- Transport
 	FishStorage = "up",
-	FishValue = "up",
+	FishValue = "decimal",
 	LoadTime = "timeDown",
 }
 

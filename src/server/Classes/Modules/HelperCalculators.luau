@@ -256,7 +256,14 @@ function HelperCalculator.CompareLevelsWithPerks(jobCategory: string, level: num
 end
 
 -- ========= Upgrading quality: add new slots without touching existing picks =========
-function HelperCalculator.AddSlotsOnQualityUpgrade(jobCategory: string, oldQualityId: number, newQualityId: number, existingKeys: { string }, existingValues: { [string]: number }, seed: number?): ({ string }, { [string]: number })
+function HelperCalculator.AddSlotsOnQualityUpgrade(
+	jobCategory: string,
+	oldQualityId: number,
+	newQualityId: number,
+	existingKeys: { string },
+	existingValues: { [string]: number },
+	seed: number?
+): ({ string }, { [string]: number })
 	local oldSlots = (Formulas.QUALITY_PERK_COUNT and Formulas.QUALITY_PERK_COUNT[oldQualityId]) or 0
 	local newSlots = (Formulas.QUALITY_PERK_COUNT and Formulas.QUALITY_PERK_COUNT[newQualityId]) or 0
 	if newSlots <= oldSlots then
@@ -345,6 +352,10 @@ function HelperCalculator.CalculateStats(jobCategory: string, level: number, qua
 			local v = leveled * stageMult * qualityMult
 			v = addDeviance(v, 0.02)
 			stats[key] = math.floor(v + 0.5)
+		elseif statType == "decimal" then
+			local v = leveled * stageMult * qualityMult
+			v = addDeviance(v, 0.02)
+			stats[key] = math.floor(v * 1000 + 0.5) / 1000 -- Round to 3 decimal places
 		else -- "timeDown"
 			local stageReduction = getStageTimeReductionFraction(stgIndex)
 			local combined = (1 - stageReduction) * (1 / qualityMult)
@@ -364,6 +375,10 @@ function HelperCalculator.CalculateStats(jobCategory: string, level: number, qua
 			local v = leveled * stageMult * qualityMult
 			v = addDeviance(v, 0.02)
 			stats[key] = math.floor(v + 0.5)
+		elseif statType == "decimal" then
+			local v = leveled * stageMult * qualityMult
+			v = addDeviance(v, 0.02)
+			stats[key] = math.floor(v * 1000 + 0.5) / 1000 -- Round to 3 decimal places
 		else -- "timeDown"
 			local stageReduction = getStageTimeReductionFraction(stgIndex)
 			local combined = (1 - stageReduction) * (1 / qualityMult)

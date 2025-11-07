@@ -2,7 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local UIConfig = require(ReplicatedStorage.Shared.UI.UIConfig)
-local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
+local Format = require(ReplicatedStorage.Shared.Utils.Format)
 local PriceBillboard = {}
 
 function PriceBillboard.Create(props: {
@@ -49,7 +49,7 @@ function PriceBillboard.Create(props: {
 	priceLabel.Font = FFGEnum.THEME.bigFont
 	priceLabel.LayoutOrder = 2
 	local cost = not props.IsPurchased and props.BaseCost or props.UpgradeCost
-	priceLabel.Text = FormatNumber(cost) or ""
+	priceLabel.Text = Format.CurrencyNumber(cost) or ""
 	priceLabel.TextColor3 = FFGEnum.THEME.color.textGold
 	priceLabel.TextStrokeTransparency = 0.7
 	UIConfig.ApplyTextConstraints(priceLabel, "caption")

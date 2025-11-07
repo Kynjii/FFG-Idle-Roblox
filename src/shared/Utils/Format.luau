@@ -1,3 +1,5 @@
+local Format = {}
+
 local SUFFIXES = {
 	{ value = 1e54, symbol = "Et" }, -- Eternium
 	{ value = 1e51, symbol = "St" }, -- Starwoven
@@ -19,8 +21,28 @@ local SUFFIXES = {
 	{ value = 1e3, symbol = "K" }, -- Thousand
 }
 
+local STAT_TYPES = {
+	-- Defaults
+	WalkSpeed = "up",
+	Storage = "up",
+	-- Fishing
+	CatchRate = "up",
+	Luck = "decimal",
+	CastTime = "timeDown",
+	-- Woodcutting
+	WoodYield = "up",
+	CritChance = "decimal",
+	SwingRate = "timeDown",
+	-- Mining
+	OreYield = "up",
+	-- Transport
+	FishStorage = "up",
+	FishValue = "decimal",
+	LoadTime = "timeDown",
+}
+
 -- Formats with 0–2 decimals depending on size, strips trailing .0
-local formatNumber = function(n: number): string
+function Format.CurrencyNumber(n: number): string
 	local absn = math.abs(n)
 
 	-- choose suffix if >= 1e3
@@ -52,4 +74,32 @@ local formatNumber = function(n: number): string
 	end
 end
 
-return formatNumber
+function Format.GetStatType(stat): string
+	if not stat then return end
+	return STAT_TYPES[stat] or ""
+end
+
+function Format.Percent(number: number): string
+	if type(number) ~= "number" then return "" end
+
+	local p = number * 100
+	-- Helper to trim trailing zeros on decimals
+	local function trim(s)
+		return s:gsub("(%..-)0+$", "%1"):gsub("%.$", "")
+	end
+
+	if p >= 10 then
+		-- show as integer percent
+		return string.format("%d%%", math.floor(p + 0.5))
+	elseif p >= 1 then
+		-- show one decimal place for 1% - 9.9%
+		local rounded = math.floor(p * 10 + 0.5) / 10
+		return trim(string.format("%.1f", rounded)) .. "%"
+	else
+		-- show two decimals for under 1% (e.g. 0.56%)
+		local rounded = math.floor(p * 100 + 0.5) / 100
+		return trim(string.format("%.2f", rounded)) .. "%"
+	end
+end
+
+return Format

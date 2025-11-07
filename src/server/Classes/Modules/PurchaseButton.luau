@@ -12,7 +12,7 @@ local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local BuildingType = require(ReplicatedStorage.Shared.Types.Classes.BuildingType)
 local ProgressBar = require(ReplicatedStorage.Shared.UI.Components.ProgressBar)
-local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
+local Format = require(ReplicatedStorage.Shared.Utils.Format)
 
 type Boat = BoatType.BoatInstance
 type Tender = TenderType.TenderInstance
@@ -121,7 +121,7 @@ function PB.CreateProgressBar(parent: Part, class)
 	end
 
 	if class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Building then
-		if progressBarText then progressBarText.Text = `{FormatNumber(class.FishInStorage)} / {FormatNumber(class.CurrentMaxStorage)}` end
+		if progressBarText then progressBarText.Text = `{Format.CurrencyNumber(class.FishInStorage)} / {Format.CurrencyNumber(class.CurrentMaxStorage)}` end
 		if progressBarFrame then ProgressBar.Update(progressBarFrame, class.FishInStorage, class.CurrentMaxStorage) end
 	else
 		if progressContainer then
@@ -167,7 +167,7 @@ function PB.UpdateProgress(progressBar: Frame, class)
 	local progressBarText = progressContainer:FindFirstChild("ProgressBarText", true)
 
 	local progressBarFrame = progressContainer:FindFirstChild("ProgressBar", true)
-	if progressBarText then progressBarText.Text = `{FormatNumber(class.FishInStorage)} / {FormatNumber(class.CurrentMaxStorage)}` end
+	if progressBarText then progressBarText.Text = `{Format.CurrencyNumber(class.FishInStorage)} / {Format.CurrencyNumber(class.CurrentMaxStorage)}` end
 	if progressBarFrame then ProgressBar.Update(progressBarFrame, class.FishInStorage, class.CurrentMaxStorage) end
 end
 

@@ -7,7 +7,7 @@ local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
 local AnimateButtonHover = require(ReplicatedStorage.Shared.UI.AnimateButtonHover)
 local Button = require(ReplicatedStorage.Shared.UI.Components.Buttons.Button)
 local UIConfig = require(ReplicatedStorage.Shared.UI.UIConfig)
-local FormatNumber = require(ReplicatedStorage.Shared.Utils.FormatNumber)
+local Format = require(ReplicatedStorage.Shared.Utils.Format)
 local AvailableJobListItem = {}
 
 function AvailableJobListItem.Create(props: {
@@ -191,7 +191,7 @@ function AvailableJobListItem.Create(props: {
 			if isTaken then
 				buttonText = "-"
 			else
-				local formattedAmount = FormatNumber(props.Slots.UnlockCost or 0)
+				local formattedAmount = Format.CurrencyNumber(props.Slots.UnlockCost or 0)
 				buttonText = `{formattedAmount}`
 			end
 
