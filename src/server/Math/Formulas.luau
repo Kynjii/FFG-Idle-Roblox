@@ -173,7 +173,7 @@ FORMULAS.HELPER_BASE = {
 		Fishing = { CatchRate = 5, Luck = 0.02, CastTime = 6 }, -- CastTime "timeDown"
 		Woodcutting = { WoodYield = 5, CritChance = 0.02, SwingRate = 6 },
 		Mining = { OreYield = 5, CritChance = 0.02, SwingRate = 6 },
-		Transporting = { Storage = 100, FishValue = 12, LoadTime = 10 },
+		Transporting = { Storage = 100, FishValue = 0.10, LoadTime = 10 },
 	},
 }
 
