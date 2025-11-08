@@ -107,9 +107,9 @@ local FORMULAS = {
 	FISH_BASEVALUE = 2,
 
 	-- Entity baselines
-	BOAT = { BaseCost = 100, BaseStorage = 100, BaseFPS = 1 },
-	TENDER = { BaseCost = 100, BaseStorage = 200 },
-	STORAGE = { BaseCost = 200, BaseStorage = 200 },
+	BOAT = { BaseCost = 10, BaseStorage = 10, BaseFPS = 1 },
+	TENDER = { BaseCost = 10, BaseStorage = 20 },
+	STORAGE = { BaseCost = 20, BaseStorage = 20 },
 	BUILDING = { BaseCost = 1500 },
 	HELPER = { BaseCost = 1000 },
 	JOBSLOT = { BaseCost = 1300 },
