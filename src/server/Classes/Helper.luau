@@ -334,26 +334,6 @@ end
 function Helper.UpdateStorageStatus(self: Helper, status: boolean): ()
 	self.StorageFull = status
 end
-
-function Helper.ShowGoldPopUp(self: Helper, amount: number): ()
-	local billboard: BillboardGui = game.Workspace:FindFirstChild("BillBoards"):FindFirstChild("GoldPopupTemplate")
-	if not billboard then return end
-
-	local primaryPart: BasePart? = self.Model.PrimaryPart
-	if not primaryPart then return end
-
-	local clone: BillboardGui = billboard:Clone()
-	local container: Instance? = primaryPart:FindFirstChild("Billboard")
-	if container then
-		clone.Parent = container
-	else
-		clone.Parent = primaryPart
-	end
-
-	clone.Adornee = primaryPart
-	clone.Name = "Gold_Popup_Clone"
-	PopUp.Animate(clone, amount, clone.Gold)
-end
 -- //!SECTION
 
 -- //SECTION - Setup

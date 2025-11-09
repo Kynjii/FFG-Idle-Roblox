@@ -251,7 +251,6 @@ function JobManager.BeginAction(self: JobManager, actionType: string, helper: He
 					if not currencyAmount then error("No currencyAmount was defined") end
 
 					DataService.Earn(self.Player, FFGEnum.CURRENCY_TYPES.Gold, currencyAmount)
-					helper:ShowGoldPopUp(currencyAmount)
 					helper:ClearStorage()
 					self:StartJob(helper, jobId)
 				end

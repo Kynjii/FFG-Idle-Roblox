@@ -221,26 +221,6 @@ function PortStorage.ShowFishPopUp(self: PortStorage, amount: number): ()
 	clone.Name = "Popup_Clone"
 	PopUp.Animate(clone, amount, clone.Fish)
 end
-
-function PortStorage.ShowGoldPopUp(self: PortStorage, amount: number): ()
-	local billboard: BillboardGui = game.Workspace:FindFirstChild("BillBoards"):FindFirstChild("GoldPopupTemplate")
-	if not billboard then return end
-
-	local primaryPart: BasePart? = self.VisualRoot
-	if not primaryPart then return end
-
-	local clone: BillboardGui = billboard:Clone()
-	local container: Instance? = primaryPart:FindFirstChild("Billboard")
-	if container then
-		clone.Parent = container
-	else
-		clone.Parent = primaryPart
-	end
-
-	clone.Adornee = primaryPart
-	clone.Name = "Gold_Popup_Clone"
-	PopUp.Animate(clone, amount, clone.Gold)
-end
 -- //!SECTION
 
 -- //SECTION - Calculations
@@ -339,7 +319,6 @@ function PortStorage.SetupFishRemovalPrompt(self: PortStorage)
 			-- Spend the currency
 			local calculatedAmount = amount * Formulas.FISH_BASEVALUE
 			DataService.Earn(player, FFGEnum.CURRENCY_TYPES.Gold, calculatedAmount)
-			self:ShowGoldPopUp(calculatedAmount)
 
 			-- Save State
 			self:Save()
