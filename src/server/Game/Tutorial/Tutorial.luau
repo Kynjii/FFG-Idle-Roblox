@@ -134,7 +134,7 @@ function Tutorial.Show(player: Player, teamId: number, stageProgress: number)
 		end,
 	}
 
-	local stage = stageProgress
+	local stage = stageProgress or 1
 
 	if stage then Tutorial.PlayerProgress[player] = stage end
 
@@ -148,7 +148,7 @@ function Tutorial.Update(player: Player, teamId: number?)
 	if not Tutorial.PlayerProgress[player] then error("No player found in tutorial player progress") end
 
 	local currentStage = Tutorial.PlayerProgress[player]
-	local maxStage = 4
+	local maxStage = 5
 
 	if currentStage == maxStage then
 		Tutorial.PlayerTrove[player]:Destroy()

@@ -444,11 +444,9 @@ end
 function DataService.SaveTutorialState(player: Player, completedStage: number): ()
 	local profile = getProfile(player, stateTypes.SaveTutorialState)
 	if not profile then return end
-
 	if completedStage == 4 then profile.Data.CompletedTutorial = true end
-	if completedStage == 2 then profile.Data.TutorialStageComplete[1] = true end
 
-	profile.Data.TutorialStageComplete[completedStage] = true
+	profile.Data.TutorialStageComplete[completedStage - 1] = true
 end
 
 function DataService.CompletedTutorial(player: Player): boolean

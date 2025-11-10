@@ -50,9 +50,8 @@ function EventListeners.Attach(class: Boat | Tender | PortStorage | Building)
 			-- Check to see if the entity matches the correct stage
 			local currentTutorialStage = DataService.CurrentTutorialStage(player)
 			if currentTutorialStage then
-				local currentTutotialEntity = tutorialOrder[currentTutorialStage]
-
-				if typedClass.Entity == currentTutotialEntity then
+				local currentTutorialEntity = tutorialOrder[currentTutorialStage + 1]
+				if currentTutorialEntity and typedClass.Entity == currentTutorialEntity then
 					return true
 				else
 					return false
