@@ -87,7 +87,7 @@ return {
 		},
 	},
 	Currencies = {
-		Gold = 15000000,
+		Gold = 1500,
 	},
 	CompletedTutorial = false,
 	TutorialStageComplete = {

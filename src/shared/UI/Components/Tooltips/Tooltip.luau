@@ -33,8 +33,10 @@ local function clearStats(innerStatsContainer: Frame)
 	end
 end
 
-local function createStats(stats, innerStatsContainer)
+local function createStats(item, innerStatsContainer)
 	clearStats(innerStatsContainer)
+
+	local preparedData = StatsIndexer.Prepare(item)
 
 	local statOrder = {
 		Storage = 1,
@@ -50,8 +52,8 @@ local function createStats(stats, innerStatsContainer)
 		CastTime = 6,
 	}
 
-	if stats then
-		for i, stat in ipairs(stats) do
+	if preparedData then
+		for i, stat in ipairs(preparedData) do
 			local statFrameContainer = Instance.new("Frame")
 			statFrameContainer.Name = `{stat.Label}Container`
 			statFrameContainer.BackgroundTransparency = 1
@@ -226,7 +228,11 @@ function Tooltip.Create(props: {
 	entityLevelAndQualityContainer.Size = UDim2.fromScale(1, 0.2)
 	entityLevelAndQualityContainer.BackgroundTransparency = 1
 	entityLevelAndQualityContainer.Parent = addInfoContainer
-	UIConfig.ApplyList(entityLevelAndQualityContainer, Enum.FillDirection.Horizontal)
+	UIConfig.ApplyList(
+		entityLevelAndQualityContainer,
+		Enum.FillDirection.Horizontal,
+		{ HAlign = Enum.HorizontalAlignment.Center, HFlex = Enum.UIFlexAlignment.SpaceBetween, VAlign = Enum.VerticalAlignment.Center }
+	)
 
 	local levelLabel: TextLabel
 	local stageLabel: TextLabel
@@ -309,7 +315,7 @@ function Tooltip.Create(props: {
 	UIConfig.SetPadding(innerStatsPadding, "XL")
 	innerStatsPadding.Parent = innerStatsContainer
 
-	createStats(item.Stats or {}, innerStatsContainer)
+	createStats(item, innerStatsContainer)
 	-- //!SECTION
 
 	local purchaseTypeLabel = Instance.new("TextLabel")
@@ -350,15 +356,6 @@ function Tooltip.Create(props: {
 	-- //!SECTION
 	-- //!SECTION
 
-	-- //SECTION - UI List Layouts
-	-- itemInfoContainer
-	local uiListLayout = Instance.new("UIListLayout")
-	uiListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	uiListLayout.FillDirection = Enum.FillDirection.Vertical
-	uiListLayout.VerticalFlex = Enum.UIFlexAlignment.SpaceEvenly
-	uiListLayout.Parent = itemInfoContainer
-	-- -- //!SECTION
-
 	local helperUpgradedEvent = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
 	if item.Stats then
 		if helperUpgradedEvent then
@@ -370,9 +367,14 @@ function Tooltip.Create(props: {
 				-- Update Level
 				if levelLabel then levelLabel.Text = item.IsPurchased and `Level {helperData.Level}` or "" end
 
+				-- Update Stage
+				if stageLabel then
+					stageLabel.Text = FFGEnum.STAGES[helperData.UpgradeStage].Label
+					stageLabel.TextColor3 = FFGEnum.STAGES[helperData.UpgradeStage].Color or Color3.new(1, 1, 1)
+				end
+
 				-- Update Stats
-				local preparedData = StatsIndexer.Prepare(helperData)
-				createStats(preparedData, innerStatsContainer)
+				createStats(helperData, innerStatsContainer)
 
 				-- Update Button State (disabled and or upgrade cost)
 				local btnText: TextLabel? = buyButton:FindFirstChild("ButtonText", true)
