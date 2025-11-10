@@ -154,6 +154,8 @@ FFGEnum.UI = {
 		PadLock = "rbxassetid://78382217391272",
 		Minus = "rbxassetid://84352522067310",
 		Purchase = "rbxassetid://107460233002169",
+		Alert = "rbxassetid://85527034084832",
+		ThumbsUp = "rbxassetid://117741528720677",
 	},
 	Frames = {
 		MainUIPanel = "rbxassetid://95574095879865",

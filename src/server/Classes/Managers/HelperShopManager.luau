@@ -6,6 +6,7 @@ local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
 local Helper = require(ServerScriptService.Server.Classes.Helper)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
 local EventListeners = require(ServerScriptService.Server.Classes.Modules.EventListeners)
+local Notification = require(ServerScriptService.Server.Classes.Modules.Notification)
 local Tutorial = require(ServerScriptService.Server.Game.Tutorial.Tutorial)
 local SetInterval = require(ServerScriptService.Server.Modules.SetInterval)
 local DataService = require(ServerScriptService.Server.Services.DataService)
@@ -95,7 +96,10 @@ function HelperShopManager.Purchasehelper(self: HelperShopManager, helperId: str
 
 	if not helperInShop or helperInShop.IsPurchased then return end
 
-	if not DataService.CanAfford(self.Player, helperInShop.CurrencyType, helperInShop.BaseCost or 0) then return end
+	if not DataService.CanAfford(self.Player, helperInShop.CurrencyType, helperInShop.BaseCost or 0) then
+		Notification.SendAlert(self.Player, "Not enough gold.")
+		return
+	end
 	if not self.CompletedTutorial then
 		Tutorial.Update(self.Player, self.TeamId)
 		self.CompletedTutorial = DataService.CompletedTutorial(self.Player)

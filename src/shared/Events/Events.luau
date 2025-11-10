@@ -6,7 +6,7 @@ local Events = {}
 Events.RemoteNames = {
 	-- HUD Messages
 	LootNotification = "LootNotification",
-	WarningMsg = "WarningMsg",
+	PlayerNotification = "PlayerNotification",
 
 	-- Open UIs
 	OpenEntityDetails = "OpenEntityDetails",

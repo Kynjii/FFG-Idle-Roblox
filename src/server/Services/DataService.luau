@@ -5,6 +5,7 @@ local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local BuildingType = require(ReplicatedStorage.Shared.Types.Classes.BuildingType)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
+local PlayerNotification = require(ReplicatedStorage.Shared.UI.Components.HUD.PlayerNotification)
 local Format = require(ReplicatedStorage.Shared.Utils.Format)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 local Jobs = require(ServerScriptService.Server.Modules.Jobs.Jobs)
@@ -193,6 +194,7 @@ end
 function DataService.CanAfford(player: Player, currencyType: "Gold", amount: number)
 	local profile = DataService.Profiles[player]
 	if not profile then return end
+
 	return (tonumber(profile.Data.Currencies[currencyType]) or 0) >= amount
 end
 

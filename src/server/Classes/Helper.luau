@@ -6,6 +6,7 @@ local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.Clas
 local Trove = require(ReplicatedStorage.Packages.Trove)
 local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
 local HelperCalculators = require(ServerScriptService.Server.Classes.Modules.HelperCalculators)
+local Notification = require(ServerScriptService.Server.Classes.Modules.Notification)
 local CollisionGroups = require(ServerScriptService.Server.Game.CollisionGroups.CollisionGroups)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
@@ -397,7 +398,7 @@ function Helper.AttachEventListeners(self: Helper)
 			if helperId ~= self.Id then return end
 
 			if not DataService.CanAfford(self.Player, self.CurrencyType, not self.IsPurchased and self.BaseCost or self.UpgradeCost or 0) then
-				-- //TODO - Send event to hud for a message
+				Notification.SendAlert(self.Player, "Not enough gold.")
 				return
 			end
 			DataService.Spend(self.Player, self.CurrencyType, self.BaseCost)

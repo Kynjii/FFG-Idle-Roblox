@@ -3,6 +3,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 
 local Helper = require(ServerScriptService.Server.Classes.Helper)
 local ClassCalculators = require(ServerScriptService.Server.Classes.Modules.ClassCalculators)
+local Notification = require(ServerScriptService.Server.Classes.Modules.Notification)
 local Pathfinding = require(ServerScriptService.Server.Classes.Modules.Pathfinding)
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
 local Jobs = require(ServerScriptService.Server.Modules.Jobs.Jobs)
@@ -145,7 +146,10 @@ function JobManager.PurchaseJobSlot(self: JobManager, jobId: number)
 			return
 		end
 
-		if not DataService.CanAfford(self.Player, FFGEnum.CURRENCY_TYPES.Gold, amount) then return end
+		if not DataService.CanAfford(self.Player, FFGEnum.CURRENCY_TYPES.Gold, amount) then
+			Notification.SendAlert(self.Player, "Not enough gold.")
+			return
+		end
 		DataService.Spend(self.Player, FFGEnum.CURRENCY_TYPES.Gold, amount)
 
 		job.Slots.LockedSlots = lockedSlots - 1
