@@ -1,6 +1,8 @@
 local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+
+local Notification = require(script.Parent.Notification)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local BoatType = require(ReplicatedStorage.Shared.Types.Classes.BoatType)
@@ -72,7 +74,10 @@ function EventListeners.Attach(class: Boat | Tender | PortStorage | Building)
 	if typedClass.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Shop then
 		local function handleStateUpdate(player)
 			local canProceed = checkTutorialState(player)
-			if not canProceed then return end
+			if not canProceed then
+				Notification.SendAlert(player, "Follow the Tutorial to unlock this!")
+				return
+			end
 
 			-- See if the player can afford the state update (purchase / upgrade)
 			if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, not typedClass.IsPurchased and typedClass.BaseCost or typedClass.UpgradeCost) then return end
@@ -124,7 +129,10 @@ function EventListeners.Attach(class: Boat | Tender | PortStorage | Building)
 				if typedClass.Player ~= player or typedClass.Owner ~= player.UserId then return end
 
 				local canProceed = checkTutorialState(player)
-				if not canProceed then return end
+				if not canProceed then
+					Notification.SendAlert(player, "Follow the Tutorial to unlock this!")
+					return
+				end
 
 				typedClass:Purchasehelper(helperId)
 			end))
