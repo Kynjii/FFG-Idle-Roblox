@@ -12,9 +12,9 @@ export type Props = {
 function PlayerNotification.Create(props: Props)
 	local messageTemplate = Instance.new("Frame")
 	messageTemplate.Name = "MessageTemplate"
-	messageTemplate.AnchorPoint = Vector2.new(0.5, 0.5)
+	messageTemplate.AnchorPoint = Vector2.new(0.5, 1)
 	messageTemplate.BackgroundColor3 = Color3.new(1, 1, 1)
-	messageTemplate.Position = UDim2.fromScale(0.5, 0.0441228)
+	messageTemplate.Position = UDim2.fromScale(0.5, 1)
 	messageTemplate.Size = UDim2.fromScale(1, 0.3)
 
 	local uIGradient = Instance.new("UIGradient")
@@ -39,8 +39,8 @@ function PlayerNotification.Create(props: Props)
 	textLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 	textLabel.BackgroundTransparency = 1
 	textLabel.FontFace = Font.new("rbxasset://fonts/families/Bangers.json")
-	textLabel.Position = UDim2.fromScale(0.5, 0.499999)
-	textLabel.Size = UDim2.fromScale(1, 0.999999)
+	textLabel.Position = UDim2.fromScale(0.5, 0.5)
+	textLabel.Size = UDim2.fromScale(1, 1)
 	textLabel.Text = props.Text or ""
 	textLabel.TextColor3 = props.Type == "Red" and FFGEnum.THEME.color.red or FFGEnum.THEME.color.Green
 	textLabel.TextScaled = true
@@ -49,9 +49,9 @@ function PlayerNotification.Create(props: Props)
 
 	local frame = Instance.new("Frame")
 	frame.Name = "Frame"
-	frame.AnchorPoint = Vector2.new(0.5, 1)
+	frame.AnchorPoint = Vector2.new(0.5, 0.5)
 	frame.BackgroundTransparency = 1
-	frame.Position = UDim2.fromScale(0.5, 0)
+	frame.Position = UDim2.fromScale(0.5, 0.5)
 	frame.Size = UDim2.fromScale(0.290713, 0.553567)
 
 	local messageIcon = Instance.new("ImageLabel")
@@ -62,7 +62,7 @@ function PlayerNotification.Create(props: Props)
 	messageIcon.ImageColor3 = Color3.fromRGB(255, 255, 0)
 	messageIcon.Position = UDim2.fromScale(0.5, 1)
 	messageIcon.ScaleType = Enum.ScaleType.Fit
-	messageIcon.Size = UDim2.fromScale(0.388922, 1)
+	messageIcon.Size = UDim2.fromScale(0.4, 1)
 	messageIcon.Parent = frame
 
 	frame.Parent = messageTemplate
