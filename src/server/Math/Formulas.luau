@@ -3,8 +3,8 @@ local MAX_LEVEL = 100
 
 local PROMO_LEVEL = { 1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 }
 
-local EARN_RATE = { 1.15, 1.12, 1.10, 1.08, 1.06, 1.05, 1.04, 1.03, 1.025, 1.02, 1.015, 1.015, 1.01, 1.01, 1.008, 1.008 }
-local COST_RATE = { 1.12, 1.14, 1.16, 1.17, 1.18, 1.19, 1.20, 1.21, 1.22, 1.23, 1.24, 1.25, 1.26, 1.27, 1.28, 1.29 }
+local EARN_RATE = { 1.15, 1.12, 1.10, 1.08, 1.06, 1.05, 1.04, 1.03, 1.025, 1.02 }
+local COST_RATE = { 1.12, 1.14, 1.16, 1.17, 1.18, 1.19, 1.20, 1.21, 1.22, 1.23 }
 
 local EARN_BONUS = {
 	[2] = 0.001,
@@ -16,12 +16,6 @@ local EARN_BONUS = {
 	[8] = 0.004,
 	[9] = 0.004,
 	[10] = 0.005,
-	[11] = 0.005,
-	[12] = 0.006,
-	[13] = 0.006,
-	[14] = 0.007,
-	[15] = 0.007,
-	[16] = 0.008,
 }
 -- //!SECTION
 
@@ -107,9 +101,9 @@ local FORMULAS = {
 	FISH_BASEVALUE = 2,
 
 	-- Entity baselines
-	BOAT = { BaseCost = 10, BaseStorage = 10, BaseFPS = 1 },
-	TENDER = { BaseCost = 10, BaseStorage = 20 },
-	STORAGE = { BaseCost = 20, BaseStorage = 20 },
+	BOAT = { BaseCost = 100, BaseStorage = 20, BaseFPS = 1 },
+	TENDER = { BaseCost = 110, BaseStorage = 25 },
+	STORAGE = { BaseCost = 150, BaseStorage = 25 },
 	BUILDING = { BaseCost = 1500 },
 	HELPER = { BaseCost = 1000 },
 	JOBSLOT = { BaseCost = 1300 },
@@ -148,9 +142,8 @@ FORMULAS.TIME_MIN_FRACTION = 0.02 -- never below 2% of base (was 5%)
 FORMULAS.TIME_BREAKTHROUGH_LEVELS = {
 	[25] = 0.15, -- -15% at level 25
 	[50] = 0.25, -- -25% at level 50
-	[100] = 0.40, -- -40% at level 100
-	[200] = 0.55, -- -55% at level 200
-	[350] = 0.70, -- -70% at level 350
+	[75] = 0.40, -- -40% at level 75
+	[100] = 0.55, -- -55% at level 100
 }
 
 -- =========================
@@ -170,14 +163,14 @@ FORMULAS.QUALITY_MULT = {
 FORMULAS.HELPER_BASE = {
 	Defaults = {
 		WalkSpeed = 5, -- "up"
-		Storage = 50, -- "up"
+		Storage = 15, -- "up"
 		LoadTime = 15, -- "timeDown"
 	},
 	PerJobCategory = {
 		Fishing = { CatchRate = 5, Luck = 0.02, CastTime = 6 }, -- CastTime "timeDown"
 		Woodcutting = { WoodYield = 5, CritChance = 0.02, SwingRate = 6 },
 		Mining = { OreYield = 5, CritChance = 0.02, SwingRate = 6 },
-		Transporting = { Storage = 100, FishValue = 0.10, LoadTime = 10 },
+		Transporting = { Storage = 25, FishValue = 0.10, LoadTime = 10 },
 	},
 }
 
@@ -192,7 +185,7 @@ FORMULAS.HELPER_PER_LEVEL_ADD = {
 		Fishing = { CatchRate = 0.003, Luck = 0.003, CastTime = 0.008 },
 		Woodcutting = { WoodYield = 0.003, CritChance = 0.003, SwingRate = 0.003 },
 		Mining = { OreYield = 0.003, CritChance = 0.003, SwingRate = 0.008 },
-		Transporting = { Storage = 25, FishValue = 0.025, LoadTime = 0.02 },
+		Transporting = { Storage = 15, FishValue = 0.025, LoadTime = 0.01 },
 	},
 }
 

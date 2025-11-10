@@ -5,6 +5,7 @@ local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
 local Button = require(ReplicatedStorage.Shared.UI.Components.Buttons.Button)
 local UIConfig = require(ReplicatedStorage.Shared.UI.UIConfig)
 local Format = require(ReplicatedStorage.Shared.Utils.Format)
+local StatsIndexer = require(ReplicatedStorage.Shared.Utils.StatsIndexer)
 
 local Tooltip = {}
 Tooltip.Existing = {}
@@ -20,6 +21,86 @@ local function handleButtonClick(itemId: string, isPurchased: boolean): ()
 	end
 end
 
+local function clearStats(innerStatsContainer: Frame)
+	if not innerStatsContainer then return end
+	local statElements = innerStatsContainer:GetChildren()
+
+	if statElements then
+		for _, element in pairs(statElements) do
+			if element:IsA("UIListLayout") or element:IsA("UIPadding") then continue end
+			element:Destroy()
+		end
+	end
+end
+
+local function createStats(stats, innerStatsContainer)
+	clearStats(innerStatsContainer)
+
+	local statOrder = {
+		Storage = 1,
+		WalkSpeed = 2,
+		CatchRate = 3,
+		CritChance = 3,
+		Luck = 4,
+		SwingRate = 4,
+		WoodYield = 5,
+		OreYield = 5,
+		FishValue = 5,
+		LoadTime = 6,
+		CastTime = 6,
+	}
+
+	if stats then
+		for i, stat in ipairs(stats) do
+			local statFrameContainer = Instance.new("Frame")
+			statFrameContainer.Name = `{stat.Label}Container`
+			statFrameContainer.BackgroundTransparency = 1
+			statFrameContainer.Size = UDim2.fromScale(1, 0.2)
+			statFrameContainer.LayoutOrder = statOrder[stat.Label] or 0
+			statFrameContainer.Parent = innerStatsContainer
+
+			local statFrameContainerUIList = Instance.new("UIListLayout")
+			statFrameContainerUIList.Name = "UIListLayout"
+			statFrameContainerUIList.FillDirection = Enum.FillDirection.Horizontal
+			statFrameContainerUIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+			statFrameContainerUIList.HorizontalFlex = Enum.UIFlexAlignment.SpaceBetween
+			statFrameContainerUIList.SortOrder = Enum.SortOrder.LayoutOrder
+			statFrameContainerUIList.Parent = statFrameContainer
+
+			local statElementLabel = Instance.new("TextLabel")
+			statElementLabel.Name = `{stat.Label}_label`
+			statElementLabel.Text = stat.Label
+			statElementLabel.TextXAlignment = Enum.TextXAlignment.Left
+			statElementLabel.TextColor3 = FFGEnum.THEME.color.black
+			statElementLabel.TextWrapped = true
+			statElementLabel.LayoutOrder = 1
+			statElementLabel.TextScaled = true
+			statElementLabel.Font = FFGEnum.THEME.bigFont
+			statElementLabel.BackgroundTransparency = 1
+			statElementLabel.Size = UDim2.fromScale(0.5, 1)
+			UIConfig.ApplyTextConstraints(statElementLabel, "body")
+			statElementLabel.Parent = statFrameContainer
+
+			local statType = Format.GetStatType(stat.Label)
+			local isDecimal = statType == "decimal"
+
+			local statElementValue = Instance.new("TextLabel")
+			statElementValue.Name = `{stat.Label}_Value`
+			statElementValue.Text = isDecimal and Format.Percent(stat.Value) or stat.Value
+			statElementValue.TextXAlignment = Enum.TextXAlignment.Right
+			statElementValue.TextColor3 = FFGEnum.THEME.color.black
+			statElementValue.TextWrapped = true
+			statElementValue.LayoutOrder = 2
+			statElementValue.TextScaled = true
+			statElementValue.Font = FFGEnum.THEME.bigFont
+			statElementValue.BackgroundTransparency = 1
+			statElementValue.Size = UDim2.fromScale(0.5, 1)
+			UIConfig.ApplyTextConstraints(statElementValue, "body")
+			statElementValue.Parent = statFrameContainer
+		end
+	end
+end
+
 function Tooltip.ClearExisting(userId: number): ()
 	if Tooltip.Existing[userId] then
 		local existing = Tooltip.Existing[userId]
@@ -31,6 +112,7 @@ end
 function Tooltip.Create(props: {
 	Size: UDim2,
 	Visible: boolean?,
+	ItemLevel: number?,
 	ItemImage: string,
 	ItemQualityId: number,
 	ItemBaseCost: number,
@@ -144,19 +226,43 @@ function Tooltip.Create(props: {
 	descriptionLabel.Parent = addInfoContainer
 	-- //!SECTION
 
-	-- //SECTION - Quality Label
+	-- //SECTION - Quality & Level Label
+	local entityLevelAndQualityContainer = Instance.new("Frame")
+	entityLevelAndQualityContainer.Name = "EntityLevelAndQualityContainer"
+	entityLevelAndQualityContainer.LayoutOrder = 2
+	entityLevelAndQualityContainer.Position = FFGEnum.THEME.alignment.position.center
+	entityLevelAndQualityContainer.Size = UDim2.fromScale(1, 0.2)
+	entityLevelAndQualityContainer.BackgroundTransparency = 1
+	entityLevelAndQualityContainer.Parent = addInfoContainer
+	UIConfig.ApplyList(entityLevelAndQualityContainer, Enum.FillDirection.Horizontal)
+
+	local levelLabel = Instance.new("TextLabel")
+	levelLabel.Name = "LevelLabel"
+	levelLabel.LayoutOrder = 1
+	levelLabel.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
+	levelLabel.Position = FFGEnum.THEME.alignment.position.center
+	levelLabel.Size = UDim2.fromScale(0.5, 1)
+	levelLabel.Text = props.IsPurchased and `Level {props.ItemLevel}` or ""
+	levelLabel.TextColor3 = FFGEnum.THEME.color.Green
+	levelLabel.TextStrokeTransparency = 0.7
+	levelLabel.TextScaled = true
+	levelLabel.Font = FFGEnum.THEME.bigFont
+	levelLabel.BackgroundTransparency = 1
+	levelLabel.Parent = entityLevelAndQualityContainer
+
 	local qualityLabel = Instance.new("TextLabel")
 	qualityLabel.Name = "QualityLabel"
 	qualityLabel.LayoutOrder = 2
+	qualityLabel.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
 	qualityLabel.Position = FFGEnum.THEME.alignment.position.center
-	qualityLabel.Size = UDim2.fromScale(1, 0.2)
+	qualityLabel.Size = UDim2.fromScale(0.5, 1)
 	qualityLabel.Text = FFGEnum.QUALITIES[props.ItemQualityId].Label or ""
 	qualityLabel.TextColor3 = FFGEnum.QUALITIES[props.ItemQualityId].Color or Color3.new(1, 1, 1)
 	qualityLabel.TextStrokeTransparency = 0.7
 	qualityLabel.TextScaled = true
 	qualityLabel.Font = FFGEnum.THEME.bigFont
 	qualityLabel.BackgroundTransparency = 1
-	qualityLabel.Parent = addInfoContainer
+	qualityLabel.Parent = entityLevelAndQualityContainer
 	-- //!SECTION
 
 	-- //SECTION - Item Stats
@@ -169,15 +275,15 @@ function Tooltip.Create(props: {
 	bottomContainer.Parent = mainContainer
 	UIConfig.ApplyList(bottomContainer, Enum.FillDirection.Vertical, { HAlign = Enum.HorizontalAlignment.Center, VAlign = Enum.VerticalAlignment.Center, VFlex = Enum.UIFlexAlignment.SpaceBetween })
 
-	local statsContainer = Instance.new("Frame")
-	statsContainer.Name = "StatsContainer"
-	statsContainer.BackgroundTransparency = 1
-	statsContainer.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
-	statsContainer.LayoutOrder = 3
-	statsContainer.Position = FFGEnum.THEME.alignment.position.center
-	statsContainer.Size = UDim2.fromScale(1, 0.6)
-	statsContainer.Parent = bottomContainer
-	UIConfig.ApplyPanelStyle(statsContainer, FFGEnum.THEME.color.white)
+	local statsPanel = Instance.new("Frame")
+	statsPanel.Name = "StatsPanel"
+	statsPanel.BackgroundTransparency = 1
+	statsPanel.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
+	statsPanel.LayoutOrder = 3
+	statsPanel.Position = FFGEnum.THEME.alignment.position.center
+	statsPanel.Size = UDim2.fromScale(1, 0.6)
+	statsPanel.Parent = bottomContainer
+	UIConfig.ApplyPanelStyle(statsPanel, FFGEnum.THEME.color.white)
 
 	local innerStatsContainer = Instance.new("Frame")
 	innerStatsContainer.Name = "StatsContainer"
@@ -186,83 +292,14 @@ function Tooltip.Create(props: {
 	innerStatsContainer.LayoutOrder = 3
 	innerStatsContainer.Position = FFGEnum.THEME.alignment.position.center
 	innerStatsContainer.Size = UDim2.fromScale(1, 0.6)
-	innerStatsContainer.Parent = statsContainer
+	innerStatsContainer.Parent = statsPanel
+	UIConfig.ApplyList(innerStatsContainer, Enum.FillDirection.Vertical, { HAlign = Enum.HorizontalAlignment.Center, Padding = "XL" })
 
-	local statsContainerUIList = Instance.new("UIListLayout")
-	statsContainerUIList.Name = "StatsContainerUIList"
-	statsContainerUIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	statsContainerUIList.SortOrder = Enum.SortOrder.LayoutOrder
-	statsContainerUIList.Parent = innerStatsContainer
-	UIConfig.SetGap(statsContainerUIList, "XL")
+	local innerStatsPadding = Instance.new("UIPadding")
+	UIConfig.SetPadding(innerStatsPadding, "XL")
+	innerStatsPadding.Parent = innerStatsContainer
 
-	local statsContainerUIPadding = Instance.new("UIPadding")
-	statsContainerUIPadding.Name = "StatsContainerUIPadding"
-	statsContainerUIPadding.Parent = innerStatsContainer
-	UIConfig.SetPadding(statsContainerUIPadding, "XL")
-
-	local statOrder = {
-		Storage = 1,
-		WalkSpeed = 2,
-		CatchRate = 3,
-		CritChance = 3,
-		Luck = 4,
-		SwingRate = 4,
-		WoodYield = 5,
-		OreYield = 5,
-		FishValue = 5,
-		LoadTime = 6,
-		CastTime = 6,
-	}
-
-	if props.ItemStats then
-		for i, stat in ipairs(props.ItemStats) do
-			local statFrameContainer = Instance.new("Frame")
-			statFrameContainer.Name = `{stat.Label}Container`
-			statFrameContainer.BackgroundTransparency = 1
-			statFrameContainer.Size = UDim2.fromScale(1, 0.2)
-			statFrameContainer.LayoutOrder = statOrder[stat.Label] or 0
-			statFrameContainer.Parent = innerStatsContainer
-
-			local statFrameContainerUIList = Instance.new("UIListLayout")
-			statFrameContainerUIList.Name = "UIListLayout"
-			statFrameContainerUIList.FillDirection = Enum.FillDirection.Horizontal
-			statFrameContainerUIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-			statFrameContainerUIList.HorizontalFlex = Enum.UIFlexAlignment.SpaceBetween
-			statFrameContainerUIList.SortOrder = Enum.SortOrder.LayoutOrder
-			statFrameContainerUIList.Parent = statFrameContainer
-
-			local statElementLabel = Instance.new("TextLabel")
-			statElementLabel.Name = `{stat.Label}_label`
-			statElementLabel.Text = stat.Label
-			statElementLabel.TextXAlignment = Enum.TextXAlignment.Left
-			statElementLabel.TextColor3 = FFGEnum.THEME.color.black
-			statElementLabel.TextWrapped = true
-			statElementLabel.LayoutOrder = 1
-			statElementLabel.TextScaled = true
-			statElementLabel.Font = FFGEnum.THEME.bigFont
-			statElementLabel.BackgroundTransparency = 1
-			statElementLabel.Size = UDim2.fromScale(0.5, 1)
-			UIConfig.ApplyTextConstraints(statElementLabel, "body")
-			statElementLabel.Parent = statFrameContainer
-
-			local statType = Format.GetStatType(stat.Label)
-			local isDecimal = statType == "decimal"
-
-			local statElementValue = Instance.new("TextLabel")
-			statElementValue.Name = `{stat.Label}_Value`
-			statElementValue.Text = isDecimal and Format.Percent(stat.Value) or stat.Value
-			statElementValue.TextXAlignment = Enum.TextXAlignment.Right
-			statElementValue.TextColor3 = FFGEnum.THEME.color.black
-			statElementValue.TextWrapped = true
-			statElementValue.LayoutOrder = 2
-			statElementValue.TextScaled = true
-			statElementValue.Font = FFGEnum.THEME.bigFont
-			statElementValue.BackgroundTransparency = 1
-			statElementValue.Size = UDim2.fromScale(0.5, 1)
-			UIConfig.ApplyTextConstraints(statElementValue, "body")
-			statElementValue.Parent = statFrameContainer
-		end
-	end
+	createStats(props.ItemStats, innerStatsContainer)
 	-- //!SECTION
 
 	local purchaseTypeLabel = Instance.new("TextLabel")
@@ -301,7 +338,6 @@ function Tooltip.Create(props: {
 		handleButtonClick(props.ItemId, props.IsPurchased or false)
 	end)
 	-- //!SECTION
-
 	-- //!SECTION
 
 	-- //SECTION - UI List Layouts
@@ -313,9 +349,27 @@ function Tooltip.Create(props: {
 	uiListLayout.Parent = itemInfoContainer
 	-- -- //!SECTION
 
-	UIConfig.ObserveViewport(function()
-		UIConfig.ApplyTextConstraints(descriptionLabel, "body")
-	end)
+	local helperUpgradedEvent = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
+	if props.ItemStats then
+		if helperUpgradedEvent then
+			helperUpgradedEvent.OnClientEvent:Connect(function(helperData: HelperType.HelperData)
+				-- Update Quality
+				qualityLabel.Text = FFGEnum.QUALITIES[helperData.QualityId].Label or ""
+				qualityLabel.TextColor3 = FFGEnum.QUALITIES[helperData.QualityId].Color or Color3.new(1, 1, 1)
+
+				-- Update Level
+				levelLabel.Text = props.IsPurchased and `Level {helperData.Level}` or ""
+
+				-- Update Stats
+				local preparedData = StatsIndexer.Prepare(helperData)
+				createStats(preparedData, innerStatsContainer)
+
+				-- Update Button State (disabled and or upgrade cost)
+				local btnText: TextLabel? = buyButton:FindFirstChild("ButtonText", true)
+				if btnText then btnText.Text = helperData.UpgradeCost end
+			end)
+		end
+	end
 
 	return tooltipContainer
 end
@@ -323,6 +377,7 @@ end
 function Tooltip.Initialize()
 	-- //SECTION - Bindables
 	type itemData = {
+		ItemLevel: number?,
 		ItemBaseCost: number,
 		ItemUpgradeCost: number,
 		ItemDescription: string,
@@ -348,6 +403,7 @@ function Tooltip.Initialize()
 			Tooltip.ClearExisting(data.Owner)
 
 			Tooltip.Existing[data.Owner] = Tooltip.Create({
+				ItemLevel = data.ItemLevel,
 				ItemBaseCost = data.ItemBaseCost,
 				ItemUpgradeCost = data.ItemUpgradeCost,
 				ItemDescription = data.ItemDescription,

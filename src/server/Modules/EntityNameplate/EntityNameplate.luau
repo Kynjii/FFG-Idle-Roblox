@@ -153,7 +153,7 @@ function EntityNameplate.Create(props: Props)
 		jobInfoText.Font = FFGEnum.THEME.bigFont
 		jobInfoText.LayoutOrder = 1
 		jobInfoText.Size = UDim2.fromScale(0.5, 1)
-		jobInfoText.Text = jobCategory == FFGEnum.CLASS.ENTITY_NAME.Boat and `{entity.CurrentFPS}/s` or entity.CurrentMaxStorage or ""
+		jobInfoText.Text = jobCategory == FFGEnum.CLASS.ENTITY_NAME.Boat and `{entity.CurrentFPS}/s` or entity.CurrentMaxStorage or entity.Stats.Storage or ""
 		jobInfoText.TextColor3 = FFGEnum.THEME.color.Blue
 		jobInfoText.TextStrokeTransparency = 0.7
 		jobInfoText.TextScaled = true
@@ -243,12 +243,16 @@ function EntityNameplate.Update(entityBillboard: BillboardGui, class: Boat | Ten
 		if qualityLabel then qualityLabel.Text = FFGEnum.QUALITIES[typedClass.QualityId or typedClass.Tier].Label or "" end
 	end
 
-	if jobInfoIcon then jobInfoIcon.Image = EntityNameplate.JobIconImage[typedClass.JobCategory] or EntityNameplate.JobIconImage.None end
+	local jobCategory = typedClass.JobCategory or typedClass.Entity
+	if jobInfoIcon then jobInfoIcon.Image = EntityNameplate.JobIconImage[jobCategory] or EntityNameplate.JobIconImage.None end
 
-	if jobInfoText then jobInfoText.Text = typedClass.JobCategory == FFGEnum.CLASS.ENTITY_NAME.Boat and `{typedClass.FPS}/s` or typedClass.CurrentMaxStorage or "" end
+	local storageText = typedClass.CurrentMaxStorage or typedClass.Stats.Storage
+	if jobInfoText then jobInfoText.Text = jobCategory == FFGEnum.CLASS.ENTITY_NAME.Boat and `{typedClass.FPS}/s` or storageText or "" end
 
-	local hasProgressBar = entityBillboard:FindFirstChild("ProgressContainer", true)
-	if hasProgressBar then EntityNameplate.UpdateProgress(hasProgressBar, class) end
+	if class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Helper and class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Building then
+		local hasProgressBar = entityBillboard:FindFirstChild("ProgressContainer", true)
+		if hasProgressBar then EntityNameplate.UpdateProgress(hasProgressBar, class) end
+	end
 end
 
 function EntityNameplate.CreateProgressBar(parent: BillboardGui, class: Boat | Tender | PortStorage | Building | Helper)
@@ -268,7 +272,7 @@ function EntityNameplate.CreateProgressBar(parent: BillboardGui, class: Boat | T
 		progressContainer.Visible = true
 	end
 
-	if class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Building then
+	if class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Helper and class.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Building then
 		if progressBarText then progressBarText.Text = `{Format.CurrencyNumber(class.FishInStorage)} / {Format.CurrencyNumber(class.CurrentMaxStorage)}` end
 		if progressBarFrame then ProgressBar.Update(progressBarFrame, class.FishInStorage, class.CurrentMaxStorage) end
 	else

@@ -11,6 +11,7 @@ local props = {
 
 local function story(target)
 	local tooltip = Tooltip.Create({
+		ItemLevel = 5,
 		ItemImage = "rbxassetid://135112095865386",
 		ItemQualityId = 1,
 		BackgroundColor3 = props.BackgroundColor3,

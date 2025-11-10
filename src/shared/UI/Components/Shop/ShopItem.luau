@@ -15,6 +15,7 @@ local function ShopItem(
 		SliceCenter: Rect?,
 		Visible: boolean?,
 		HoverEffect: boolean?,
+		ItemLevel: number?,
 		ItemImage: string,
 		ItemName: string,
 		ItemId: string,
@@ -114,64 +115,66 @@ local function ShopItem(
 	-- //!SECTION
 
 	-- //SECTION -  Item Price
-	local priceContainer = Instance.new("Frame")
-	priceContainer.Name = "PriceContainer"
-	priceContainer.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
-	priceContainer.Size = UDim2.fromScale(1, 0.2)
-	priceContainer.LayoutOrder = 3
-	priceContainer.BackgroundTransparency = 1
-	priceContainer.Parent = mainContainer
+	if not props.IsPurchased then
+		local priceContainer = Instance.new("Frame")
+		priceContainer.Name = "PriceContainer"
+		priceContainer.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
+		priceContainer.Size = UDim2.fromScale(1, 0.2)
+		priceContainer.LayoutOrder = 3
+		priceContainer.BackgroundTransparency = 1
+		priceContainer.Parent = mainContainer
 
-	local priceContainerGradient = Instance.new("ImageLabel")
-	priceContainerGradient.Name = "Gradient"
-	priceContainerGradient.Image = "rbxassetid://74369602913754"
-	priceContainerGradient.Size = UDim2.fromScale(0.99, 1)
-	priceContainerGradient.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
-	priceContainerGradient.Position = FFGEnum.THEME.alignment.position.center
-	priceContainerGradient.ImageColor3 = Color3.fromRGB(1, 1, 1)
-	priceContainerGradient.ImageTransparency = 0.7
-	priceContainerGradient.Rotation = 180
-	priceContainerGradient.BackgroundTransparency = 1
-	priceContainerGradient.Parent = priceContainer
+		local priceContainerGradient = Instance.new("ImageLabel")
+		priceContainerGradient.Name = "Gradient"
+		priceContainerGradient.Image = "rbxassetid://74369602913754"
+		priceContainerGradient.Size = UDim2.fromScale(0.99, 1)
+		priceContainerGradient.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
+		priceContainerGradient.Position = FFGEnum.THEME.alignment.position.center
+		priceContainerGradient.ImageColor3 = Color3.fromRGB(1, 1, 1)
+		priceContainerGradient.ImageTransparency = 0.7
+		priceContainerGradient.Rotation = 180
+		priceContainerGradient.BackgroundTransparency = 1
+		priceContainerGradient.Parent = priceContainer
 
-	local priceContainerGradientCorner = Instance.new("UICorner")
-	priceContainerGradientCorner.CornerRadius = UDim.new(0.3)
-	priceContainerGradientCorner.Parent = priceContainerGradient
+		local priceContainerGradientCorner = Instance.new("UICorner")
+		priceContainerGradientCorner.CornerRadius = UDim.new(0.3)
+		priceContainerGradientCorner.Parent = priceContainerGradient
 
-	local priceContainerInner = Instance.new("Frame")
-	priceContainerInner.Size = UDim2.fromScale(1, 1)
-	priceContainerInner.LayoutOrder = 3
-	priceContainerInner.BackgroundTransparency = 1
-	priceContainerInner.Parent = priceContainer
+		local priceContainerInner = Instance.new("Frame")
+		priceContainerInner.Size = UDim2.fromScale(1, 1)
+		priceContainerInner.LayoutOrder = 3
+		priceContainerInner.BackgroundTransparency = 1
+		priceContainerInner.Parent = priceContainer
 
-	local currencyIcon = Instance.new("ImageLabel")
-	currencyIcon.Image = FFGEnum.UI.Icons.Gold
-	currencyIcon.BackgroundTransparency = 1
-	currencyIcon.Size = UDim2.fromScale(0.3, 0.9)
-	currencyIcon.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
-	currencyIcon.Parent = priceContainerInner
+		local currencyIcon = Instance.new("ImageLabel")
+		currencyIcon.Image = FFGEnum.UI.Icons.Gold
+		currencyIcon.BackgroundTransparency = 1
+		currencyIcon.Size = UDim2.fromScale(0.3, 0.9)
+		currencyIcon.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
+		currencyIcon.Parent = priceContainerInner
 
-	local currencyIconAspect = Instance.new("UIAspectRatioConstraint")
-	currencyIconAspect.Parent = currencyIcon
+		local currencyIconAspect = Instance.new("UIAspectRatioConstraint")
+		currencyIconAspect.Parent = currencyIcon
 
-	local ItemBaseCostTxt = Instance.new("TextLabel")
-	ItemBaseCostTxt.BorderSizePixel = 0
-	ItemBaseCostTxt.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
-	ItemBaseCostTxt.TextColor3 = FFGEnum.THEME.color.white
-	ItemBaseCostTxt.BackgroundTransparency = 1
-	ItemBaseCostTxt.LayoutOrder = 2
-	ItemBaseCostTxt.Text = props.ItemBaseCost
-	ItemBaseCostTxt.Font = FFGEnum.THEME.bigFont
-	ItemBaseCostTxt.Size = UDim2.fromScale(0.5, 0.9)
-	ItemBaseCostTxt.TextScaled = true
-	ItemBaseCostTxt.Parent = priceContainerInner
+		local ItemBaseCostTxt = Instance.new("TextLabel")
+		ItemBaseCostTxt.BorderSizePixel = 0
+		ItemBaseCostTxt.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
+		ItemBaseCostTxt.TextColor3 = FFGEnum.THEME.color.white
+		ItemBaseCostTxt.BackgroundTransparency = 1
+		ItemBaseCostTxt.LayoutOrder = 2
+		ItemBaseCostTxt.Text = props.ItemBaseCost
+		ItemBaseCostTxt.Font = FFGEnum.THEME.bigFont
+		ItemBaseCostTxt.Size = UDim2.fromScale(0.5, 0.9)
+		ItemBaseCostTxt.TextScaled = true
+		ItemBaseCostTxt.Parent = priceContainerInner
 
-	local priceContainerList = Instance.new("UIListLayout")
-	priceContainerList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	priceContainerList.VerticalAlignment = Enum.VerticalAlignment.Center
-	priceContainerList.FillDirection = Enum.FillDirection.Horizontal
-	priceContainerList.SortOrder = Enum.SortOrder.LayoutOrder
-	priceContainerList.Parent = priceContainerInner
+		local priceContainerList = Instance.new("UIListLayout")
+		priceContainerList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		priceContainerList.VerticalAlignment = Enum.VerticalAlignment.Center
+		priceContainerList.FillDirection = Enum.FillDirection.Horizontal
+		priceContainerList.SortOrder = Enum.SortOrder.LayoutOrder
+		priceContainerList.Parent = priceContainerInner
+	end
 	-- //!SECTION
 
 	-- //SECTION - UI List Layout
@@ -191,9 +194,10 @@ local function ShopItem(
 		local bindableEvent = Events.GetBindableEvent(Events.BindableNames.ShowTooltip)
 		if bindableEvent then
 			local itemData = {
+				ItemLevel = props.ItemLevel,
 				ItemImage = props.ItemImage,
 				ItemBaseCost = props.ItemBaseCost,
-				ItemUpgradeCost = props.UpgradeCost,
+				ItemUpgradeCost = props.ItemUpgradeCost,
 				ItemName = props.ItemName,
 				ItemId = props.ItemId,
 				ItemDescription = props.ItemDescription,

@@ -8,6 +8,7 @@ local ShopGUI = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopGUI)
 local ShopItem = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopItem)
 local Tooltip = require(ReplicatedStorage.Shared.UI.Components.Tooltips.Tooltip)
 local Format = require(ReplicatedStorage.Shared.Utils.Format)
+local StatsIndexer = require(ReplicatedStorage.Shared.Utils.StatsIndexer)
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -31,15 +32,10 @@ function clearExistingTooltip()
 end
 
 function createitemComponent(helper: HelperType.HelperData)
-	local preparedStatData: { [number]: { [string]: any } }? = {}
-
-	local index = 1
-	for statName, statValue in pairs(helper.Stats) do
-		preparedStatData[index] = { Label = statName, Value = statValue }
-		index += 1
-	end
+	local preparedStatData = StatsIndexer.Prepare(helper)
 
 	return ShopItem({
+		ItemLevel = helper.Level,
 		ItemImage = helper.ItemImage,
 		ItemName = helper.Name,
 		ItemId = helper.Id,

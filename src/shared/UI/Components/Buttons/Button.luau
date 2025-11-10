@@ -41,6 +41,7 @@ function Button.Create(props: {
 	local buttonText: TextLabel?
 	if props.Text then
 		buttonText = Instance.new("TextLabel")
+		buttonText.Name = "ButtonText"
 		buttonText.Font = FFGEnum.THEME.bigFont
 		buttonText.Text = props.Text
 		buttonText.LayoutOrder = 2
@@ -55,6 +56,7 @@ function Button.Create(props: {
 
 	if props.CurrencyType == "Gold" then
 		local currencyIcon = Instance.new("ImageLabel")
+		currencyIcon.Name = "CurrencyIcon"
 		currencyIcon.Image = FFGEnum.UI.Icons.Gold
 		currencyIcon.LayoutOrder = 1
 		currencyIcon.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
