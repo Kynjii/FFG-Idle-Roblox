@@ -123,7 +123,7 @@ function PB.CreateLogic(class)
 	class.ButtonDebounce = false
 
 	local function handleUpgrade(class)
-		Events.FireBindableEvent(Events.BindableNames.PurchaseEntity, class)
+		Events.FireBindableEvent(Events.BindableNames.PurchaseEntity, { Id = class.Id, Player = class.Player })
 	end
 
 	class._cleaner:Add(buttonBase.Touched:Connect(function(hit)
