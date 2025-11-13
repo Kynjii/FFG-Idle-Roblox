@@ -20,6 +20,7 @@ export type JobState = {
 		AssignedHelpers: AssignedHelper,
 		UnlockCost: number?,
 	},
+	Unlocked: boolean,
 	Player: Player,
 }
 
@@ -35,6 +36,7 @@ Jobs.Data = {
 			LockedSlots = 2,
 			AssignedHelpers = {},
 		},
+		Unlocked = false,
 	},
 	[2] = {
 		Id = 2,
@@ -46,6 +48,7 @@ Jobs.Data = {
 			LockedSlots = 2,
 			AssignedHelpers = {},
 		},
+		Unlocked = false,
 	},
 	[3] = {
 		Id = 3,
@@ -57,6 +60,7 @@ Jobs.Data = {
 			LockedSlots = 2,
 			AssignedHelpers = {},
 		},
+		Unlocked = false,
 	},
 	[4] = {
 		Id = 4,
@@ -68,6 +72,7 @@ Jobs.Data = {
 			LockedSlots = 2,
 			AssignedHelpers = {},
 		},
+		Unlocked = false,
 	},
 	[5] = {
 		Id = 5,
@@ -79,6 +84,7 @@ Jobs.Data = {
 			LockedSlots = 2,
 			AssignedHelpers = {},
 		},
+		Unlocked = false,
 	},
 	[6] = {
 		Id = 6,
@@ -90,6 +96,7 @@ Jobs.Data = {
 			LockedSlots = 2,
 			AssignedHelpers = {},
 		},
+		Unlocked = false,
 	},
 }
 

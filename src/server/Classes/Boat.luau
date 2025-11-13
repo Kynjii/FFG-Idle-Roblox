@@ -14,6 +14,7 @@ local Formulas = require(ServerScriptService.Server.Math.Formulas)
 local EntityNameplate = require(ServerScriptService.Server.Modules.EntityNameplate.EntityNameplate)
 local PopUp = require(ServerScriptService.Server.Modules.Tweens.PopUp)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
+local Events = require(ReplicatedStorage.Shared.Events.Events)
 local BuffType = require(ReplicatedStorage.Shared.Types.BuffType)
 local DeepWait = require(ReplicatedStorage.Shared.Utils.DeepWait)
 local SetInterval = require(ServerScriptService.Server.Modules.SetInterval)
@@ -142,6 +143,8 @@ function Boat.Purchase(self: Boat): ()
 	self:Save()
 
 	if self.Tier == 1 then Tutorial.Update(self.Player, self.TeamId) end
+
+	Events.FireBindableEvent(Events.BindableNames.JobUnlocked, self.Tier)
 end
 
 function Boat.Upgrade(self: Boat): ()

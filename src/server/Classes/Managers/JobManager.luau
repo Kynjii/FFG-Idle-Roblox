@@ -133,6 +133,17 @@ function JobManager.UpdateNewJobState(self: JobManager, jobId: number, helper: H
 	end
 end
 
+function JobManager.UnlockJob(self: JobManager, jobId: number)
+	local job: Jobs.JobState = self.JobState[jobId]
+	if job then
+		local isUnlocked = job.Unlocked
+
+		if not isUnlocked then job.Unlocked = true end
+
+		DataService.SaveJobState(self.Player, job)
+	end
+end
+
 function JobManager.PurchaseJobSlot(self: JobManager, jobId: number)
 	local job: Jobs.JobState = self.JobState[jobId]
 	if job then
@@ -343,7 +354,7 @@ function JobManager.AttachEventListeners(self: JobManager): ()
 		end))
 	end
 
-	-- Remote Events for handling job cycle
+	-- Bindable Events for handling job cycle
 	local helperAtGatheringLoc = Events.GetBindableEvent(Events.BindableNames.HelperAtGatheringLoc)
 	if helperAtGatheringLoc then
 		self._cleaner:Add(helperAtGatheringLoc.Event:Connect(function(data)
@@ -398,6 +409,11 @@ function JobManager.AttachEventListeners(self: JobManager): ()
 	if jobDataEvent then jobDataEvent.OnServerInvoke = function(player: Player)
 		return self.JobState
 	end end
+
+	local unlockJobEvent = Events.GetBindableEvent(Events.BindableNames.JobUnlocked)
+	if unlockJobEvent then unlockJobEvent.Event:Connect(function(jobId: number)
+		if jobId and typeof(jobId) == "number" then self:UnlockJob(jobId) end
+	end) end
 end
 -- //!SECTION
 

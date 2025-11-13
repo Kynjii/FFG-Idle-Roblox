@@ -45,7 +45,12 @@ function CrewManagementPanel.Create(player: Player, jobsData, crewData, jobCateg
 	availableJobs.Parent = crewManagementContainer
 
 	-- Handle Available Jobs
+	local jobCount = 0
 	for id, job in ipairs(jobsData) do
+		if not job.Unlocked then continue end
+
+		jobCount += 1
+
 		local jobData = job
 		local preparedData = TableUtil.Copy(jobData)
 		preparedData.Player = player
@@ -53,6 +58,8 @@ function CrewManagementPanel.Create(player: Player, jobsData, crewData, jobCateg
 		availableJob.LayoutOrder = id
 		availableJob.Parent = availableJobs
 	end
+
+	if jobCount == 0 then CrewManagementPanel.AddEmptyState(availableJobs, "Purchase a Fishing Boat to see jobs.") end
 
 	local availableCrew = Instance.new("ScrollingFrame")
 	availableCrew.Name = "AvailableCrew"
@@ -91,22 +98,26 @@ function CrewManagementPanel.Create(player: Player, jobsData, crewData, jobCateg
 		index += 1
 	end
 
-	if index == 1 then
-		local emptyState = Instance.new("TextLabel")
-		emptyState.Name = "Empty State"
-		emptyState.Font = FFGEnum.THEME.bigFont
-		emptyState.TextColor3 = FFGEnum.THEME.color.white
-		emptyState.BackgroundTransparency = 1
-		emptyState.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
-		emptyState.Position = FFGEnum.THEME.alignment.position.center
-		emptyState.Text = "Purchase Crew Members from the Crew Shop to assign them."
-		emptyState.TextScaled = true
-		emptyState.Parent = availableCrew
-	end
+	if index == 1 then CrewManagementPanel.AddEmptyState(availableCrew, "Purchase Crew Members from the Crew Shop to assign them.") end
 
 	availableCrew.Parent = crewManagementContainer
 
 	return crewManagementContainer
+end
+
+function CrewManagementPanel.AddEmptyState(parent: Instance, text: string)
+	local emptyState = Instance.new("TextLabel")
+	emptyState.Name = "EmptyState"
+	emptyState.Font = FFGEnum.THEME.bigFont
+	emptyState.TextColor3 = FFGEnum.THEME.color.white
+	emptyState.BackgroundTransparency = 1
+	emptyState.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
+	emptyState.Position = FFGEnum.THEME.alignment.position.center
+	emptyState.Text = text
+	emptyState.TextScaled = true
+	emptyState.Parent = parent
+
+	return emptyState
 end
 
 return CrewManagementPanel

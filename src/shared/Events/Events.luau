@@ -60,6 +60,9 @@ Events.BindableNames = {
 	EntityUpdated = "EntityUpdated",
 	UpdateState = "UpdateState",
 
+	-- Jobs
+	JobUnlocked = "JobUnlocked",
+
 	-- Helper Purchase
 	HelperUpgraded = "HelperUpgraded",
 	PurchasedHelper = "PurchasedHelper",
