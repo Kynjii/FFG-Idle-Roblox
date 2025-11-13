@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
+local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
 local AvailableHelperListItem = require(ReplicatedStorage.Shared.UI.Components.Jobs.AvailableHelperListItem)
 local AvailableJobListItem = require(ReplicatedStorage.Shared.UI.Components.Jobs.AvailableJobListItem)
@@ -88,6 +89,19 @@ function CrewManagementPanel.Create(player: Player, jobsData, crewData, jobCateg
 		availableHelper.Parent = availableCrew
 
 		index += 1
+	end
+
+	if index == 1 then
+		local emptyState = Instance.new("TextLabel")
+		emptyState.Name = "Empty State"
+		emptyState.Font = FFGEnum.THEME.bigFont
+		emptyState.TextColor3 = FFGEnum.THEME.color.white
+		emptyState.BackgroundTransparency = 1
+		emptyState.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
+		emptyState.Position = FFGEnum.THEME.alignment.position.center
+		emptyState.Text = "Purchase Crew Members from the Crew Shop to assign them."
+		emptyState.TextScaled = true
+		emptyState.Parent = availableCrew
 	end
 
 	availableCrew.Parent = crewManagementContainer
