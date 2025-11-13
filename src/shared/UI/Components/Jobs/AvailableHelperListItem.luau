@@ -35,7 +35,7 @@ function AvailableHelperListItem.Create(helper: HelperType.HelperData, selectedH
 	container.Position = FFGEnum.THEME.alignment.position.center
 	container.Size = UDim2.fromScale(1, 1)
 	KinUI.ApplyList(container, Enum.FillDirection.Vertical)
-	KinUI.AddPadding(container, "XL")
+	KinUI.AddPadding(container, "L")
 
 	local textLabel = Instance.new("TextLabel")
 	textLabel.Name = "HelperName"
@@ -172,7 +172,7 @@ function AvailableHelperListItem.Create(helper: HelperType.HelperData, selectedH
 	helperStatsContainer.LayoutOrder = 2
 	helperStatsContainer.Size = UDim2.fromScale(1, 0.8)
 	helperStatsContainer.BackgroundTransparency = 1
-	KinUI.ApplyList(helperStatsContainer, Enum.FillDirection.Vertical)
+	KinUI.ApplyList(helperStatsContainer, Enum.FillDirection.Vertical, { Padding = "M" })
 	KinUI.AddPadding(helperStatsContainer, "M")
 	helperStatsContainer.Parent = helperInfo
 
@@ -220,7 +220,6 @@ function AvailableHelperListItem.Create(helper: HelperType.HelperData, selectedH
 			statElementLabel.Font = FFGEnum.THEME.bigFont
 			statElementLabel.BackgroundTransparency = 1
 			statElementLabel.Size = UDim2.fromScale(0.5, 1)
-			KinUI.ApplyTextConstraints(statElementLabel, "body")
 			statElementLabel.Parent = statFrameContainer
 
 			local statType = Format.GetStatType(stat.Label)
@@ -237,7 +236,6 @@ function AvailableHelperListItem.Create(helper: HelperType.HelperData, selectedH
 			statElementValue.Font = FFGEnum.THEME.bigFont
 			statElementValue.BackgroundTransparency = 1
 			statElementValue.Size = UDim2.fromScale(0.5, 1)
-			KinUI.ApplyTextConstraints(statElementValue, "body")
 			statElementValue.Parent = statFrameContainer
 		end
 	end

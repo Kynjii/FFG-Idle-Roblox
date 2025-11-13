@@ -37,7 +37,7 @@ function Button.Create(props: {
 	button.SliceCenter = Rect.new(25, 64, 39, 161)
 	button.BackgroundTransparency = 1
 	button.Size = props.Size or UDim2.fromScale(1, 1)
-	KinUI.AddPadding(button, "S")
+	KinUI.AddPadding(button, "M")
 
 	local buttonText: TextLabel?
 	if props.Text then
@@ -46,10 +46,11 @@ function Button.Create(props: {
 		buttonText.Font = FFGEnum.THEME.bigFont
 		buttonText.Text = props.Text
 		buttonText.LayoutOrder = 2
+		buttonText.AutomaticSize = Enum.AutomaticSize.X
 		buttonText.TextColor3 = FFGEnum.THEME.color.white
 		buttonText.BackgroundTransparency = 1
 		buttonText.TextScaled = true
-		buttonText.Size = UDim2.fromScale(0.7, 0.5)
+		buttonText.Size = UDim2.fromScale(0.7, 0.8)
 		buttonText.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
 		buttonText.Position = FFGEnum.THEME.alignment.position.textCenter
 		buttonText.Parent = button
@@ -63,13 +64,11 @@ function Button.Create(props: {
 		currencyIcon.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
 		currencyIcon.Position = FFGEnum.THEME.alignment.position.center
 		currencyIcon.BackgroundTransparency = 1
-		currencyIcon.Size = UDim2.fromScale(0.25, 0.25)
+		currencyIcon.Size = UDim2.fromScale(0.2, 0.2)
 		KinUI.ApplyAspect(currencyIcon)
 		currencyIcon.Parent = button
 
-		if buttonText then buttonText.Size = UDim2.fromScale(0.3, 1) end
-
-		KinUI.ApplyList(button, Enum.FillDirection.Horizontal, { HAlign = Enum.HorizontalAlignment.Center, VAlign = Enum.VerticalAlignment.Center })
+		KinUI.ApplyList(button, Enum.FillDirection.Horizontal, { HAlign = Enum.HorizontalAlignment.Center, VAlign = Enum.VerticalAlignment.Center, Padding = "S" })
 	end
 
 	local baseSize = button.Size
