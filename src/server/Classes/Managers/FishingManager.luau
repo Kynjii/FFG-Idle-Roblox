@@ -1,6 +1,8 @@
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 
+local Fish = require(ServerScriptService.Server.Classes.Fish)
 local Trove = require(ReplicatedStorage.Packages.Trove)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
@@ -12,40 +14,6 @@ local taggedFishingLocs = CollectionService:GetTagged("FishingLocation")
 local FishingManager = {}
 FishingManager.__index = FishingManager
 
--- number index for testing, use proper random algo (use helper quality algo)
-local fishArray = {
-	[1] = {
-		Name = "Flynn",
-		QualityId = 1,
-		MaxHP = 100,
-	},
-	[2] = {
-		Name = "Lucy",
-		QualityId = 2,
-		MaxHP = 150,
-	},
-	[3] = {
-		Name = "Imke",
-		QualityId = 3,
-		MaxHP = 200,
-	},
-	[4] = {
-		Name = "Dean",
-		QualityId = 4,
-		MaxHP = 250,
-	},
-	[5] = {
-		Name = "Charlie",
-		QualityId = 5,
-		MaxHP = 300,
-	},
-	[6] = {
-		Name = "Luey",
-		QualityId = 6,
-		MaxHP = 400,
-	},
-}
-
 type FishingManager = typeof(setmetatable({}, FishingManager))
 
 function FishingManager.New(player: Player, teamId: number)
@@ -55,6 +23,7 @@ function FishingManager.New(player: Player, teamId: number)
 	self.Owner = self.Owner or player.UserId
 	self.TeamId = teamId
 	self.FishingLocations = self:GetLocations()
+	self.GeneratedFish = {}
 
 	self._cleaner = Trove.new()
 
@@ -80,8 +49,20 @@ function FishingManager.GetLocations(self: FishingManager)
 	return locations
 end
 
-function FishingManager.GetRandomFish(self: FishingManager)
-	return fishArray[math.random(1, #fishArray)]
+function FishingManager.GetRandomFish(self: FishingManager, fishingLocTier)
+	local fish = Fish.New({}, self.Player, self.TeamId, fishingLocTier)
+	if fish then self.GeneratedFish[fish.Id] = fish end
+	print(self.GeneratedFish[fish.Id])
+	return fish
+end
+
+function FishingManager.SaveCaughtFish(self: FishingManager, caughtFishId)
+	-- //TODO - add some kind of report to identify potential hacker
+	if not self.GeneratedFish[caughtFishId] then return end
+
+	local fish = self.GeneratedFish[caughtFishId]
+	-- //TODO - create fish model, add to player etc.
+	fish:Save()
 end
 
 function FishingManager.GetPlayerRod(self: FishingManager)
@@ -91,6 +72,7 @@ end
 function FishingManager.SetupProximityPrompts(self: FishingManager)
 	for _, location in pairs(self.FishingLocations) do
 		local taggedLocationTeamId = location:GetAttribute(FFGEnum.ATTRIBUTES.TeamId)
+		local taggedLocationTier = location:GetAttribute(FFGEnum.ATTRIBUTES.Tier)
 		local proximityPrompt = Instance.new("ProximityPrompt")
 		proximityPrompt.ObjectText = `Tier {taggedLocationTeamId}`
 		proximityPrompt.ActionText = "Begin Fishing"
@@ -99,7 +81,7 @@ function FishingManager.SetupProximityPrompts(self: FishingManager)
 		self._cleaner:Add(proximityPrompt.Triggered:Connect(function(player: Player)
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
 
-			Events.FireEvent(Events.RemoteNames.StartFishingMiniGame, player, { Fish = self:GetRandomFish(), Rod = self:GetPlayerRod() })
+			Events.FireEvent(Events.RemoteNames.StartFishingMiniGame, player, { Fish = self:GetRandomFish(taggedLocationTier), Rod = self:GetPlayerRod() })
 		end))
 	end
 end
@@ -113,6 +95,14 @@ function FishingManager.AttachAttListeners(self: FishingManager)
 			return { Fish = self:GetRandomFish(), Rod = self:GetPlayerRod() }
 		end
 		self._cleaner:Add(getFishItemEvent)
+	end
+
+	local caughtFishEvent = Events.GetRemote(Events.RemoteNames.FishCaught)
+	if caughtFishEvent then
+		self._cleaner:Add(caughtFishEvent.OnServerEvent:Connect(function(player: Player, fishId: string)
+			if self.Player ~= player or self.Owner ~= player.UserId then return end
+			self:SaveCaughtFish(fishId)
+		end))
 	end
 end
 

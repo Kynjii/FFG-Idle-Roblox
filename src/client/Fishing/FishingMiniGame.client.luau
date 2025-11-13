@@ -24,9 +24,9 @@ ProgressBar.Reset(pbFrame)
 ProgressBar.Show(fishCounterContainer)
 
 type PlayerRod = { Name: string, QualityId: number, BaseDmg: number }
-type Fish = { Name: string, QualityId: number, MaxHP: number }
+type Fish = { Id: string, QualityId: number, MaxHP: number }
 
-local caughtFish: Fish
+local hookedFish: Fish
 local playerRod: PlayerRod
 
 local elements = {
@@ -126,20 +126,21 @@ local function startLosingHP()
 	task.wait(1)
 	task.spawn(function()
 		while isLosingHP do
-			currentFishHP -= caughtFish.MaxHP / 40
+			currentFishHP -= hookedFish.MaxHP / 40
 
 			if currentFishHP <= 0 then
 				currentFishHP = 0
 				isLosingHP = false
 			end
 
-			ProgressBar.Update(pbFrame, currentFishHP, caughtFish.MaxHP)
+			ProgressBar.Update(pbFrame, currentFishHP, hookedFish.MaxHP)
 			task.wait(1)
 		end
 	end)
 end
 
 local getFishingDataEvent = Events.GetRemoteFn(Events.RemoteFunctionNames.GetFishItem)
+local caughtFishEvent = Events.GetRemote(Events.RemoteNames.FishCaught)
 
 if catchButton then
 	catchButton.Activated:Connect(function()
@@ -162,30 +163,29 @@ if catchButton then
 		local newHp = currentHp + hpAdded
 		currentFishHP = newHp
 
-		if newHp >= caughtFish.MaxHP then
-			print(`GREAT CATCH! You caught a {caughtFish.Name}`)
+		if newHp >= hookedFish.MaxHP then
 			currentFishHP = 0
+
+			caughtFishEvent:FireServer(hookedFish.Id)
 
 			local data = getFishingDataEvent:InvokeServer()
 			if data then
-				caughtFish = data.Fish
+				hookedFish = data.Fish
 				playerRod = data.Rod
 			end
 		end
 		relocateHitContainer()
 
-		ProgressBar.Update(pbFrame, currentFishHP, caughtFish.MaxHP)
+		ProgressBar.Update(pbFrame, currentFishHP, hookedFish.MaxHP)
 
 		if area > 0 then startLosingHP() end
 	end)
 end
 
--- Events
--- Open UI
 local startGameEvent = Events.GetRemote(Events.RemoteNames.StartFishingMiniGame)
 if startGameEvent then startGameEvent.OnClientEvent:Connect(function(data: { Fish: {}, Rod: {} })
 	screenGui.Enabled = true
 
-	caughtFish = data.Fish
+	hookedFish = data.Fish
 	playerRod = data.Rod
 end) end

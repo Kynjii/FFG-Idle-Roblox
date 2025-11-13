@@ -28,6 +28,7 @@ Events.RemoteNames = {
 
 	-- Player Fishing
 	StartFishingMiniGame = "StartFishingMiniGame",
+	FishCaught = "FishCaught",
 }
 
 Events.RemoteFunctionNames = {

@@ -100,6 +100,7 @@ FFGEnum.CLASS = {
 		Building = "Building",
 		Shop = "Shop",
 		Helper = "Helper",
+		Fish = "Fish",
 	},
 }
 
