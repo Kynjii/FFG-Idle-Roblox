@@ -355,7 +355,7 @@ function FishCalculator.GenerateStats(qualityId: number): (number, number)
 	local qualityMult = getQualityMult(qualityId)
 
 	-- Base values for fish stats
-	local baseMaxHP = 100
+	local baseMaxHP = 100 * qualityId
 	local baseWeight = 1.0
 
 	-- Apply quality multiplier

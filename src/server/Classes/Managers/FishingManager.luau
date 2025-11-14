@@ -68,8 +68,8 @@ function FishingManager.GetLocations(self: FishingManager)
 	return locations
 end
 
-function FishingManager.GetRandomFish(self: FishingManager)
-	local fish = Fish.New({}, self.Player, self.TeamId, self.CurrentFishingLocTier, self.RealmId)
+function FishingManager.GetRandomFish(self: FishingManager, fishingLocTier: number)
+	local fish = Fish.New({}, self.Player, self.TeamId, fishingLocTier, self.RealmId)
 	if fish then self.GeneratedFish[fish.Id] = fish end
 	return fish
 end
@@ -103,6 +103,7 @@ function FishingManager.SetupProximityPrompts(self: FishingManager)
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
 
 			self.CurrentFishingLocTier = taggedLocationTier
+			print(self.CurrentFishingLocTier)
 
 			Events.FireEvent(Events.RemoteNames.StartFishingMiniGame, player, { Fish = self:GetRandomFish(taggedLocationTier, self.RealmId), Rod = self:GetPlayerRod() })
 		end))
