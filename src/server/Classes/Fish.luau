@@ -69,7 +69,7 @@ function Fish.New(state, player: Player, teamId: number, fishingLocTier: number,
 	self.Species = state.Species or specieData.Species
 	self.Variant = state.Variant or specieData.Variant
 	self.ItemImage = state.ItemImage or specieData.ItemImage
-	self.Name = state.Name or self.Species
+	self.Name = state.Name or FishCalculators.GetFishName(self.Species, self.Variant, self.RealmId)
 
 	-- Define quality first
 	self.QualityId = state.QualityId or self:DefineQuality(fishingLocTier)

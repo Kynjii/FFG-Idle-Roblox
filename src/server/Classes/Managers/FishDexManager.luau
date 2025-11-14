@@ -62,6 +62,8 @@ function FishDexManager.UpdateCaughtStatus(self: FishDexManager, caughtFish: Fis
 	if existing then existing.Caught = true end
 
 	self:Save()
+
+	Events.FireEvent(Events.RemoteNames.LootNotification, self.Player, { ItemType = "Fishing", Text = `Added {caughtFish.Name} to FishDex` })
 end
 
 function FishDexManager.AttachAttListeners(self: FishDexManager)
