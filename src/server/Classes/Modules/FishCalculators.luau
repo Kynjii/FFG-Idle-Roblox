@@ -411,6 +411,22 @@ function FishCalculator.ChooseSpecie(fishingLocTier: number?): { Species: string
 		end
 	end
 
+	-- Special check: Elder variants only for truly exclusive tier 6 species
+	if chosenVariant == FISH_VARIANT.ELDER then
+		local tier6ExclusiveSpecies = {
+			Coelacanth = true,
+			Stringfish = true,
+			PopeyedGoldfish = true,
+			BarbelSteed = true,
+			BarredKnifejaw = true,
+		}
+
+		if not tier6ExclusiveSpecies[chosenSpeciesKey] then
+			-- Reroll to normal or elemental for non-exclusive species
+			chosenVariant = (math.random() < 0.75) and FISH_VARIANT.NORMAL or FISH_VARIANT.ELEMENTAL
+		end
+	end
+
 	local speciesName = FISH_SPECIES[chosenSpeciesKey] or chosenSpeciesKey
 	local itemImage = FISH_ASSETS[chosenSpeciesKey] or FISH_ASSETS.Guppy
 
@@ -432,11 +448,14 @@ end
 function FishCalculator.GetAllFishVariations(): { { Species: string, Variant: string, ItemImage: string, SpeciesKey: string, Caught: boolean } }
 	local variations = {}
 
-	-- Get tier 6 species for elder variants
-	local tier6Species = {}
-	for speciesKey, _ in pairs(SPECIES_DROPS_BY_TIER[6]) do
-		tier6Species[speciesKey] = true
-	end
+	-- Only the 5 truly exclusive tier 6 species get elder variants
+	local tier6ExclusiveSpecies = {
+		Coelacanth = true,
+		Stringfish = true,
+		PopeyedGoldfish = true,
+		BarbelSteed = true,
+		BarredKnifejaw = true,
+	}
 
 	for speciesKey, speciesName in pairs(FISH_SPECIES) do
 		local itemImage = FISH_ASSETS[speciesKey] or FISH_ASSETS.Guppy
@@ -459,8 +478,8 @@ function FishCalculator.GetAllFishVariations(): { { Species: string, Variant: st
 			Caught = false,
 		})
 
-		-- Add elder variant (only tier 6 species)
-		if tier6Species[speciesKey] then
+		-- Add elder variant (only truly exclusive tier 6 species)
+		if tier6ExclusiveSpecies[speciesKey] then
 			table.insert(variations, {
 				Species = speciesName,
 				Variant = FISH_VARIANT.ELDER,

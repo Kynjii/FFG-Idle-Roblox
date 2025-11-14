@@ -41,6 +41,12 @@ local function ShopItem(
 	shopItemContainerAspect.AspectType = Enum.AspectType.ScaleWithParentSize
 	shopItemContainerAspect.Parent = shopItemContainer
 
+	local variant = {
+		normal = 1,
+		elemental = 2,
+		elder = 5,
+	}
+
 	local itemQualityBG = Instance.new("ImageLabel")
 	itemQualityBG.Name = "ItemBG"
 	itemQualityBG.Size = UDim2.fromScale(1, 1)
@@ -49,7 +55,7 @@ local function ShopItem(
 	itemQualityBG.BackgroundTransparency = 1
 	itemQualityBG.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
 	itemQualityBG.Position = FFGEnum.THEME.alignment.position.center
-	itemQualityBG.Image = FFGEnum.UI.Items.BackgroundQualityId[item.QualityId or item.Tier or 2]
+	itemQualityBG.Image = FFGEnum.UI.Items.BackgroundQualityId[item.QualityId or item.Tier or variant[item.Variant]]
 	itemQualityBG.Parent = shopItemContainer
 
 	-- //SECTION - Shop Item Outline
@@ -157,7 +163,7 @@ local function ShopItem(
 		ItemBaseCostTxt.TextColor3 = FFGEnum.THEME.color.white
 		ItemBaseCostTxt.BackgroundTransparency = 1
 		ItemBaseCostTxt.LayoutOrder = 2
-		ItemBaseCostTxt.Text = Format.CurrencyNumber(item.BaseCost or 0) or ""
+		ItemBaseCostTxt.Text = item.Caught and "CAUGHT" or Format.CurrencyNumber(item.BaseCost or 0) or ""
 		ItemBaseCostTxt.Font = FFGEnum.THEME.bigFont
 		ItemBaseCostTxt.Size = UDim2.fromScale(0.5, 0.9)
 		ItemBaseCostTxt.TextScaled = true

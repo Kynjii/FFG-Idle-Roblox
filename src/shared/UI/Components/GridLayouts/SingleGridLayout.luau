@@ -9,7 +9,7 @@ function SingleGridLayout.Create(props: {
 	scrollingFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 	scrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	scrollingFrame.BackgroundTransparency = 1
-	scrollingFrame.CanvasSize = UDim2.fromScale(0, 4)
+	scrollingFrame.CanvasSize = UDim2.fromScale(0, 10)
 	scrollingFrame.Position = UDim2.fromScale(0.5, 0.5)
 	scrollingFrame.ScrollBarImageColor3 = Color3.new()
 	scrollingFrame.ScrollBarThickness = 0
