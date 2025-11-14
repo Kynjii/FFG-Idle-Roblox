@@ -7,6 +7,7 @@ local FishDexManager = require(script.Parent.FishDexManager)
 local FishingManager = require(script.Parent.FishingManager)
 local HelperShopManager = require(script.Parent.HelperShopManager)
 local HelperManager = require(script.Parent.HelperManager)
+local InventoryManager = require(script.Parent.InventoryManager)
 local JobManager = require(script.Parent.JobManager)
 local BuildingsManagerType = require(ReplicatedStorage.Shared.Types.Managers.BuildingsManagerType)
 local ChainManagerType = require(ReplicatedStorage.Shared.Types.Managers.ChainManagerType)
@@ -65,6 +66,7 @@ TeamManager.HelperManager = {}
 TeamManager.JobManager = {}
 TeamManager.FishingManager = {}
 TeamManager.FishDexManager = {}
+TeamManager.InventoryManager = {}
 
 function TeamManager.CreateTeams(): ()
 	for i, team in ipairs(TeamManager.Teams) do
@@ -174,6 +176,17 @@ function TeamManager.AssignFishDexManager(profile, player: Player, teamId: numbe
 	TeamManager.FishDexManager[player.UserId] = fishDexManager
 end
 
+function TeamManager.AssignInventoryManager(profile, player: Player, teamId: number): ()
+	TeamManager.InventoryManager[player.UserId] = TeamManager.InventoryManager[player.UserId] or { OwnerId = player.UserId }
+
+	local inventoryState = profile.Inventory or {}
+
+	local assignInventoryManager = InventoryManager.New(inventoryState, player, teamId)
+	if not assignInventoryManager then return end
+
+	TeamManager.InventoryManager[player.UserId] = assignInventoryManager
+end
+
 function TeamManager.AssignTeam(player: Player): number?
 	local teams = Teams:GetTeams()
 	for i, team in ipairs(teams) do
@@ -198,6 +211,7 @@ function TeamManager.AssignManagers(profile, player: Player, teamId: number): ()
 	TeamManager.AssignJobManager(profile.Data, player, teamId)
 	TeamManager.AssignFishingManager(profile.Data, player, teamId)
 	TeamManager.AssignFishDexManager(profile.Data, player, teamId)
+	TeamManager.AssignInventoryManager(profile.Data, player, teamId)
 end
 
 local managerTypes = {
@@ -208,6 +222,7 @@ local managerTypes = {
 	Job = "Job",
 	Fishing = "Fishing",
 	FishDex = "FishDex",
+	Helper = "Helper",
 }
 
 local function listClean(list, userId, managerType): ()
@@ -228,7 +243,7 @@ local function listClean(list, userId, managerType): ()
 		TeamManager.BuildingsManager[userId] = nil
 	elseif managerType == managerTypes.Shop then
 		TeamManager.HelperShopManager[userId] = nil
-	elseif managerType == managerTypes.Inventory then
+	elseif managerType == managerTypes.Helper then
 		TeamManager.HelperManager[userId] = nil
 	elseif managerType == managerTypes.Job then
 		TeamManager.JobManager[userId] = nil
@@ -236,6 +251,8 @@ local function listClean(list, userId, managerType): ()
 		TeamManager.FishingManager[userId] = nil
 	elseif managerType == managerTypes.FishDex then
 		TeamManager.FishDexManager[userId] = nil
+	elseif managerType == managerTypes.Inventory then
+		TeamManager.InventoryManager[userId] = nil
 	end
 end
 
@@ -243,18 +260,20 @@ function TeamManager.CleanupPlayer(userId: number): ()
 	local chainList = TeamManager.ChainManagers[userId]
 	local buildingList = TeamManager.BuildingsManager[userId]
 	local helperShopList = TeamManager.HelperShopManager[userId]
-	local inventoryList = TeamManager.HelperManager[userId]
+	local helperManagerList = TeamManager.HelperManager[userId]
 	local jobList = TeamManager.JobManager[userId]
 	local fishingList = TeamManager.FishingManager[userId]
 	local fishDexList = TeamManager.FishDexManager[userId]
+	local inventoryList = TeamManager.InventoryManager[userId]
 
 	if chainList then listClean(chainList, userId, managerTypes.Chain) end
 	if buildingList then listClean(buildingList, userId, managerTypes.Building) end
 	if helperShopList then listClean(helperShopList, userId, managerTypes.Shop) end
-	if inventoryList then listClean(inventoryList, userId, managerTypes.Inventory) end
+	if helperManagerList then listClean(helperManagerList, userId, managerTypes.Helper) end
 	if jobList then listClean(jobList, userId, managerTypes.Job) end
 	if fishingList then listClean(fishingList, userId, managerTypes.Fishing) end
 	if fishDexList then listClean(fishDexList, userId, managerTypes.FishDex) end
+	if inventoryList then listClean(inventoryList, userId, managerTypes.Inventory) end
 end
 
 export type TeamManager = typeof(TeamManager)

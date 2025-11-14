@@ -10,6 +10,8 @@ local ShopGUI = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopGUI)
 local ShopItem = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopItem)
 local Tooltip = require(ReplicatedStorage.Shared.UI.Components.Tooltips.Tooltip)
 
+satchel:SetBackpackEnabled(false)
+
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
@@ -106,7 +108,7 @@ end
 
 if not game:IsLoaded() then game.Loaded:Wait() end
 
-task.wait(7)
+task.wait(10)
 satchel:SetBackpackEnabled(true)
 
 satchel.GetStateChangedEvent().Event:Connect(function(isOpened: boolean)

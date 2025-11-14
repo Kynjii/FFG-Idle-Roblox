@@ -37,7 +37,11 @@ local realmBuffs = {
 return {
 	CurrentRealm = 1,
 	GlobalBuffs = {},
-	FishDex = FishCalculators.GetAllFishVariations(),
+	FishDex = FishCalculators.GetAllFishVariations(1),
+	Inventory = {
+		Fish = {},
+		Equipment = {},
+	},
 	Realms = {
 		[1] = {
 			Lanes = 6,
@@ -48,7 +52,6 @@ return {
 			Buildings = {},
 			Buffs = realmBuffs,
 			Helpers = {},
-			FishInventory = {},
 			Shops = {},
 			Jobs = Jobs.Data,
 		},
@@ -61,7 +64,6 @@ return {
 			Buildings = {},
 			Buffs = realmBuffs,
 			Helpers = {},
-			FishInventory = {},
 			Shops = {},
 			Jobs = Jobs.Data,
 		},
@@ -74,7 +76,6 @@ return {
 			Buildings = {},
 			Buffs = realmBuffs,
 			Helpers = {},
-			FishInventory = {},
 			Shops = {},
 			Jobs = Jobs.Data,
 		},
@@ -87,7 +88,6 @@ return {
 			Buildings = {},
 			Buffs = realmBuffs,
 			Helpers = {},
-			FishInventory = {},
 			Shops = {},
 			Jobs = Jobs.Data,
 		},

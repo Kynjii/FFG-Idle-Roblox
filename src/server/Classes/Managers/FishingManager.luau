@@ -78,7 +78,6 @@ function FishingManager.SaveCaughtFish(self: FishingManager, caughtFishId)
 	if not self.GeneratedFish[caughtFishId] then return end
 
 	local fish = self.GeneratedFish[caughtFishId]
-	-- //TODO - create fish model, add to player etc.
 	fish:Save()
 
 	Notification.SendSuccess(self.Player, `GRATZ! You caught a {fish.Name}`)
@@ -91,19 +90,21 @@ end
 function FishingManager.SetupProximityPrompts(self: FishingManager)
 	for _, location in pairs(self.FishingLocations) do
 		local taggedLocationTeamId = location:GetAttribute(FFGEnum.ATTRIBUTES.TeamId)
+		if taggedLocationTeamId ~= self.TeamId then continue end
+
 		local taggedLocationTier = location:GetAttribute(FFGEnum.ATTRIBUTES.Tier)
 
-		self.CurrentFishingLocTier = taggedLocationTier
-
 		local proximityPrompt = Instance.new("ProximityPrompt")
-		proximityPrompt.ObjectText = `Tier {taggedLocationTeamId}`
+		proximityPrompt.ObjectText = `Tier {taggedLocationTier}`
 		proximityPrompt.ActionText = "Begin Fishing"
 		proximityPrompt.Parent = location
 
 		self._cleaner:Add(proximityPrompt.Triggered:Connect(function(player: Player)
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
 
-			Events.FireEvent(Events.RemoteNames.StartFishingMiniGame, player, { Fish = self:GetRandomFish(self.CurrentFishingLocTier, self.RealmId), Rod = self:GetPlayerRod() })
+			self.CurrentFishingLocTier = taggedLocationTier
+
+			Events.FireEvent(Events.RemoteNames.StartFishingMiniGame, player, { Fish = self:GetRandomFish(taggedLocationTier, self.RealmId), Rod = self:GetPlayerRod() })
 		end))
 	end
 end

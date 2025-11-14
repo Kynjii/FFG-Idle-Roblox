@@ -88,7 +88,7 @@ ReplicatedFirst:RemoveDefaultLoadingScreen()
 
 if not game:IsLoaded() then game.Loaded:Wait() end
 
-task.wait(7) -- Force screen to appear for a minimum number of seconds
+task.wait(10) -- Force screen to appear for a minimum number of seconds
 task.cancel(textUpdater)
 textUpdater = nil
 

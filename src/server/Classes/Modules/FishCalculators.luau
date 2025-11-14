@@ -103,6 +103,7 @@ local FISH_ASSETS = {
 	Stringfish = "rbxassetid://132952116869650",
 	Sweetfish = "rbxassetid://113656155322041",
 }
+FishCalculator.FISH_ASSETS = FISH_ASSETS
 
 -- Species drop chances by tier - higher tiers unlock rarer species
 local SPECIES_DROPS_BY_TIER = {
@@ -372,7 +373,7 @@ function FishCalculator.GenerateStats(qualityId: number): (number, number)
 	return maxHP, weight
 end
 
-function FishCalculator.ChooseSpecie(fishingLocTier: number?): { Species: string, Variant: string, ItemImage: string }
+function FishCalculator.ChooseSpecie(fishingLocTier: number?, realmId: number): { Species: string, SpeciesKey: string, Variant: string, ItemImage: string, Name: string, NameKey: string }
 	local tier = math.clamp(fishingLocTier or 1, 1, 6)
 	local availableSpecies = SPECIES_DROPS_BY_TIER[tier]
 
@@ -429,11 +430,15 @@ function FishCalculator.ChooseSpecie(fishingLocTier: number?): { Species: string
 
 	local speciesName = FISH_SPECIES[chosenSpeciesKey] or chosenSpeciesKey
 	local itemImage = FISH_ASSETS[chosenSpeciesKey] or FISH_ASSETS.Guppy
+	local name, nameKey = FishCalculator.GetFishName(speciesName, chosenSpeciesKey, chosenVariant, realmId)
 
 	return {
 		Species = speciesName,
+		SpeciesKey = chosenSpeciesKey,
 		Variant = chosenVariant,
 		ItemImage = itemImage,
+		Name = name,
+		NameKey = nameKey,
 	}
 end
 
@@ -445,7 +450,7 @@ function FishCalculator.GetFishAsset(speciesKey: string): string?
 	return FISH_ASSETS[speciesKey]
 end
 
-function FishCalculator.GetAllFishVariations(): { { Species: string, Variant: string, ItemImage: string, SpeciesKey: string, Caught: boolean } }
+function FishCalculator.GetAllFishVariations(realmId: number): { { Species: string, Variant: string, ItemImage: string, SpeciesKey: string, Caught: boolean, Name: string, NameKey: string } }
 	local variations = {}
 
 	-- Only the 5 truly exclusive tier 6 species get elder variants
@@ -461,30 +466,39 @@ function FishCalculator.GetAllFishVariations(): { { Species: string, Variant: st
 		local itemImage = FISH_ASSETS[speciesKey] or FISH_ASSETS.Guppy
 
 		-- Add normal variant (all species)
+		local normalName, normalNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FISH_VARIANT.NORMAL, realmId)
 		table.insert(variations, {
 			Species = speciesName,
 			Variant = FISH_VARIANT.NORMAL,
 			ItemImage = itemImage,
 			SpeciesKey = speciesKey,
+			Name = normalName,
+			NameKey = normalNameKey,
 			Caught = false,
 		})
 
 		-- Add elemental variant (all species)
+		local elementalName, elementalNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FISH_VARIANT.ELEMENTAL, realmId)
 		table.insert(variations, {
 			Species = speciesName,
 			Variant = FISH_VARIANT.ELEMENTAL,
 			ItemImage = itemImage,
 			SpeciesKey = speciesKey,
+			Name = elementalName,
+			NameKey = elementalNameKey,
 			Caught = false,
 		})
 
 		-- Add elder variant (only truly exclusive tier 6 species)
+		local elderName, elderNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FISH_VARIANT.ELDER, realmId)
 		if tier6ExclusiveSpecies[speciesKey] then
 			table.insert(variations, {
 				Species = speciesName,
 				Variant = FISH_VARIANT.ELDER,
 				ItemImage = itemImage,
 				SpeciesKey = speciesKey,
+				Name = elderName,
+				NameKey = elderNameKey,
 				Caught = false,
 			})
 		end
@@ -493,16 +507,17 @@ function FishCalculator.GetAllFishVariations(): { { Species: string, Variant: st
 	return variations
 end
 
-function FishCalculator.GetFishName(species: string, variant: string, realmId: number): string
+function FishCalculator.GetFishName(species: string, speciesKey: string, variant: string, realmId: number): string
 	local baseName = species
+	local baseNameKey = speciesKey
 
 	if variant == FISH_VARIANT.ELEMENTAL then
 		local element = REALM_ELEMENTS[realmId] or "Unknown"
-		return `{element} {baseName}`
+		return `{element} {baseName}`, `{element}{baseName}`
 	elseif variant == FISH_VARIANT.ELDER then
-		return `Elder {baseName}`
+		return `Elder {baseName}`, `Elder{baseName}`
 	else
-		return baseName
+		return baseName, baseNameKey
 	end
 end
 

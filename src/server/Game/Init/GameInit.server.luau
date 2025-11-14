@@ -1,13 +1,15 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local Helper = require(ServerScriptService.Server.Classes.Helper)
+local ServerStorage = game:GetService("ServerStorage")
+
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 local PlayerDataTemplate = require(ServerScriptService.Server.Modules.PlayerDataTemplate)
 local ProfileStore = require(ServerScriptService.Server.Libs.ProfileStore)
 local TeamManager = require(ServerScriptService.Server.Classes.Managers.TeamManager)
 local Animator = require(ServerScriptService.Server.Classes.Modules.Animator)
+local FishCalculators = require(ServerScriptService.Server.Classes.Modules.FishCalculators)
 local Tutorial = require(ServerScriptService.Server.Game.Tutorial.Tutorial)
 local Badges = require(ServerScriptService.Server.Modules.Badges.Badges)
 local MusicManager = require(ServerScriptService.Server.Music.MusicManager)
@@ -45,6 +47,24 @@ local PlayerStore = ProfileStore.New(FFGHelpers.GetStoreName(), PlayerDataTempla
 local function Initialize(player: Player, profile: typeof(PlayerStore:StartSessionAsync()))
 	DataService.AttachReplica(player, profile)
 end
+
+local function createTools()
+	for _, fish in pairs(FishCalculators.GetAllFishVariations(1)) do
+		local tool = Instance.new("Tool")
+		tool.Name = fish.NameKey
+		tool.TextureId = fish.ItemImage
+		tool.ToolTip = fish.Species
+		tool.RequiresHandle = true
+		tool.CanBeDropped = true
+
+		local part = Instance.new("Part")
+		part.Name = "Handle"
+		part.Parent = tool
+
+		tool.Parent = ServerStorage.Tools
+	end
+end
+createTools()
 
 local function PlayerAdded(player: Player)
 	local profile = PlayerStore:StartSessionAsync("Player_" .. player.UserId, {

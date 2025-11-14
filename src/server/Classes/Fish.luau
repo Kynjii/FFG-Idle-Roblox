@@ -65,11 +65,13 @@ function Fish.New(state, player: Player, teamId: number, fishingLocTier: number,
 
 	self.Model = nil
 
-	local specieData = FishCalculators.ChooseSpecie(fishingLocTier)
+	local specieData = FishCalculators.ChooseSpecie(fishingLocTier, self.RealmId)
 	self.Species = state.Species or specieData.Species
 	self.Variant = state.Variant or specieData.Variant
+	self.SpeciesKey = state.SpeciesKey or specieData.SpeciesKey
 	self.ItemImage = state.ItemImage or specieData.ItemImage
-	self.Name = state.Name or FishCalculators.GetFishName(self.Species, self.Variant, self.RealmId)
+	self.Name = state.Name or specieData.Name
+	self.NameKey = state.NameKey or specieData.NameKey
 
 	-- Define quality first
 	self.QualityId = state.QualityId or self:DefineQuality(fishingLocTier)
@@ -107,7 +109,9 @@ function Fish.Serialize(self: Fish): { [string]: any }
 		TeamId = self.TeamId,
 		Owner = self.Owner,
 		Name = self.Name,
+		NameKey = self.NameKey,
 		Species = self.Species,
+		SpeciesKey = self.SpeciesKey,
 		Variant = self.Variant,
 		QualityId = self.QualityId,
 		MaxHP = self.MaxHP,
