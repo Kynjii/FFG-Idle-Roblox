@@ -40,7 +40,10 @@ local startX = 0
 local endX = 1
 local up = true
 
+local gameStarted = false
+
 RunService.Heartbeat:Connect(function(deltaTime: number)
+	if not gameStarted then return end
 	local currentX = hitMarker.Position.X.Scale
 
 	if up then
@@ -55,6 +58,22 @@ RunService.Heartbeat:Connect(function(deltaTime: number)
 		up = true
 	end
 end)
+
+function handleClosingShopDetailsUI()
+	local character = player.Character.PrimaryPart
+	local originalPosition = character.CFrame.Position
+
+	while true do
+		local distance = player:DistanceFromCharacter(originalPosition)
+		if distance >= 8 then
+			screenGui.Enabled = false
+			gameStarted = false
+			break
+		end
+
+		task.wait(0.5)
+	end
+end
 
 local hitArea1 = hitBoxContainer
 local hitArea2 = hitBoxContainer:FindFirstChild("InnerHit")
@@ -107,6 +126,10 @@ local function animate(area: number)
 	end
 end
 
+local function resetHitMarker()
+	hitMarker.Position = UDim2.fromScale(0, 0.5)
+end
+
 local function relocateHitContainer()
 	if hitArea1 then
 		local randX = math.random()
@@ -157,10 +180,10 @@ if catchButton then
 		animate(area)
 
 		local hpAdded = playerRod.BaseDmg * area
-		print(`+{hpAdded} DMG`)
 		local currentHp = currentFishHP
 
 		local newHp = currentHp + hpAdded
+		if area == 0 then newHp = currentHp - playerRod.BaseDmg end
 		currentFishHP = newHp
 
 		if newHp >= hookedFish.MaxHP then
@@ -183,9 +206,16 @@ if catchButton then
 end
 
 local startGameEvent = Events.GetRemote(Events.RemoteNames.StartFishingMiniGame)
-if startGameEvent then startGameEvent.OnClientEvent:Connect(function(data: { Fish: {}, Rod: {} })
-	screenGui.Enabled = true
+if startGameEvent then
+	startGameEvent.OnClientEvent:Connect(function(data: { Fish: {}, Rod: {} })
+		resetHitMarker()
 
-	hookedFish = data.Fish
-	playerRod = data.Rod
-end) end
+		screenGui.Enabled = true
+		gameStarted = true
+
+		hookedFish = data.Fish
+		playerRod = data.Rod
+
+		handleClosingShopDetailsUI()
+	end)
+end

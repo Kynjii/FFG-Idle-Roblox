@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
 local Fish = require(ServerScriptService.Server.Classes.Fish)
+local Notification = require(ServerScriptService.Server.Classes.Modules.Notification)
 local Trove = require(ReplicatedStorage.Packages.Trove)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
@@ -52,7 +53,6 @@ end
 function FishingManager.GetRandomFish(self: FishingManager, fishingLocTier)
 	local fish = Fish.New({}, self.Player, self.TeamId, fishingLocTier)
 	if fish then self.GeneratedFish[fish.Id] = fish end
-	print(self.GeneratedFish[fish.Id])
 	return fish
 end
 
@@ -63,6 +63,8 @@ function FishingManager.SaveCaughtFish(self: FishingManager, caughtFishId)
 	local fish = self.GeneratedFish[caughtFishId]
 	-- //TODO - create fish model, add to player etc.
 	fish:Save()
+
+	Notification.SendSuccess(self.Player, `GRATZ! You caught a {fish.Name}`)
 end
 
 function FishingManager.GetPlayerRod(self: FishingManager)
