@@ -4,6 +4,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 
 local Trove = require(ReplicatedStorage.Packages.Trove)
 local FishCalculators = require(ServerScriptService.Server.Classes.Modules.FishCalculators)
+local DataService = require(ServerScriptService.Server.Services.DataService)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 
 local DEFAULTS = {
@@ -16,7 +17,7 @@ local DEFAULTS = {
 local Fish = {}
 Fish.__index = Fish
 
-type Fish = {
+export type Fish = {
 	Entity: string,
 	Id: string,
 	Player: Player,
@@ -116,9 +117,7 @@ function Fish.Serialize(self: Fish): { [string]: any }
 end
 
 function Fish.Save(self: Fish): ()
-	print(`Saving Fish!`)
-	-- //TODO - create proper save func
-	-- DataService.SaveFish(self.Player, self:Serialize())
+	DataService.SaveFish(self.Player, self:Serialize())
 end
 -- //!SECTION
 

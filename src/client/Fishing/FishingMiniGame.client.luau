@@ -24,7 +24,7 @@ ProgressBar.Reset(pbFrame)
 ProgressBar.Show(fishCounterContainer)
 
 type PlayerRod = { Name: string, QualityId: number, BaseDmg: number }
-type Fish = { Id: string, QualityId: number, MaxHP: number }
+type Fish = { Id: string, QualityId: number, MaxHP: number, Species: string, Variant: string }
 
 local hookedFish: Fish
 local playerRod: PlayerRod
@@ -197,7 +197,7 @@ if catchButton then
 		if newHp >= hookedFish.MaxHP then
 			currentFishHP = 0
 
-			caughtFishEvent:FireServer(hookedFish.Id)
+			caughtFishEvent:FireServer(hookedFish)
 
 			local data = getFishingDataEvent:InvokeServer()
 			if data then

@@ -121,9 +121,9 @@ function FishingManager.AttachAttListeners(self: FishingManager)
 
 	local caughtFishEvent = Events.GetRemote(Events.RemoteNames.FishCaught)
 	if caughtFishEvent then
-		self._cleaner:Add(caughtFishEvent.OnServerEvent:Connect(function(player: Player, fishId: string)
+		self._cleaner:Add(caughtFishEvent.OnServerEvent:Connect(function(player: Player, fish: Fish.Fish)
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
-			self:SaveCaughtFish(fishId)
+			self:SaveCaughtFish(fish.Id)
 		end))
 	end
 end

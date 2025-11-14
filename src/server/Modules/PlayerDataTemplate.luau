@@ -36,6 +36,7 @@ local realmBuffs = {
 return {
 	CurrentRealm = 1,
 	GlobalBuffs = {},
+	FishDex = {},
 	Realms = {
 		[1] = {
 			Lanes = 6,
