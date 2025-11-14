@@ -31,7 +31,7 @@ end
 function createitemComponent(fish)
 	return ShopItem({
 		ItemData = fish,
-		BackgroundColor3 = FFGEnum.QUALITIES[fish.QualityId].Color,
+		BackgroundColor3 = FFGEnum.QUALITIES[2].Color,
 		Size = UDim2.fromScale(1, 1),
 		Rounded = FFGEnum.THEME.button.cornerRadius,
 		HoverEffect = true,
@@ -58,7 +58,7 @@ function updateUI(keepTooltip: boolean)
 	if inventoryItemsContainer then
 		for k, item in pairs(playerFishDex) do
 			local itemComponent = createitemComponent(item)
-			itemComponents[item.Id] = itemComponent
+			itemComponents[`{item.SpeciesKey}_{item.Variant}`] = itemComponent
 		end
 	end
 end

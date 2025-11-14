@@ -26,7 +26,7 @@ local function ShopItem(
 	local item = props.ItemData
 
 	local shopItemContainer = Instance.new("Frame")
-	shopItemContainer.Name = item.Id
+	shopItemContainer.Name = item.Id or item.Species
 	shopItemContainer.BackgroundTransparency = 1
 	shopItemContainer.Size = props.Size
 	shopItemContainer.BackgroundColor3 = props.BackgroundColor3 or FFGEnum.THEME.color.white
@@ -49,7 +49,7 @@ local function ShopItem(
 	itemQualityBG.BackgroundTransparency = 1
 	itemQualityBG.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
 	itemQualityBG.Position = FFGEnum.THEME.alignment.position.center
-	itemQualityBG.Image = FFGEnum.UI.Items.BackgroundQualityId[item.QualityId or item.Tier]
+	itemQualityBG.Image = FFGEnum.UI.Items.BackgroundQualityId[item.QualityId or item.Tier or 2]
 	itemQualityBG.Parent = shopItemContainer
 
 	-- //SECTION - Shop Item Outline
@@ -92,7 +92,7 @@ local function ShopItem(
 	itemName.BackgroundTransparency = 1
 	itemName.TextColor3 = FFGEnum.THEME.color.white
 	itemName.LayoutOrder = 1
-	itemName.Text = item.Name
+	itemName.Text = item.Name or item.Species
 	itemName.TextScaled = true
 	itemName.Parent = mainContainer
 	-- //!SECTION
@@ -100,7 +100,7 @@ local function ShopItem(
 	-- //SECTION -  Item Image
 	local itemImage = Instance.new("ImageLabel")
 	itemImage.Name = "ItemImage"
-	itemImage.Image = item.ItemImage
+	itemImage.Image = item.ItemImage or ""
 	itemImage.LayoutOrder = 2
 	itemImage.BackgroundTransparency = 1
 	itemImage.Size = UDim2.fromScale(0.6, 0.6)
