@@ -78,6 +78,13 @@ function FishDexManager.AttachAttListeners(self: FishDexManager)
 			self:UpdateCaughtStatus(fish)
 		end))
 	end
+
+	local getFishDexFn = Events.GetRemoteFn(Events.RemoteFunctionNames.GetFishDex)
+	if getFishDexFn then getFishDexFn.OnServerInvoke = function(player: Player)
+		if self.Player ~= player or self.Owner ~= player.UserId then return end
+
+		return self.FishDexState
+	end end
 end
 
 function FishDexManager.Save(self: FishDexManager)

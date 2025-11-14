@@ -36,6 +36,7 @@ Events.RemoteFunctionNames = {
 	GetCrewManagementState = "GetCrewManagementState",
 	GetJobData = "GetJobData",
 	GetFishItem = "GetFishItem",
+	GetFishDex = "GetFishDex",
 }
 
 Events.BindableFunctionNames = {

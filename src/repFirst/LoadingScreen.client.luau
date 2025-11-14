@@ -97,6 +97,7 @@ local elementsToShow = {
 	HUD = "HUD",
 	InventoryButton = "InventoryButton",
 	CrewManagementButton = "CrewManagementButton",
+	FishDexButton = "FishDexButton",
 }
 for _, screenGUI: ScreenGui in pairs(hudElements) do
 	if elementsToShow[screenGUI.Name] then screenGUI.Enabled = true end
