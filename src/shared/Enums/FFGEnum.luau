@@ -52,6 +52,19 @@ FFGEnum.STAGES = {
 	[16] = { Color = Color3.fromHex("#472200"), Label = "Stage XVI" },
 }
 
+FFGEnum.SCREENGUI = {
+	CrewManagementButton = "CrewManagementButton",
+	FishDexButton = "FishDexButton",
+	InventoryButton = "InventoryButton",
+
+	HUD = "HUD",
+
+	LootNotifications = "LootNotifications",
+	PlayerMessages = "PlayerMessages",
+
+	FishDex = "FishDex",
+}
+
 FFGEnum.ATTRIBUTES = {
 	IsPurchased = "IsPurchased",
 	atPort = "atPort",
@@ -157,6 +170,7 @@ FFGEnum.UI = {
 		Purchase = "rbxassetid://107460233002169",
 		Alert = "rbxassetid://85527034084832",
 		ThumbsUp = "rbxassetid://117741528720677",
+		Close = "rbxassetid://83362863401865",
 	},
 	Frames = {
 		MainUIPanel = "rbxassetid://95574095879865",

@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
+local FishData = require(ReplicatedStorage.Shared.Fish.FishData)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
 local KinUI = require(ReplicatedStorage.Shared.UI.KinUI)
 local Format = require(ReplicatedStorage.Shared.Utils.Format)
@@ -98,16 +99,27 @@ local function ShopItem(
 	itemName.BackgroundTransparency = 1
 	itemName.TextColor3 = FFGEnum.THEME.color.white
 	itemName.LayoutOrder = 1
-	itemName.Text = item.Name or item.Species
+	itemName.Text = not item.Caught and item.SpeciesKey and "?" or item.Name
 	itemName.TextScaled = true
 	KinUI.AddStroke(itemName, "L")
 	itemName.Parent = mainContainer
 	-- //!SECTION
 
 	-- //SECTION -  Item Image
+	local image
+	if item.SpeciesKey then
+		if item.Caught then
+			image = item.ItemImage
+		else
+			image = FishData.FISH_ASSETS_MASKED[item.SpeciesKey]
+		end
+	else
+		image = item.ItemImage
+	end
+
 	local itemImage = Instance.new("ImageLabel")
 	itemImage.Name = "ItemImage"
-	itemImage.Image = item.ItemImage or ""
+	itemImage.Image = image or ""
 	itemImage.LayoutOrder = 2
 	itemImage.BackgroundTransparency = 1
 	itemImage.Size = UDim2.fromScale(0.6, 0.6)
@@ -117,7 +129,7 @@ local function ShopItem(
 	-- //!SECTION
 
 	-- //SECTION -  Item Price
-	if not item.IsPurchased then
+	if not item.IsPurchased and not item.SpeciesKey then
 		local priceContainer = Instance.new("Frame")
 		priceContainer.Name = "PriceContainer"
 		priceContainer.AnchorPoint = FFGEnum.THEME.alignment.anchor.center

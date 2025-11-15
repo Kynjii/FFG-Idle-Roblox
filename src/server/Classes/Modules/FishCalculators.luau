@@ -2,108 +2,9 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Formulas = require(ServerScriptService.Server.Math.Formulas)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
+local FishData = require(ReplicatedStorage.Shared.Fish.FishData)
 
 local FishCalculator = {}
-
-local FISH_SPECIES = {
-	Angelfish = "Angelfish",
-	Arapaima = "Arapaima",
-	Arowana = "Arowana",
-	BarbelSteed = "Barbel Steed",
-	BarredKnifejaw = "Barred Knifejaw",
-	Bass = "Bass",
-	Bitterling = "Bitterling",
-	Bluegill = "Bluegill",
-	BrookTrout = "Brook Trout",
-	Carp = "Carp",
-	Catfish = "Catfish",
-	CherrySalmon = "Cherry Salmon",
-	Coelacanth = "Coelacanth",
-	Crawfish = "Crawfish",
-	CrucianCarp = "Crucian Carp",
-	Dace = "Dace",
-	Eel = "Eel",
-	FreshwaterGoby = "Freshwater Goby",
-	Frog = "Frog",
-	GiantCatfish = "Giant Catfish",
-	GiantSnakehead = "Giant Snakehead",
-	Goldfish = "Goldfish",
-	Guppy = "Guppy",
-	Jellyfish = "Jellyfish",
-	Killifish = "Killifish",
-	Koi = "Koi",
-	LargeBass = "Large Bass",
-	LargeChar = "Large Char",
-	Loach = "Loach",
-	PaleChub = "Pale Chub",
-	Piranha = "Piranha",
-	PondSmelt = "Pond Smelt",
-	PopeyedGoldfish = "Popeyed Goldfish",
-	RainbowTrout = "Rainbow Trout",
-	RedSnapper = "Red Snapper",
-	Salmon = "Salmon",
-	SeaBass = "Sea Bass",
-	SmallBass = "Small Bass",
-	Stringfish = "Stringfish",
-	Sweetfish = "Sweetfish",
-}
-
-local FISH_VARIANT = {
-	NORMAL = "normal",
-	ELEMENTAL = "elemental",
-	ELDER = "elder",
-}
-
-local REALM_ELEMENTS = {
-	[1] = "Hydro",
-	[2] = "Frostreed",
-	[3] = "Cinder",
-	[4] = "Mossy",
-}
-
-local FISH_ASSETS = {
-	Angelfish = "rbxassetid://86530930916913",
-	Arapaima = "rbxassetid://111671767238179",
-	Arowana = "rbxassetid://108983393931009",
-	BarbelSteed = "rbxassetid://102595507548669",
-	BarredKnifejaw = "rbxassetid://72962993740810",
-	Bass = "rbxassetid://90246099507682",
-	Bitterling = "rbxassetid://134033945265675",
-	Bluegill = "rbxassetid://82079624957321",
-	BrookTrout = "rbxassetid://98287941099017",
-	Carp = "rbxassetid://111160034327339",
-	Catfish = "rbxassetid://120608521661152",
-	CherrySalmon = "rbxassetid://86655108971369",
-	Coelacanth = "rbxassetid://86888174125652",
-	Crawfish = "rbxassetid://93301919634243",
-	CrucianCarp = "rbxassetid://124081328496276",
-	Dace = "rbxassetid://72442566434341",
-	Eel = "rbxassetid://137912964469805",
-	FreshwaterGoby = "rbxassetid://73075716714952",
-	Frog = "rbxassetid://75076556447926",
-	GiantCatfish = "rbxassetid://97608705235157",
-	GiantSnakehead = "rbxassetid://108521102102921",
-	Goldfish = "rbxassetid://116344850086061",
-	Guppy = "rbxassetid://119927746171786",
-	Jellyfish = "rbxassetid://137210949493537",
-	Killifish = "rbxassetid://88472643540035",
-	Koi = "rbxassetid://125780772181467",
-	LargeBass = "rbxassetid://136571700180366",
-	LargeChar = "rbxassetid://72112552667255",
-	Loach = "rbxassetid://94282466239890",
-	PaleChub = "rbxassetid://77005738686041",
-	Piranha = "rbxassetid://91401134170565",
-	PondSmelt = "rbxassetid://131664189781217",
-	PopeyedGoldfish = "rbxassetid://71269017919182",
-	RainbowTrout = "rbxassetid://106767459214394",
-	RedSnapper = "rbxassetid://111244267622882",
-	Salmon = "rbxassetid://139440277462943",
-	SeaBass = "rbxassetid://86637772733086",
-	SmallBass = "rbxassetid://112751745497790",
-	Stringfish = "rbxassetid://132952116869650",
-	Sweetfish = "rbxassetid://113656155322041",
-}
-FishCalculator.FISH_ASSETS = FISH_ASSETS
 
 -- Species drop chances by tier - higher tiers unlock rarer species
 local SPECIES_DROPS_BY_TIER = {
@@ -234,14 +135,14 @@ local SPECIES_DROPS_BY_TIER = {
 local VARIANT_DROP_CHANCES = {
 	-- Tiers 1-5: Only normal and elemental
 	standard = {
-		[FISH_VARIANT.NORMAL] = 0.85, -- 85% chance for normal
-		[FISH_VARIANT.ELEMENTAL] = 0.15, -- 15% chance for elemental
+		[FishData.FISH_VARIANT.NORMAL] = 0.85, -- 85% chance for normal
+		[FishData.FISH_VARIANT.ELEMENTAL] = 0.15, -- 15% chance for elemental
 	},
 	-- Tier 6: Includes elder variant
 	tier6 = {
-		[FISH_VARIANT.NORMAL] = 0.74, -- 74% chance for normal
-		[FISH_VARIANT.ELEMENTAL] = 0.25, -- 25% chance for elemental
-		[FISH_VARIANT.ELDER] = 0.01, -- 1% chance for elder
+		[FishData.FISH_VARIANT.NORMAL] = 0.74, -- 74% chance for normal
+		[FishData.FISH_VARIANT.ELEMENTAL] = 0.25, -- 25% chance for elemental
+		[FishData.FISH_VARIANT.ELDER] = 0.01, -- 1% chance for elder
 	},
 }
 
@@ -399,7 +300,7 @@ function FishCalculator.ChooseSpecie(fishingLocTier: number?, realmId: number): 
 	end
 
 	local variantRoll = math.random()
-	local chosenVariant = FISH_VARIANT.NORMAL
+	local chosenVariant = FishData.FISH_VARIANT.NORMAL
 
 	local dropTable = (tier == 6) and VARIANT_DROP_CHANCES.tier6 or VARIANT_DROP_CHANCES.standard
 
@@ -413,7 +314,7 @@ function FishCalculator.ChooseSpecie(fishingLocTier: number?, realmId: number): 
 	end
 
 	-- Special check: Elder variants only for truly exclusive tier 6 species
-	if chosenVariant == FISH_VARIANT.ELDER then
+	if chosenVariant == FishData.FISH_VARIANT.ELDER then
 		local tier6ExclusiveSpecies = {
 			Coelacanth = true,
 			Stringfish = true,
@@ -424,12 +325,12 @@ function FishCalculator.ChooseSpecie(fishingLocTier: number?, realmId: number): 
 
 		if not tier6ExclusiveSpecies[chosenSpeciesKey] then
 			-- Reroll to normal or elemental for non-exclusive species
-			chosenVariant = (math.random() < 0.75) and FISH_VARIANT.NORMAL or FISH_VARIANT.ELEMENTAL
+			chosenVariant = (math.random() < 0.75) and FishData.FISH_VARIANT.NORMAL or FishData.FISH_VARIANT.ELEMENTAL
 		end
 	end
 
-	local speciesName = FISH_SPECIES[chosenSpeciesKey] or chosenSpeciesKey
-	local itemImage = FISH_ASSETS[chosenSpeciesKey] or FISH_ASSETS.Guppy
+	local speciesName = FishData.FISH_SPECIES[chosenSpeciesKey] or chosenSpeciesKey
+	local itemImage = FishData.FISH_ASSETS[chosenSpeciesKey] or FishData.FISH_ASSETS.Guppy
 	local name, nameKey = FishCalculator.GetFishName(speciesName, chosenSpeciesKey, chosenVariant, realmId)
 
 	return {
@@ -447,7 +348,7 @@ function FishCalculator.ChooseQuality(fishingLocTier: number?): number?
 end
 
 function FishCalculator.GetFishAsset(speciesKey: string): string?
-	return FISH_ASSETS[speciesKey]
+	return FishData.FISH_ASSETS[speciesKey]
 end
 
 function FishCalculator.GetAllFishVariations(realmId: number): { { Species: string, Variant: string, ItemImage: string, SpeciesKey: string, Caught: boolean, Name: string, NameKey: string } }
@@ -462,14 +363,14 @@ function FishCalculator.GetAllFishVariations(realmId: number): { { Species: stri
 		BarredKnifejaw = true,
 	}
 
-	for speciesKey, speciesName in pairs(FISH_SPECIES) do
-		local itemImage = FISH_ASSETS[speciesKey] or FISH_ASSETS.Guppy
+	for speciesKey, speciesName in pairs(FishData.FISH_SPECIES) do
+		local itemImage = FishData.FISH_ASSETS[speciesKey] or FishData.FISH_ASSETS.Guppy
 
 		-- Add normal variant (all species)
-		local normalName, normalNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FISH_VARIANT.NORMAL, realmId)
+		local normalName, normalNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FishData.FISH_VARIANT.NORMAL, realmId)
 		table.insert(variations, {
 			Species = speciesName,
-			Variant = FISH_VARIANT.NORMAL,
+			Variant = FishData.FISH_VARIANT.NORMAL,
 			ItemImage = itemImage,
 			SpeciesKey = speciesKey,
 			Name = normalName,
@@ -478,10 +379,10 @@ function FishCalculator.GetAllFishVariations(realmId: number): { { Species: stri
 		})
 
 		-- Add elemental variant (all species)
-		local elementalName, elementalNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FISH_VARIANT.ELEMENTAL, realmId)
+		local elementalName, elementalNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FishData.FISH_VARIANT.ELEMENTAL, realmId)
 		table.insert(variations, {
 			Species = speciesName,
-			Variant = FISH_VARIANT.ELEMENTAL,
+			Variant = FishData.FISH_VARIANT.ELEMENTAL,
 			ItemImage = itemImage,
 			SpeciesKey = speciesKey,
 			Name = elementalName,
@@ -490,11 +391,11 @@ function FishCalculator.GetAllFishVariations(realmId: number): { { Species: stri
 		})
 
 		-- Add elder variant (only truly exclusive tier 6 species)
-		local elderName, elderNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FISH_VARIANT.ELDER, realmId)
+		local elderName, elderNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FishData.FISH_VARIANT.ELDER, realmId)
 		if tier6ExclusiveSpecies[speciesKey] then
 			table.insert(variations, {
 				Species = speciesName,
-				Variant = FISH_VARIANT.ELDER,
+				Variant = FishData.FISH_VARIANT.ELDER,
 				ItemImage = itemImage,
 				SpeciesKey = speciesKey,
 				Name = elderName,
@@ -511,10 +412,10 @@ function FishCalculator.GetFishName(species: string, speciesKey: string, variant
 	local baseName = species
 	local baseNameKey = speciesKey
 
-	if variant == FISH_VARIANT.ELEMENTAL then
-		local element = REALM_ELEMENTS[realmId] or "Unknown"
+	if variant == FishData.FISH_VARIANT.ELEMENTAL then
+		local element = FishData.REALM_ELEMENTS[realmId] or "Unknown"
 		return `{element} {baseName}`, `{element}{baseName}`
-	elseif variant == FISH_VARIANT.ELDER then
+	elseif variant == FishData.FISH_VARIANT.ELDER then
 		return `Elder {baseName}`, `Elder{baseName}`
 	else
 		return baseName, baseNameKey

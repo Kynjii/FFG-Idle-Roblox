@@ -1,4 +1,3 @@
---!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local AvailableHelperListItem = require(ReplicatedStorage.Shared.UI.Components.Jobs.AvailableHelperListItem)

@@ -85,24 +85,16 @@ function MainUIPanel.Create(props: {
 	main.Size = UDim2.fromScale(1, 1)
 	main.Parent = panelContainer
 
-	local mainPadding = Instance.new("UIPadding")
-	KinUI.SetPadding(mainPadding, "S")
-	mainPadding.Parent = main
-
 	local panelNameContainer = Instance.new("Frame")
 	panelNameContainer.Name = "PanelNameContainer"
-	panelNameContainer.AnchorPoint = Vector2.new(0.5, 0.5)
+	panelNameContainer.AnchorPoint = Vector2.new(0, 0.5)
 	panelNameContainer.BackgroundTransparency = 1
-	panelNameContainer.Position = UDim2.fromScale(0.500531, 0.1)
-	panelNameContainer.Size = UDim2.fromScale(1, 0.0868755)
+	panelNameContainer.Position = UDim2.fromScale(0.02, 0.08)
+	panelNameContainer.Size = UDim2.fromScale(0.5, 0.086)
 	panelNameContainer.Parent = main
 
-	local panelNameContainerPadding = Instance.new("UIPadding")
-	KinUI.SetPadding(panelNameContainerPadding, "S")
-	panelNameContainerPadding.Parent = panelNameContainer
-
 	local textLabel = Instance.new("TextLabel")
-	textLabel.Name = "TextLabel"
+	textLabel.Name = "PanelName"
 	textLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 	textLabel.BackgroundTransparency = 1
 	textLabel.Font = FFGEnum.THEME.bigFont
@@ -123,13 +115,12 @@ function MainUIPanel.Create(props: {
 
 	local innerWindow = Instance.new("Frame")
 	innerWindow.Name = "InnerWindow"
-	innerWindow.AnchorPoint = Vector2.new(0.5, 0.5)
+	innerWindow.AnchorPoint = Vector2.new(0, 0.5)
 	innerWindow.BackgroundTransparency = 1
 	innerWindow.LayoutOrder = 2
-	innerWindow.Position = UDim2.fromScale(0.5, 0.55)
-	innerWindow.Size = UDim2.fromScale(1, 0.8)
+	innerWindow.Position = UDim2.fromScale(0.02, 0.55)
+	innerWindow.Size = UDim2.fromScale(0.96, 0.8)
 	innerWindow.ZIndex = 10
-	KinUI.ApplyPanelStyle(innerWindow)
 	innerWindow.Parent = main
 
 	local container = Instance.new("Frame")
@@ -143,7 +134,7 @@ function MainUIPanel.Create(props: {
 	closeButton.Name = "CloseButton"
 	closeButton.AnchorPoint = Vector2.new(0.5, 0.5)
 	closeButton.BackgroundColor3 = FFGEnum.THEME.color.orange_900
-	closeButton.Position = UDim2.fromScale(1, 0)
+	closeButton.Position = UDim2.fromScale(0.99, 0.01)
 	closeButton.Size = UDim2.fromScale(0.06, 0.09)
 
 	local baseSize = closeButton.Size
@@ -176,22 +167,13 @@ function MainUIPanel.Create(props: {
 	uIStroke2.Thickness = FFGEnum.THEME.shop.shopItem.outlineThickness
 	uIStroke2.Parent = closeButton
 
-	local closeButtonX = Instance.new("TextLabel")
-	closeButtonX.Name = "TextLabel"
+	local closeButtonX = Instance.new("ImageLabel")
+	closeButtonX.Name = "ImageLabel"
 	closeButtonX.AnchorPoint = Vector2.new(0.5, 0.5)
 	closeButtonX.BackgroundTransparency = 1
-	closeButtonX.Font = FFGEnum.THEME.bigFont
 	closeButtonX.Position = UDim2.fromScale(0.5, 0.5)
-	closeButtonX.Size = UDim2.fromScale(0.480769, 0.634615)
-	closeButtonX.Text = "X"
-	closeButtonX.TextColor3 = Color3.new(1, 1, 1)
-	closeButtonX.TextScaled = true
-	closeButtonX.TextStrokeTransparency = 0
-
-	local uIStroke3 = Instance.new("UIStroke")
-	uIStroke3.Name = "UIStroke"
-	uIStroke3.Thickness = 2
-	uIStroke3.Parent = closeButtonX
+	closeButtonX.Size = UDim2.fromScale(0.8, 0.8)
+	closeButtonX.Image = FFGEnum.UI.Icons.Close
 
 	closeButtonX.Parent = closeButton
 

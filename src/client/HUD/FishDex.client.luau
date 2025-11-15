@@ -31,7 +31,7 @@ end
 function createitemComponent(fish)
 	return ShopItem({
 		ItemData = fish,
-		BackgroundColor3 = FFGEnum.QUALITIES[2].Color,
+		BackgroundColor3 = FFGEnum.QUALITIES[1].Color,
 		Size = UDim2.fromScale(1, 1),
 		Rounded = FFGEnum.THEME.button.cornerRadius,
 		HoverEffect = true,

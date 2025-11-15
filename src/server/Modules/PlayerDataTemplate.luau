@@ -42,6 +42,9 @@ return {
 		Fish = {},
 		Equipment = {},
 	},
+	AccountStats = {
+		Fish = {},
+	},
 	Realms = {
 		[1] = {
 			Lanes = 6,

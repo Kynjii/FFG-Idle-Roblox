@@ -2,6 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local Economy = require(ServerScriptService.Server.Analytics.Economy)
 local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
+local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local BuildingType = require(ReplicatedStorage.Shared.Types.Classes.BuildingType)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
@@ -17,6 +18,33 @@ DataService.Profiles = {}
 DataService.Replicas = {}
 
 type ReplicaType = Replica.Replica
+
+local fishStatStructure = {
+	Normal = {
+		Uncommon = { MaxWeight = 0, Caught = 0 },
+		Common = { MaxWeight = 0, Caught = 0 },
+		Rare = { MaxWeight = 0, Caught = 0 },
+		Epic = { MaxWeight = 0, Caught = 0 },
+		Legendary = { MaxWeight = 0, Caught = 0 },
+		Mythic = { MaxWeight = 0, Caught = 0 },
+	},
+	Elemental = {
+		Uncommon = { MaxWeight = 0, Caught = 0 },
+		Common = { MaxWeight = 0, Caught = 0 },
+		Rare = { MaxWeight = 0, Caught = 0 },
+		Epic = { MaxWeight = 0, Caught = 0 },
+		Legendary = { MaxWeight = 0, Caught = 0 },
+		Mythic = { MaxWeight = 0, Caught = 0 },
+	},
+	Elder = {
+		Uncommon = { MaxWeight = 0, Caught = 0 },
+		Common = { MaxWeight = 0, Caught = 0 },
+		Rare = { MaxWeight = 0, Caught = 0 },
+		Epic = { MaxWeight = 0, Caught = 0 },
+		Legendary = { MaxWeight = 0, Caught = 0 },
+		Mythic = { MaxWeight = 0, Caught = 0 },
+	},
+}
 
 local stateTypes = {
 	SaveBuff = "save Buff",
@@ -522,6 +550,8 @@ function DataService.SaveFish(player: Player, fish): boolean
 
 	profile.Data.Inventory.Fish[fish.Id] = fish
 
+	DataService.SaveFishStat(player, fish)
+
 	return true
 end
 -- //!SECTION
@@ -535,6 +565,49 @@ function DataService.SaveFishDex(player: Player, fishDexState): boolean
 	if not profile.Data.FishDex then profile.Data.FishDex = {} end
 
 	profile.Data.FishDex = fishDexState
+
+	return true
+end
+
+function DataService.SaveFishStat(player: Player, fish)
+	local profile = getProfile(player, stateTypes.SaveFish)
+	if not profile then return false end
+
+	-- Initialize Fish Stats array if it doesn't exist
+	if not profile.Data.AccountStats then profile.Data.AccountStats = {} end
+	if not profile.Data.AccountStats.Fish then profile.Data.AccountStats.Fish = {} end
+
+	local speciesKey = fish.SpeciesKey
+	if not speciesKey then return false end
+
+	local storedFishData = profile.Data.AccountStats.Fish[speciesKey]
+	if not storedFishData then
+		profile.Data.AccountStats.Fish[speciesKey] = profile.Data.AccountStats.Fish[speciesKey]
+		local clonedStructure = fishStatStructure
+
+		profile.Data.AccountStats.Fish[speciesKey] = clonedStructure
+
+		storedFishData = profile.Data.AccountStats.Fish[speciesKey]
+	end
+	local fishVariant = fish.Variant
+	if not fishVariant then return false end
+
+	local storedFishVariant = storedFishData[fishVariant]
+	if not storedFishVariant then return false end
+
+	local qualityName = FFGEnum.QUALITIES[fish.QualityId].Label
+	local storedFishQuality = storedFishVariant[qualityName]
+	if not storedFishQuality then return end
+
+	local function updateWeight()
+		local newWeight = fish.Weight
+		local currentMaxWeight = storedFishQuality.MaxWeight
+
+		if newWeight > currentMaxWeight then storedFishQuality.MaxWeight = newWeight end
+	end
+
+	storedFishQuality.Caught += 1
+	updateWeight()
 
 	return true
 end
