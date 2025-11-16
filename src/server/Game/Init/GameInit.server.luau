@@ -48,23 +48,19 @@ local function Initialize(player: Player, profile: typeof(PlayerStore:StartSessi
 	DataService.AttachReplica(player, profile)
 end
 
-local function createTools()
+local function updateTools()
 	for _, fish in pairs(FishCalculators.GetAllFishVariations(1)) do
-		local tool = Instance.new("Tool")
-		tool.Name = fish.NameKey
-		tool.TextureId = fish.ItemImage
-		tool.ToolTip = fish.Species
-		tool.RequiresHandle = true
-		tool.CanBeDropped = true
-
-		local part = Instance.new("Part")
-		part.Name = "Handle"
-		part.Parent = tool
-
-		tool.Parent = ServerStorage.Tools
+		local fishSpeciesKey = fish.SpeciesKey
+		if ServerStorage.Tools:FindFirstChild(fishSpeciesKey) then
+			local fishTool = ServerStorage.Tools[fishSpeciesKey]
+			fishTool.TextureId = fish.ItemImage
+			fishTool.ToolTip = fish.Species
+			fishTool.RequiresHandle = true
+			fishTool.CanBeDropped = true
+		end
 	end
 end
-createTools()
+updateTools()
 
 local function PlayerAdded(player: Player)
 	local profile = PlayerStore:StartSessionAsync("Player_" .. player.UserId, {
