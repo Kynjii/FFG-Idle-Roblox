@@ -1,6 +1,20 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Emitter = {}
 
-function Emitter.AttachElement(parent: Instance, element: "Hydro" | "Frostreed" | "Cinder" | "Mossy")
+local function getQualityColorSequence(qualityIndex: number): ColorSequence
+	local qualityColor = FFGEnum.QUALITIES[qualityIndex].Color
+
+	local darkened = Color3.new(qualityColor.R * 0.6, qualityColor.G * 0.6, qualityColor.B * 0.6)
+
+	return ColorSequence.new({
+		ColorSequenceKeypoint.new(0, darkened),
+		ColorSequenceKeypoint.new(1, qualityColor),
+	})
+end
+
+function Emitter.AttachElement(parent: Instance, element: "Hydro" | "Frostreed" | "Cinder" | "Mossy", qualityId: number?)
 	local attachment = Instance.new("Attachment")
 	attachment.Name = "Attachment"
 
@@ -26,6 +40,7 @@ function Emitter.AttachElement(parent: Instance, element: "Hydro" | "Frostreed" 
 		water30.Speed = NumberRange.new(0)
 		water30.Texture = "rbxassetid://16866073152"
 		water30.ZOffset = 5
+		if qualityId then water30.Color = getQualityColorSequence(qualityId) end
 		water30.Parent = attachment
 	end
 

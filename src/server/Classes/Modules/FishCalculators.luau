@@ -384,7 +384,7 @@ function FishCalculator.GetAllFishVariations(realmId: number): { { Species: stri
 		table.insert(variations, {
 			Species = speciesName,
 			Variant = FishData.FISH_VARIANT.ELEMENTAL,
-			ItemImage = FishData.FISH_ASSETS[speciesKey].Elemental[realmId][1] or FishData.FISH_ASSETS.Guppy.Basic,
+			ItemImage = itemImage,
 			SpeciesKey = speciesKey,
 			Name = elementalName,
 			NameKey = elementalNameKey,
@@ -399,7 +399,7 @@ function FishCalculator.GetAllFishVariations(realmId: number): { { Species: stri
 			table.insert(variations, {
 				Species = speciesName,
 				Variant = FishData.FISH_VARIANT.ELDER,
-				ItemImage = FishData.FISH_ASSETS[speciesKey].Elder[1] or FishData.FISH_ASSETS.Guppy.Basic,
+				ItemImage = itemImage,
 				SpeciesKey = speciesKey,
 				Name = elderName,
 				NameKey = elderNameKey,

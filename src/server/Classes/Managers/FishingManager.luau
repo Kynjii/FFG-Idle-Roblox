@@ -87,7 +87,7 @@ function FishingManager.SaveCaughtFish(self: FishingManager, caughtFish: Fish.Fi
 end
 
 function FishingManager.GetPlayerRod(self: FishingManager)
-	return { Name = "Fishing Rod of Doom", QualityId = 1, BaseDmg = 10 }
+	return { Name = "Fishing Rod of Doom", QualityId = 1, BaseDmg = 1000 }
 end
 
 function FishingManager.SetupProximityPrompts(self: FishingManager)

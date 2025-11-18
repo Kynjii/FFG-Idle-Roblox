@@ -86,18 +86,28 @@ function InventoryManager.GrantTool(self: InventoryManager, item)
 	local runtimeTool: Tool = invTool:Clone()
 	runtimeTool.Parent = self.Player.Backpack
 
-	if item.Variant == FishData.FISH_VARIANT.ELEMENTAL then
+	invTool.ToolTip = item.Name or item.Species
+	runtimeTool.ToolTip = item.Name or item.Species
+
+	local image = nil
+	if item.Variant == FishData.FISH_VARIANT.NORMAL then
+		image = FishData.FISH_ASSETS[item.SpeciesKey].Normal[item.QualityId]
+	elseif item.Variant == FishData.FISH_VARIANT.ELEMENTAL then
+		image = FishData.FISH_ASSETS[item.SpeciesKey].Elemental[item.RealmId or item.ElementNum or 1][item.QualityId]
 		local elementName = item.ElementName
-
 		if elementName then
-			Emitter.AttachElement(invTool.Handle or invTool:FindFirstChild("Handle"), elementName)
-			Emitter.AttachElement(runtimeTool.Handle or runtimeTool:FindFirstChild("Handle"), elementName)
-
-			invTool.ToolTip = item.Name
-			runtimeTool.ToolTip = item.Name
-
-			-- //TODO -  Change image to correct quality and image
+			Emitter.AttachElement(invTool.Handle or invTool:FindFirstChild("Handle"), elementName, item.QualityId)
+			Emitter.AttachElement(runtimeTool.Handle or runtimeTool:FindFirstChild("Handle"), elementName, item.QualityId)
 		end
+	elseif item.Variant == FishData.FISH_VARIANT.ELDER then
+		image = FishData.FISH_ASSETS[item.SpeciesKey].Elder[item.QualityId]
+	else
+		image = FishData.FISH_ASSETS[item.SpeciesKey].Basic
+	end
+
+	if image then
+		invTool.TextureId = image
+		runtimeTool.TextureId = image
 	end
 end
 
