@@ -379,12 +379,12 @@ function FishCalculator.GetAllFishVariations(realmId: number): { { Species: stri
 		})
 
 		-- Add elemental variant (all species)
-		itemImage = FishData.FISH_ASSETS[speciesKey].Elemental[realmId][1] or FishData.FISH_ASSETS.Guppy.Basic
+
 		local elementalName, elementalNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FishData.FISH_VARIANT.ELEMENTAL, realmId)
 		table.insert(variations, {
 			Species = speciesName,
 			Variant = FishData.FISH_VARIANT.ELEMENTAL,
-			ItemImage = itemImage,
+			ItemImage = FishData.FISH_ASSETS[speciesKey].Elemental[realmId][1] or FishData.FISH_ASSETS.Guppy.Basic,
 			SpeciesKey = speciesKey,
 			Name = elementalName,
 			NameKey = elementalNameKey,
@@ -394,13 +394,12 @@ function FishCalculator.GetAllFishVariations(realmId: number): { { Species: stri
 		})
 
 		-- Add elder variant (only truly exclusive tier 6 species)
-		itemImage = FishData.FISH_ASSETS[speciesKey].Elder[1] or FishData.FISH_ASSETS.Guppy.Basic
 		local elderName, elderNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FishData.FISH_VARIANT.ELDER, realmId)
 		if tier6ExclusiveSpecies[speciesKey] then
 			table.insert(variations, {
 				Species = speciesName,
 				Variant = FishData.FISH_VARIANT.ELDER,
-				ItemImage = itemImage,
+				ItemImage = FishData.FISH_ASSETS[speciesKey].Elder[1] or FishData.FISH_ASSETS.Guppy.Basic,
 				SpeciesKey = speciesKey,
 				Name = elderName,
 				NameKey = elderNameKey,
