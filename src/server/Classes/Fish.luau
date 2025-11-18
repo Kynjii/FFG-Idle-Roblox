@@ -78,7 +78,6 @@ function Fish.New(state, player: Player, teamId: number, fishingLocTier: number,
 	end
 
 	self.SpeciesKey = state.SpeciesKey or specieData.SpeciesKey
-	self.ItemImage = state.ItemImage or specieData.ItemImage
 	self.Name = state.Name or specieData.Name
 	self.NameKey = state.NameKey or specieData.NameKey
 
@@ -86,6 +85,13 @@ function Fish.New(state, player: Player, teamId: number, fishingLocTier: number,
 	self.QualityId = state.QualityId or self:DefineQuality(fishingLocTier)
 	self.Quality = FFGEnum.QUALITIES[self.QualityId]
 	self.MaxHP, self.Weight = self:CalculateStats()
+
+	self.ItemImage = nil
+	if self.Variant ~= FishData.FISH_VARIANT.ELEMENTAL then
+		self.ItemImage = FishData.FISH_ASSETS[self.SpeciesKey][self.Variant][self.QualityId]
+	else
+		self.ItemImage = FishData.FISH_ASSETS[self.SpeciesKey][self.Variant][self.RealmId][self.QualityId]
+	end
 
 	self._cleaner = Trove.new()
 

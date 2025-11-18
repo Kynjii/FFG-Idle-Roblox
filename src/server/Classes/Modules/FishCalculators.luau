@@ -330,7 +330,7 @@ function FishCalculator.ChooseSpecie(fishingLocTier: number?, realmId: number): 
 	end
 
 	local speciesName = FishData.FISH_SPECIES[chosenSpeciesKey] or chosenSpeciesKey
-	local itemImage = FishData.FISH_ASSETS[chosenSpeciesKey] or FishData.FISH_ASSETS.Guppy
+	local itemImage = FishData.FISH_ASSETS[chosenSpeciesKey].Basic or FishData.FISH_ASSETS.Guppy.Basic
 	local name, nameKey = FishCalculator.GetFishName(speciesName, chosenSpeciesKey, chosenVariant, realmId)
 
 	return {
@@ -364,7 +364,7 @@ function FishCalculator.GetAllFishVariations(realmId: number): { { Species: stri
 	}
 
 	for speciesKey, speciesName in pairs(FishData.FISH_SPECIES) do
-		local itemImage = FishData.FISH_ASSETS[speciesKey] or FishData.FISH_ASSETS.Guppy
+		local itemImage = FishData.FISH_ASSETS[speciesKey].Basic or FishData.FISH_ASSETS.Guppy.Basic
 
 		-- Add normal variant (all species)
 		local normalName, normalNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FishData.FISH_VARIANT.NORMAL, realmId)
@@ -379,6 +379,7 @@ function FishCalculator.GetAllFishVariations(realmId: number): { { Species: stri
 		})
 
 		-- Add elemental variant (all species)
+		itemImage = FishData.FISH_ASSETS[speciesKey].Elemental[realmId][1] or FishData.FISH_ASSETS.Guppy.Basic
 		local elementalName, elementalNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FishData.FISH_VARIANT.ELEMENTAL, realmId)
 		table.insert(variations, {
 			Species = speciesName,
@@ -393,6 +394,7 @@ function FishCalculator.GetAllFishVariations(realmId: number): { { Species: stri
 		})
 
 		-- Add elder variant (only truly exclusive tier 6 species)
+		itemImage = FishData.FISH_ASSETS[speciesKey].Elder[1] or FishData.FISH_ASSETS.Guppy.Basic
 		local elderName, elderNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FishData.FISH_VARIANT.ELDER, realmId)
 		if tier6ExclusiveSpecies[speciesKey] then
 			table.insert(variations, {
