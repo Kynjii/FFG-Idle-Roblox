@@ -11,7 +11,7 @@ Events.RemoteNames = {
 	-- Open UIs
 	OpenEntityDetails = "OpenEntityDetails",
 	OpenHelperShop = "OpenHelperShop",
-	OpenCrewManagementPanel = "OpenCrewManagementPanel",
+	OpenJobPanel = "OpenJobPanel",
 
 	-- Update UIs
 	PrepareHelperShop = "PrepareHelperShop",

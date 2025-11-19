@@ -6,9 +6,9 @@ local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
 local AvailableHelperListItem = require(ReplicatedStorage.Shared.UI.Components.Jobs.AvailableHelperListItem)
 local AvailableJobListItem = require(ReplicatedStorage.Shared.UI.Components.Jobs.AvailableJobListItem)
 local KinUI = require(ReplicatedStorage.Shared.UI.KinUI)
-local CrewManagementPanel = {}
+local JobPanel = {}
 
-function CrewManagementPanel.Create(player: Player, jobsData, crewData, jobCategory: "Fishing" | "Woodcutting" | "Mining" | "Transporting")
+function JobPanel.Create(player: Player, jobsData, crewData, jobCategory: "Crew" | "Jobs")
 	local crewManagementContainer = Instance.new("Frame")
 	crewManagementContainer.Name = "CrewManagementContainer"
 	crewManagementContainer.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -59,7 +59,7 @@ function CrewManagementPanel.Create(player: Player, jobsData, crewData, jobCateg
 		availableJob.Parent = availableJobs
 	end
 
-	if jobCount == 0 then CrewManagementPanel.AddEmptyState(availableJobs, "Purchase a Fishing Boat to see jobs.") end
+	if jobCount == 0 then JobPanel.AddEmptyState(availableJobs, "Purchase a Fishing Boat to see jobs.") end
 
 	local availableCrew = Instance.new("ScrollingFrame")
 	availableCrew.Name = "AvailableCrew"
@@ -89,7 +89,7 @@ function CrewManagementPanel.Create(player: Player, jobsData, crewData, jobCateg
 	for _, helper in pairs(crewData) do
 		local helperData: HelperType.HelperInstance = helper
 		if helperData.CurrentAssignment > 0 then continue end
-		if helperData.JobCategory ~= jobCategory then continue end
+		if helperData.JobCategory ~= FFGEnum.JOB_CATEGORY.Transporting then continue end
 
 		local availableHelper = AvailableHelperListItem.Create(helperData, selectedHelperState)
 		availableHelper.LayoutOrder = index
@@ -98,19 +98,20 @@ function CrewManagementPanel.Create(player: Player, jobsData, crewData, jobCateg
 		index += 1
 	end
 
-	if index == 1 then CrewManagementPanel.AddEmptyState(availableCrew, "Purchase Crew Members from the Crew Shop to assign them.") end
+	if index == 1 then JobPanel.AddEmptyState(availableCrew, "Purchase Crew Members from the Crew Shop to assign them.") end
 
 	availableCrew.Parent = crewManagementContainer
 
 	return crewManagementContainer
 end
 
-function CrewManagementPanel.AddEmptyState(parent: Instance, text: string)
+function JobPanel.AddEmptyState(parent: Instance, text: string)
 	local emptyState = Instance.new("TextLabel")
 	emptyState.Name = "EmptyState"
 	emptyState.Font = FFGEnum.THEME.bigFont
 	emptyState.TextColor3 = FFGEnum.THEME.color.white
 	emptyState.BackgroundTransparency = 1
+	emptyState.Size = UDim2.fromScale(0.8, 0.5)
 	emptyState.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
 	emptyState.Position = FFGEnum.THEME.alignment.position.center
 	emptyState.Text = text
@@ -120,4 +121,4 @@ function CrewManagementPanel.AddEmptyState(parent: Instance, text: string)
 	return emptyState
 end
 
-return CrewManagementPanel
+return JobPanel

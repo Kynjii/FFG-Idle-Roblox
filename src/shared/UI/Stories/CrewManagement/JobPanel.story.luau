@@ -2,10 +2,10 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
-local CrewManagementPanel = require(ReplicatedStorage.Shared.UI.Components.Frames.CrewManagementPanel)
+local JobPanel = require(ReplicatedStorage.Shared.UI.Components.Frames.JobPanel)
 
 local function story(target)
-	local panel = CrewManagementPanel.Create(
+	local panel = JobPanel.Create(
 		Players.LocalPlayer,
 		{ [1] = { Id = 1, Tier = 1, Category = FFGEnum.JOB_CATEGORY.Transporting, Label = "Pier 1", Slots = {
 			MaxSlots = 3,
