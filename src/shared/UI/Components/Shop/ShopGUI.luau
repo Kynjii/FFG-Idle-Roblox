@@ -11,7 +11,16 @@ local KinUI = require(ReplicatedStorage.Shared.UI.KinUI)
 local ShopGUI = {}
 
 function ShopGUI.Create()
-	local screenGui = MainUIPanel.Create({ screenGuiName = FFGEnum.SCREENGUI.HelperShop, panelName = "Hire Crew Members" })
+	local screenGui = MainUIPanel.Create({
+		screenGuiName = FFGEnum.SCREENGUI.HelperShop,
+		panelName = "Hire Crew Members",
+		panelTabs = {
+			hasTabs = true,
+			tabs = {
+				{ Name = "Transporters", Index = 1, Icon = FFGEnum.UI.Icons.Transporting },
+			},
+		},
+	})
 
 	local innerWindow = screenGui:FindFirstChild("InnerWindow", true)
 	KinUI.ApplyList(innerWindow, Enum.FillDirection.Horizontal, { HFlex = Enum.UIFlexAlignment.SpaceEvenly, VAlign = Enum.VerticalAlignment.Center })

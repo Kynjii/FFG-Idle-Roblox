@@ -1,114 +1,114 @@
-local Lighting = game:GetService("Lighting")
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+-- local Lighting = game:GetService("Lighting")
+-- local Players = game:GetService("Players")
+-- local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local satchel = require(ReplicatedStorage.Packages.satchel)
-local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
-local Events = require(ReplicatedStorage.Shared.Events.Events)
-local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
-local ShopGUI = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopGUI)
-local ShopItem = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopItem)
-local Tooltip = require(ReplicatedStorage.Shared.UI.Components.Tooltips.Tooltip)
+-- local satchel = require(ReplicatedStorage.Packages.satchel)
+-- local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
+-- local Events = require(ReplicatedStorage.Shared.Events.Events)
+-- local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
+-- local ShopGUI = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopGUI)
+-- local ShopItem = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopItem)
+-- local Tooltip = require(ReplicatedStorage.Shared.UI.Components.Tooltips.Tooltip)
 
-satchel:SetBackpackEnabled(false)
+-- satchel:SetBackpackEnabled(false)
 
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+-- local player = Players.LocalPlayer
+-- local playerGui = player:WaitForChild("PlayerGui")
 
-local main: Instance
-local inventoryItemsContainer: Instance
-local screenGui: ScreenGui
-local inventoryButtonScreenGui = playerGui:WaitForChild("InventoryButton")
-local hudInventoryButton = inventoryButtonScreenGui:FindFirstChild("OpenButton", true) :: ImageButton
+-- local main: Instance
+-- local inventoryItemsContainer: Instance
+-- local screenGui: ScreenGui
+-- local inventoryButtonScreenGui = playerGui:WaitForChild("InventoryButton")
+-- local hudInventoryButton = inventoryButtonScreenGui:FindFirstChild("OpenButton", true) :: ImageButton
 
-task.spawn(function()
-	screenGui = ShopGUI.Create({ screenGuiName = "PlayerInventory", shopName = "INVENTORY" })
-	screenGui.Parent = playerGui
+-- task.spawn(function()
+-- 	screenGui = ShopGUI.Create({ screenGuiName = "PlayerInventory", shopName = "INVENTORY" })
+-- 	screenGui.Parent = playerGui
 
-	main = screenGui:FindFirstChild("Main", true) :: Frame
-	if main then inventoryItemsContainer = main:FindFirstChild("ItemContainer", true) :: ScrollingFrame end
-end)
+-- 	main = screenGui:FindFirstChild("Main", true) :: Frame
+-- 	if main then inventoryItemsContainer = main:FindFirstChild("ItemContainer", true) :: ScrollingFrame end
+-- end)
 
-function clearExistingTooltip()
-	Tooltip.ClearExisting(player.UserId)
-end
+-- function clearExistingTooltip()
+-- 	Tooltip.ClearExisting(player.UserId)
+-- end
 
-function createitemComponent(helper: HelperType.HelperData)
-	return ShopItem({
-		ItemData = helper,
-		BackgroundColor3 = FFGEnum.QUALITIES[helper.QualityId].Color,
-		Size = UDim2.fromScale(1, 1),
-		Rounded = FFGEnum.THEME.button.cornerRadius,
-		HoverEffect = true,
-		Visible = true,
-		ScaleType = Enum.ScaleType.Slice,
-		SliceCenter = Rect.new(77, 77, 100, 111),
-		Parent = inventoryItemsContainer,
-		ShopInstance = main,
-	})
-end
+-- function createitemComponent(helper: HelperType.HelperData)
+-- 	return ShopItem({
+-- 		ItemData = helper,
+-- 		BackgroundColor3 = FFGEnum.QUALITIES[helper.QualityId].Color,
+-- 		Size = UDim2.fromScale(1, 1),
+-- 		Rounded = FFGEnum.THEME.button.cornerRadius,
+-- 		HoverEffect = true,
+-- 		Visible = true,
+-- 		ScaleType = Enum.ScaleType.Slice,
+-- 		SliceCenter = Rect.new(77, 77, 100, 111),
+-- 		Parent = inventoryItemsContainer,
+-- 		ShopInstance = main,
+-- 	})
+-- end
 
-local playerInventory: { [string]: any } = {}
-local itemComponents = {}
+-- local playerInventory: { [string]: any } = {}
+-- local itemComponents = {}
 
-function updateUI(keepTooltip: boolean)
-	if not keepTooltip then clearExistingTooltip() end
+-- function updateUI(keepTooltip: boolean)
+-- 	if not keepTooltip then clearExistingTooltip() end
 
-	for _, component: Instance in pairs(itemComponents) do
-		component:Destroy()
-	end
+-- 	for _, component: Instance in pairs(itemComponents) do
+-- 		component:Destroy()
+-- 	end
 
-	itemComponents = {}
+-- 	itemComponents = {}
 
-	if inventoryItemsContainer then
-		for k, item in pairs(playerInventory) do
-			local itemComponent = createitemComponent(item)
-			itemComponents[item.Id] = itemComponent
-		end
-	end
-end
+-- 	if inventoryItemsContainer then
+-- 		for k, item in pairs(playerInventory) do
+-- 			local itemComponent = createitemComponent(item)
+-- 			itemComponents[item.Id] = itemComponent
+-- 		end
+-- 	end
+-- end
 
-function populateDetailsUI(keepTooltip: boolean?)
-	if not playerInventory then return end
-	local blur = Instance.new("BlurEffect")
-	blur.Parent = Lighting
+-- function populateDetailsUI(keepTooltip: boolean?)
+-- 	if not playerInventory then return end
+-- 	local blur = Instance.new("BlurEffect")
+-- 	blur.Parent = Lighting
 
-	updateUI(keepTooltip)
-end
+-- 	updateUI(keepTooltip)
+-- end
 
-local getInventoryFn = Events.GetRemoteFn(Events.RemoteFunctionNames.GetPlayerInventory)
-hudInventoryButton.Activated:Connect(function()
-	if screenGui.Enabled then
-		satchel:SetBackpackEnabled(true)
-		screenGui.Enabled = false
-		if Lighting then
-			local blur = Lighting:FindFirstChild("Blur")
-			if blur then blur:Destroy() end
-		end
-		return
-	end
+-- local getInventoryFn = Events.GetRemoteFn(Events.RemoteFunctionNames.GetPlayerInventory)
+-- hudInventoryButton.Activated:Connect(function()
+-- 	if screenGui.Enabled then
+-- 		satchel:SetBackpackEnabled(true)
+-- 		screenGui.Enabled = false
+-- 		if Lighting then
+-- 			local blur = Lighting:FindFirstChild("Blur")
+-- 			if blur then blur:Destroy() end
+-- 		end
+-- 		return
+-- 	end
 
-	local data = getInventoryFn:InvokeServer()
-	if data then
-		playerInventory = data
+-- 	local data = getInventoryFn:InvokeServer()
+-- 	if data then
+-- 		playerInventory = data
 
-		populateDetailsUI()
-		satchel:SetBackpackEnabled(false)
-		screenGui.Enabled = true
-	end
-end)
+-- 		populateDetailsUI()
+-- 		satchel:SetBackpackEnabled(false)
+-- 		screenGui.Enabled = true
+-- 	end
+-- end)
 
-local helperUpgradedEvent = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
-if helperUpgradedEvent then
-	helperUpgradedEvent.OnClientEvent:Connect(function(helperData: HelperType.HelperData)
-		if playerInventory[helperData.Id] then playerInventory[helperData.Id] = helperData end
+-- local helperUpgradedEvent = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
+-- if helperUpgradedEvent then
+-- 	helperUpgradedEvent.OnClientEvent:Connect(function(helperData: HelperType.HelperData)
+-- 		if playerInventory[helperData.Id] then playerInventory[helperData.Id] = helperData end
 
-		local keepTooltip = true
-		populateDetailsUI(keepTooltip)
-	end)
-end
+-- 		local keepTooltip = true
+-- 		populateDetailsUI(keepTooltip)
+-- 	end)
+-- end
 
-if not game:IsLoaded() then game.Loaded:Wait() end
+-- if not game:IsLoaded() then game.Loaded:Wait() end
 
-task.wait(10)
-satchel:SetBackpackEnabled(true)
+-- task.wait(10)
+-- satchel:SetBackpackEnabled(true)

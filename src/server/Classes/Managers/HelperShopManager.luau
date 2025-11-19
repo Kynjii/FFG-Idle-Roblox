@@ -216,21 +216,12 @@ function HelperShopManager.SetupProximityPrompt(self: HelperShopManager, model: 
 	proximityPrompt.ObjectText = "Open"
 	proximityPrompt.ActionText = `{self.Entity}`
 
-	if self.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Shop then
-		self._cleaner:Add(proximityPrompt.Triggered:Connect(function(player)
-			if player.UserId ~= self.Owner then return end
-			if self.Level == self.MaxLevel then return end
+	self._cleaner:Add(proximityPrompt.Triggered:Connect(function(player)
+		if player.UserId ~= self.Owner then return end
 
-			Events.FireEvent(Events.RemoteNames.OpenEntityDetails, self.Player, self)
-		end))
-	else
-		self._cleaner:Add(proximityPrompt.Triggered:Connect(function(player)
-			if player.UserId ~= self.Owner then return end
-
-			local shopInventory = self.Inventory or {}
-			Events.FireEvent(Events.RemoteNames.OpenHelperShop, self.Player, HttpService:JSONEncode(shopInventory))
-		end))
-	end
+		local shopInventory = self.Inventory or {}
+		Events.FireEvent(Events.RemoteNames.OpenHelperShop, self.Player, HttpService:JSONEncode(shopInventory))
+	end))
 
 	return proximityPrompt
 end
@@ -269,6 +260,19 @@ function HelperShopManager.AttachEventListeners(self: HelperShopManager): ()
 
 			self:Purchasehelper(helperId)
 		end))
+	end
+
+	local updateInfoPanel = Events.GetRemote(Events.RemoteNames.UpdateInfoPanel)
+	if updateInfoPanel then
+		updateInfoPanel.OnServerEvent:Connect(function(player: Player, sentHelper: HelperType.HelperInstance)
+			if self.Player ~= player or self.Owner ~= player.UserId then return end
+			local helperInShop = TableUtil.Find(self.Inventory, function(helper: HelperType.HelperData)
+				return helper.Id == sentHelper.Id
+			end) :: HelperType.HelperData
+
+			if not helperInShop then return end
+			if helperInShop then Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, helperInShop) end
+		end)
 	end
 end
 -- //!SECTION

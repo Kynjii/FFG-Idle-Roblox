@@ -1,4 +1,5 @@
 --!strict
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
@@ -41,7 +42,7 @@ local function ShopItem(
 	shopItemContainerAspect.AspectType = Enum.AspectType.ScaleWithParentSize
 	shopItemContainerAspect.Parent = shopItemContainer
 
-	local itemQualityBG = Instance.new("ImageLabel")
+	local itemQualityBG = Instance.new("ImageButton")
 	itemQualityBG.Name = "ItemBG"
 	itemQualityBG.Size = UDim2.fromScale(1, 1)
 	if props.SliceCenter ~= nil then itemQualityBG.SliceCenter = props.SliceCenter end
@@ -182,24 +183,8 @@ local function ShopItem(
 	uiList.Parent = mainContainer
 	-- //!SECTION
 
-	-- //SECTION - Hover Effects
-	shopItemContainer.MouseEnter:Connect(function()
-		hoverImage.Visible = true
-
-		-- Tooltips
-		local bindableEvent = Events.GetBindableEvent(Events.BindableNames.ShowTooltip)
-		if bindableEvent then
-			local itemData = {
-				Item = item,
-				Parent = props.ShopInstance,
-			}
-
-			Events.FireBindableEvent(Events.BindableNames.ShowTooltip, itemData)
-		end
-	end)
-
-	shopItemContainer.MouseLeave:Connect(function()
-		hoverImage.Visible = false
+	itemQualityBG.Activated:Connect(function()
+		Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, Players.LocalPlayer, item)
 	end)
 
 	return shopItemContainer

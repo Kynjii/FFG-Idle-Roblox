@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local KinUI = require(ReplicatedStorage.Shared.UI.KinUI)
 local SingleGridLayout = {}
 
@@ -18,7 +19,7 @@ function SingleGridLayout.Create(props: {
 	scrollingFrame.ScrollBarImageColor3 = Color3.new()
 	scrollingFrame.ScrollBarThickness = 0
 	scrollingFrame.ScrollingDirection = Enum.ScrollingDirection.Y
-	KinUI.AddStroke(scrollingFrame, "XL", Color3.fromHex("#02447d"))
+	KinUI.AddStroke(scrollingFrame, "XL", FFGEnum.THEME.FrameStrokes.PrimaryBlue)
 	KinUI.AddCorner(scrollingFrame, "S")
 
 	local size

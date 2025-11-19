@@ -387,6 +387,10 @@ FFGEnum.THEME = {
 		Elder = Color3.fromHex("#B59A5A"),
 	},
 
+	FrameStrokes = {
+		PrimaryBlue = Color3.new(1, 1, 1):Lerp(Color3.fromHex("#02447d"), 0.6),
+	},
+
 	-- Sizing/styling
 	radius = 8,
 	padding = 10,

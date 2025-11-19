@@ -230,9 +230,29 @@ function KinUI.AddBadge(parent: Instance, size: UDim2?, text: string, strokeSize
 	local badgeContainer = Instance.new("Frame")
 	badgeContainer.Size = size or UDim2.fromScale(0.6, 1)
 	badgeContainer.LayoutOrder = layoutOrder or 1
-	badgeContainer.BackgroundColor3 = color or Color3.new(1, 1, 1)
+	badgeContainer.BackgroundTransparency = 1
 	badgeContainer.Parent = parent
 	KinUI.AddCorner(badgeContainer, "XS")
+
+	local innerContainer = Instance.new("Frame")
+	innerContainer.Size = UDim2.fromScale(1, 1)
+	innerContainer.BackgroundColor3 = color or Color3.new(1, 1, 1)
+	innerContainer.ZIndex = 50
+	innerContainer.Parent = badgeContainer
+	KinUI.AddCorner(innerContainer, "XS")
+
+	local strokeColor = Color3.new(1, 1, 1):Lerp(innerContainer.BackgroundColor3, 0.6)
+	KinUI.AddStroke(badgeContainer, "M", strokeColor)
+
+	local shadow = Instance.new("Frame")
+	shadow.Size = UDim2.fromScale(1, 1)
+	shadow.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
+	shadow.Position = UDim2.fromScale(0.5, 0.6)
+	shadow.ZIndex = 1
+	local lerpedColor = Color3.new(0, 0, 0):Lerp(innerContainer.BackgroundColor3, 0.6)
+	shadow.BackgroundColor3 = lerpedColor
+	shadow.Parent = badgeContainer
+	KinUI.AddCorner(shadow, "XS")
 
 	local textLabel = Instance.new("TextLabel")
 	textLabel.Name = "TextLabel"
@@ -246,7 +266,7 @@ function KinUI.AddBadge(parent: Instance, size: UDim2?, text: string, strokeSize
 	textLabel.TextScaled = true
 	KinUI.AddStroke(textLabel, strokeSize)
 	KinUI.AddPadding(textLabel, "XL")
-	textLabel.Parent = badgeContainer
+	textLabel.Parent = innerContainer
 
 	return badgeContainer
 end

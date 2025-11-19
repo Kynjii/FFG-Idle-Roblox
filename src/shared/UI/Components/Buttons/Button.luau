@@ -67,8 +67,8 @@ function Button.Create(props: {
 		currencyIcon.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
 		currencyIcon.Position = FFGEnum.THEME.alignment.position.center
 		currencyIcon.BackgroundTransparency = 1
-		currencyIcon.Size = UDim2.fromScale(0.2, 0.2)
-		KinUI.ApplyAspect(currencyIcon)
+		currencyIcon.Size = UDim2.fromScale(0.8, 0.8)
+		KinUI.ApplyAspect(currencyIcon, 1, nil, Enum.AspectType.FitWithinMaxSize)
 		currencyIcon.Parent = button
 
 		KinUI.ApplyList(button, Enum.FillDirection.Horizontal, { HAlign = Enum.HorizontalAlignment.Center, VAlign = Enum.VerticalAlignment.Center, Padding = "S" })

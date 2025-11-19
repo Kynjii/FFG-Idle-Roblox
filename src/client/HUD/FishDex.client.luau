@@ -11,17 +11,17 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 local main: Instance
-local inventoryItemsContainer: Instance
+local fishDexItemsContainer: Instance
 local screenGui: ScreenGui
 local fishDexButtonScreenGui = playerGui:WaitForChild("FishDexButton")
 local hudFishDexButton = fishDexButtonScreenGui:FindFirstChild("OpenButton", true) :: ImageButton
 
 task.spawn(function()
-	screenGui = FishDexUI.Create({ screenGuiName = "PlayerFishDex", shopName = "Fish Dex" })
+	screenGui = FishDexUI.Create()
 	screenGui.Parent = playerGui
 
 	main = screenGui:FindFirstChild("Main", true) :: Frame
-	if main then inventoryItemsContainer = main:FindFirstChild("ItemContainer", true) :: ScrollingFrame end
+	if main then fishDexItemsContainer = main:FindFirstChild("ItemContainer", true) :: ScrollingFrame end
 end)
 
 function createitemComponent(fish)
@@ -29,7 +29,7 @@ function createitemComponent(fish)
 		ItemData = fish,
 		Size = UDim2.fromScale(1, 1),
 		Visible = true,
-		Parent = inventoryItemsContainer,
+		Parent = fishDexItemsContainer,
 	})
 end
 
@@ -43,7 +43,7 @@ function updateUI()
 
 	itemComponents = {}
 
-	if inventoryItemsContainer then
+	if fishDexItemsContainer then
 		for k, item in pairs(playerFishDex) do
 			local itemComponent = createitemComponent(item)
 			if item.Species == "Angelfish" then

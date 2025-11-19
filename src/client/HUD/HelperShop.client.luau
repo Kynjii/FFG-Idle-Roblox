@@ -9,7 +9,6 @@ local Events = require(ReplicatedStorage.Shared.Events.Events)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
 local ShopGUI = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopGUI)
 local ShopItem = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopItem)
-local Tooltip = require(ReplicatedStorage.Shared.UI.Components.Tooltips.Tooltip)
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -19,16 +18,12 @@ local shopItemsContainer: Instance
 local screenGui: ScreenGui
 
 task.spawn(function()
-	screenGui = ShopGUI.Create({ screenGuiName = "HelperShop", shopName = "CREW SHOP" })
+	screenGui = ShopGUI.Create()
 	screenGui.Parent = playerGui
 
 	main = screenGui:FindFirstChild("Main", true) :: Frame
 	if main then shopItemsContainer = main:FindFirstChild("ItemContainer", true) :: ScrollingFrame end
 end)
-
-function clearExistingTooltip()
-	Tooltip.ClearExisting(player.UserId)
-end
 
 function createShopitemComponent(helper: HelperType.HelperData)
 	return ShopItem({
@@ -45,7 +40,6 @@ function createShopitemComponent(helper: HelperType.HelperData)
 	})
 end
 
-local _replica = nil
 local shopData: { [string]: any } = {}
 local itemComponents = {}
 
@@ -56,7 +50,6 @@ function handleClosingShopDetailsUI()
 	while true do
 		local distance = player:DistanceFromCharacter(originalPosition)
 		if distance >= 8 then
-			clearExistingTooltip()
 			satchel:SetBackpackEnabled(true)
 			ShopGUI.CloseShop(screenGui)
 			break
@@ -67,18 +60,28 @@ function handleClosingShopDetailsUI()
 end
 
 function updateUI()
-	clearExistingTooltip()
-
 	for _, component: Instance in pairs(itemComponents) do
 		component:Destroy()
 	end
 
+	itemComponents = {}
+
 	if shopItemsContainer then
+		local isFirst = true
 		for k, item in pairs(shopData) do
 			if item.IsPurchased then
-				return
+				continue
 			else
 				local itemComponent = createShopitemComponent(item)
+				if isFirst then
+					local btn = itemComponent:FindFirstChildOfClass("ImageButton")
+					if btn then
+						btn.Selected = true
+						Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, item)
+					end
+
+					isFirst = false
+				end
 				itemComponents[item.Id] = itemComponent
 			end
 		end

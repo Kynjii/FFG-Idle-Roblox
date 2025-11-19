@@ -151,6 +151,7 @@ function Helper.CreateStateData(player: Player, currencyType: string)
 	end
 
 	-- Calculate derived properties
+	state.Entity = state.Entity or FFGEnum.CLASS.ENTITY_NAME.Helper
 	state.Owner = state.Owner or player.UserId
 	state.Id = state.Id or HttpService:GenerateGUID(false)
 	state.JobCategory = state.JobCategory or chooseJob()
