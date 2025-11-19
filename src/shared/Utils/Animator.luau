@@ -2,7 +2,11 @@ local Animator = {}
 Animator.Animations = {}
 
 local animAssets = {
+	-- Boat
 	["WaterBob"] = "rbxassetid://104615638615761",
+
+	-- Fishing
+	["FishCaught1"] = "rbxassetid://91834542934799",
 }
 
 function Animator.LoadAnimations()
@@ -18,5 +22,7 @@ end
 function Animator.GetAnimation(name: string): Animation
 	return Animator.Animations[name]
 end
+
+Animator.LoadAnimations()
 
 return Animator

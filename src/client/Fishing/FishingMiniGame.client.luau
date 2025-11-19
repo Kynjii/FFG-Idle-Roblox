@@ -31,6 +31,7 @@ type Fish = { Id: string, QualityId: number, MaxHP: number, Species: string, Var
 local hookedFish: Fish
 local playerRod: PlayerRod
 local currentTier: number
+local reelingSound = workspace.Audio.Reel
 
 local elements = {
 	[0] = emojiContainer:FindFirstChild("0"),
@@ -74,6 +75,10 @@ end
 
 function showGame(value: boolean)
 	screenGui.Enabled = value
+
+	if reelingSound.IsPlaying then reelingSound:Stop() end
+
+	if value then reelingSound:Play() end
 
 	if value then
 		satchel:SetBackpackEnabled(false)
@@ -201,7 +206,6 @@ function startLosingHP()
 	end)
 end
 
-local getFishingDataEvent = Events.GetRemoteFn(Events.RemoteFunctionNames.GetFishItem)
 local caughtFishEvent = Events.GetRemote(Events.RemoteNames.FishCaught)
 
 if catchButton then
@@ -229,11 +233,12 @@ if catchButton then
 
 			caughtFishEvent:FireServer(hookedFish)
 
-			local data = getFishingDataEvent:InvokeServer()
-			if data then
-				hookedFish = data.Fish
-				playerRod = data.Rod
-			end
+			showGame(false)
+			startGame(false)
+			task.delay(4, function()
+				local explosion: Sound = workspace.Audio.Explosion
+				if explosion then explosion:Play() end
+			end)
 		end
 		relocateHitContainer()
 

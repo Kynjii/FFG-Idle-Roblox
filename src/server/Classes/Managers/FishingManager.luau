@@ -7,6 +7,7 @@ local Notification = require(ServerScriptService.Server.Classes.Modules.Notifica
 local Trove = require(ReplicatedStorage.Packages.Trove)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
+local Animator = require(ReplicatedStorage.Shared.Utils.Animator)
 
 -- //SECTION - Tagged Fishing Locations within Workspace
 local taggedFishingLocs = CollectionService:GetTagged("FishingLocation")
@@ -128,6 +129,33 @@ function FishingManager.SetupProximityPrompts(self: FishingManager)
 	end
 end
 
+local ANIMATIONS = {
+	FishCaught1 = "FishCaught1",
+}
+
+function FishingManager.PlayerAnim(self: FishingManager, player: Player)
+	local character = player.Character or player.CharacterAdded:Wait()
+	local humanoid = character:WaitForChild("Humanoid")
+	local animator = humanoid:WaitForChild("Animator")
+	local animation: Animation = Animator.GetAnimation(ANIMATIONS.FishCaught1)
+
+	if animator then
+		local animationTrack: AnimationTrack = animator:LoadAnimation(animation)
+		animationTrack.Priority = Enum.AnimationPriority.Action
+
+		task.wait()
+		animationTrack:Play()
+
+		animationTrack.Ended:Connect(function(...: any)
+			Events.FireEvent(
+				Events.RemoteNames.StartFishingMiniGame,
+				player,
+				{ Fish = self:GetRandomFish(self.CurrentFishingLocTier, self.RealmId), Rod = self:GetPlayerRod(), Tier = self.CurrentFishingLocTier }
+			)
+		end)
+	end
+end
+
 function FishingManager.AttachAttListeners(self: FishingManager)
 	local getFishItemEvent = Events.GetRemoteFn(Events.RemoteFunctionNames.GetFishItem)
 	if getFishItemEvent then
@@ -144,6 +172,8 @@ function FishingManager.AttachAttListeners(self: FishingManager)
 		self._cleaner:Add(caughtFishEvent.OnServerEvent:Connect(function(player: Player, fish: Fish.Fish)
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
 			self:SaveCaughtFish(fish)
+
+			self:PlayerAnim(player)
 		end))
 	end
 end

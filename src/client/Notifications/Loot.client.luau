@@ -18,6 +18,9 @@ if notificationContainer then
 				if notification then
 					notification.Parent = notificationContainer
 					LootNotification.Animate(notification)
+
+					local sound = workspace.UISounds.FishDexAlert
+					if sound then sound:Play() end
 				end
 			end
 		end)
