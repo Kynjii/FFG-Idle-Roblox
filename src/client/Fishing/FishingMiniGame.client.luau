@@ -46,22 +46,8 @@ local up = true
 
 local gameStarted = false
 
-RunService.Heartbeat:Connect(function(deltaTime: number)
-	if not gameStarted then return end
-	local currentX = hitMarker.Position.X.Scale
-
-	if up then
-		hitMarker.Position = hitMarker.Position + UDim2.fromScale(deltaTime / 2, 0)
-	else
-		hitMarker.Position = hitMarker.Position - UDim2.fromScale(deltaTime / 2, 0)
-	end
-
-	if currentX >= endX then
-		up = false
-	elseif currentX <= startX then
-		up = true
-	end
-end)
+local isButtonHeld = false
+local markerConnection = nil
 
 function startGame(value: boolean)
 	gameStarted = value
@@ -70,7 +56,32 @@ function startGame(value: boolean)
 	resetProgress()
 	relocateHitContainer()
 
-	if not value then Events.FireEvent(Events.RemoteNames.GameEnded, player, currentTier) end
+	if value then
+		markerConnection = RunService.Heartbeat:Connect(function(deltaTime: number)
+			if not gameStarted or not isButtonHeld then return end
+
+			local currentX = hitMarker.Position.X.Scale
+
+			if up then
+				hitMarker.Position = hitMarker.Position + UDim2.fromScale(deltaTime / 2, 0)
+			else
+				hitMarker.Position = hitMarker.Position - UDim2.fromScale(deltaTime / 2, 0)
+			end
+
+			if currentX >= endX then
+				up = false
+			elseif currentX <= startX then
+				up = true
+			end
+		end)
+	else
+		isButtonHeld = false
+		if markerConnection then
+			markerConnection:Disconnect()
+			markerConnection = nil
+		end
+		Events.FireEvent(Events.RemoteNames.GameEnded, player, currentTier)
+	end
 end
 
 function showGame(value: boolean)
@@ -208,39 +219,82 @@ end
 
 local caughtFishEvent = Events.GetRemote(Events.RemoteNames.FishCaught)
 
+local function buttonReleased()
+	isButtonHeld = false
+
+	if markerConnection then
+		markerConnection:Disconnect()
+		markerConnection = nil
+	end
+
+	local isOverLapping1 = checkObjectsOverlap(hitMarker, hitArea1)
+	local isOverLapping2 = checkObjectsOverlap(hitMarker, hitArea2)
+	local isOverLapping3 = checkObjectsOverlap(hitMarker, hitArea3)
+
+	resetHitMarker()
+
+	local area = 0
+
+	if isOverLapping1 then area = 1 end
+	if isOverLapping2 then area = 2 end
+	if isOverLapping3 then area = 3 end
+
+	local hpAdded = playerRod.BaseDmg * area
+	animate(area, hpAdded)
+	local currentHp = currentFishHP
+
+	local newHp = currentHp + hpAdded
+	if area == 0 then newHp = currentHp - playerRod.BaseDmg end
+	currentFishHP = newHp
+
+	if newHp >= hookedFish.MaxHP then
+		currentFishHP = 0
+
+		caughtFishEvent:FireServer(hookedFish)
+
+		showGame(false)
+		startGame(false)
+	end
+	relocateHitContainer()
+
+	ProgressBar.Update(pbFrame, currentFishHP, hookedFish.MaxHP)
+
+	if area > 0 then startLosingHP() end
+end
+
+local function buttonPressed()
+	isButtonHeld = true
+
+	if not markerConnection and gameStarted then
+		markerConnection = RunService.Heartbeat:Connect(function(deltaTime: number)
+			if not gameStarted or not isButtonHeld then return end
+
+			local currentX = hitMarker.Position.X.Scale
+
+			if up then
+				hitMarker.Position = hitMarker.Position + UDim2.fromScale(deltaTime / 2, 0)
+			else
+				hitMarker.Position = hitMarker.Position - UDim2.fromScale(deltaTime / 2, 0)
+			end
+
+			if currentX >= endX then
+				up = false
+			elseif currentX <= startX then
+				up = true
+			end
+		end)
+	end
+end
+
 if catchButton then
-	catchButton.Activated:Connect(function()
-		local isOverLapping1 = checkObjectsOverlap(hitMarker, hitArea1)
-		local isOverLapping2 = checkObjectsOverlap(hitMarker, hitArea2)
-		local isOverLapping3 = checkObjectsOverlap(hitMarker, hitArea3)
+	catchButton.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then buttonPressed() end
+	end)
+end
 
-		local area = 0
-
-		if isOverLapping1 then area = 1 end
-		if isOverLapping2 then area = 2 end
-		if isOverLapping3 then area = 3 end
-
-		local hpAdded = playerRod.BaseDmg * area
-		animate(area, hpAdded)
-		local currentHp = currentFishHP
-
-		local newHp = currentHp + hpAdded
-		if area == 0 then newHp = currentHp - playerRod.BaseDmg end
-		currentFishHP = newHp
-
-		if newHp >= hookedFish.MaxHP then
-			currentFishHP = 0
-
-			caughtFishEvent:FireServer(hookedFish)
-
-			showGame(false)
-			startGame(false)
-		end
-		relocateHitContainer()
-
-		ProgressBar.Update(pbFrame, currentFishHP, hookedFish.MaxHP)
-
-		if area > 0 then startLosingHP() end
+if catchButton then
+	catchButton.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then buttonReleased() end
 	end)
 end
 
