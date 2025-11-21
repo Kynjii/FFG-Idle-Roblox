@@ -1,8 +1,8 @@
 local MAX_FISHING_LEVEL = 100
 
 -- Tunable curve parameters
-local BASE_XP = 30 -- minimum XP per level
-local SCALE_XP = 20 -- growth factor
+local BASE_XP = 60 -- minimum XP per level
+local SCALE_XP = 30 -- growth factor
 local GROWTH_XP = 1.25 -- exponent: controls how steep it gets late-game
 
 local FishingXP = {}
