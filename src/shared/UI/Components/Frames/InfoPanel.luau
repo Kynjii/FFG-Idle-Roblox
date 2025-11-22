@@ -354,6 +354,12 @@ function InfoPanel.Create(props: {
 			})
 			buyButton.Parent = buyButtonContainer
 
+			if canAfford then
+				Button.Enable(buyButton)
+			else
+				Button.Disable(buyButton)
+			end
+
 			buyButton.Activated:Connect(function()
 				handleButtonClick(helperData.Id, helperData.IsPurchased or false)
 			end)
