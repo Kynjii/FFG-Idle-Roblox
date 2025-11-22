@@ -7,6 +7,9 @@ Events.RemoteNames = {
 	-- Game Start
 	PlayerAssigned = "PlayerAssigned",
 
+	-- Currencies
+	GoldChanged = "GoldChanged",
+
 	-- HUD Messages
 	LootNotification = "LootNotification",
 	PlayerNotification = "PlayerNotification",
@@ -44,6 +47,8 @@ Events.RemoteFunctionNames = {
 	GetFishItem = "GetFishItem",
 	GetFishDex = "GetFishDex",
 	GetFishStat = "GetFishStat",
+
+	CanAfford = "CanAfford",
 }
 
 Events.BindableFunctionNames = {

@@ -88,4 +88,18 @@ function Button.Create(props: {
 	return button
 end
 
+function Button.Enable(button: ImageButton)
+	if button then
+		button.Image = buttonImages.squareColor.Green
+		button.Active = true
+	end
+end
+
+function Button.Disable(button: ImageButton)
+	if button then
+		button.Image = buttonImages.squareColor.Gray
+		button.Active = false
+	end
+end
+
 return Button

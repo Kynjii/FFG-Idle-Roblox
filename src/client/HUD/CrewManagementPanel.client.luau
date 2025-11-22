@@ -6,14 +6,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
+local HelperPanel = require(ReplicatedStorage.Shared.UI.Components.Frames.HelperPanel)
 local JobPanel = require(ReplicatedStorage.Shared.UI.Components.Frames.JobPanel)
 local MainUIPanel = require(ReplicatedStorage.Shared.UI.Components.Frames.MainUIPanel)
-local ShopItem = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopItem)
 
 -- Elements
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
-local crewManagementButtonScreenGui = playerGui:WaitForChild("CrewManagementButton")
+local crewManagementButtonScreenGui = playerGui:WaitForChild("CrewManagementButton") :: ScreenGui
 local crewManagementButton = crewManagementButtonScreenGui:FindFirstChild("OpenButton", true) :: ImageButton
 local screenGui: ScreenGui
 local innerWindow: any
@@ -22,7 +22,6 @@ local innerWindow: any
 local getJobDataEvent = Events.GetRemoteFn(Events.RemoteFunctionNames.GetJobData)
 local getCrewManagementState = Events.GetRemoteFn(Events.RemoteFunctionNames.GetPlayerInventory)
 local tabSelectedEvent = Events.GetBindableEvent(Events.BindableNames.TabSelected)
-local getInventoryFn = Events.GetRemoteFn(Events.RemoteFunctionNames.GetPlayerInventory)
 local updateUIEvent = Events.GetRemote(Events.RemoteNames.UpdateJobManagementUI)
 local helperUpgradedEvent = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
 
@@ -30,9 +29,6 @@ local helperUpgradedEvent = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
 local crewState: { [string]: any } = {}
 type Tab = "Crew" | "Jobs"
 local selectedTab: Tab = "Crew"
-
-local itemComponents: { [string]: Instance } = {}
-local playerInventory: { [string]: any } = {}
 
 task.spawn(function()
 	screenGui = MainUIPanel.Create({
@@ -52,59 +48,22 @@ end)
 
 function updateCrewPanel()
 	if not innerWindow then return end
-
-	local crewItemsContainer = innerWindow:FindFirstChild("ItemContainer", true) :: ScrollingFrame
-
-	local function createShopitemComponent(helper: HelperType.HelperData)
-		return ShopItem({
-			ItemData = helper,
-			BackgroundColor3 = FFGEnum.QUALITIES[helper.QualityId].Color,
-			Size = UDim2.fromScale(1, 1),
-			Rounded = FFGEnum.THEME.button.cornerRadius,
-			HoverEffect = true,
-			Visible = true,
-			ScaleType = Enum.ScaleType.Slice,
-			SliceCenter = Rect.new(32, 83, 32, 83),
-			Parent = crewItemsContainer,
-			ShopInstance = innerWindow,
-		})
-	end
-
-	for _, component in pairs(itemComponents) do
-		component:Destroy()
-	end
-
-	itemComponents = {}
-
-	if crewItemsContainer then
-		local isFirst = true
-		for k, item in pairs(playerInventory) do
-			local itemComponent = createShopitemComponent(item)
-			if isFirst then
-				local btn = itemComponent:FindFirstChildOfClass("ImageButton")
-				if btn then
-					btn.Selected = true
-					Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, item)
-				end
-
-				isFirst = false
-			end
-			itemComponents[item.Id] = itemComponent
-		end
-	end
+	HelperPanel.Create(player, crewState, innerWindow)
 end
 
 function updateCrewMngPanelUI()
-	local crewManagementContainer = innerWindow and innerWindow:FindFirstChild("CrewManagementContainer", true)
-	if crewManagementContainer then crewManagementContainer:Destroy() end
+	local innerWindowChildren = innerWindow:GetChildren()
+	for _, element in ipairs(innerWindowChildren) do
+		element:Destroy()
+	end
 
-	if innerWindow then
+	if innerWindow and getCrewManagementState then
+		-- Get Crewstate
+		local data = getCrewManagementState:InvokeServer()
+		if data then crewState = data end
+
 		if selectedTab == "Jobs" then
-			if getJobDataEvent and getCrewManagementState then
-				-- Get Crewstate
-				local data = getCrewManagementState:InvokeServer()
-				if data then crewState = data end
-
+			if getJobDataEvent then
 				-- Get Job Data
 				local jobsData = getJobDataEvent:InvokeServer()
 
@@ -113,9 +72,6 @@ function updateCrewMngPanelUI()
 				jobPanel.Parent = innerWindow
 			end
 		elseif selectedTab == "Crew" then
-			local data
-			if getInventoryFn then data = getInventoryFn:InvokeServer() end
-			if data then playerInventory = data end
 			updateCrewPanel()
 		end
 	end
@@ -163,11 +119,18 @@ if crewManagementButton and getCrewManagementState then
 	end)
 end
 
+local playerAssignedEvent = Events.GetRemote(Events.RemoteNames.PlayerAssigned)
+if playerAssignedEvent then
+	playerAssignedEvent.OnClientEvent:Once(function()
+		if crewManagementButtonScreenGui and not crewManagementButtonScreenGui.Enabled then crewManagementButtonScreenGui.Enabled = true end
+	end)
+end
+
 if updateUIEvent then updateUIEvent.OnClientEvent:Connect(function()
 	updateCrewMngPanelUI()
 end) end
 
-if tabSelectedEvent and getInventoryFn then tabSelectedEvent.Event:Connect(function(tabName)
+if tabSelectedEvent and getCrewManagementState then tabSelectedEvent.Event:Connect(function(tabName)
 	selectedTab = tabName
 
 	updateCrewMngPanelUI()
@@ -175,8 +138,7 @@ end) end
 
 if helperUpgradedEvent then
 	helperUpgradedEvent.OnClientEvent:Connect(function(helperData: HelperType.HelperData)
-		if playerInventory[helperData.Id] then playerInventory[helperData.Id] = helperData end
-
+		if crewState[helperData.Id] then crewState[helperData.Id] = helperData end
 		updateCrewMngPanelUI()
 	end)
 end

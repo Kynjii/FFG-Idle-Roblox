@@ -229,6 +229,7 @@ function DataService.Earn(player: Player, currencyType: "Gold", amount: number)
 
 	Events.FireBindableEvent(Events.BindableNames.UpdateState, player)
 	Events.FireEvent(Events.RemoteNames.LootNotification, player, { ItemType = currencyType, Text = Format.CurrencyNumber(amount) })
+	Events.FireEvent(Events.RemoteNames.GoldChanged, player, newValue)
 end
 
 function DataService.CanAfford(player: Player, currencyType: "Gold", amount: number)
@@ -261,6 +262,7 @@ function DataService.Spend(player: Player, currencyType: "Gold", amount: number)
 	if replica then replica:Set({ "Currencies", currencyType }, newValue) end
 
 	Events.FireBindableEvent(Events.BindableNames.UpdateState, player)
+	Events.FireEvent(Events.RemoteNames.GoldChanged, player, newValue)
 end
 
 function DataService.ClearProfileData(player: Player, profile)
@@ -680,6 +682,11 @@ task.delay(9, function()
 	if getFishStatFn then getFishStatFn.OnServerInvoke = function(player: Player, fish: FishType.FishData)
 		local value = DataService.GetFishStat(player, fish)
 		return value
+	end end
+
+	local canAffordEventFn = Events.GetRemoteFn(Events.RemoteFunctionNames.CanAfford)
+	if canAffordEventFn then canAffordEventFn.OnServerInvoke = function(player: Player, currencyType: "Gold", amount: number)
+		return DataService.CanAfford(player, currencyType, amount)
 	end end
 end)
 

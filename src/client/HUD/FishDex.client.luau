@@ -68,6 +68,11 @@ function populateDetailsUI()
 	updateUI()
 end
 
+local playerAssignedEvent = Events.GetRemote(Events.RemoteNames.PlayerAssigned)
+if playerAssignedEvent then playerAssignedEvent.OnClientEvent:Once(function()
+	if fishDexButtonScreenGui and not fishDexButtonScreenGui.Enabled then fishDexButtonScreenGui.Enabled = true end
+end) end
+
 local getFishDexFn = Events.GetRemoteFn(Events.RemoteFunctionNames.GetFishDex)
 hudFishDexButton.Activated:Connect(function()
 	if screenGui.Enabled then

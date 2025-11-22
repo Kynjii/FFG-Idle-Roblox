@@ -12,6 +12,8 @@ local KinUI = require(ReplicatedStorage.Shared.UI.KinUI)
 local Format = require(ReplicatedStorage.Shared.Utils.Format)
 local StatsIndexer = require(ReplicatedStorage.Shared.Utils.StatsIndexer)
 
+local canAffordEvent = Events.GetRemoteFn(Events.RemoteFunctionNames.CanAfford)
+
 local InfoPanel = {}
 
 local function handleButtonClick(itemId: string, isPurchased: boolean): ()
@@ -330,7 +332,7 @@ function InfoPanel.Create(props: {
 
 		createStats(helperData, itemProgress)
 
-		if helperData.IsPurchased then
+		if isHelper then
 			local buyButtonContainer = Instance.new("Frame")
 			buyButtonContainer.Name = "BuyButtonContainer"
 			buyButtonContainer.BackgroundTransparency = 1
@@ -339,8 +341,13 @@ function InfoPanel.Create(props: {
 			buyButtonContainer.Parent = itemProgress
 
 			local cost: number = helperData.IsPurchased and helperData.UpgradeCost or helperData.BaseCost or 0
+			local canAfford = false
+			if canAffordEvent then canAfford = canAffordEvent:InvokeServer("Gold", cost) end
+
+			local colorToUse = canAfford and "Green" or "Gray"
+
 			local buyButton = Button.Create({
-				Color = "Green",
+				Color = colorToUse,
 				Text = Format.CurrencyNumber(cost),
 				Size = UDim2.fromScale(0.5, 1),
 				CurrencyType = "Gold",
@@ -350,6 +357,19 @@ function InfoPanel.Create(props: {
 			buyButton.Activated:Connect(function()
 				handleButtonClick(helperData.Id, helperData.IsPurchased or false)
 			end)
+
+			local goldChangedEvent = Events.GetRemote(Events.RemoteNames.GoldChanged)
+			if goldChangedEvent then
+				goldChangedEvent.OnClientEvent:Connect(function(newGoldAmount)
+					if buyButton then
+						if newGoldAmount < cost then
+							Button.Disable(buyButton)
+						elseif newGoldAmount >= cost then
+							Button.Enable(buyButton)
+						end
+					end
+				end)
+			end
 
 			local helperUpgradedEvent = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
 			if helperData.Stats then
