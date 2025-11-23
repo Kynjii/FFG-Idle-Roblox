@@ -6,6 +6,7 @@ local ServerStorage = game:GetService("ServerStorage")
 local Fish = require(ServerScriptService.Server.Classes.Fish)
 local Emitter = require(ServerScriptService.Server.Modules.Emitters.Emitter)
 local Trove = require(ReplicatedStorage.Packages.Trove)
+local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local FishData = require(ReplicatedStorage.Shared.Fish.FishData)
 
@@ -90,16 +91,16 @@ function InventoryManager.GrantTool(self: InventoryManager, item)
 	runtimeTool.ToolTip = item.Name or item.Species
 
 	local image = nil
-	if item.Variant == FishData.FISH_VARIANT.NORMAL then
+	if item.Variant == FFGEnum.FISH_VARIANT.NORMAL then
 		image = FishData.FISH_ASSETS[item.SpeciesKey].Normal[item.QualityId]
-	elseif item.Variant == FishData.FISH_VARIANT.ELEMENTAL then
+	elseif item.Variant == FFGEnum.FISH_VARIANT.ELEMENTAL then
 		image = FishData.FISH_ASSETS[item.SpeciesKey].Elemental[item.RealmId or item.ElementNum or 1][item.QualityId]
 		local elementName = item.ElementName
 		if elementName then
 			Emitter.AttachElement(invTool.Handle or invTool:FindFirstChild("Handle"), elementName, item.QualityId)
 			Emitter.AttachElement(runtimeTool.Handle or runtimeTool:FindFirstChild("Handle"), elementName, item.QualityId)
 		end
-	elseif item.Variant == FishData.FISH_VARIANT.ELDER then
+	elseif item.Variant == FFGEnum.FISH_VARIANT.ELDER then
 		image = FishData.FISH_ASSETS[item.SpeciesKey].Elder[item.QualityId]
 	else
 		image = FishData.FISH_ASSETS[item.SpeciesKey].Basic

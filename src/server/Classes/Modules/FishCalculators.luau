@@ -61,14 +61,14 @@ local SPECIES_DROPS_BY_TIER = {
 local VARIANT_DROP_CHANCES = {
 	-- Tiers 1-5: Only normal and elemental
 	standard = {
-		[FishData.FISH_VARIANT.NORMAL] = 0.85, -- 85% chance for normal
-		[FishData.FISH_VARIANT.ELEMENTAL] = 0.15, -- 15% chance for elemental
+		[FFGEnum.FISH_VARIANT.NORMAL] = 0.85, -- 85% chance for normal
+		[FFGEnum.FISH_VARIANT.ELEMENTAL] = 0.15, -- 15% chance for elemental
 	},
 	-- Tier 6: Includes elder variant
 	tier6 = {
-		[FishData.FISH_VARIANT.NORMAL] = 0.74, -- 74% chance for normal
-		[FishData.FISH_VARIANT.ELEMENTAL] = 0.25, -- 25% chance for elemental
-		[FishData.FISH_VARIANT.ELDER] = 0.01, -- 1% chance for elder
+		[FFGEnum.FISH_VARIANT.NORMAL] = 0.74, -- 74% chance for normal
+		[FFGEnum.FISH_VARIANT.ELEMENTAL] = 0.25, -- 25% chance for elemental
+		[FFGEnum.FISH_VARIANT.ELDER] = 0.01, -- 1% chance for elder
 	},
 }
 
@@ -226,7 +226,7 @@ function FishCalculator.ChooseSpecie(fishingLocTier: number?, realmId: number): 
 	end
 
 	local variantRoll = math.random()
-	local chosenVariant = FishData.FISH_VARIANT.NORMAL
+	local chosenVariant = FFGEnum.FISH_VARIANT.NORMAL
 
 	local dropTable = (tier == 6) and VARIANT_DROP_CHANCES.tier6 or VARIANT_DROP_CHANCES.standard
 
@@ -240,7 +240,7 @@ function FishCalculator.ChooseSpecie(fishingLocTier: number?, realmId: number): 
 	end
 
 	-- Special check: Elder variants only for truly exclusive tier 6 species
-	if chosenVariant == FishData.FISH_VARIANT.ELDER then
+	if chosenVariant == FFGEnum.FISH_VARIANT.ELDER then
 		local tier6ExclusiveSpecies = {
 			Coelacanth = true,
 			Stringfish = true,
@@ -251,11 +251,11 @@ function FishCalculator.ChooseSpecie(fishingLocTier: number?, realmId: number): 
 
 		if not tier6ExclusiveSpecies[chosenSpeciesKey] then
 			-- Reroll to normal or elemental for non-exclusive species
-			chosenVariant = (math.random() < 0.75) and FishData.FISH_VARIANT.NORMAL or FishData.FISH_VARIANT.ELEMENTAL
+			chosenVariant = (math.random() < 0.75) and FFGEnum.FISH_VARIANT.NORMAL or FFGEnum.FISH_VARIANT.ELEMENTAL
 		end
 	end
 
-	local speciesName = FishData.FISH_SPECIES[chosenSpeciesKey] or chosenSpeciesKey
+	local speciesName = FFGEnum.FISH_SPECIES[chosenSpeciesKey] or chosenSpeciesKey
 	local itemImage = FishData.FISH_ASSETS[chosenSpeciesKey].Basic or FishData.FISH_ASSETS.Guppy.Basic
 	local name, nameKey = FishCalculator.GetFishName(speciesName, chosenSpeciesKey, chosenVariant, realmId)
 
@@ -291,14 +291,16 @@ function FishCalculator.GetAllFishVariations(realmId: number): { { Species: stri
 
 	for speciesKey, speciesName in pairs(FishData.FISH_SPECIES) do
 		local itemImage = FishData.FISH_ASSETS[speciesKey].Basic or FishData.FISH_ASSETS.Guppy.Basic
+		local itemImageMasked = FishData.FISH_ASSETS_MASKED[speciesKey] or FishData.FISH_ASSETS_MASKED.Guppy
 
 		-- Add normal variant (all species)
-		local normalName, normalNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FishData.FISH_VARIANT.NORMAL, realmId)
+		local normalName, normalNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FFGEnum.FISH_VARIANT.NORMAL, realmId)
 		table.insert(variations, {
 			Entity = FFGEnum.CLASS.ENTITY_NAME.Fish,
 			Species = speciesName,
-			Variant = FishData.FISH_VARIANT.NORMAL,
+			Variant = FFGEnum.FISH_VARIANT.NORMAL,
 			ItemImage = itemImage,
+			ItemImageMasked = itemImageMasked,
 			SpeciesKey = speciesKey,
 			Name = normalName,
 			NameKey = normalNameKey,
@@ -307,28 +309,30 @@ function FishCalculator.GetAllFishVariations(realmId: number): { { Species: stri
 
 		-- Add elemental variant (all species)
 
-		local elementalName, elementalNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FishData.FISH_VARIANT.ELEMENTAL, realmId)
+		local elementalName, elementalNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FFGEnum.FISH_VARIANT.ELEMENTAL, realmId)
 		table.insert(variations, {
 			Entity = FFGEnum.CLASS.ENTITY_NAME.Fish,
 			Species = speciesName,
-			Variant = FishData.FISH_VARIANT.ELEMENTAL,
+			Variant = FFGEnum.FISH_VARIANT.ELEMENTAL,
 			ItemImage = itemImage,
+			ItemImageMasked = itemImageMasked,
 			SpeciesKey = speciesKey,
 			Name = elementalName,
 			NameKey = elementalNameKey,
-			ElementName = FishData.REALM_ELEMENTS[realmId],
+			ElementName = FFGEnum.REALM_ELEMENTS[realmId],
 			ElementNum = realmId,
 			Caught = false,
 		})
 
 		-- Add elder variant (only truly exclusive tier 6 species)
-		local elderName, elderNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FishData.FISH_VARIANT.ELDER, realmId)
+		local elderName, elderNameKey = FishCalculator.GetFishName(speciesName, speciesKey, FFGEnum.FISH_VARIANT.ELDER, realmId)
 		if tier6ExclusiveSpecies[speciesKey] then
 			table.insert(variations, {
 				Entity = FFGEnum.CLASS.ENTITY_NAME.Fish,
 				Species = speciesName,
-				Variant = FishData.FISH_VARIANT.ELDER,
+				Variant = FFGEnum.FISH_VARIANT.ELDER,
 				ItemImage = itemImage,
+				ItemImageMasked = itemImageMasked,
 				SpeciesKey = speciesKey,
 				Name = elderName,
 				NameKey = elderNameKey,
@@ -344,10 +348,10 @@ function FishCalculator.GetFishName(species: string, speciesKey: string, variant
 	local baseName = species
 	local baseNameKey = speciesKey
 
-	if variant == FishData.FISH_VARIANT.ELEMENTAL then
-		local element = FishData.REALM_ELEMENTS[realmId] or "Unknown"
+	if variant == FFGEnum.FISH_VARIANT.ELEMENTAL then
+		local element = FFGEnum.REALM_ELEMENTS[realmId] or "Unknown"
 		return `{element} {baseName}`, `{element}{baseName}`
-	elseif variant == FishData.FISH_VARIANT.ELDER then
+	elseif variant == FFGEnum.FISH_VARIANT.ELDER then
 		return `Elder {baseName}`, `Elder{baseName}`
 	else
 		return baseName, baseNameKey

@@ -42,19 +42,6 @@ FishData.FISH_SPECIES.SmallBass = "Small Bass"
 FishData.FISH_SPECIES.Stringfish = "Stringfish"
 FishData.FISH_SPECIES.Sweetfish = "Sweetfish"
 
-FishData.FISH_VARIANT = {
-	NORMAL = "Normal",
-	ELEMENTAL = "Elemental",
-	ELDER = "Elder",
-}
-
-FishData.REALM_ELEMENTS = {
-	[1] = "Hydro",
-	[2] = "Frostreed",
-	[3] = "Cinder",
-	[4] = "Mossy",
-}
-
 FishData.FISH_ASSETS = {} :: { [string]: string }
 FishData.FISH_ASSETS.Angelfish = {
 	Basic = "rbxassetid://83578364860938",

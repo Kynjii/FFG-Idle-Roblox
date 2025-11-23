@@ -3,7 +3,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
-local FishData = require(ReplicatedStorage.Shared.Fish.FishData)
 local FishType = require(ReplicatedStorage.Shared.Types.Classes.FishType)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
 local Button = require(ReplicatedStorage.Shared.UI.Components.Buttons.Button)
@@ -163,7 +162,7 @@ function InfoPanel.Create(props: {
 			if fishData.Caught then
 				image = fishData.ItemImage
 			else
-				image = FishData.FISH_ASSETS_MASKED[fishData.SpeciesKey]
+				image = fishData.ItemImageMasked
 			end
 		else
 			image = fishData.ItemImage or ""
@@ -207,13 +206,13 @@ function InfoPanel.Create(props: {
 
 	if isFish then
 		local fishData = data :: FishType.FishData
-		if fishData.Variant == FishData.FISH_VARIANT.NORMAL then
+		if fishData.Variant == FFGEnum.FISH_VARIANT.NORMAL then
 			KinUI.AddBadge(variantsContainer, UDim2.fromScale(0.3, 0.8), not fishData.Caught and "???" or "Normal", "M", 1, FFGEnum.THEME.Variants.Normal)
-		elseif fishData.Variant == FishData.FISH_VARIANT.ELEMENTAL then
+		elseif fishData.Variant == FFGEnum.FISH_VARIANT.ELEMENTAL then
 			local element = not fishData.Caught and "???" or fishData.ElementName or "Elemental"
 			local elementColor = not fishData.Caught and FFGEnum.THEME.Variants.Elemental[1] or fishData.ElementNum and FFGEnum.THEME.Variants.Elemental[fishData.ElementNum]
 			KinUI.AddBadge(variantsContainer, UDim2.fromScale(0.3, 0.8), element, "M", 2, elementColor)
-		elseif fishData.Variant == FishData.FISH_VARIANT.ELDER then
+		elseif fishData.Variant == FFGEnum.FISH_VARIANT.ELDER then
 			KinUI.AddBadge(variantsContainer, UDim2.fromScale(0.3, 0.8), not fishData.Caught and "???" or "Elder", "M", 3, FFGEnum.THEME.Variants.Elder)
 		end
 	end

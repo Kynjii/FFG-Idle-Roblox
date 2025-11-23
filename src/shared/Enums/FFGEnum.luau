@@ -120,6 +120,19 @@ FFGEnum.CLASS = {
 	},
 }
 
+FFGEnum.FISH_VARIANT = {
+	NORMAL = "Normal",
+	ELEMENTAL = "Elemental",
+	ELDER = "Elder",
+}
+
+FFGEnum.REALM_ELEMENTS = {
+	[1] = "Hydro",
+	[2] = "Frostreed",
+	[3] = "Cinder",
+	[4] = "Mossy",
+}
+
 FFGEnum.JOB_CATEGORY = {
 	Fishing = "Fishing",
 	Woodcutting = "Woodcutting",

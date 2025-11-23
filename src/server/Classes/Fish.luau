@@ -6,7 +6,6 @@ local Trove = require(ReplicatedStorage.Packages.Trove)
 local FishCalculators = require(ServerScriptService.Server.Classes.Modules.FishCalculators)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
-local FishData = require(ReplicatedStorage.Shared.Fish.FishData)
 
 local DEFAULTS = {
 	Entity = FFGEnum.CLASS.ENTITY_NAME.Fish,
@@ -73,8 +72,8 @@ function Fish.New(state, player: Player, teamId: number, fishingLocTier: number,
 
 	self.ElementName = state.ElementName or nil
 	self.ElementNum = state.ElementNum or nil
-	if self.Variant == FishData.FISH_VARIANT.ELEMENTAL then
-		self.ElementName = FishData.REALM_ELEMENTS[self.RealmId]
+	if self.Variant == FFGEnum.FISH_VARIANT.ELEMENTAL then
+		self.ElementName = FFGEnum.REALM_ELEMENTS[self.RealmId]
 		self.ElementNum = self.RealmId
 	end
 
