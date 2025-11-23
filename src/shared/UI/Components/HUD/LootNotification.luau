@@ -13,9 +13,9 @@ export type Props = {
 function LootNotification.Create(props: Props)
 	local lootNotificationContainer = Instance.new("CanvasGroup")
 	lootNotificationContainer.Name = "NotificationContainer"
-	lootNotificationContainer.AnchorPoint = Vector2.new(0.5, 0.5)
+	lootNotificationContainer.AnchorPoint = Vector2.new(1, 0.5)
 	lootNotificationContainer.BackgroundTransparency = 1
-	lootNotificationContainer.Position = UDim2.fromScale(0.5, 0.130233)
+	lootNotificationContainer.Position = UDim2.fromScale(1, 0.8)
 	lootNotificationContainer.Size = UDim2.fromScale(1, 0.28)
 	KinUI.AddCorner(lootNotificationContainer, "M")
 
@@ -91,11 +91,11 @@ function LootNotification.Animate(frame: Frame)
 
 	if frame then
 		local tweenGoalUp = {
-			Position = FFGEnum.THEME.alignment.position.top,
+			Position = UDim2.fromScale(1, 0),
 		}
 
 		local tweenGoalSwipe = {
-			Position = UDim2.fromScale(1.1, 0.5),
+			Position = UDim2.fromScale(2.1, 0),
 		}
 
 		local tweenInfoUp = TweenInfo.new(DEFAULTS.UP)
