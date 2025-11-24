@@ -79,28 +79,31 @@ end
 
 function FishDexManager.AttachAttListeners(self: FishDexManager)
 	local getFishDexFn = Events.GetRemoteFn(Events.RemoteFunctionNames.GetFishDex)
-	if getFishDexFn then getFishDexFn.OnServerInvoke = function(player: Player)
-		if self.Player ~= player or self.Owner ~= player.UserId then return end
+	if getFishDexFn then
+		getFishDexFn.OnServerInvoke = function(player: Player)
+			if self.Player ~= player or self.Owner ~= player.UserId then return end
 
-		return self.FishDexState
-	end end
+			return self.FishDexState
+		end
+		self._cleaner:Add(getFishDexFn)
+	end
 
 	local updateInfoPanel = Events.GetRemote(Events.RemoteNames.UpdateInfoPanel)
 	if updateInfoPanel then
-		updateInfoPanel.OnServerEvent:Connect(function(player: Player, fish: Fish.Fish)
+		self._cleaner:Add(updateInfoPanel.OnServerEvent:Connect(function(player: Player, fish: Fish.Fish)
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
 			local existing = findExistingFish(self.FishDexState, fish)
 			if existing then Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, existing) end
-		end)
+		end))
 	end
 
 	local updateCaughtFishEvent = Events.GetBindableEvent(Events.BindableNames.UpdateCaughtFish)
 	if updateCaughtFishEvent then
-		updateCaughtFishEvent.Event:Connect(function(data: { Fish: Fish.Fish, Player: Player })
+		self._cleaner:Add(updateCaughtFishEvent.Event:Connect(function(data: { Fish: Fish.Fish, Player: Player })
 			if self.Player ~= data.Player or self.Owner ~= data.Player.UserId then return end
 
 			self:UpdateCaughtStatus(data.Fish)
-		end)
+		end))
 	end
 end
 

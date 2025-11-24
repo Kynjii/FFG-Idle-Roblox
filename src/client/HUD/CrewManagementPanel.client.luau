@@ -20,7 +20,7 @@ local innerWindow: any
 
 -- Events
 local getJobDataEvent = Events.GetRemoteFn(Events.RemoteFunctionNames.GetJobData)
-local getCrewManagementState = Events.GetRemoteFn(Events.RemoteFunctionNames.GetPlayerInventory)
+local getCrewManagementState = Events.GetRemoteFn(Events.RemoteFunctionNames.GetHelperInventory)
 local tabSelectedEvent = Events.GetBindableEvent(Events.BindableNames.TabSelected)
 local updateUIEvent = Events.GetRemote(Events.RemoteNames.UpdateJobManagementUI)
 local helperUpgradedEvent = Events.GetRemote(Events.RemoteNames.HelperUpgraded)

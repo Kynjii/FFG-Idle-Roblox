@@ -17,6 +17,7 @@ Events.RemoteNames = {
 	-- Open UIs
 	OpenEntityDetails = "OpenEntityDetails",
 	OpenHelperShop = "OpenHelperShop",
+	OpenMarketShop = "OpenMarketShop",
 	OpenJobPanel = "OpenJobPanel",
 
 	-- Update UIs
@@ -40,8 +41,9 @@ Events.RemoteNames = {
 }
 
 Events.RemoteFunctionNames = {
-	GetPlayerInventory = "GetPlayerInventory",
+	GetHelperInventory = "GetHelperInventory",
 	GetCrewManagementState = "GetCrewManagementState",
+	GetPlayerInventory = "GetPlayerInventory",
 	GetJobData = "GetJobData",
 	GetFishItem = "GetFishItem",
 	GetFishDex = "GetFishDex",

@@ -292,10 +292,10 @@ function AvailableJobListItem.Create(
 		local availableSlots = (props.Slots.MaxSlots - lockedSlots) - numOfAssignedHelpers
 		if availableSlots == 0 then return end
 
-		local getPlayerInventory = Events.GetRemoteFn(Events.RemoteFunctionNames.GetPlayerInventory)
+		local getHelperInventory = Events.GetRemoteFn(Events.RemoteFunctionNames.GetHelperInventory)
 
-		if getPlayerInventory then
-			local data = getPlayerInventory:InvokeServer()
+		if getHelperInventory then
+			local data = getHelperInventory:InvokeServer()
 			if data then
 				for _, helper in pairs(data) do
 					local typedHelper = helper :: HelperType.HelperInstance

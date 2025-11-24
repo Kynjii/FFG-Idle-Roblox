@@ -61,7 +61,7 @@ local stateTypes = {
 	GetTutorialState = "get Tutorial",
 	ResetData = "Reset",
 	HelperShop = "save Helper Shop",
-	getPlayerInventory = "get Player Inventory",
+	getHelperInventory = "get Player Inventory",
 	SaveJobState = "save Job State",
 	GetJobState = "get Job State",
 	SaveFish = "save Fish",
@@ -466,8 +466,8 @@ end
 -- //!SECTION
 
 -- //SECTION - INVENTORY
-function DataService.GetPlayerInventory(player: Player)
-	local profile = getProfile(player, stateTypes.getPlayerInventory)
+function DataService.GetHelperInventory(player: Player)
+	local profile = getProfile(player, stateTypes.getHelperInventory)
 	if not profile then return false end
 
 	local hasRealms = getRealms(profile)

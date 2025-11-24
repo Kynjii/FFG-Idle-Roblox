@@ -11,6 +11,7 @@ local HelperShopManager = require(script.Parent.HelperShopManager)
 local HelperManager = require(script.Parent.HelperManager)
 local InventoryManager = require(script.Parent.InventoryManager)
 local JobManager = require(script.Parent.JobManager)
+local MarketManager = require(script.Parent.MarketManager)
 local BuildingsManagerType = require(ReplicatedStorage.Shared.Types.Managers.BuildingsManagerType)
 local ChainManagerType = require(ReplicatedStorage.Shared.Types.Managers.ChainManagerType)
 
@@ -69,6 +70,7 @@ TeamManager.JobManager = {}
 TeamManager.FishingManager = {}
 TeamManager.FishDexManager = {}
 TeamManager.InventoryManager = {}
+TeamManager.MarketManager = {}
 
 function TeamManager.CreateTeams(): ()
 	for i, team in ipairs(TeamManager.Teams) do
@@ -193,6 +195,16 @@ function TeamManager.AssignInventoryManager(profile, player: Player, teamId: num
 	TeamManager.InventoryManager[player.UserId] = assignInventoryManager
 end
 
+function TeamManager.AssignMarketManager(profile, player: Player, teamId: number): ()
+	TeamManager.MarketManager[player.UserId] = TeamManager.MarketManager[player.UserId] or { OwnerId = player.UserId }
+	local currentRealm = profile.CurrentRealm or 1
+
+	local assignMarketManager = MarketManager.New(player, teamId, currentRealm)
+	if not assignMarketManager then return end
+
+	TeamManager.MarketManager[player.UserId] = assignMarketManager
+end
+
 function TeamManager.AssignTeam(player: Player): number?
 	local teams = Teams:GetTeams()
 	for i, team in ipairs(teams) do
@@ -219,6 +231,7 @@ function TeamManager.AssignManagers(profile, player: Player, teamId: number): ()
 	TeamManager.AssignBuildingsManager(profile.Data, player, teamId)
 	TeamManager.AssignChainManagers(profile.Data, player, teamId)
 	TeamManager.AssignJobManager(profile.Data, player, teamId)
+	TeamManager.AssignMarketManager(profile.Data, player, teamId)
 end
 
 function TeamManager.GetManager(
@@ -239,6 +252,7 @@ local managerTypes = {
 	Fishing = "Fishing",
 	FishDex = "FishDex",
 	Helper = "Helper",
+	Market = "Market",
 }
 
 local function listClean(list, userId, managerType): ()
@@ -269,6 +283,8 @@ local function listClean(list, userId, managerType): ()
 		TeamManager.FishDexManager[userId] = nil
 	elseif managerType == managerTypes.Inventory then
 		TeamManager.InventoryManager[userId] = nil
+	elseif managerType == managerTypes.Market then
+		TeamManager.MarketManager[userId] = nil
 	end
 end
 
@@ -281,6 +297,7 @@ function TeamManager.CleanupPlayer(userId: number): ()
 	local fishingList = TeamManager.FishingManager[userId]
 	local fishDexList = TeamManager.FishDexManager[userId]
 	local inventoryList = TeamManager.InventoryManager[userId]
+	local marketList = TeamManager.MarketManager[userId]
 
 	if chainList then listClean(chainList, userId, managerTypes.Chain) end
 	if buildingList then listClean(buildingList, userId, managerTypes.Building) end
@@ -290,6 +307,7 @@ function TeamManager.CleanupPlayer(userId: number): ()
 	if fishingList then listClean(fishingList, userId, managerTypes.Fishing) end
 	if fishDexList then listClean(fishDexList, userId, managerTypes.FishDex) end
 	if inventoryList then listClean(inventoryList, userId, managerTypes.Inventory) end
+	if marketList then listClean(marketList, userId, managerTypes.Market) end
 end
 
 export type TeamManager = typeof(TeamManager)

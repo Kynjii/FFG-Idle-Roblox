@@ -74,6 +74,17 @@ function InventoryManager.AttachEventListeners(self: InventoryManager)
 			self:GrantTool(data.Fish)
 		end))
 	end
+
+	local getPlayerInventoryEvent = Events.GetRemoteFn(Events.RemoteFunctionNames.GetPlayerInventory)
+	if getPlayerInventoryEvent then
+		getPlayerInventoryEvent.OnServerInvoke = function(player: Player)
+			if self.Player ~= player or self.Owner ~= player.UserId then return end
+
+			return self.Inventory
+		end
+
+		self._cleaner:Add(getPlayerInventoryEvent)
+	end
 end
 
 function InventoryManager.GrantTool(self: InventoryManager, item)

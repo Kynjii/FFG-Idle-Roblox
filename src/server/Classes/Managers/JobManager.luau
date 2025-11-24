@@ -187,7 +187,7 @@ function JobManager.AssignHelper(self: JobManager, helperId: number, jobId: numb
 
 	local isNewAssignment = true
 	if not helper then
-		local inventory = DataService.GetPlayerInventory(self.Player)
+		local inventory = DataService.GetHelperInventory(self.Player)
 		if not inventory then return end
 
 		local savedHelperState = inventory[helperId]
@@ -349,7 +349,7 @@ function JobManager.AttachEventListeners(self: JobManager): ()
 			local player: Player = data.Player
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
 
-			local helperState = DataService.GetPlayerInventory(self.Player)
+			local helperState = DataService.GetHelperInventory(self.Player)
 			self:CreateHelpers(helperState)
 		end))
 	end
