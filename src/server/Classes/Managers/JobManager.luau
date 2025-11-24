@@ -431,7 +431,10 @@ function JobManager.Destroy(self: JobManager): ()
 
 	self.Save()
 
-	self.Player = nil :: any
+	self.Player = nil
+	self.Owner = nil
+	self.TeamId = nil
+	self.RealmId = nil
 end
 -- //!SECTION
 

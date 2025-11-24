@@ -228,7 +228,7 @@ function DataService.Earn(player: Player, currencyType: "Gold", amount: number)
 	if replica then replica:Set({ "Currencies", currencyType }, newValue) end
 
 	Events.FireBindableEvent(Events.BindableNames.UpdateState, player)
-	Events.FireEvent(Events.RemoteNames.LootNotification, player, { ItemType = currencyType, Text = Format.CurrencyNumber(amount) })
+	Events.FireEvent(Events.RemoteNames.LootNotification, player, { ItemImage = currencyType, Text = Format.CurrencyNumber(amount) })
 	Events.FireEvent(Events.RemoteNames.GoldChanged, player, newValue)
 end
 

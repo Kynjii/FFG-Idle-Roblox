@@ -3,6 +3,7 @@ local TweenService = game:GetService("TweenService")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local KinUI = require(ReplicatedStorage.Shared.UI.KinUI)
+local Shime = require(ReplicatedStorage.Shared.UI.Shime)
 local LootNotification = {}
 
 export type Props = {
@@ -10,14 +11,23 @@ export type Props = {
 	Text: string?,
 }
 
-function LootNotification.Create(props: Props)
-	local lootNotificationContainer = Instance.new("CanvasGroup")
+function LootNotification.Create(props: Props): Frame & CanvasGroup
+	local lootNotificationContainer = Instance.new("Frame")
 	lootNotificationContainer.Name = "NotificationContainer"
-	lootNotificationContainer.AnchorPoint = Vector2.new(1, 0.5)
+	lootNotificationContainer.AnchorPoint = Vector2.new(0.5, 0.5)
 	lootNotificationContainer.BackgroundTransparency = 1
-	lootNotificationContainer.Position = UDim2.fromScale(1, 0.8)
+	lootNotificationContainer.Position = UDim2.fromScale(0.5, 0.5)
 	lootNotificationContainer.Size = UDim2.fromScale(1, 0.28)
-	KinUI.AddCorner(lootNotificationContainer, "M")
+
+	local notification = Instance.new("CanvasGroup")
+	notification.Name = "Template"
+	notification.AnchorPoint = Vector2.new(0, 0.5)
+	notification.BackgroundTransparency = 1
+	notification.Position = UDim2.fromScale(1.1, 0.5)
+	notification.Size = UDim2.fromScale(1, 1)
+	KinUI.AddCorner(notification, "M")
+	notification.Parent = lootNotificationContainer
+	Shime.new(notification)
 
 	local bG = Instance.new("ImageLabel")
 	bG.Name = "BG"
@@ -36,13 +46,13 @@ function LootNotification.Create(props: Props)
 	textLabel.BackgroundTransparency = 1
 	textLabel.Font = FFGEnum.THEME.bigFont
 	textLabel.Position = UDim2.fromScale(0.5, 1)
-	textLabel.Size = UDim2.fromScale(0.826442, 0.675447)
+	textLabel.Size = UDim2.fromScale(0.8, 0.6)
 	textLabel.Text = props.Text or ""
 	textLabel.TextColor3 = Color3.new(1, 1, 1)
 	textLabel.TextScaled = true
 	textLabel.Parent = bG
 
-	bG.Parent = lootNotificationContainer
+	bG.Parent = notification
 
 	if props.ItemType then
 		local icon = Instance.new("ImageLabel")
@@ -55,64 +65,44 @@ function LootNotification.Create(props: Props)
 		icon.Image = FFGEnum.UI.Icons[props.ItemImage] or ""
 		KinUI.ApplyAspect(icon)
 
-		icon.Parent = lootNotificationContainer
+		icon.Parent = notification
 	end
 
-	return lootNotificationContainer
-end
-
-local function fadeOut(frame: Frame, duration: number)
-	local tweenGoal = {
-		Transparency = 1,
-	}
-
-	local _progressTween = nil
-	if _progressTween then
-		_progressTween:Cancel()
-		_progressTween = nil
-	end
-
-	local tweenInfo = TweenInfo.new(duration)
-	local tween = TweenService:Create(frame, tweenInfo, tweenGoal)
-
-	tween.Completed:Once(function()
-		if _progressTween == tween then _progressTween = nil end
-		frame:Destroy()
-	end)
-
-	tween:Play()
+	return lootNotificationContainer, notification
 end
 
 function LootNotification.Animate(frame: Frame)
 	local DEFAULTS = {
-		UP = 3,
-		SWIPE = 0.5,
+		LEFT = 3,
+		RIGHT = 0.5,
 	}
 
 	if frame then
-		local tweenGoalUp = {
-			Position = UDim2.fromScale(1, 0),
+		local tweenGoalLeft = {
+			Position = UDim2.fromScale(0, 0.5),
 		}
 
-		local tweenGoalSwipe = {
-			Position = UDim2.fromScale(2.1, 0),
+		local tweenGoalRight = {
+			Position = UDim2.fromScale(2.1, 0.5),
 		}
 
-		local tweenInfoUp = TweenInfo.new(DEFAULTS.UP)
-		local tweenUp = TweenService:Create(frame, tweenInfoUp, tweenGoalUp)
+		local tweenInfoUp = TweenInfo.new(DEFAULTS.LEFT)
+		local tweenLeft = TweenService:Create(frame, tweenInfoUp, tweenGoalLeft)
 
-		local tweenInfoSwipe = TweenInfo.new(DEFAULTS.SWIPE)
-		local tweenSwipe = TweenService:Create(frame, tweenInfoSwipe, tweenGoalSwipe)
+		local tweenInfoSwipe = TweenInfo.new(DEFAULTS.RIGHT, Enum.EasingStyle.Sine, Enum.EasingDirection.In)
+		local tweenRight = TweenService:Create(frame, tweenInfoSwipe, tweenGoalRight)
 
-		tweenUp.Completed:Once(function()
-			tweenSwipe:Play()
+		tweenLeft.Completed:Once(function()
+			task.delay(1, function()
+				tweenRight:Play()
+			end)
 		end)
 
-		tweenSwipe.Completed:Once(function()
-			fadeOut(frame, 1)
+		tweenRight.Completed:Once(function()
+			frame.Parent:Destroy()
 		end)
 
-		tweenUp:Play()
+		tweenLeft:Play()
 	end
 end
 

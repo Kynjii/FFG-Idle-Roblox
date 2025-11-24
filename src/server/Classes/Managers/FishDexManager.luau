@@ -74,7 +74,7 @@ function FishDexManager.UpdateCaughtStatus(self: FishDexManager, caughtFish: Fis
 
 	self:Save()
 
-	Events.FireEvent(Events.RemoteNames.LootNotification, self.Player, { ItemType = "Fishing", Text = `Added {caughtFish.Name} to FishDex` })
+	Events.FireEvent(Events.RemoteNames.LootNotification, self.Player, { ItemImage = "Fishing", Text = `Added {caughtFish.Name} to FishDex` })
 end
 
 function FishDexManager.AttachAttListeners(self: FishDexManager)
@@ -119,6 +119,8 @@ function FishDexManager.Destroy(self: FishDexManager)
 
 	self.Player = nil
 	self.Owner = nil
+	self.TeamId = nil
+	self.RealmId = nil
 end
 -- //!SECTION
 

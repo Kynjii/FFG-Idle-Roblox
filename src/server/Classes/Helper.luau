@@ -455,7 +455,10 @@ function Helper.Destroy(self: Helper)
 		self._cleaner = nil
 	end
 
-	self.Player = nil :: any
+	self.Player = nil
+	self.Owner = nil
+	self.TeamId = nil
+	self.RealmId = nil
 end
 -- //!SECTION
 

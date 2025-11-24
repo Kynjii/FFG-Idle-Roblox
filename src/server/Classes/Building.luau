@@ -24,7 +24,6 @@ type BuildingData = BuildingType.BuildingData
 
 -- //SECTION - Building Data
 local NAME = {
-	Market = "Harbor Market",
 	BoatStorageUpgrader = "Harbor Shipyard",
 	BoatFPSUpgrader = "Fishing Nets",
 	TenderTTUpgrader = "Transporter Workshop",
@@ -34,7 +33,6 @@ local NAME = {
 }
 
 local DESCRIPTION = {
-	Market = "Bustling with trade and salty gossip, your market boosts profits. \n\n- Increases the gold value of fish.",
 	BoatStorageUpgrader = "Extra crates, sheds, and yards mean fewer wasted hauls. \n\n- Increases how much your boat can carry before unloading.",
 	BoatFPSUpgrader = "Better nets and gear keep the fish flowing. \n\n- Increases your boat’s Fish Per Second (FPS).",
 	TenderTTUpgrader = "Charts, signals, and waystations smooth every voyage. \n\n- Decreases your tender’s travel time.",
@@ -44,7 +42,6 @@ local DESCRIPTION = {
 }
 
 local BUILDING_BUFFS = {
-	Market = FFGEnum.BUFFS.FISH.Fish_Percent,
 	BoatStorageUpgrader = FFGEnum.BUFFS.STORAGE.Boat_Percent,
 	BoatFPSUpgrader = FFGEnum.BUFFS.FPS.FPS_Percent,
 	TenderTTUpgrader = FFGEnum.BUFFS.TRAVEL_TIME.Tender_Percent,
@@ -343,8 +340,9 @@ function Building.Destroy(self: Building): ()
 		self._cleaner = nil
 	end
 
-	self.Player = nil :: any
-	self.Model = nil :: any
+	self.Player = nil
+	self.Owner = nil
+	self.Model = nil
 end
 -- //!SECTION
 

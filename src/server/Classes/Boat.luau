@@ -502,8 +502,10 @@ function Boat.Destroy(self: Boat)
 		self._cleaner = nil
 	end
 
-	self.Player = nil :: any
-	self.Model = nil :: any
+	self.Player = nil
+	self.Owner = nil
+	self.TeamId = nil
+	self.Model = nil
 end
 -- //!SECTION
 

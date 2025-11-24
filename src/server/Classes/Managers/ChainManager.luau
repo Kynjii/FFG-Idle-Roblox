@@ -361,6 +361,9 @@ function ChainManager.Destroy(self: ChainManagerInstance)
 	self.LaneStorage:Destroy()
 
 	self:ResetTravellingAttributes()
+
+	self.Player = nil
+	self.TeamId = nil
 end
 -- //!SECTION
 

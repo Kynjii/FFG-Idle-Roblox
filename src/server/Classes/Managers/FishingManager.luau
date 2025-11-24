@@ -352,11 +352,11 @@ function FishingManager.ApplyFishingXP(self: FishingManager, stats)
 	DataService.UpdateSkillData(self.Player, "Fishing", dataToSave)
 
 	-- Notify player of XP gain
-	Events.FireEvent(Events.RemoteNames.LootNotification, self.Player, { ItemType = "Fishing", Text = string.format("+%d Fishing XP", xpReward) })
+	Events.FireEvent(Events.RemoteNames.LootNotification, self.Player, { ItemImage = "Fishing", Text = string.format("+%d Fishing XP", xpReward) })
 
 	-- Handle level up
 	if newLevel > oldLevel then
-		Events.FireEvent(Events.RemoteNames.LootNotification, self.Player, { ItemType = "Fishing", Text = string.format("🎣 Fishing Level Up! Level %d → %d", oldLevel, newLevel) })
+		Events.FireEvent(Events.RemoteNames.LootNotification, self.Player, { ItemImage = "Fishing", Text = string.format("🎣 Fishing Level Up! Level %d → %d", oldLevel, newLevel) })
 
 		-- Log level up for debugging
 		print(string.format("%s reached Fishing Level %d! (+%d XP)", self.Player.Name, newLevel, xpReward))
@@ -458,8 +458,10 @@ function FishingManager.Destroy(self: FishingManager)
 		self._cleaner = nil
 	end
 
-	self.Player = nil :: any
-	self.Owner = nil :: any
+	self.Player = nil
+	self.Owner = nil
+	self.TeamId = nil
+	self.RealmId = nil
 end
 -- //!SECTION
 

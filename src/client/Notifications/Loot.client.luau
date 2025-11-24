@@ -9,18 +9,28 @@ local playerGui = player:WaitForChild("PlayerGui")
 local screenGui = playerGui:WaitForChild("LootNotifications")
 local notificationContainer = screenGui:WaitForChild("LootNotificationContainer")
 
+local elementCount = 0
+
 if notificationContainer then
 	local lootNotificationEvent = Events.GetRemote(Events.RemoteNames.LootNotification)
 	if lootNotificationEvent then
 		lootNotificationEvent.OnClientEvent:Connect(function(data: LootNotification.Props)
 			if data then
-				local notification = LootNotification.Create({ ItemType = data.ItemType or nil, Text = data.Text or nil })
-				if notification then
-					notification.Parent = notificationContainer
+				local notificationFrame, notification = LootNotification.Create({ ItemType = data.ItemType or nil, Text = data.Text or nil })
+				if notification and notificationFrame then
+					elementCount += 1
+					notificationFrame.LayoutOrder = elementCount
+					notificationFrame.Parent = notificationContainer
 					LootNotification.Animate(notification)
 
 					local sound = workspace.UISounds.FishDexAlert
 					if sound then sound:Play() end
+
+					task.spawn(function()
+						task.delay(3.4, function()
+							elementCount -= 1
+						end)
+					end)
 				end
 			end
 		end)

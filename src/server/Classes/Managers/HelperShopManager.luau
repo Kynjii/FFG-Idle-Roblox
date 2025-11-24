@@ -4,7 +4,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
 local Helper = require(ServerScriptService.Server.Classes.Helper)
-local ClassVisualizer = require(ServerScriptService.Server.Classes.Modules.ClassVisualizer)
 local Notification = require(ServerScriptService.Server.Classes.Modules.Notification)
 local Tutorial = require(ServerScriptService.Server.Game.Tutorial.Tutorial)
 local SetInterval = require(ServerScriptService.Server.Modules.SetInterval)
@@ -175,7 +174,7 @@ function HelperShopManager.CreateRefreshBillboard(self: HelperShopManager)
 	billboard.AlwaysOnTop = true
 	billboard.MaxDistance = 150
 	billboard.ResetOnSpawn = false
-	billboard.ExtentsOffsetWorldSpace = Vector3.new(0, 1.5, 0)
+	billboard.ExtentsOffsetWorldSpace = Vector3.new(0, 3, 0)
 	billboard.Parent = self.ShopModel.PrimaryPart
 
 	local countdownTimer = Instance.new("TextLabel")
@@ -199,10 +198,6 @@ end
 
 -- //SECTION - UI Setup
 function HelperShopManager.Initialize(self: HelperShopManager): ()
-	self:Show()
-	self:CanCollide()
-
-	-- Setup UI components
 	if self.ShopModel then self:SetupProximityPrompt(self.ShopModel) end
 end
 
@@ -224,24 +219,6 @@ function HelperShopManager.SetupProximityPrompt(self: HelperShopManager, model: 
 	end))
 
 	return proximityPrompt
-end
--- //!SECTION
-
--- //SECTION - Visibility and Collision
-function HelperShopManager.Show(self: HelperShopManager): ()
-	ClassVisualizer.Show(self.ShopModel)
-end
-
-function HelperShopManager.Hide(self: HelperShopManager): ()
-	ClassVisualizer.Hide(self.ShopModel)
-end
-
-function HelperShopManager.CanCollide(self: HelperShopManager): ()
-	ClassVisualizer.CanCollide(self.ShopModel)
-end
-
-function HelperShopManager.CannotCollide(self: HelperShopManager): ()
-	ClassVisualizer.CannotCollide(self.ShopModel)
 end
 -- //!SECTION
 
@@ -297,9 +274,6 @@ end
 
 -- //SECTION - Cleanup
 function HelperShopManager.Destroy(self: HelperShopManager): ()
-	self:Hide()
-	self:CannotCollide()
-
 	if self._cleaner then
 		self._cleaner:Clean()
 		self._cleaner = nil
@@ -307,8 +281,10 @@ function HelperShopManager.Destroy(self: HelperShopManager): ()
 
 	self.Save()
 
-	self.Player = nil :: any
-	self.ShopModel = nil :: any
+	self.Player = nil
+	self.Owner = nil
+	self.TeamId = nil
+	self.ShopModel = nil
 end
 -- //!SECTION
 
