@@ -6,6 +6,7 @@ local ServerStorage = game:GetService("ServerStorage")
 
 local Fish = require(ServerScriptService.Server.Classes.Fish)
 local Emitter = require(ServerScriptService.Server.Modules.Emitters.Emitter)
+local DataService = require(ServerScriptService.Server.Services.DataService)
 local Trove = require(ReplicatedStorage.Packages.Trove)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
@@ -58,6 +59,28 @@ function InventoryManager.SetupInventory(self: InventoryManager): { [any]: any }
 	return inventory
 end
 
+function InventoryManager.RemoveTool(self: InventoryManager, item, type: "Equipment" | "Fish")
+	local existing = self.Inventory[type][item.Id]
+	if existing then
+		self.Inventory[type][item.Id] = nil
+
+		local backpack = self.Player:WaitForChild("Backpack")
+		local inventory = self.Player:WaitForChild("Inventory")
+
+		local backpackItem = backpack:FindFirstChild(item.Id)
+		if backpackItem then backpackItem:Destroy() end
+
+		local inventoryItem = inventory:FindFirstChild(item.Id)
+		if inventoryItem then inventoryItem:Destroy() end
+
+		Events.FireEvent(Events.RemoteNames.UpdateMarketUI, self.Player, item.Id)
+	end
+end
+
+function InventoryManager.RemoveManyTools(self: InventoryManager, items)
+	--
+end
+
 function InventoryManager.RestoreInventoryToBackpack(self: InventoryManager)
 	local backpack = self.Player:WaitForChild("Backpack")
 	local inventory = self.Player:WaitForChild("Inventory")
@@ -82,10 +105,7 @@ function InventoryManager.AttachEventListeners(self: InventoryManager)
 		self._cleaner:Add(caughtFishEvent.Event:Connect(function(data: { Player: Player, Fish: Fish.Fish })
 			if self.Player ~= data.Player or self.Owner ~= data.Player.UserId then return end
 			self:GrantTool(data.Fish)
-			self.Inventory[data.Fish.Id] = data.Fish
-
-			print(data)
-			print(self.Inventory)
+			self.Inventory.Fish[data.Fish.Id] = data.Fish
 		end))
 	end
 
@@ -95,16 +115,10 @@ function InventoryManager.AttachEventListeners(self: InventoryManager)
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
 			local data = HttpService:JSONDecode(encodedData)
 
-			if data.isFishDex then
-				print("is fishDex")
-				return
-			end
+			if data.isFishDex then return end
 
-			local existing = self.Inventory[data.Item.Id]
-			if existing then
-				print("firing existing")
-				Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, { Item = existing })
-			end
+			local existing = self.Inventory.Fish[data.Item.Id]
+			if existing then Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, { Item = existing }) end
 		end))
 	end
 
@@ -123,9 +137,19 @@ function InventoryManager.AttachEventListeners(self: InventoryManager)
 	if sellInventoryItemEvent then
 		self._cleaner:Add(sellInventoryItemEvent.OnServerEvent:Connect(function(player: Player, item)
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
-			if not self.Inventory[item.Id] then return end
+			local itemType = item.Entity
+			if itemType == "Fish" then
+				if not self.Inventory.Fish[item.Id] then return end
+			end
 
-			print(`Found the item: {self.Inventory[item.Id]}`)
+			if itemType == "Equipment" then
+				if not self.Inventory.Equipment[item.Id] then return end
+			end
+
+			local sellAmount = item.SellPrice
+			if sellAmount then DataService.Earn(player, "Gold", sellAmount) end
+
+			self:RemoveTool(self.Inventory.Fish[item.Id], itemType)
 		end))
 	end
 end
@@ -142,7 +166,9 @@ function InventoryManager.GrantTool(self: InventoryManager, item)
 	runtimeTool.Parent = self.Player.Backpack
 
 	invTool.ToolTip = item.Name or item.Species
+	invTool.Name = item.Id
 	runtimeTool.ToolTip = item.Name or item.Species
+	runtimeTool.Name = item.Id
 
 	local image = nil
 	if item.Variant == FFGEnum.FISH_VARIANT.NORMAL then

@@ -32,10 +32,7 @@ function FishDexUI.Create()
 		updateInfoPanelEvent.OnClientEvent:Connect(function(encodedData: { Item: any, isFishDex: boolean? })
 			local data = HttpService:JSONDecode(encodedData)
 
-			if not data.isFishDex then
-				print(`Not isFishDex`)
-				return
-			end
+			if not data.isFishDex then return end
 
 			FishDexUI.RenderInfoPanel(innerWindow, data.Item)
 		end)

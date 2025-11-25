@@ -1,3 +1,4 @@
+local HttpService = game:GetService("HttpService")
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -109,5 +110,15 @@ if openMarketUIEvent and playerInventoryFn then
 				handleClosingShopDetailsUI()
 			end)
 		end
+	end)
+end
+
+local updateUIEvent = Events.GetRemote(Events.RemoteNames.UpdateMarketUI)
+if updateUIEvent then
+	updateUIEvent.OnClientEvent:Connect(function(encodedHelperId)
+		local helperId = HttpService:JSONDecode(encodedHelperId)
+		if not helperId then return end
+		if playerInventoryData[helperId] then playerInventoryData[helperId] = nil end
+		updateUI()
 	end)
 end

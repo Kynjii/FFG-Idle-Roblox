@@ -31,14 +31,9 @@ function MarketGUI.Create()
 	local updateInfoPanelEvent = Events.GetRemote(Events.RemoteNames.UpdateInfoPanel)
 	if updateInfoPanelEvent then
 		updateInfoPanelEvent.OnClientEvent:Connect(function(encodedData: { Item: FishType.FishData, isFishDex: boolean? })
-			print("[MarketGUI] OnClientEvent fired for UpdateInfoPanel")
 			local data = HttpService:JSONDecode(encodedData)
-			print("[MarketGUI] Decoded data:", data)
 
-			if data.isFishDex then
-				print(`is fishdex baby`)
-				return
-			end
+			if data.isFishDex then return end
 
 			MarketGUI.RenderInfoPanel(innerWindow, data.Item)
 		end)

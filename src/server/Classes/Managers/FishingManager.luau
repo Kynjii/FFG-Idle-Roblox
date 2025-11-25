@@ -235,11 +235,10 @@ function FishingManager.SaveCaughtFish(self: FishingManager, caughtFish: Fish.Fi
 	if not self.GeneratedFish[caughtFish.Id] then return end
 
 	local fish = self.GeneratedFish[caughtFish.Id]
-	fish.Caught = true
 	fish:Save()
 
 	local updateCaughtFishEvent = Events.GetBindableEvent(Events.BindableNames.UpdateCaughtFish)
-	if updateCaughtFishEvent then updateCaughtFishEvent:Fire({ Player = self.Player, Fish = self.GeneratedFish[caughtFish.Id] }) end
+	if updateCaughtFishEvent then updateCaughtFishEvent:Fire({ Player = self.Player, Fish = self.GeneratedFish[caughtFish.Id]:Serialize() }) end
 	local grantFishToolEvent = Events.GetBindableEvent(Events.BindableNames.FishCaught)
 	if grantFishToolEvent then grantFishToolEvent:Fire({ Player = self.Player, Fish = self.GeneratedFish[caughtFish.Id]:Serialize() }) end
 
@@ -292,9 +291,10 @@ function FishingManager.SetupProximityPrompts(self: FishingManager)
 
 		local gameEndedEvent = Events.GetRemote(Events.RemoteNames.GameEnded)
 		if gameEndedEvent then
-			self._cleaner:Add(gameEndedEvent.OnServerEvent:Connect(function(player: Player, tier: number)
+			self._cleaner:Add(gameEndedEvent.OnServerEvent:Connect(function(player: Player, encodedTier: number)
 				if self.Player ~= player or self.Owner ~= player.UserId then return end
 
+				local tier = HttpService:JSONDecode(encodedTier)
 				local promptTier = proximityPrompt:GetAttribute(FFGEnum.ATTRIBUTES.Tier)
 
 				if tier ~= promptTier then return end

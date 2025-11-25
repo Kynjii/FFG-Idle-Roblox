@@ -126,9 +126,6 @@ function InfoPanel.Create(props: {
 	local isHelper = data.Entity == FFGEnum.CLASS.ENTITY_NAME.Helper
 	local isMarket = props.isMarket or false
 
-	print(data)
-	print(props)
-
 	local panelContainer = Instance.new("Frame")
 	panelContainer.Name = "InfoPanelContainer"
 	panelContainer.AnchorPoint = Vector2.new(0.5, 0.5)

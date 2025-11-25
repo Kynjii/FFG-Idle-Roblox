@@ -130,6 +130,7 @@ function Fish.Serialize(self: Fish): { [string]: any }
 end
 
 function Fish.Save(self: Fish): ()
+	self.Caught = true
 	DataService.SaveFish(self.Player, self:Serialize())
 end
 -- //!SECTION

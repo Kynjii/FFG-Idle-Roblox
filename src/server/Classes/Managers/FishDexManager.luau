@@ -95,16 +95,10 @@ function FishDexManager.AttachAttListeners(self: FishDexManager)
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
 			local data = HttpService:JSONDecode(encodedData)
 
-			if not data.isFishDex then
-				print("Not fishDex")
-				return
-			end
+			if not data.isFishDex then return end
 
 			local existing = findExistingFish(self.FishDexState, data.Item)
-			if existing then
-				print("firing existing")
-				Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, { Item = existing, isFishDex = true })
-			end
+			if existing then Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, { Item = existing, isFishDex = true }) end
 		end))
 	end
 

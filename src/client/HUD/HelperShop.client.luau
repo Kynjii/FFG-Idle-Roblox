@@ -114,8 +114,11 @@ if shopDetails then
 end
 
 local updateUIEvent = Events.GetRemote(Events.RemoteNames.UpdateHelperShopUI)
-if updateUIEvent then updateUIEvent.OnClientEvent:Connect(function(helperId)
-	if not helperId then return end
-	if shopData[helperId] then shopData[helperId] = nil end
-	updateUI()
-end) end
+if updateUIEvent then
+	updateUIEvent.OnClientEvent:Connect(function(encodedHelperId)
+		local helperId = HttpService:JSONDecode(encodedHelperId)
+		if not helperId then return end
+		if shopData[helperId] then shopData[helperId] = nil end
+		updateUI()
+	end)
+end

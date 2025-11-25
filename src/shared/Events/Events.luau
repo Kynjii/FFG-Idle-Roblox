@@ -41,6 +41,7 @@ Events.RemoteNames = {
 
 	-- Market
 	SellItem = "SellItem",
+	UpdateMarketUI = "UpdateMarketUI",
 }
 
 Events.RemoteFunctionNames = {

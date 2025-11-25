@@ -226,7 +226,6 @@ function HelperShopManager.AttachEventListeners(self: HelperShopManager): ()
 	local itemPurchased = Events.GetRemote(Events.RemoteNames.HelperPurchased)
 	if itemPurchased then
 		self._cleaner:Add(itemPurchased.OnServerEvent:Connect(function(player: Player, helperId: string)
-			print(helperId)
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
 
 			local canProceed = Tutorial.CheckTutorialState(player, self)
@@ -243,11 +242,8 @@ function HelperShopManager.AttachEventListeners(self: HelperShopManager): ()
 	if updateInfoPanel then
 		updateInfoPanel.OnServerEvent:Connect(function(player: Player, encodedData: { Item: HelperType.HelperData, isFishDex: boolean? })
 			local data = HttpService:JSONDecode(encodedData)
-			if data.isFishDex then
-				print("is fishDex")
-				return
-			end
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
+			if data.isFishDex then return end
 			if not data.Item and data.Item.Entity == FFGEnum.CLASS.ENTITY_NAME.Helper then return end
 
 			local helperInShop = TableUtil.Find(self.Inventory, function(helper: HelperType.HelperData)

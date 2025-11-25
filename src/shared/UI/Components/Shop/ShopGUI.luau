@@ -32,10 +32,7 @@ function ShopGUI.Create()
 		updateInfoPanelEvent.OnClientEvent:Connect(function(encodedData: { Item: any, isFishDex: boolean? })
 			local data = HttpService:JSONDecode(encodedData)
 
-			if data.isFishDex then
-				print(`yup`)
-				return
-			end
+			if data.isFishDex then return end
 			ShopGUI.RenderInfoPanel(innerWindow, data.Item)
 		end)
 	end
