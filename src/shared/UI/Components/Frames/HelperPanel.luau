@@ -1,3 +1,4 @@
+local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
@@ -37,9 +38,18 @@ function HelperPanel.Create(player: Player, crewData, innerWindow: Frame): Scrol
 	if index == 0 then HelperPanel.AddEmptyState(scrollingFrame, "Purchase Crew Members from the Crew Shop to see them here.") end
 
 	local updateInfoPanelEvent = Events.GetRemote(Events.RemoteNames.UpdateInfoPanel)
-	if updateInfoPanelEvent then updateInfoPanelEvent.OnClientEvent:Connect(function(helper)
-		HelperPanel.RenderInfoPanel(innerWindow, helper)
-	end) end
+	if updateInfoPanelEvent then
+		updateInfoPanelEvent.OnClientEvent:Connect(function(encodedData: { Item: HelperType.HelperInstance, isFishDex: boolean? })
+			local data = HttpService:JSONDecode(encodedData)
+
+			if data.isFishDex then
+				print(`it is FishDex`)
+				return
+			end
+
+			HelperPanel.RenderInfoPanel(innerWindow, data.Item)
+		end)
+	end
 
 	return scrollingFrame
 end

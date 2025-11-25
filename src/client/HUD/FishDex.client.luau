@@ -50,8 +50,9 @@ function updateUI()
 				if item.Variant == "Normal" then
 					local btn = itemComponent:FindFirstChildOfClass("ImageButton")
 					if btn then
+						print("doing fishDex")
 						btn.Selected = true
-						Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, item)
+						Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, { Item = item, isFishDex = true })
 					end
 				end
 			end

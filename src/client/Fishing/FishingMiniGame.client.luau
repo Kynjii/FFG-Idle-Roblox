@@ -1,3 +1,4 @@
+local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -413,7 +414,8 @@ end
 
 local startGameEvent = Events.GetRemote(Events.RemoteNames.StartFishingMiniGame)
 if startGameEvent then
-	startGameEvent.OnClientEvent:Connect(function(data: { Fish: {}, Rod: {}, Tier: number, SessionId: string, MinigameConfig: {} })
+	startGameEvent.OnClientEvent:Connect(function(encodedData: { Fish: {}, Rod: {}, Tier: number, SessionId: string, MinigameConfig: {} })
+		local data = HttpService:JSONDecode(encodedData)
 		currentTier = data.Tier
 		currentSessionId = data.SessionId
 

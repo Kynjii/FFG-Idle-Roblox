@@ -1,3 +1,4 @@
+local HttpService = game:GetService("HttpService")
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -27,9 +28,17 @@ function ShopGUI.Create()
 	if innerWindow then SingleGridLayout.Create({ Name = "ItemContainer", Parent = innerWindow, Size = "TwoThird" }) end
 
 	local updateInfoPanelEvent = Events.GetRemote(Events.RemoteNames.UpdateInfoPanel)
-	if updateInfoPanelEvent then updateInfoPanelEvent.OnClientEvent:Connect(function(item)
-		ShopGUI.RenderInfoPanel(innerWindow, item)
-	end) end
+	if updateInfoPanelEvent then
+		updateInfoPanelEvent.OnClientEvent:Connect(function(encodedData: { Item: any, isFishDex: boolean? })
+			local data = HttpService:JSONDecode(encodedData)
+
+			if data.isFishDex then
+				print(`yup`)
+				return
+			end
+			ShopGUI.RenderInfoPanel(innerWindow, data.Item)
+		end)
+	end
 	return screenGui
 end
 

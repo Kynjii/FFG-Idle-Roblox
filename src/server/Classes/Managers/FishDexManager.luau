@@ -1,3 +1,4 @@
+local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
@@ -90,10 +91,20 @@ function FishDexManager.AttachAttListeners(self: FishDexManager)
 
 	local updateInfoPanel = Events.GetRemote(Events.RemoteNames.UpdateInfoPanel)
 	if updateInfoPanel then
-		self._cleaner:Add(updateInfoPanel.OnServerEvent:Connect(function(player: Player, fish: Fish.Fish)
+		self._cleaner:Add(updateInfoPanel.OnServerEvent:Connect(function(player: Player, encodedData: { Item: Fish.Fish, isFishDex: boolean? })
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
-			local existing = findExistingFish(self.FishDexState, fish)
-			if existing then Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, existing) end
+			local data = HttpService:JSONDecode(encodedData)
+
+			if not data.isFishDex then
+				print("Not fishDex")
+				return
+			end
+
+			local existing = findExistingFish(self.FishDexState, data.Item)
+			if existing then
+				print("firing existing")
+				Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, { Item = existing, isFishDex = true })
+			end
 		end))
 	end
 
@@ -113,7 +124,6 @@ end
 
 -- //SECTION - Cleanup
 function FishDexManager.Destroy(self: FishDexManager)
-	print(self.FishDexState)
 	pcall(function()
 		self:Save()
 	end)

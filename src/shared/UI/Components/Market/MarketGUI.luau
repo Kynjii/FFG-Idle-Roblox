@@ -1,8 +1,10 @@
+local HttpService = game:GetService("HttpService")
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
+local FishType = require(ReplicatedStorage.Shared.Types.Classes.FishType)
 local InfoPanel = require(ReplicatedStorage.Shared.UI.Components.Frames.InfoPanel)
 local MainUIPanel = require(ReplicatedStorage.Shared.UI.Components.Frames.MainUIPanel)
 local SingleGridLayout = require(ReplicatedStorage.Shared.UI.Components.GridLayouts.SingleGridLayout)
@@ -27,9 +29,22 @@ function MarketGUI.Create()
 	if innerWindow then SingleGridLayout.Create({ Name = "ItemContainer", Parent = innerWindow, Size = "TwoThird" }) end
 
 	local updateInfoPanelEvent = Events.GetRemote(Events.RemoteNames.UpdateInfoPanel)
-	if updateInfoPanelEvent then updateInfoPanelEvent.OnClientEvent:Connect(function(item)
-		MarketGUI.RenderInfoPanel(innerWindow, item)
-	end) end
+	if updateInfoPanelEvent then
+		updateInfoPanelEvent.OnClientEvent:Connect(function(encodedData: { Item: FishType.FishData, isFishDex: boolean? })
+			print("[MarketGUI] OnClientEvent fired for UpdateInfoPanel")
+			local data = HttpService:JSONDecode(encodedData)
+			print("[MarketGUI] Decoded data:", data)
+
+			if data.isFishDex then
+				print(`is fishdex baby`)
+				return
+			end
+
+			MarketGUI.RenderInfoPanel(innerWindow, data.Item)
+		end)
+	else
+		warn("[MarketGUI] UpdateInfoPanel RemoteEvent not found!")
+	end
 	return screenGui
 end
 

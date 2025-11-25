@@ -83,6 +83,28 @@ function InventoryManager.AttachEventListeners(self: InventoryManager)
 			if self.Player ~= data.Player or self.Owner ~= data.Player.UserId then return end
 			self:GrantTool(data.Fish)
 			self.Inventory[data.Fish.Id] = data.Fish
+
+			print(data)
+			print(self.Inventory)
+		end))
+	end
+
+	local updateInfoPanel = Events.GetRemote(Events.RemoteNames.UpdateInfoPanel)
+	if updateInfoPanel then
+		self._cleaner:Add(updateInfoPanel.OnServerEvent:Connect(function(player: Player, encodedData: { Item: Fish.Fish, isFishDex: boolean? })
+			if self.Player ~= player or self.Owner ~= player.UserId then return end
+			local data = HttpService:JSONDecode(encodedData)
+
+			if data.isFishDex then
+				print("is fishDex")
+				return
+			end
+
+			local existing = self.Inventory[data.Item.Id]
+			if existing then
+				print("firing existing")
+				Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, { Item = existing })
+			end
 		end))
 	end
 

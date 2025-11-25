@@ -92,7 +92,7 @@ local function FishDexItem(props: {
 	-- //!SECTION
 
 	itemQualityBG.Activated:Connect(function()
-		Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, Players.LocalPlayer, item)
+		Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, Players.LocalPlayer, { Item = item, isFishDex = true })
 	end)
 
 	return fishDexItemContainer

@@ -22,7 +22,6 @@ Events.RemoteNames = {
 	OpenJobPanel = "OpenJobPanel",
 
 	-- Update UIs
-	PrepareHelperShop = "PrepareHelperShop",
 	UpdateHelperShopUI = "UpdateHelperShopUI",
 	PurchaseJobSlot = "PurchaseJobSlot",
 	EntityUpdated = "EntityUpdated",
@@ -214,7 +213,8 @@ function Events.FireBindableEvent(name: string, data: any)
 	local folder = ReplicatedStorage:FindFirstChild(FOLDER_NAME_BINDABLES)
 	local ev = folder and folder:FindFirstChild(name)
 	if ev and ev:IsA("BindableEvent") then
-		ev:Fire(data)
+		local safeData = HttpService:JSONEncode(data)
+		ev:Fire(safeData)
 		return true
 	else
 		warn(("BindableEvent %q not found under ReplicatedStorage/%s"):format(name, FOLDER_NAME_BINDABLES))
@@ -226,8 +226,9 @@ function Events.FireEvent(name: string, player: Player, data: any)
 	local folder = ReplicatedStorage:FindFirstChild(FOLDER_NAME)
 	local ev = folder and folder:FindFirstChild(name)
 	if ev and ev:IsA("RemoteEvent") then
-		if RunService:IsServer() then ev:FireClient(player, data) end
-		if RunService:IsClient() then ev:FireServer(data) end
+		local safeData = HttpService:JSONEncode(data)
+		if RunService:IsServer() then ev:FireClient(player, safeData) end
+		if RunService:IsClient() then ev:FireServer(safeData) end
 
 		return true
 	else

@@ -235,6 +235,7 @@ function FishingManager.SaveCaughtFish(self: FishingManager, caughtFish: Fish.Fi
 	if not self.GeneratedFish[caughtFish.Id] then return end
 
 	local fish = self.GeneratedFish[caughtFish.Id]
+	fish.Caught = true
 	fish:Save()
 
 	local updateCaughtFishEvent = Events.GetBindableEvent(Events.BindableNames.UpdateCaughtFish)

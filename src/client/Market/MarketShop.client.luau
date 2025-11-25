@@ -74,7 +74,7 @@ function updateUI()
 					local btn = itemComponent:FindFirstChildOfClass("ImageButton")
 					if btn then
 						btn.Selected = true
-						Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, item)
+						Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, { Item = item })
 					end
 
 					isFirst = false

@@ -177,7 +177,8 @@ local function ShopItem(
 	-- //!SECTION
 
 	itemQualityBG.Activated:Connect(function()
-		Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, Players.LocalPlayer, typedItem)
+		print("click", typedItem)
+		Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, Players.LocalPlayer, { Item = typedItem, isFishDex = false })
 	end)
 
 	return shopItemContainer

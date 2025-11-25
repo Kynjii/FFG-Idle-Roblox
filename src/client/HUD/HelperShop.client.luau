@@ -77,7 +77,7 @@ function updateUI()
 					local btn = itemComponent:FindFirstChildOfClass("ImageButton")
 					if btn then
 						btn.Selected = true
-						Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, item)
+						Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, { Item = item })
 					end
 
 					isFirst = false
@@ -110,16 +110,6 @@ if shopDetails then
 				handleClosingShopDetailsUI()
 			end)
 		end
-	end)
-end
-
-local prepareShopEvent = Events.GetRemote(Events.RemoteNames.PrepareHelperShop)
-if prepareShopEvent then
-	prepareShopEvent.OnClientEvent:Connect(function(data)
-		if not data then return end
-		local decodedData = HttpService:JSONDecode(data)
-		shopData = decodedData
-		updateUI()
 	end)
 end
 

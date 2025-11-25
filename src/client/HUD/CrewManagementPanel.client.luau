@@ -1,4 +1,5 @@
 --!strict
+local HttpService = game:GetService("HttpService")
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -138,7 +139,8 @@ if tabSelectedEvent and getCrewManagementState then tabSelectedEvent.Event:Conne
 end) end
 
 if helperUpgradedEvent then
-	helperUpgradedEvent.OnClientEvent:Connect(function(helperData: HelperType.HelperData)
+	helperUpgradedEvent.OnClientEvent:Connect(function(encodedData)
+		local helperData = HttpService:JSONDecode(encodedData) :: HelperType.HelperData
 		if crewState[helperData.Id] then crewState[helperData.Id] = helperData end
 		updateCrewMngPanelUI()
 	end)

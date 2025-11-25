@@ -87,6 +87,7 @@ function Fish.New(state, player: Player, teamId: number, fishingLocTier: number,
 	self.MaxHP, self.Weight = self:CalculateStats()
 
 	self.SellPrice = FishCalculators.CalculateSellPrice(self.SpeciesKey, fishingLocTier, fishingLocId, self.QualityId, self.Variant, self.Weight)
+	self.Caught = false
 
 	self._cleaner = Trove.new()
 
@@ -124,6 +125,7 @@ function Fish.Serialize(self: Fish): { [string]: any }
 		Weight = self.Weight,
 		ItemImage = self.ItemImage,
 		SellPrice = self.SellPrice,
+		Caught = self.Caught,
 	}
 end
 

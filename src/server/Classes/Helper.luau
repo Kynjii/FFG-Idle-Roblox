@@ -406,7 +406,7 @@ function Helper.AttachEventListeners(self: Helper)
 			local helperUpgradedEvent = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
 			if helperUpgradedEvent then helperUpgradedEvent:FireClient(player, self:Serialize()) end
 
-			Events.FireBindableEvent(Events.BindableNames.HelperUpgraded, HttpService:JSONEncode(self:Serialize()))
+			Events.FireBindableEvent(Events.BindableNames.HelperUpgraded, self:Serialize())
 		end))
 	end
 end
