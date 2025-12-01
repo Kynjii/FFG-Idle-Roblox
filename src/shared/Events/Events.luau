@@ -18,10 +18,12 @@ Events.RemoteNames = {
 	OpenEntityDetails = "OpenEntityDetails",
 	OpenHelperShop = "OpenHelperShop",
 	OpenMarketShop = "OpenMarketShop",
+	OpenFishingRodShop = "OpenFishingRodShop",
 	OpenJobPanel = "OpenJobPanel",
 
 	-- Update UIs
 	UpdateHelperShopUI = "UpdateHelperShopUI",
+	UpdateFishingRodShopUI = "UpdateFishingRodShopUI",
 	PurchaseJobSlot = "PurchaseJobSlot",
 	EntityUpdated = "EntityUpdated",
 	HelperPurchased = "HelperPurchased",

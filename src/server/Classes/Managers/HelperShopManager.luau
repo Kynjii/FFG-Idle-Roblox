@@ -70,7 +70,7 @@ function HelperShopManager.HandleStock(self: HelperShopManager, shopState): ()
 	if not self.Inventory then
 		self:RestockShop()
 	else
-		-- If the shop is within the same time period as when it was saved, don't restock (prevent exploits)
+		-- If the shop is within the same time period as when it was saved, don't restock
 		if self.CurrentPeriod == shopState.CurrentPeriod then
 			return
 		else
