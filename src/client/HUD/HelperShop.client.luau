@@ -1,4 +1,3 @@
-local HttpService = game:GetService("HttpService")
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -100,8 +99,7 @@ local shopDetails = Events.GetRemote(Events.RemoteNames.OpenHelperShop)
 if shopDetails then
 	shopDetails.OnClientEvent:Connect(function(data)
 		if data then
-			local decodedData = HttpService:JSONDecode(data)
-			shopData = decodedData
+			shopData = data
 
 			populateDetailsUI()
 			satchel:SetBackpackEnabled(false)
@@ -114,11 +112,8 @@ if shopDetails then
 end
 
 local updateUIEvent = Events.GetRemote(Events.RemoteNames.UpdateHelperShopUI)
-if updateUIEvent then
-	updateUIEvent.OnClientEvent:Connect(function(encodedHelperId)
-		local helperId = HttpService:JSONDecode(encodedHelperId)
-		if not helperId then return end
-		if shopData[helperId] then shopData[helperId] = nil end
-		updateUI()
-	end)
-end
+if updateUIEvent then updateUIEvent.OnClientEvent:Connect(function(helperId)
+	if not helperId then return end
+	if shopData[helperId] then shopData[helperId] = nil end
+	updateUI()
+end) end

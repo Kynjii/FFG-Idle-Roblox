@@ -1,4 +1,3 @@
-local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Events = require(ReplicatedStorage.Shared.Events.Events)
@@ -15,8 +14,7 @@ local elementCount = 0
 if notificationContainer then
 	local lootNotificationEvent = Events.GetRemote(Events.RemoteNames.LootNotification)
 	if lootNotificationEvent then
-		lootNotificationEvent.OnClientEvent:Connect(function(encodedData: LootNotification.Props)
-			local data = HttpService:JSONDecode(encodedData)
+		lootNotificationEvent.OnClientEvent:Connect(function(data: LootNotification.Props)
 			if data then
 				local notificationFrame, notification = LootNotification.Create({ ItemType = data.ItemType or nil, Text = data.Text or nil })
 				if notification and notificationFrame then

@@ -1,4 +1,3 @@
-local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
@@ -360,8 +359,7 @@ function Tooltip.Create(props: {
 	local helperUpgradedEvent = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
 	if item.Stats then
 		if helperUpgradedEvent then
-			helperUpgradedEvent.OnClientEvent:Connect(function(encodedData)
-				local helperData = HttpService:JSONDecode(encodedData) :: HelperType.HelperData
+			helperUpgradedEvent.OnClientEvent:Connect(function(helperData: HelperType.HelperData)
 				-- Update Quality
 				qualityLabel.Text = FFGEnum.QUALITIES[helperData.QualityId].Label or ""
 				qualityLabel.TextColor3 = FFGEnum.QUALITIES[helperData.QualityId].Color or Color3.new(1, 1, 1)

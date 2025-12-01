@@ -88,7 +88,7 @@ function PB.CreatePB(pbModel: Model, class: Boat | Tender | PortStorage | Buildi
 
 	local buttonColorStateEvent = Events.GetBindableEvent(Events.BindableNames.UpdateState)
 	if buttonColorStateEvent then
-		typedClass._cleaner:Add(buttonColorStateEvent.Event:Connect(function(...: any)
+		typedClass._cleaner:Add(buttonColorStateEvent.Event:Connect(function()
 			if button then
 				if not DataService.CanAfford(typedClass.Player, "Gold", not typedClass.IsPurchased and typedClass.BaseCost or typedClass.UpgradeCost) then
 					button.Color = FFGEnum.THEME.color.red

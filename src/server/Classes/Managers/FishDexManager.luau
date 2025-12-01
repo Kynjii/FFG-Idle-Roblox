@@ -1,4 +1,3 @@
-local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
@@ -91,9 +90,8 @@ function FishDexManager.AttachAttListeners(self: FishDexManager)
 
 	local updateInfoPanel = Events.GetRemote(Events.RemoteNames.UpdateInfoPanel)
 	if updateInfoPanel then
-		self._cleaner:Add(updateInfoPanel.OnServerEvent:Connect(function(player: Player, encodedData: { Item: Fish.Fish, isFishDex: boolean? })
+		self._cleaner:Add(updateInfoPanel.OnServerEvent:Connect(function(player: Player, data: { Item: Fish.Fish, isFishDex: boolean? })
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
-			local data = HttpService:JSONDecode(encodedData)
 
 			if not data.isFishDex then return end
 

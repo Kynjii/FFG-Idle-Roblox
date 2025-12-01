@@ -1,4 +1,3 @@
-local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
@@ -111,9 +110,8 @@ function InventoryManager.AttachEventListeners(self: InventoryManager)
 
 	local updateInfoPanel = Events.GetRemote(Events.RemoteNames.UpdateInfoPanel)
 	if updateInfoPanel then
-		self._cleaner:Add(updateInfoPanel.OnServerEvent:Connect(function(player: Player, encodedData: { Item: Fish.Fish, isFishDex: boolean? })
+		self._cleaner:Add(updateInfoPanel.OnServerEvent:Connect(function(player: Player, data: { Item: Fish.Fish, isFishDex: boolean? })
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
-			local data = HttpService:JSONDecode(encodedData)
 
 			if data.isFishDex then return end
 
@@ -137,6 +135,7 @@ function InventoryManager.AttachEventListeners(self: InventoryManager)
 	if sellInventoryItemEvent then
 		self._cleaner:Add(sellInventoryItemEvent.OnServerEvent:Connect(function(player: Player, item)
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
+
 			local itemType = item.Entity
 			if itemType == "Fish" then
 				if not self.Inventory.Fish[item.Id] then return end

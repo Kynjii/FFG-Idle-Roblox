@@ -1,4 +1,3 @@
-local HttpService = game:GetService("HttpService")
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -29,9 +28,7 @@ function FishDexUI.Create()
 
 	local updateInfoPanelEvent = Events.GetRemote(Events.RemoteNames.UpdateInfoPanel)
 	if updateInfoPanelEvent then
-		updateInfoPanelEvent.OnClientEvent:Connect(function(encodedData: { Item: any, isFishDex: boolean? })
-			local data = HttpService:JSONDecode(encodedData)
-
+		updateInfoPanelEvent.OnClientEvent:Connect(function(data: { Item: any, isFishDex: boolean? })
 			if not data.isFishDex then return end
 
 			FishDexUI.RenderInfoPanel(innerWindow, data.Item)

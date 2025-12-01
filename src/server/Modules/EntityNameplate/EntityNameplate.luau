@@ -1,4 +1,3 @@
-local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
@@ -188,10 +187,9 @@ function EntityNameplate.Create(props: Props)
 	local helperUpgradedEvent = Events.GetBindableEvent(Events.BindableNames.HelperUpgraded)
 	if helperUpgradedEvent then
 		helperUpgradedEvent.Event:Connect(function(helperData: HelperType.HelperData)
-			local decoded = HttpService:JSONDecode(helperData)
-			if entity.Id ~= decoded.Id then return end
+			if entity.Id ~= helperData.Id then return end
 
-			EntityNameplate.Update(entityBillboard, decoded)
+			EntityNameplate.Update(entityBillboard, helperData)
 		end)
 	end
 

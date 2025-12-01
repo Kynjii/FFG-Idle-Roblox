@@ -1,4 +1,3 @@
-local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
@@ -214,8 +213,7 @@ function Events.FireBindableEvent(name: string, data: any)
 	local folder = ReplicatedStorage:FindFirstChild(FOLDER_NAME_BINDABLES)
 	local ev = folder and folder:FindFirstChild(name)
 	if ev and ev:IsA("BindableEvent") then
-		local safeData = HttpService:JSONEncode(data)
-		ev:Fire(safeData)
+		ev:Fire(data)
 		return true
 	else
 		warn(("BindableEvent %q not found under ReplicatedStorage/%s"):format(name, FOLDER_NAME_BINDABLES))
@@ -227,9 +225,8 @@ function Events.FireEvent(name: string, player: Player, data: any)
 	local folder = ReplicatedStorage:FindFirstChild(FOLDER_NAME)
 	local ev = folder and folder:FindFirstChild(name)
 	if ev and ev:IsA("RemoteEvent") then
-		local safeData = HttpService:JSONEncode(data)
-		if RunService:IsServer() then ev:FireClient(player, safeData) end
-		if RunService:IsClient() then ev:FireServer(safeData) end
+		if RunService:IsServer() then ev:FireClient(player, data) end
+		if RunService:IsClient() then ev:FireServer(data) end
 
 		return true
 	else

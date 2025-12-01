@@ -240,8 +240,7 @@ function HelperShopManager.AttachEventListeners(self: HelperShopManager): ()
 
 	local updateInfoPanel = Events.GetRemote(Events.RemoteNames.UpdateInfoPanel)
 	if updateInfoPanel then
-		updateInfoPanel.OnServerEvent:Connect(function(player: Player, encodedData: { Item: HelperType.HelperData, isFishDex: boolean? })
-			local data = HttpService:JSONDecode(encodedData)
+		updateInfoPanel.OnServerEvent:Connect(function(player: Player, data: { Item: HelperType.HelperData, isFishDex: boolean? })
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
 			if data.isFishDex then return end
 			if not data.Item and data.Item.Entity == FFGEnum.CLASS.ENTITY_NAME.Helper then return end

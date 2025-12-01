@@ -1,5 +1,4 @@
 --!strict
-local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
@@ -379,8 +378,7 @@ function InfoPanel.Create(props: {
 
 		local goldChangedEvent = Events.GetRemote(Events.RemoteNames.GoldChanged)
 		if goldChangedEvent then
-			goldChangedEvent.OnClientEvent:Connect(function(encodedAmount)
-				local newGoldAmount = HttpService:JSONDecode(encodedAmount)
+			goldChangedEvent.OnClientEvent:Connect(function(newGoldAmount)
 				if buyButton then
 					if newGoldAmount < cost then
 						Button.Disable(buyButton)
@@ -394,8 +392,7 @@ function InfoPanel.Create(props: {
 		local helperUpgradedEvent = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
 		if helperData.Stats then
 			if helperUpgradedEvent then
-				helperUpgradedEvent.OnClientEvent:Connect(function(encodedData)
-					local helperData = HttpService:JSONDecode(encodedData) :: HelperType.HelperInstance
+				helperUpgradedEvent.OnClientEvent:Connect(function(data: HelperType.HelperInstance)
 					-- Update Level
 					if levelLabel then levelLabel.Text = helperData.IsPurchased and `Level {helperData.Level}` or "" end
 

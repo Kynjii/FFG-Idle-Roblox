@@ -1,4 +1,3 @@
-local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
@@ -39,9 +38,7 @@ function HelperPanel.Create(player: Player, crewData, innerWindow: Frame): Scrol
 
 	local updateInfoPanelEvent = Events.GetRemote(Events.RemoteNames.UpdateInfoPanel)
 	if updateInfoPanelEvent then
-		updateInfoPanelEvent.OnClientEvent:Connect(function(encodedData: { Item: HelperType.HelperInstance, isFishDex: boolean? })
-			local data = HttpService:JSONDecode(encodedData)
-
+		updateInfoPanelEvent.OnClientEvent:Connect(function(data: { Item: HelperType.HelperInstance, isFishDex: boolean? })
 			if data.isFishDex then return end
 
 			HelperPanel.RenderInfoPanel(innerWindow, data.Item)

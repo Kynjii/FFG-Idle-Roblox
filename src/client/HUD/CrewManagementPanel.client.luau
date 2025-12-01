@@ -1,5 +1,4 @@
 --!strict
-local HttpService = game:GetService("HttpService")
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -67,7 +66,7 @@ function updateCrewMngPanelUI()
 			if getJobDataEvent then
 				-- Get Job Data
 				local jobsData = getJobDataEvent:InvokeServer()
-
+				print(jobsData)
 				-- Recreate window
 				local jobPanel = JobPanel.Create(player, jobsData, crewState, selectedTab)
 				jobPanel.Parent = innerWindow
@@ -131,19 +130,14 @@ if updateUIEvent then updateUIEvent.OnClientEvent:Connect(function()
 	updateCrewMngPanelUI()
 end) end
 
-if tabSelectedEvent and getCrewManagementState then
-	tabSelectedEvent.Event:Connect(function(tabName)
-		if not screenGui.Enabled then return end
-		selectedTab = HttpService:JSONDecode(tabName)
+if tabSelectedEvent and getCrewManagementState then tabSelectedEvent.Event:Connect(function(tabName)
+	if not screenGui.Enabled then return end
+	selectedTab = tabName
 
-		updateCrewMngPanelUI()
-	end)
-end
+	updateCrewMngPanelUI()
+end) end
 
-if helperUpgradedEvent then
-	helperUpgradedEvent.OnClientEvent:Connect(function(encodedData)
-		local helperData = HttpService:JSONDecode(encodedData) :: HelperType.HelperData
-		if crewState[helperData.Id] then crewState[helperData.Id] = helperData end
-		updateCrewMngPanelUI()
-	end)
-end
+if helperUpgradedEvent then helperUpgradedEvent.OnClientEvent:Connect(function(helperData)
+	if crewState[helperData.Id] then crewState[helperData.Id] = helperData end
+	updateCrewMngPanelUI()
+end) end

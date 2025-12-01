@@ -120,7 +120,7 @@ function FishingManager.StartFishingSession(self: FishingManager, player: Player
 		Rod = rodData,
 		Tier = tier,
 		SessionId = sessionId,
-		MinigameConfig = minigameConfig, -- NEW: Send difficulty-based config
+		MinigameConfig = minigameConfig,
 	})
 
 	return sessionId
@@ -291,12 +291,9 @@ function FishingManager.SetupProximityPrompts(self: FishingManager)
 
 		local gameEndedEvent = Events.GetRemote(Events.RemoteNames.GameEnded)
 		if gameEndedEvent then
-			self._cleaner:Add(gameEndedEvent.OnServerEvent:Connect(function(player: Player, encodedTier: number)
+			self._cleaner:Add(gameEndedEvent.OnServerEvent:Connect(function(player: Player, tier: number)
 				if self.Player ~= player or self.Owner ~= player.UserId then return end
-
-				local tier = HttpService:JSONDecode(encodedTier)
 				local promptTier = proximityPrompt:GetAttribute(FFGEnum.ATTRIBUTES.Tier)
-
 				if tier ~= promptTier then return end
 
 				proximityPrompt.Enabled = true
@@ -415,6 +412,7 @@ function FishingManager.AttachAttListeners(self: FishingManager)
 	local fishingResultEvent = Events.GetRemote(Events.RemoteNames.FishingResult)
 	if fishingResultEvent then
 		self._cleaner:Add(fishingResultEvent.OnServerEvent:Connect(function(player: Player, sessionId: string, result: {})
+			print(sessionId, result)
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
 
 			local isValid, message, fishCaught, stats = self:ValidateAndScoreFishing(player, sessionId, result)

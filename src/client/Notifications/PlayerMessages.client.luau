@@ -1,4 +1,3 @@
-local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Events = require(ReplicatedStorage.Shared.Events.Events)
@@ -13,8 +12,7 @@ local notificationContainer = screenGui:WaitForChild("MessageContainer")
 if notificationContainer then
 	local playerNotificationEvent = Events.GetRemote(Events.RemoteNames.PlayerNotification)
 	if playerNotificationEvent then
-		playerNotificationEvent.OnClientEvent:Connect(function(encodedData: PlayerNotification.Props)
-			local data = HttpService:JSONDecode(encodedData)
+		playerNotificationEvent.OnClientEvent:Connect(function(data: PlayerNotification.Props)
 			if data then
 				local notification = PlayerNotification.Create(data)
 				if notification then

@@ -325,6 +325,7 @@ function JobManager.AttachEventListeners(self: JobManager): ()
 	if assignJobEvent then
 		self._cleaner:Add(assignJobEvent.OnServerEvent:Connect(function(player: Player, helperId: string, jobId: number)
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
+			print(helperId, jobId)
 			if not helperId or not jobId then return end
 
 			self:AssignHelper(helperId, jobId)
