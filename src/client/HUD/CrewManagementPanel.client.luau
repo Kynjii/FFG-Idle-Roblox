@@ -131,12 +131,14 @@ if updateUIEvent then updateUIEvent.OnClientEvent:Connect(function()
 	updateCrewMngPanelUI()
 end) end
 
-if tabSelectedEvent and getCrewManagementState then tabSelectedEvent.Event:Connect(function(tabName)
-	if not screenGui.Enabled then return end
-	selectedTab = tabName
+if tabSelectedEvent and getCrewManagementState then
+	tabSelectedEvent.Event:Connect(function(tabName)
+		if not screenGui.Enabled then return end
+		selectedTab = HttpService:JSONDecode(tabName)
 
-	updateCrewMngPanelUI()
-end) end
+		updateCrewMngPanelUI()
+	end)
+end
 
 if helperUpgradedEvent then
 	helperUpgradedEvent.OnClientEvent:Connect(function(encodedData)

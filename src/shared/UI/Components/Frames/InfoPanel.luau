@@ -254,7 +254,7 @@ function InfoPanel.Create(props: {
 	local itemProgress = Instance.new("Frame")
 	itemProgress.Name = "ItemProgress"
 	itemProgress.BackgroundTransparency = 1
-	itemProgress.Size = UDim2.fromScale(1, 0.4)
+	itemProgress.Size = UDim2.fromScale(1, 0.3)
 	itemProgress.Parent = panelContainer
 	KinUI.ApplyList(itemProgress, Enum.FillDirection.Vertical, { VFlex = Enum.UIFlexAlignment.SpaceBetween, HAlign = Enum.HorizontalAlignment.Center })
 
@@ -312,16 +312,16 @@ function InfoPanel.Create(props: {
 	buyButtonContainer.Name = "BuyButtonContainer"
 	buyButtonContainer.BackgroundTransparency = 1
 	buyButtonContainer.LayoutOrder = 10
-	buyButtonContainer.Size = UDim2.fromScale(1, 0.2)
+	buyButtonContainer.Size = UDim2.fromScale(1, 0.1)
+	buyButtonContainer.Parent = panelContainer
 
 	if isHelper then
-		progressHeader.Parent = itemProgress
-		buyButtonContainer.Parent = itemProgress
 		local helperData = data :: HelperType.HelperInstance
 
 		local levelLabel: TextLabel
 		local stageLabel: TextLabel
 		if helperData.IsPurchased then
+			progressHeader.Parent = panelContainer
 			levelLabel = Instance.new("TextLabel")
 			levelLabel.Name = "LevelLabel"
 			levelLabel.LayoutOrder = 1
@@ -423,7 +423,6 @@ function InfoPanel.Create(props: {
 	else
 		if isMarket then
 			progressHeader.Parent = itemProgress
-			buyButtonContainer.Parent = itemProgress
 			buyButtonContainer.Name = "SellButtonContainer"
 
 			local sellPrice = data.SellPrice or 0
