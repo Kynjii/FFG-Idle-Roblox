@@ -598,7 +598,7 @@ function DataService.SaveFishStat(player: Player, fish)
 
 	local storedFishData = profile.Data.AccountStats.Fish[speciesKey]
 	if not storedFishData then
-		local clonedStructure = fishStatStructure
+		local clonedStructure = TableUtil.Copy(fishStatStructure, true)
 
 		profile.Data.AccountStats.Fish[speciesKey] = clonedStructure
 
@@ -621,11 +621,10 @@ function DataService.SaveFishStat(player: Player, fish)
 		if newWeight > currentMaxWeight then storedFishQuality.MaxWeight = newWeight end
 	end
 
-	print(`Before: {storedFishQuality.Caught}`)
 	storedFishQuality.Caught += 1
 	updateWeight()
 
-	print(`After: {storedFishQuality.Caught}`)
+	print(storedFishQuality)
 
 	return true
 end

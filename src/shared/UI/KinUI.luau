@@ -3,6 +3,7 @@ local RunService = game:GetService("RunService")
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 
@@ -446,5 +447,27 @@ function KinUI.SetState(name: string, value: any, parent: Instance): ValueBase
 	return valueBase
 end
 -- //!SECTION
+
+function KinUI.ScrollTo(props: { direction: "Up" | "Down", smooth: boolean?, instance: ScrollingFrame })
+	if not props.instance.ScrollingEnabled then
+		error("Passed Instance does not have Scrolling Enabled.")
+		return
+	end
+
+	local direction = props.direction or "Up"
+	local smooth = props.smooth or true
+
+	local SPEED = smooth and 1.5 or 0.1
+	local POSITION = direction == "Up" and Vector2.new(0, 0) or Vector2.new(0, 500)
+
+	local tweenGoal = {
+		CanvasPosition = POSITION,
+	}
+
+	local tweenInfo = TweenInfo.new(SPEED)
+	local tween = TweenService:Create(props.instance, tweenInfo, tweenGoal)
+
+	tween:Play()
+end
 
 return KinUI

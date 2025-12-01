@@ -6,6 +6,7 @@ local satchel = require(ReplicatedStorage.Packages.satchel)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local FishDexItem = require(ReplicatedStorage.Shared.UI.Components.FishDex.FishDexItem)
 local FishDexUI = require(ReplicatedStorage.Shared.UI.Components.FishDex.FishDexUI)
+local KinUI = require(ReplicatedStorage.Shared.UI.KinUI)
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -37,6 +38,7 @@ local playerFishDex: { [string]: any } = {}
 local itemComponents = {}
 
 function updateUI()
+	KinUI.ScrollTo({ instance = fishDexItemsContainer })
 	for _, component: Instance in pairs(itemComponents) do
 		component:Destroy()
 	end

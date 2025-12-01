@@ -8,6 +8,7 @@ local Events = require(ReplicatedStorage.Shared.Events.Events)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
 local ShopGUI = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopGUI)
 local ShopItem = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopItem)
+local KinUI = require(ReplicatedStorage.Shared.UI.KinUI)
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -59,6 +60,7 @@ function handleClosingShopDetailsUI()
 end
 
 function updateUI()
+	KinUI.ScrollTo({ instance = shopItemsContainer })
 	for _, component: Instance in pairs(itemComponents) do
 		component:Destroy()
 	end
