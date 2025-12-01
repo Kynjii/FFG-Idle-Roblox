@@ -5,7 +5,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
-local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
 local HelperPanel = require(ReplicatedStorage.Shared.UI.Components.Frames.HelperPanel)
 local JobPanel = require(ReplicatedStorage.Shared.UI.Components.Frames.JobPanel)
 local MainUIPanel = require(ReplicatedStorage.Shared.UI.Components.Frames.MainUIPanel)

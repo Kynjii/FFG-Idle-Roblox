@@ -53,8 +53,9 @@ Replica.OnNew("PlayerState", function(replicaData)
 	-- Set intial snapshot
 	local fishingLevel = replicaData.Data.Skills.Fishing.FishingLevel
 	local xpAmount = replicaData.Data.Skills.Fishing.FishingXP
+	local totalForNextLevel = replicaData.Data.Skills.Fishing.TotalForNextLevel
 	local totalForCurrentLevel = replicaData.Data.Skills.Fishing.TotalForCurrentLevel
-	updateXP("Fishing", fishingLevel, xpAmount, nil, totalForCurrentLevel)
+	updateXP("Fishing", fishingLevel, xpAmount, totalForNextLevel, totalForCurrentLevel)
 
 	-- Player Skill Progress
 	replicaData:OnSet({ "Skills", "Fishing" }, function(newValue)
