@@ -16,7 +16,7 @@ if notificationContainer then
 	if lootNotificationEvent then
 		lootNotificationEvent.OnClientEvent:Connect(function(data: LootNotification.Props)
 			if data then
-				local notificationFrame, notification = LootNotification.Create({ ItemType = data.ItemType or nil, Text = data.Text or nil })
+				local notificationFrame, notification = LootNotification.Create({ ItemImage = data.ItemImage or nil, Text = data.Text or nil })
 				if notification and notificationFrame then
 					elementCount += 1
 					notificationFrame.LayoutOrder = elementCount

@@ -102,9 +102,9 @@ local FORMULAS = {
 	FISH_BASEVALUE = 2,
 
 	-- Entity baselines
-	BOAT = { BaseCost = 100, BaseStorage = 20, BaseFPS = 1 },
-	TENDER = { BaseCost = 110, BaseStorage = 25 },
-	STORAGE = { BaseCost = 150, BaseStorage = 25 },
+	BOAT = { BaseCost = 100, BaseStorage = 200, BaseFPS = 1 },
+	TENDER = { BaseCost = 110, BaseStorage = 250 },
+	STORAGE = { BaseCost = 150, BaseStorage = 250 },
 	BUILDING = { BaseCost = 1200 },
 	HELPER = { BaseCost = 800 },
 	JOBSLOT = { BaseCost = 1000 },
@@ -135,9 +135,9 @@ FORMULAS.PER_LEVEL_MULT = 1.005 -- 0.5% compound growth per level
 -- Time-stat tuning (Stage → % faster) - IMPROVED
 -- =========================
 
-FORMULAS.STAGE_TIME_REDUCTION_COEFF = 0.30 -- 30% per stage (was 20%)
-FORMULAS.MAX_STAGE_TIME_REDUCTION = 0.80 -- cap 80% faster (was 50%)
-FORMULAS.TIME_MIN_FRACTION = 0.02 -- never below 2% of base (was 5%)
+FORMULAS.STAGE_TIME_REDUCTION_COEFF = 0.30 -- 30% per stage
+FORMULAS.MAX_STAGE_TIME_REDUCTION = 0.80 -- cap 80% faster
+FORMULAS.TIME_MIN_FRACTION = 0.02 -- never below 2% of base
 
 -- Add breakthrough levels for major time reductions
 FORMULAS.TIME_BREAKTHROUGH_LEVELS = {

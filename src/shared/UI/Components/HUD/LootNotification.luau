@@ -52,18 +52,17 @@ function LootNotification.Create(props: Props): Frame & CanvasGroup
 
 	bG.Parent = notification
 
-	if props.ItemType then
+	if props.ItemImage then
 		local icon = Instance.new("ImageLabel")
 		icon.Name = "Icon"
-		icon.AnchorPoint = Vector2.new(0.5, 1)
+		icon.AnchorPoint = Vector2.new(0.5, 0.5)
 		icon.BackgroundTransparency = 1
-		icon.Position = UDim2.fromScale(0.5, 0.35)
-		icon.Size = UDim2.fromScale(0.239935, 0.324553)
+		icon.Position = UDim2.fromScale(0, 0.5)
+		icon.Size = UDim2.fromScale(0.08, 0.08)
 		icon.ZIndex = 5
 		icon.Image = FFGEnum.UI.Icons[props.ItemImage] or ""
-		KinUI.ApplyAspect(icon)
-
-		icon.Parent = notification
+		icon.Parent = textLabel
+		KinUI.ApplyAspect(icon, 1, Enum.DominantAxis.Width, Enum.AspectType.ScaleWithParentSize)
 	end
 
 	return lootNotificationContainer, notification

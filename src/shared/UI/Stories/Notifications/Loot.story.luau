@@ -1,10 +1,14 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local SkillUpNotification = require(ReplicatedStorage.Shared.UI.Components.HUD.SkillUpNotification)
+local LootNotification = require(ReplicatedStorage.Shared.UI.Components.HUD.LootNotification)
 local KinUI = require(ReplicatedStorage.Shared.UI.KinUI)
 
 local function story(target)
-	local item = SkillUpNotification.Create("+50 xp", "Fishing")
+	local props: LootNotification.Props = {
+		ItemImage = "Gold",
+		Text = "+50 Fishing XP",
+	}
+	local item = LootNotification.Create(props)
 
 	local frame = Instance.new("Frame")
 	frame.Size = UDim2.fromScale(1, 1)
