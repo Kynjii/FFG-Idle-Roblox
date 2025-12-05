@@ -53,7 +53,6 @@ Events.RemoteFunctionNames = {
 	GetCrewManagementState = "GetCrewManagementState",
 	GetPlayerInventory = "GetPlayerInventory",
 	GetJobData = "GetJobData",
-	GetFishItem = "GetFishItem",
 	GetFishDex = "GetFishDex",
 	GetFishStat = "GetFishStat",
 

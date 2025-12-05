@@ -65,7 +65,7 @@ function updateCrewMngPanelUI()
 			if getJobDataEvent then
 				-- Get Job Data
 				local jobsData = getJobDataEvent:InvokeServer()
-				print(jobsData)
+
 				-- Recreate window
 				local jobPanel = JobPanel.Create(player, jobsData, crewState, selectedTab)
 				jobPanel.Parent = innerWindow

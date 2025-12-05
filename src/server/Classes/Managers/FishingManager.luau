@@ -11,6 +11,7 @@ local DataService = require(ServerScriptService.Server.Services.DataService)
 local Trove = require(ReplicatedStorage.Packages.Trove)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
+local RodType = require(ReplicatedStorage.Shared.Types.RodType)
 local Animator = require(ReplicatedStorage.Shared.Utils.Animator)
 
 -- //SECTION - Tagged Fishing Locations within Workspace
@@ -67,7 +68,7 @@ function FishingManager.StartFishingSession(self: FishingManager, player: Player
 	local sessionId = HttpService:GenerateGUID(false)
 
 	-- Calculate difficulty factors for the minigame
-	local playerData = { FishingLevel = 1 } -- TODO: Get actual player data
+	local playerData = DataService.GetSkillData(self.Player, "Fishing")
 	local rodData = self:GetPlayerRod()
 	local difficultyFactor = Difficulty.GetDifficultyFactor(playerData, rodData, fishConfig)
 	local playerPower = Difficulty.GetPlayerPower(playerData, rodData)
@@ -152,7 +153,7 @@ function FishingManager.ValidateAndScoreFishing(self: FishingManager, player: Pl
 	local perfectHits = math.clamp(result.PerfectHits or 0, 0, totalHits)
 
 	-- Get player data for difficulty calculation
-	local playerData = { FishingLevel = 1 } -- TODO: Replace with actual player data
+	local playerData = DataService.GetSkillData(self.Player, "Fishing")
 	local rodData = self:GetPlayerRod()
 
 	-- Calculate difficulty factor
@@ -246,21 +247,21 @@ function FishingManager.SaveCaughtFish(self: FishingManager, caughtFish: Fish.Fi
 end
 
 function FishingManager.GetPlayerRod(self: FishingManager)
-	-- TODO: Replace with actual player rod data from inventory/equipment
-	return {
-		Name = "Fishing Rod of Doom",
-		QualityId = 2,
-		BaseDmg = 10,
-		Stats = {
-			ReelPower = 3, -- ★★★☆☆☆ (3/6 stars)
-			LineControl = 2, -- ★★☆☆☆☆ (2/6 stars)
-			Stability = 2, -- ★★☆☆☆☆ (2/6 stars)
-		},
-		Perks = {
-			-- Example perks that could be added
-			-- "Perfect Hook", "Forgiving Line", "Tide Sync"
-		},
-	}
+	-- //TODO - Handle only equippedRod
+	local playerRods = DataService.GetRods(self.Player)
+	local highestRodQualityId = 0
+	local highestQualityRod = nil
+	if playerRods then
+		for _, rod in pairs(playerRods) do
+			local rodData = rod :: RodType.FishingRodType
+			if rodData.QualityId > highestRodQualityId then
+				highestRodQualityId = rodData.QualityId
+				highestQualityRod = rod
+			end
+		end
+	end
+
+	return highestQualityRod
 end
 
 function FishingManager.SetupProximityPrompts(self: FishingManager)
@@ -282,6 +283,25 @@ function FishingManager.SetupProximityPrompts(self: FishingManager)
 
 			self.CurrentFishingLocTier = taggedLocationTier
 			self.CurrentFishingLocId = taggedLocationId
+
+			local playerRods = DataService.GetRods(self.Player)
+			local highestRodQualityId = 0
+			if playerRods then
+				for _, rod in pairs(playerRods) do
+					local rodData = rod :: RodType.FishingRodType
+					if rodData.QualityId > highestRodQualityId then highestRodQualityId = rodData.QualityId end
+				end
+			end
+
+			if highestRodQualityId == 0 then
+				Notification.SendAlert(player, `Purchase a Fishing Rod to be able to fish!`)
+				return
+			elseif highestRodQualityId < self.CurrentFishingLocTier then
+				Notification.SendAlert(player, `Your Fishing Rod quality is too low for this spot!`)
+				return
+			end
+
+			-- //TODO - Handle equipped Rods
 
 			local fishConfig = self:GetRandomFish(taggedLocationTier, taggedLocationId)
 			self:StartFishingSession(player, fishConfig, taggedLocationTier)
@@ -399,16 +419,6 @@ function FishingManager.CalculateFishingXPReward(self: FishingManager, fishData,
 end
 
 function FishingManager.AttachAttListeners(self: FishingManager)
-	local getFishItemEvent = Events.GetRemoteFn(Events.RemoteFunctionNames.GetFishItem)
-	if getFishItemEvent then
-		getFishItemEvent.OnServerInvoke = function(player: Player)
-			if self.Player ~= player or self.Owner ~= player.UserId then return end
-
-			return { Fish = self:GetRandomFish(self.CurrentFishingLocTier, self.CurrentFishingLocId), Rod = self:GetPlayerRod() }
-		end
-		self._cleaner:Add(getFishItemEvent)
-	end
-
 	local fishingResultEvent = Events.GetRemote(Events.RemoteNames.FishingResult)
 	if fishingResultEvent then
 		self._cleaner:Add(fishingResultEvent.OnServerEvent:Connect(function(player: Player, sessionId: string, result: {})

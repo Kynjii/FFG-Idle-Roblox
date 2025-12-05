@@ -174,9 +174,15 @@ function InventoryManager.AttachEventListeners(self: InventoryManager)
 				error("No Fishing Rod found with id of:", rodId)
 			end
 
-			print("Rod assigned to Inventory, time to save it", self.Inventory)
+			self:SaveRod(self.Inventory.Equipment[rodId])
 		end))
 	end
+end
+
+function InventoryManager.SaveRod(self: InventoryManager, rod)
+	if not rod then return end
+
+	DataService.SaveRod(self.Player, rod)
 end
 
 function InventoryManager.GrantTool(self: InventoryManager, item)

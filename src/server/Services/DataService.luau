@@ -64,7 +64,9 @@ local stateTypes = {
 	getHelperInventory = "get Player Inventory",
 	SaveJobState = "save Job State",
 	GetJobState = "get Job State",
+	GetRods = "get player Rods",
 	SaveFish = "save Fish",
+	SaveRod = "save Rod",
 	GetFishStat = "GetFishStat",
 	SaveFishDex = "save Fish Dex",
 	GetSkillData = "get Skill Data",
@@ -476,9 +478,8 @@ function DataService.GetHelperInventory(player: Player)
 	local currentRealm = getRealmData(profile)
 	if not currentRealm then return false end
 
-	-- Initialize Inventory array if it doesn't exist
-	-- //TODO - Replace with proper inventory (temp)
-	-- if not profile.Data.Realms[currentRealm].Shops then profile.Data.Realms[currentRealm].Shops = {} end
+	-- Initialize HelperInventory array if it doesn't exist
+	if not profile.Data.Realms[currentRealm].Helpers then profile.Data.Realms[currentRealm].Helpers = {} end
 
 	return profile.Data.Realms[currentRealm].Helpers
 end
@@ -569,6 +570,29 @@ function DataService.SaveFish(player: Player, fish): boolean
 end
 -- //!SECTION
 
+-- //SECTION - Rod Inventory
+function DataService.SaveRod(player: Player, rod): boolean
+	local profile = getProfile(player, stateTypes.SaveRod)
+	if not profile then return false end
+
+	-- Initialize Rod Inventory array if it doesn't exist
+	if not profile.Data.Inventory.Equipment then profile.Data.Inventory.Equipment = {} end
+
+	profile.Data.Inventory.Equipment[rod.Id] = rod
+
+	return true
+end
+
+function DataService.GetRods(player: Player)
+	local profile = getProfile(player, stateTypes.GetRods)
+	if not profile then return false end
+
+	if not profile.Data.Inventory.Equipment then return false end
+
+	return profile.Data.Inventory.Equipment
+end
+-- //!SECTION
+
 -- //SECTION - Fish Dex
 function DataService.SaveFishDex(player: Player, fishDexState): boolean
 	local profile = getProfile(player, stateTypes.SaveFishDex)
@@ -623,8 +647,6 @@ function DataService.SaveFishStat(player: Player, fish)
 
 	storedFishQuality.Caught += 1
 	updateWeight()
-
-	print(storedFishQuality)
 
 	return true
 end

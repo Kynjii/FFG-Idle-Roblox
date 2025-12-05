@@ -212,7 +212,7 @@ function Helper.CreateModel(self: Helper)
 		local nameplate: BillboardGui = EntityNameplate.Create({
 			EntityData = self,
 			Adornee = clonedModel,
-			HasProgressBar = false, -- //TODO -
+			HasProgressBar = true, -- //TODO -
 		})
 		nameplate.ExtentsOffsetWorldSpace = Vector3.new(0, 2, 0)
 		nameplate.Enabled = true

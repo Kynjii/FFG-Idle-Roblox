@@ -5,7 +5,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local satchel = require(ReplicatedStorage.Packages.satchel)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
+local FishType = require(ReplicatedStorage.Shared.Types.Classes.FishType)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
+local RodType = require(ReplicatedStorage.Shared.Types.RodType)
 local ShopGUI = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopGUI)
 local ShopItem = require(ReplicatedStorage.Shared.UI.Components.Shop.ShopItem)
 local KinUI = require(ReplicatedStorage.Shared.UI.KinUI)
@@ -44,6 +46,10 @@ function createShopitemComponent(helper: HelperType.HelperData)
 end
 
 local shopData: { [string]: any } = {}
+local playersInventory: {
+	Fish: { FishType.FishData },
+	Equipment: { RodType.FishingRodType },
+} = {}
 local itemComponents = {}
 
 function handleClosingShopDetailsUI()
@@ -73,6 +79,8 @@ function updateUI()
 	if shopItemsContainer then
 		local isFirst = true
 		for k, item in pairs(shopData) do
+			if playersInventory[item.Id] then continue end
+
 			local itemComponent = createShopitemComponent(item)
 			itemComponent.LayoutOrder = item.LevelRequirement
 			if isFirst then
@@ -98,10 +106,14 @@ function populateDetailsUI()
 end
 
 local openUIEvent = Events.GetRemote(Events.RemoteNames.OpenFishingRodShop)
-if openUIEvent then
+local getPlayerInventoryEvent = Events.GetRemoteFn(Events.RemoteFunctionNames.GetPlayerInventory)
+if openUIEvent and getPlayerInventoryEvent then
 	openUIEvent.OnClientEvent:Connect(function(data)
 		if data then
 			shopData = data
+
+			local playerInventory = getPlayerInventoryEvent:InvokeServer()
+			if playerInventory then playersInventory = playerInventory end
 
 			populateDetailsUI()
 			satchel:SetBackpackEnabled(false)
