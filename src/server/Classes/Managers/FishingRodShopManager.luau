@@ -4,12 +4,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
 local Notification = require(ServerScriptService.Server.Classes.Modules.Notification)
-local Tutorial = require(ServerScriptService.Server.Game.Tutorial.Tutorial)
+local FishingRods = require(ServerScriptService.Server.Data.FishingRods)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Trove = require(ReplicatedStorage.Packages.Trove)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
+local RodType = require(ReplicatedStorage.Shared.Types.RodType)
 
 -- //SECTION - Tagged Entities within Workspace
 local taggedShops = CollectionService:GetTagged("FishingRodShop")
@@ -20,32 +21,22 @@ FishingRodShopManager.__index = FishingRodShopManager
 
 type FishingRodShopManager = typeof(setmetatable({}, FishingRodShopManager))
 
-type ShopState = {
-	Inventory: { [string]: any },
-	Entity: string,
-	Id: string,
-	Owner: number,
-	CompletedTutorial: boolean,
-	PeriodEnd: number,
-}
-
-function FishingRodShopManager.New(shopState: ShopState, player: Player, teamId: number): FishingRodShopManager
+function FishingRodShopManager.New(player: Player, teamId: number): FishingRodShopManager
 	local self = setmetatable({} :: FishingRodShopManager, FishingRodShopManager)
 
 	self.Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRodShop
-	self.Id = shopState and shopState.Id or HttpService:GenerateGUID(false)
+	self.Id = HttpService:GenerateGUID(false)
 	self.Player = player
 	self.Owner = self.Owner or player.UserId
 	self.TeamId = teamId
 	self.ShopModel = self:FindShopModel(teamId)
 
-	self.Inventory = shopState and shopState.Inventory or nil
-
-	self.CompletedTutorial = shopState and shopState.CompletedTutorial or DataService.CompletedTutorial(self.Player)
+	self.Inventory = FishingRods
 
 	self._cleaner = Trove.new()
 
 	self:AttachEventListeners()
+	self:Initialize()
 
 	return self
 end
@@ -59,35 +50,24 @@ function FishingRodShopManager.FindShopModel(self: FishingRodShopManager, teamId
 	return nil
 end
 
-function FishingRodShopManager.PurchaseRod(self: FishingRodShopManager, rodId: string): ()
+function FishingRodShopManager.PurchaseRod(self: FishingRodShopManager, rodId: number): ()
 	local rodInShop = TableUtil.Find(self.Inventory, function(rod)
 		return rod.Id == rodId
 	end) :: HelperType.HelperData
 
-	if not rodInShop or rodInShop.IsPurchased then return end
+	if not rodInShop then return end
 
-	if not DataService.CanAfford(self.Player, rodInShop.CurrencyType, rodInShop.BaseCost or 0) then
+	if not DataService.CanAfford(self.Player, rodInShop.CurrencyType, rodInShop.Cost or 0) then
 		Notification.SendAlert(self.Player, "Not enough gold.")
 		return
 	end
-	if not self.CompletedTutorial then
-		Tutorial.Update(self.Player, self.TeamId)
-		self.CompletedTutorial = DataService.CompletedTutorial(self.Player)
-	end
 
-	-- local helperClass = Helper.New(rodInShop, self.Player, self.TeamId)
-	-- helperClass:Purchase()
-	-- helperClass:Destroy()
-
-	DataService.Spend(self.Player, rodInShop.CurrencyType, rodInShop.BaseCost)
+	DataService.Spend(self.Player, rodInShop.CurrencyType, rodInShop.Cost)
 
 	self.Inventory[rodId] = nil
 
 	Events.FireEvent(Events.RemoteNames.UpdateFishingRodShopUI, self.Player, rodId)
-	-- //TODO -
-	-- Events.FireBindableEvent(Events.BindableNames.PurchasedHelper, { Player = self.Player })
-
-	self:Save()
+	Events.FireBindableEvent(Events.BindableNames.PurchasedRod, { Player = self.Player, RodId = rodId })
 end
 
 -- //SECTION - UI Setup
@@ -100,7 +80,7 @@ function FishingRodShopManager.SetupProximityPrompt(self: FishingRodShopManager,
 	proximityPrompt.Parent = model
 
 	proximityPrompt.HoldDuration = 0
-	proximityPrompt.MaxActivationDistance = self.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Shop and 5 or 15
+	proximityPrompt.MaxActivationDistance = self.Entity ~= FFGEnum.CLASS.ENTITY_NAME.FishingRodShop and 5 or 15
 	proximityPrompt.MaxIndicatorDistance = proximityPrompt.MaxActivationDistance * 5
 	proximityPrompt.ObjectText = "Open"
 	proximityPrompt.ActionText = `{self.Entity}`
@@ -109,7 +89,7 @@ function FishingRodShopManager.SetupProximityPrompt(self: FishingRodShopManager,
 		if player.UserId ~= self.Owner then return end
 
 		local shopInventory = self.Inventory or {}
-		Events.FireEvent(Events.RemoteNames.OpenHelperShop, self.Player, shopInventory)
+		Events.FireEvent(Events.RemoteNames.OpenFishingRodShop, self.Player, shopInventory)
 	end))
 
 	return proximityPrompt
@@ -118,64 +98,35 @@ end
 
 -- //SECTION - Event Listeners
 function FishingRodShopManager.AttachEventListeners(self: FishingRodShopManager): ()
-	-- //TODO - events
-	local itemPurchased = Events.GetRemote(Events.RemoteNames.HelperPurchased)
+	local itemPurchased = Events.GetRemote(Events.RemoteNames.RodPurchased)
 	if itemPurchased then
-		self._cleaner:Add(itemPurchased.OnServerEvent:Connect(function(player: Player, helperId: string)
+		self._cleaner:Add(itemPurchased.OnServerEvent:Connect(function(player: Player, rodId: number)
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
 
-			local canProceed = Tutorial.CheckTutorialState(player, self)
-			if not canProceed then
-				Notification.SendAlert(player, "Follow the Tutorial to unlock this!")
-				return
-			end
-
-			self:PurchaseRod(helperId)
+			self:PurchaseRod(rodId)
 		end))
 	end
 
 	local updateInfoPanel = Events.GetRemote(Events.RemoteNames.UpdateInfoPanel)
 	if updateInfoPanel then
-		updateInfoPanel.OnServerEvent:Connect(function(player: Player, data: { Item: HelperType.HelperData, isFishDex: boolean? })
+		updateInfoPanel.OnServerEvent:Connect(function(player: Player, data: { Item: RodType.FishingRodType, isFishDex: boolean? })
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
 			if data.isFishDex then return end
-			if not data.Item and data.Item.Entity == FFGEnum.CLASS.ENTITY_NAME.Helper then return end
+			if not data.Item and data.Item.Entity == FFGEnum.CLASS.ENTITY_NAME.FishingRod then return end
 
-			local helperInShop = TableUtil.Find(self.Inventory, function(helper: HelperType.HelperData)
-				return helper.Id == data.Item.Id
-			end) :: HelperType.HelperData
+			local rodInShop = TableUtil.Find(self.Inventory, function(rod: RodType.FishingRodType)
+				return rod.Id == data.Item.Id
+			end) :: RodType.FishingRodType
 
-			if not helperInShop then return end
-			if helperInShop then Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, { Item = helperInShop }) end
+			if not rodInShop then return end
+			if rodInShop then Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, { Item = rodInShop }) end
 		end)
 	end
 end
 -- //!SECTION
 
--- //SECTION - Saving and Loading
-function FishingRodShopManager.Serialize(self: FishingRodShopManager): { [string]: any }
-	return {
-		Entity = self.Entity,
-		Id = self.Id,
-		Owner = self.Owner,
-		Inventory = self.Inventory,
-		CompletedTutorial = self.CompletedTutorial,
-	}
-end
-
-function FishingRodShopManager.Save(self: FishingRodShopManager)
-	-- //TODO -
-	DataService.SaveFishingRodShop(self.Player, self:Serialize())
-end
-
--- //!SECTION
-
 -- //SECTION - Cleanup
 function FishingRodShopManager.Destroy(self: FishingRodShopManager): ()
-	pcall(function()
-		self:Save()
-	end)
-
 	if self._cleaner then
 		self._cleaner:Clean()
 		self._cleaner = nil

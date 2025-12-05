@@ -1,11 +1,18 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local FishingRods = {
 	-- QUALITY 1 (Starter/Budget)
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Bamboo Rod",
+		Id = 1,
 		QualityId = 1,
 		BaseDmg = 5,
-		Cost = 100,
+		Cost = 100000,
+		CurrencyType = "Gold",
 		LevelRequirement = 1,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 1,
 			LineControl = 2,
@@ -15,11 +22,15 @@ local FishingRods = {
 	},
 
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Apprentice Rod",
+		Id = 10,
 		QualityId = 1,
 		BaseDmg = 8,
-		Cost = 300,
+		Cost = 300000,
+		CurrencyType = "Gold",
 		LevelRequirement = 3,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 2,
 			LineControl = 1,
@@ -29,11 +40,15 @@ local FishingRods = {
 	},
 
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "River Reed Rod",
+		Id = 15,
 		QualityId = 1,
 		BaseDmg = 7,
-		Cost = 450,
+		Cost = 450000,
+		CurrencyType = "Gold",
 		LevelRequirement = 4,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 1,
 			LineControl = 3,
@@ -43,11 +58,15 @@ local FishingRods = {
 	},
 
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Worn Guild Rod",
+		Id = 18,
 		QualityId = 1,
 		BaseDmg = 9,
-		Cost = 550,
+		Cost = 550000,
+		CurrencyType = "Gold",
 		LevelRequirement = 5,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 2,
 			LineControl = 2,
@@ -58,11 +77,15 @@ local FishingRods = {
 
 	-- QUALITY 2 (Early Progression)
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Steel Line Rod",
+		Id = 13,
 		QualityId = 2,
 		BaseDmg = 12,
-		Cost = 800,
+		Cost = 800000,
+		CurrencyType = "Gold",
 		LevelRequirement = 6,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 2,
 			LineControl = 3,
@@ -72,11 +95,15 @@ local FishingRods = {
 	},
 
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Steady Fisher",
+		Id = 11,
 		QualityId = 2,
 		BaseDmg = 10,
-		Cost = 950,
+		Cost = 950000,
+		CurrencyType = "Gold",
 		LevelRequirement = 7,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 1,
 			LineControl = 2,
@@ -86,11 +113,15 @@ local FishingRods = {
 	},
 
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Iron Hook Rod",
+		Id = 108,
 		QualityId = 2,
 		BaseDmg = 13,
-		Cost = 1200,
+		Cost = 1200000,
+		CurrencyType = "Gold",
 		LevelRequirement = 8,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 3,
 			LineControl = 2,
@@ -100,11 +131,15 @@ local FishingRods = {
 	},
 
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Pond Whisper",
+		Id = 111,
 		QualityId = 2,
 		BaseDmg = 11,
-		Cost = 1350,
+		Cost = 1350000,
+		CurrencyType = "Gold",
 		LevelRequirement = 9,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 2,
 			LineControl = 3,
@@ -115,11 +150,15 @@ local FishingRods = {
 
 	-- QUALITY 3 (Mid-game, Specialized)
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Power Reeler",
+		Id = 145,
 		QualityId = 3,
 		BaseDmg = 18,
-		Cost = 2000,
+		Cost = 2000000,
+		CurrencyType = "Gold",
 		LevelRequirement = 12,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 5,
 			LineControl = 2,
@@ -129,11 +168,15 @@ local FishingRods = {
 	},
 
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Precision Caster",
+		Id = 197,
 		QualityId = 3,
 		BaseDmg = 16,
-		Cost = 2300,
+		Cost = 2300000,
+		CurrencyType = "Gold",
 		LevelRequirement = 14,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 2,
 			LineControl = 5,
@@ -143,11 +186,15 @@ local FishingRods = {
 	},
 
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Journeyman’s Balance",
+		Id = 201,
 		QualityId = 3,
 		BaseDmg = 17,
-		Cost = 2500,
+		Cost = 2500000,
+		CurrencyType = "Gold",
 		LevelRequirement = 15,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 3,
 			LineControl = 3,
@@ -157,11 +204,15 @@ local FishingRods = {
 	},
 
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Tide Breaker",
+		Id = 247,
 		QualityId = 3,
 		BaseDmg = 19,
-		Cost = 2800,
+		Cost = 2800000,
+		CurrencyType = "Gold",
 		LevelRequirement = 17,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 4,
 			LineControl = 3,
@@ -172,11 +223,15 @@ local FishingRods = {
 
 	-- QUALITY 4 (Advanced)
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Balanced Master",
+		Id = 486,
 		QualityId = 4,
 		BaseDmg = 22,
-		Cost = 4000,
+		Cost = 4000000,
+		CurrencyType = "Gold",
 		LevelRequirement = 20,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 4,
 			LineControl = 4,
@@ -186,11 +241,15 @@ local FishingRods = {
 	},
 
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Titan's Grip",
+		Id = 876,
 		QualityId = 4,
 		BaseDmg = 25,
-		Cost = 5000,
+		Cost = 5000000,
+		CurrencyType = "Gold",
 		LevelRequirement = 24,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 6,
 			LineControl = 3,
@@ -200,11 +259,15 @@ local FishingRods = {
 	},
 
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Moonlit Thread Rod",
+		Id = 987,
 		QualityId = 4,
 		BaseDmg = 23,
-		Cost = 5200,
+		Cost = 5200000,
+		CurrencyType = "Gold",
 		LevelRequirement = 26,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 3,
 			LineControl = 5,
@@ -214,11 +277,15 @@ local FishingRods = {
 	},
 
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Anchorheart Rod",
+		Id = 586,
 		QualityId = 4,
 		BaseDmg = 21,
-		Cost = 4500,
+		Cost = 4500000,
+		CurrencyType = "Gold",
 		LevelRequirement = 22,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 3,
 			LineControl = 3,
@@ -229,11 +296,15 @@ local FishingRods = {
 
 	-- QUALITY 5 (Near-Legendary)
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Whispering Current",
+		Id = 687,
 		QualityId = 5,
 		BaseDmg = 28,
-		Cost = 8000,
+		Cost = 8000000,
+		CurrencyType = "Gold",
 		LevelRequirement = 32,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 3,
 			LineControl = 6,
@@ -243,11 +314,15 @@ local FishingRods = {
 	},
 
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Stormcaller Rod",
+		Id = 388,
 		QualityId = 5,
 		BaseDmg = 30,
-		Cost = 9000,
+		Cost = 9000000,
+		CurrencyType = "Gold",
 		LevelRequirement = 35,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 6,
 			LineControl = 4,
@@ -257,11 +332,15 @@ local FishingRods = {
 	},
 
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Deepsea Warden",
+		Id = 333,
 		QualityId = 5,
 		BaseDmg = 29,
-		Cost = 9500,
+		Cost = 95000000,
+		CurrencyType = "Gold",
 		LevelRequirement = 38,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 4,
 			LineControl = 4,
@@ -272,11 +351,15 @@ local FishingRods = {
 
 	-- QUALITY 6 (End-Game)
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Angler's Perfection",
+		Id = 909,
 		QualityId = 6,
 		BaseDmg = 35,
-		Cost = 15000,
+		Cost = 150000000,
+		CurrencyType = "Gold",
 		LevelRequirement = 45,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 6,
 			LineControl = 5,
@@ -286,11 +369,15 @@ local FishingRods = {
 	},
 
 	{
+		Entity = FFGEnum.CLASS.ENTITY_NAME.FishingRod,
 		Name = "Celestial Tide Scepter",
+		Id = 999,
 		QualityId = 6,
 		BaseDmg = 36,
-		Cost = 17000,
+		Cost = 170000000,
+		CurrencyType = "Gold",
 		LevelRequirement = 50,
+		ItemImage = "rbxassetid://107401856051981",
 		Stats = {
 			ReelPower = 5,
 			LineControl = 6,

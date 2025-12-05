@@ -43,6 +43,9 @@ Events.RemoteNames = {
 	-- Market
 	SellItem = "SellItem",
 	UpdateMarketUI = "UpdateMarketUI",
+
+	-- Fishing Rod Shop
+	RodPurchased = "RodPurchased",
 }
 
 Events.RemoteFunctionNames = {
@@ -90,6 +93,9 @@ Events.BindableNames = {
 	-- Helper Purchase
 	HelperUpgraded = "HelperUpgraded",
 	PurchasedHelper = "PurchasedHelper",
+
+	-- Rod Purchased
+	PurchasedRod = "PurchasedRod",
 
 	-- Helper UI (CrewManagement)
 	AvailableHelperSelected = "AvailableHelperSelected",

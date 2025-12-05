@@ -5,6 +5,7 @@ local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local FishType = require(ReplicatedStorage.Shared.Types.Classes.FishType)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
+local RodType = require(ReplicatedStorage.Shared.Types.RodType)
 local Button = require(ReplicatedStorage.Shared.UI.Components.Buttons.Button)
 local ProgressBar = require(ReplicatedStorage.Shared.UI.Components.ProgressBar)
 local KinUI = require(ReplicatedStorage.Shared.UI.KinUI)
@@ -30,6 +31,11 @@ local function handleButtonClick(item): ()
 			local sellItemEvent = Events.GetRemote(Events.RemoteNames.SellItem)
 			if sellItemEvent then sellItemEvent:FireServer(item) end
 		end
+
+		if item.Cost then
+			local purchaseRodEvent = Events.GetRemote(Events.RemoteNames.RodPurchased)
+			if purchaseRodEvent then purchaseRodEvent:FireServer(item.Id) end
+		end
 	end
 end
 
@@ -52,9 +58,12 @@ local function createStats(item, innerStatsContainer)
 
 	local statOrder = {
 		Storage = 1,
+		ReelPower = 1,
 		WalkSpeed = 2,
+		LineControl = 2,
 		CatchRate = 3,
 		CritChance = 3,
+		Stability = 3,
 		Luck = 4,
 		SwingRate = 4,
 		WoodYield = 5,
@@ -155,6 +164,11 @@ function InfoPanel.Create(props: {
 		local helperData = data :: HelperType.HelperData
 		text = helperData.Name
 	end
+
+	if not isHelper and not isFish and data then
+		local rodData = data :: RodType.FishingRodType
+		text = rodData.Name
+	end
 	KinUI.AddTextLabel(itemName, nil, text or "", "L")
 	-- //!SECTION
 
@@ -231,6 +245,11 @@ function InfoPanel.Create(props: {
 		local helperData = data :: HelperType.HelperData
 		KinUI.AddBadge(variantsContainer, UDim2.fromScale(0.3, 0.8), FFGEnum.QUALITIES[helperData.QualityId].Label, "M", nil, FFGEnum.QUALITIES[helperData.QualityId].Color)
 	end
+
+	if not isHelper and not isFish and data.QualityId then
+		local rodData = data :: RodType.FishingRodType
+		KinUI.AddBadge(variantsContainer, UDim2.fromScale(0.3, 0.8), FFGEnum.QUALITIES[rodData.QualityId].Label, "M", nil, FFGEnum.QUALITIES[rodData.QualityId].Color)
+	end
 	-- //!SECTION
 
 	-- //SECTION - FishDex
@@ -248,6 +267,9 @@ function InfoPanel.Create(props: {
 	elseif isHelper then
 		local helperData = data :: HelperType.HelperData
 		statData = helperData.Stats
+	elseif not isHelper and not isFish then
+		local rodData = data :: RodType.FishingRodType
+		statData = rodData.Stats
 	end
 
 	local itemProgress = Instance.new("Frame")
@@ -435,6 +457,50 @@ function InfoPanel.Create(props: {
 			sellButton.Activated:Connect(function()
 				handleButtonClick(data)
 			end)
+		end
+
+		if not isFish then
+			progressHeader.Parent = itemProgress
+			local rodData = data :: RodType.FishingRodType
+
+			createStats(rodData, itemProgress)
+
+			local cost: number = rodData.Cost or 0
+			local canAfford = false
+			if canAffordEvent then canAfford = canAffordEvent:InvokeServer("Gold", cost) end
+
+			local colorToUse = canAfford and "Green" or "Gray"
+
+			local buyButton = Button.Create({
+				Color = colorToUse,
+				Text = Format.CurrencyNumber(cost),
+				Size = UDim2.fromScale(0.5, 1),
+				CurrencyType = "Gold",
+			})
+			buyButton.Parent = buyButtonContainer
+
+			if canAfford then
+				Button.Enable(buyButton)
+			else
+				Button.Disable(buyButton)
+			end
+
+			buyButton.Activated:Connect(function()
+				handleButtonClick(data)
+			end)
+
+			local goldChangedEvent = Events.GetRemote(Events.RemoteNames.GoldChanged)
+			if goldChangedEvent then
+				goldChangedEvent.OnClientEvent:Connect(function(newGoldAmount)
+					if buyButton then
+						if newGoldAmount < cost then
+							Button.Disable(buyButton)
+						elseif newGoldAmount >= cost then
+							Button.Enable(buyButton)
+						end
+					end
+				end)
+			end
 		end
 	end
 

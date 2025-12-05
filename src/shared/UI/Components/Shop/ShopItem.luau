@@ -6,6 +6,7 @@ local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
 local FishType = require(ReplicatedStorage.Shared.Types.Classes.FishType)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
+local RodType = require(ReplicatedStorage.Shared.Types.RodType)
 local KinUI = require(ReplicatedStorage.Shared.UI.KinUI)
 local Format = require(ReplicatedStorage.Shared.Utils.Format)
 
@@ -26,16 +27,24 @@ local function ShopItem(
 	}
 )
 	local typedItem
+	local isFish = false
+	local isHelper = false
+	local isRod = false
 	if props.ItemData.Entity == FFGEnum.CLASS.ENTITY_NAME.Fish then
 		typedItem = props.ItemData :: FishType.FishData
+		isFish = true
 	elseif props.ItemData.Entity == FFGEnum.CLASS.ENTITY_NAME.Helper then
 		typedItem = props.ItemData :: HelperType.HelperData
+		isHelper = true
+	elseif props.ItemData.Entity == FFGEnum.CLASS.ENTITY_NAME.FishingRod then
+		typedItem = props.ItemData :: RodType.FishingRodType
+		isRod = true
 	else
 		typedItem = props.ItemData
 	end
 
 	local shopItemContainer = Instance.new("Frame")
-	shopItemContainer.Name = typedItem.Id or "Shopitem"
+	shopItemContainer.Name = tostring(typedItem.Id) or "Shopitem"
 	shopItemContainer.BackgroundTransparency = 1
 	shopItemContainer.Size = props.Size
 	shopItemContainer.BackgroundColor3 = props.BackgroundColor3 or FFGEnum.THEME.color.white
@@ -104,7 +113,7 @@ local function ShopItem(
 	-- //!SECTION
 
 	-- //SECTION -  Item Price
-	if not typedItem.IsPurchased or typedItem.Entity == FFGEnum.CLASS.ENTITY_NAME.Fish then
+	if isHelper and not typedItem.IsPurchased or isFish or isRod then
 		local priceContainer = Instance.new("Frame")
 		priceContainer.Name = "PriceContainer"
 		priceContainer.AnchorPoint = FFGEnum.THEME.alignment.anchor.center
@@ -151,7 +160,7 @@ local function ShopItem(
 		ItemBaseCostTxt.TextColor3 = FFGEnum.THEME.color.white
 		ItemBaseCostTxt.BackgroundTransparency = 1
 		ItemBaseCostTxt.LayoutOrder = 2
-		local value = typedItem.BaseCost or typedItem.SellPrice or 0
+		local value = typedItem.BaseCost or typedItem.SellPrice or typedItem.Cost or 0
 		ItemBaseCostTxt.Text = Format.CurrencyNumber(value) or ""
 		ItemBaseCostTxt.Font = FFGEnum.THEME.bigFont
 		ItemBaseCostTxt.Size = UDim2.fromScale(0.5, 0.9)
@@ -175,6 +184,9 @@ local function ShopItem(
 	uiList.SortOrder = Enum.SortOrder.LayoutOrder
 	uiList.Parent = mainContainer
 	-- //!SECTION
+
+	local stroke = KinUI.AddStroke(shopItemContainer, "L", Color3.fromRGB(255, 212, 11), Enum.LineJoinMode.Bevel)
+	stroke.Transparency = 1
 
 	itemQualityBG.Activated:Connect(function()
 		Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, Players.LocalPlayer, { Item = typedItem, isFishDex = false })

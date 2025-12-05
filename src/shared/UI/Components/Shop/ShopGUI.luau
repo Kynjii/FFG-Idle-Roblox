@@ -10,16 +10,16 @@ local KinUI = require(ReplicatedStorage.Shared.UI.KinUI)
 
 local ShopGUI = {}
 
-function ShopGUI.Create()
+function ShopGUI.Create(props: { screenGuiName: string?, panelName: string?, panelTabs: boolean? })
 	local screenGui = MainUIPanel.Create({
-		screenGuiName = FFGEnum.SCREENGUI.HelperShop,
-		panelName = "Hire Crew Members",
-		panelTabs = {
+		screenGuiName = props and props.screenGuiName or FFGEnum.SCREENGUI.HelperShop,
+		panelName = props and props.panelName or "Hire Crew Members",
+		panelTabs = props and props.panelTabs and {
 			hasTabs = true,
 			tabs = {
 				{ Name = "Transporters", Index = 1, Icon = FFGEnum.UI.Icons.Transporting },
 			},
-		},
+		} or {},
 	})
 
 	local innerWindow = screenGui:FindFirstChild("InnerWindow", true)
@@ -30,6 +30,17 @@ function ShopGUI.Create()
 	if updateInfoPanelEvent then
 		updateInfoPanelEvent.OnClientEvent:Connect(function(data: { Item: any, isFishDex: boolean? })
 			if data.isFishDex then return end
+			local shopItems = innerWindow:FindFirstChild("ItemContainer"):GetChildren()
+
+			for i, item in ipairs(shopItems) do
+				if not item:IsA("Frame") then continue end
+
+				local stroke = item:FindFirstChildOfClass("UIStroke")
+				if stroke then stroke.Transparency = 1 end
+
+				if tostring(data.Item.Id) == item.Name then stroke.Transparency = 0 end
+			end
+
 			ShopGUI.RenderInfoPanel(innerWindow, data.Item)
 		end)
 	end

@@ -68,7 +68,7 @@ KinUI.Text = {
 }
 
 KinUI.CornerPx = { XS = UDim.new(0, 6), S = UDim.new(0, 8), M = UDim.new(0, 10), L = UDim.new(0, 12) }
-KinUI.StrokePx = { S = 0.5, M = 1, L = 2, XL = 4 }
+KinUI.StrokePx = { XS = 0.5, S = 1, M = 2, L = 3, XL = 4 }
 -- //!SECTION
 
 -- //SECTION - Internals
@@ -140,12 +140,15 @@ function KinUI.ApplyPanelStyle(frame: Frame | TextLabel | ImageLabel, panelColor
 	bg.Parent = frame
 end
 
-function KinUI.AddStroke(instance: Instance, thickness: "S" | "M" | "L" | "XL", color: Color3?)
+function KinUI.AddStroke(instance: Instance, thickness: "XS" | "S" | "M" | "L" | "XL", color: Color3?, lineJoinMode: Enum.LineJoinMode?)
 	local t = (KinUI.StrokePx :: any)[thickness]
 	local stroke = Instance.new("UIStroke")
 	if color then stroke.Color = color end
+	if lineJoinMode then stroke.LineJoinMode = lineJoinMode end
 	stroke.Thickness = t
 	stroke.Parent = instance
+
+	return stroke
 end
 
 function KinUI.AddCorner(instance: Instance, radius: "XS" | "S" | "M" | "L")

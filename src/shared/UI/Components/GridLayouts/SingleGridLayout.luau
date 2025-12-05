@@ -40,6 +40,7 @@ function SingleGridLayout.Create(props: {
 	uiGridLayout.FillDirection = Enum.FillDirection.Horizontal
 	uiGridLayout.FillDirectionMaxCells = 5
 	uiGridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	uiGridLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	uiGridLayout.Parent = scrollingFrame
 
 	local gridPadding = Instance.new("UIPadding")

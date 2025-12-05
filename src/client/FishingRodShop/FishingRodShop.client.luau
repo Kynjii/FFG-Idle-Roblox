@@ -18,7 +18,10 @@ local shopItemsContainer: Instance
 local screenGui: ScreenGui
 
 task.spawn(function()
-	screenGui = ShopGUI.Create()
+	screenGui = ShopGUI.Create({
+		screenGuiName = "FishingRodShop",
+		panelName = "Fishing Rod Shop",
+	})
 	screenGui.Parent = playerGui
 
 	main = screenGui:FindFirstChild("Main", true) :: Frame
@@ -70,21 +73,18 @@ function updateUI()
 	if shopItemsContainer then
 		local isFirst = true
 		for k, item in pairs(shopData) do
-			if item.IsPurchased then
-				continue
-			else
-				local itemComponent = createShopitemComponent(item)
-				if isFirst then
-					local btn = itemComponent:FindFirstChildOfClass("ImageButton")
-					if btn then
-						btn.Selected = true
-						Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, { Item = item })
-					end
-
-					isFirst = false
+			local itemComponent = createShopitemComponent(item)
+			itemComponent.LayoutOrder = item.LevelRequirement
+			if isFirst then
+				local btn = itemComponent:FindFirstChildOfClass("ImageButton")
+				if btn then
+					btn.Selected = true
+					Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, { Item = item })
 				end
-				itemComponents[item.Id] = itemComponent
+
+				isFirst = false
 			end
+			itemComponents[item.Id] = itemComponent
 		end
 	end
 end

@@ -3,7 +3,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local ServerStorage = game:GetService("ServerStorage")
 
+local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
 local Fish = require(ServerScriptService.Server.Classes.Fish)
+local FishingRods = require(ServerScriptService.Server.Data.FishingRods)
 local Emitter = require(ServerScriptService.Server.Modules.Emitters.Emitter)
 local DataService = require(ServerScriptService.Server.Services.DataService)
 local Trove = require(ReplicatedStorage.Packages.Trove)
@@ -77,7 +79,7 @@ function InventoryManager.RemoveTool(self: InventoryManager, item, type: "Equipm
 end
 
 function InventoryManager.RemoveManyTools(self: InventoryManager, items)
-	--
+	-- //TODO -
 end
 
 function InventoryManager.RestoreInventoryToBackpack(self: InventoryManager)
@@ -149,6 +151,30 @@ function InventoryManager.AttachEventListeners(self: InventoryManager)
 			if sellAmount then DataService.Earn(player, "Gold", sellAmount) end
 
 			self:RemoveTool(self.Inventory.Fish[item.Id], itemType)
+		end))
+	end
+
+	local rodPurchasedEvent = Events.GetBindableEvent(Events.BindableNames.PurchasedRod)
+	if rodPurchasedEvent then
+		self._cleaner:Add(rodPurchasedEvent.Event:Connect(function(playerData: { Player: Player, RodId: number })
+			local player = playerData.Player
+			if self.Player ~= player or self.Owner ~= player.UserId then return end
+
+			local rodId = playerData.RodId
+			if self.Inventory.Equipment[rodId] then return end
+
+			local associatedRod = TableUtil.Find(FishingRods, function(rod)
+				return rod.Id == rodId
+			end)
+
+			if associatedRod then
+				local rodCopy = TableUtil.Copy(associatedRod, true)
+				self.Inventory.Equipment[rodId] = rodCopy
+			else
+				error("No Fishing Rod found with id of:", rodId)
+			end
+
+			print("Rod assigned to Inventory, time to save it", self.Inventory)
 		end))
 	end
 end
