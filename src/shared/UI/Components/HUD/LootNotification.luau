@@ -27,16 +27,22 @@ function LootNotification.Create(props: Props): Frame & CanvasGroup
 	KinUI.AddCorner(notification, "M")
 	notification.Parent = lootNotificationContainer
 
-	local bG = Instance.new("ImageLabel")
-	bG.Name = "BG"
-	bG.AnchorPoint = Vector2.new(0.5, 0.5)
-	bG.BackgroundTransparency = 1
-	bG.Image = FFGEnum.UI.Notifications.ToastWhite
-	bG.ImageColor3 = Color3.fromRGB(37, 190, 255)
-	bG.Position = UDim2.fromScale(0.5, 0.5)
-	bG.ScaleType = Enum.ScaleType.Slice
-	bG.Size = UDim2.fromScale(1, 1)
-	bG.SliceCenter = Rect.new(4, 26, 7, 29)
+	local uIGradient = Instance.new("UIGradient")
+	uIGradient.Name = "UIGradient"
+	uIGradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
+		ColorSequenceKeypoint.new(0.3, Color3.fromRGB(0, 10, 22)),
+		ColorSequenceKeypoint.new(0.7, Color3.fromRGB(0, 10, 22)),
+		ColorSequenceKeypoint.new(1, Color3.new(1, 1, 1)),
+	})
+	uIGradient.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(0.197007, 0.75),
+		NumberSequenceKeypoint.new(0.5, 0.24375),
+		NumberSequenceKeypoint.new(0.799252, 0.7375),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	uIGradient.Parent = notification
 
 	local textLabel = Instance.new("TextLabel")
 	textLabel.Name = "TextLabel"
@@ -48,9 +54,7 @@ function LootNotification.Create(props: Props): Frame & CanvasGroup
 	textLabel.Text = props.Text or ""
 	textLabel.TextColor3 = Color3.new(1, 1, 1)
 	textLabel.TextScaled = true
-	textLabel.Parent = bG
-
-	bG.Parent = notification
+	textLabel.Parent = notification
 
 	if props.ItemImage then
 		local icon = Instance.new("ImageLabel")
@@ -58,7 +62,7 @@ function LootNotification.Create(props: Props): Frame & CanvasGroup
 		icon.AnchorPoint = Vector2.new(0.5, 0.5)
 		icon.BackgroundTransparency = 1
 		icon.Position = UDim2.fromScale(0, 0.5)
-		icon.Size = UDim2.fromScale(0.08, 0.08)
+		icon.Size = UDim2.fromScale(0.5, 0.5)
 		icon.ZIndex = 5
 		icon.Image = FFGEnum.UI.Icons[props.ItemImage] or ""
 		icon.Parent = textLabel
