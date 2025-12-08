@@ -214,6 +214,16 @@ function InventoryManager.GrantTool(self: InventoryManager, item, type: "Equipme
 	local runtimeTool: Tool = invTool:Clone()
 	runtimeTool.Parent = self.Player.Backpack
 
+	if type == "Equipment" then
+		runtimeTool.Equipped:Connect(function()
+			Events.FireBindableEvent(Events.BindableNames.EquippedRod, { Player = self.Player, RodId = tonumber(runtimeTool.Name) })
+		end)
+
+		runtimeTool.Unequipped:Connect(function()
+			Events.FireBindableEvent(Events.BindableNames.EquippedRod, { Player = self.Player, RodId = nil })
+		end)
+	end
+
 	if type == "Fish" then
 		invTool.ToolTip = item.Name or item.Species
 		invTool.Name = item.Id

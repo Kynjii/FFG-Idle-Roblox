@@ -76,7 +76,7 @@ local function updateTools()
 		local id = rod.Id
 
 		if ServerStorage.RodTools:FindFirstChild(id) then
-			local rodTool = ServerStorage.RodTools[id]
+			local rodTool = ServerStorage.RodTools[id] :: Tool
 			rodTool.TextureId = rod.ItemImage
 			rodTool.ToolTip = rod.Name
 			rodTool.RequiresHandle = true

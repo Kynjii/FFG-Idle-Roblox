@@ -107,6 +107,7 @@ Events.BindableNames = {
 
 	-- Fishing
 	FishCaught = "FishCaught",
+	EquippedRod = "EquippedRod",
 }
 
 local FOLDER_NAME = "RME"

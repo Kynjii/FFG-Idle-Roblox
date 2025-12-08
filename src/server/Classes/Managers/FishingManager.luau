@@ -3,6 +3,7 @@ local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
+local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
 local Fish = require(ServerScriptService.Server.Classes.Fish)
 local Difficulty = require(ServerScriptService.Server.Classes.Modules.Difficulty)
 local Notification = require(ServerScriptService.Server.Classes.Modules.Notification)
@@ -39,6 +40,7 @@ function FishingManager.New(player: Player, teamId: number, currentRealm: number
 	self.FishingLocations = self:GetLocations()
 	self.GeneratedFish = {}
 	self.FishingSessions = FishingSessions
+	self.CurrentlyEquippedRod = nil
 
 	self._cleaner = Trove.new()
 
@@ -247,21 +249,7 @@ function FishingManager.SaveCaughtFish(self: FishingManager, caughtFish: Fish.Fi
 end
 
 function FishingManager.GetPlayerRod(self: FishingManager)
-	-- //TODO - Handle only equippedRod
-	local playerRods = DataService.GetRods(self.Player)
-	local highestRodQualityId = 0
-	local highestQualityRod = nil
-	if playerRods then
-		for _, rod in pairs(playerRods) do
-			local rodData = rod :: RodType.FishingRodType
-			if rodData.QualityId > highestRodQualityId then
-				highestRodQualityId = rodData.QualityId
-				highestQualityRod = rod
-			end
-		end
-	end
-
-	return highestQualityRod
+	return self.CurrentlyEquippedRod
 end
 
 function FishingManager.SetupProximityPrompts(self: FishingManager)
@@ -280,32 +268,20 @@ function FishingManager.SetupProximityPrompts(self: FishingManager)
 
 		self._cleaner:Add(proximityPrompt.Triggered:Connect(function(player: Player)
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
+			if not self.CurrentlyEquippedRod then
+				Notification.SendAlert(player, "Equip a Fishing Rod first!")
+				return
+			end
 
 			self.CurrentFishingLocTier = taggedLocationTier
 			self.CurrentFishingLocId = taggedLocationId
 
-			local playerRods = DataService.GetRods(self.Player)
-			local character = player.Character
-			if character then
-				-- //TODO -
-			end
-			local highestRodQualityId = 0
-			if playerRods then
-				for _, rod in pairs(playerRods) do
-					local rodData = rod :: RodType.FishingRodType
-					if rodData.QualityId > highestRodQualityId then highestRodQualityId = rodData.QualityId end
-				end
-			end
+			local playerRod = self.CurrentlyEquippedRod :: RodType.FishingRodType
 
-			if highestRodQualityId == 0 then
-				Notification.SendAlert(player, `Purchase a Fishing Rod to be able to fish!`)
-				return
-			elseif highestRodQualityId < self.CurrentFishingLocTier then
+			if playerRod.QualityId < self.CurrentFishingLocTier then
 				Notification.SendAlert(player, `Your Fishing Rod quality is too low for this spot!`)
 				return
 			end
-
-			-- //TODO - Handle equipped Rods
 
 			local fishConfig = self:GetRandomFish(taggedLocationTier, taggedLocationId)
 			self:StartFishingSession(player, fishConfig, taggedLocationTier)
@@ -459,6 +435,27 @@ function FishingManager.AttachAttListeners(self: FishingManager)
 				print(string.format("Fish escaped from %s. Score: %d/%d (insufficient)", player.Name, stats.Score, stats.RequiredScore))
 				if Notification and Notification.SendAlert then Notification.SendAlert(player, "The fish got away! Try to land more perfect hits.") end
 			end
+		end))
+	end
+
+	local equippedRodEvent = Events.GetBindableEvent(Events.BindableNames.EquippedRod)
+	if equippedRodEvent then
+		self._cleaner:Add(equippedRodEvent.Event:Connect(function(data: { Player: Player, RodId: number })
+			local player = data.Player
+			if self.Player ~= player or self.Owner ~= player.UserId then return end
+
+			local rodId = data.RodId
+			if not rodId then
+				self.CurrentlyEquippedRod = nil
+				return
+			end
+
+			local playerRods = DataService.GetRods(player)
+			local existing = TableUtil.Find(playerRods, function(rod)
+				return rod.Id == rodId
+			end)
+
+			if existing then self.CurrentlyEquippedRod = existing end
 		end))
 	end
 end
