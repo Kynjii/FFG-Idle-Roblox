@@ -286,7 +286,6 @@ function PortStorage.SetButtonLogic(self: PortStorage): ()
 end
 
 function PortStorage.SetupFishRemovalPrompt(self: PortStorage)
-	-- Create the proximity prompt
 	local parent = self.Model:FindFirstChild("Panel", true)
 	local proximityPrompt
 	if parent then
@@ -299,26 +298,21 @@ function PortStorage.SetupFishRemovalPrompt(self: PortStorage)
 	proximityPrompt.ActionText = "Sell Fish"
 	proximityPrompt.UIOffset = Vector2.new(-50, 0)
 
-	-- Handle not showing the prompt if the user is not the owner
 	if self._cleaner then
 		self._cleaner:Add(proximityPrompt.PromptShown:Connect(function(player: Player)
 			if player.UserId ~= self.Owner then return end
 		end))
 
-		-- Handle proximity prompt triggered
 		self._cleaner:Add(proximityPrompt.Triggered:Connect(function(player: Player)
-			-- Another safety check
 			if player.UserId ~= self.Owner then return end
 
-			-- Remove the Fish
 			local amount = math.min(self.FishInStorage, self.CurrentMaxStorage)
 			if amount == 0 then return end
 
 			self:RemoveFish(amount)
 
-			-- Spend the currency
 			local calculatedAmount = amount * Formulas.FISH_BASEVALUE
-			DataService.Earn(player, FFGEnum.CURRENCY_TYPES.Gold, calculatedAmount)
+			DataService.Earn(player, FFGEnum.CURRENCY_TYPES.Gold, calculatedAmount, "ManualStorageSell")
 
 			-- Save State
 			self:Save()

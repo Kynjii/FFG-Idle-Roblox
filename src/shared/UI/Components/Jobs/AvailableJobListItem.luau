@@ -302,7 +302,7 @@ function AvailableJobListItem.Create(
 					if typedHelper.CurrentAssignment > 0 then continue end
 
 					local assignJobEvent = Events.GetRemote(Events.RemoteNames.AssignJob)
-					if assignJobEvent then assignJobEvent:FireServer({ typedHelper.Id, props.Id }) end
+					if assignJobEvent then assignJobEvent:FireServer({ helperId = typedHelper.Id, jobId = props.Id }) end
 					break
 				end
 			end

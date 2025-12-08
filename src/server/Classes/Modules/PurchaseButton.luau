@@ -133,10 +133,10 @@ function PB.CreateLogic(class)
 			return
 		end
 
-		-- See if the player can afford the state update (purchase / upgrade)
 		if not DataService.CanAfford(player, FFGEnum.CURRENCY_TYPES.Gold, not class.IsPurchased and class.BaseCost or class.UpgradeCost) then return end
 
-		DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, not class.IsPurchased and class.BaseCost or class.UpgradeCost)
+		local source = `{class.Entity}{not class.IsPurchased and "Purchased" or "Upgraded"}`
+		DataService.Spend(player, FFGEnum.CURRENCY_TYPES.Gold, not class.IsPurchased and class.BaseCost or class.UpgradeCost, source, { Tier = class.Tier })
 
 		if class.IsPurchased then
 			class:Upgrade()

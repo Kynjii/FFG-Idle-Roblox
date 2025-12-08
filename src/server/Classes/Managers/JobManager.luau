@@ -161,7 +161,7 @@ function JobManager.PurchaseJobSlot(self: JobManager, jobId: number)
 			Notification.SendAlert(self.Player, "Not enough gold.")
 			return
 		end
-		DataService.Spend(self.Player, FFGEnum.CURRENCY_TYPES.Gold, amount)
+		DataService.Spend(self.Player, FFGEnum.CURRENCY_TYPES.Gold, amount, "JobSlotPurchased")
 
 		job.Slots.LockedSlots = lockedSlots - 1
 
@@ -265,7 +265,7 @@ function JobManager.BeginAction(self: JobManager, actionType: string, helper: He
 					end
 					if not currencyAmount then error("No currencyAmount was defined") end
 
-					DataService.Earn(self.Player, FFGEnum.CURRENCY_TYPES.Gold, currencyAmount)
+					DataService.Earn(self.Player, FFGEnum.CURRENCY_TYPES.Gold, currencyAmount, "HelperSell")
 					helper:ClearStorage()
 					self:StartJob(helper, jobId)
 				end

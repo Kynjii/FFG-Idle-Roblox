@@ -400,7 +400,7 @@ function Helper.AttachEventListeners(self: Helper)
 				Notification.SendAlert(self.Player, "Not enough gold.")
 				return
 			end
-			DataService.Spend(self.Player, self.CurrencyType, self.BaseCost)
+			DataService.Spend(self.Player, self.CurrencyType, self.BaseCost, "HelperUpgraded", { QualityId = self.QualityId })
 
 			self:Upgrade()
 			local helperUpgradedEvent = Events.GetRemote(Events.RemoteNames.HelperUpgraded)

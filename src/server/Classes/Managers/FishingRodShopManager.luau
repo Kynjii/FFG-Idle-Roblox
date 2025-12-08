@@ -77,7 +77,7 @@ function FishingRodShopManager.PurchaseRod(self: FishingRodShopManager, rodId: n
 		return
 	end
 
-	DataService.Spend(self.Player, rodInShop.CurrencyType, rodInShop.Cost)
+	DataService.Spend(self.Player, rodInShop.CurrencyType, rodInShop.Cost, "RodPurchased", { QualityId = rodInShop.QualityId })
 
 	Events.FireBindableEvent(Events.BindableNames.PurchasedRod, { Player = self.Player, Rod = rodInShop })
 	self.Inventory[rodInShop.Key] = nil

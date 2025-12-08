@@ -10,14 +10,14 @@ export type Props = {
 	Text: string?,
 }
 
-function LootNotification.Create(props: Props): Frame & CanvasGroup
+function LootNotification.Create(props: Props): Frame
 	local lootNotificationContainer = Instance.new("Frame")
 	lootNotificationContainer.Name = "NotificationContainer"
 	lootNotificationContainer.AnchorPoint = Vector2.new(0.5, 0.5)
 	lootNotificationContainer.Position = UDim2.fromScale(0.5, 0.5)
 	lootNotificationContainer.Size = UDim2.fromScale(1, 0.28)
 
-	local notification = Instance.new("CanvasGroup")
+	local notification = Instance.new("Frame")
 	notification.Name = "Template"
 	notification.AnchorPoint = Vector2.new(0, 0.5)
 	notification.BackgroundTransparency = 1
@@ -53,6 +53,7 @@ function LootNotification.Create(props: Props): Frame & CanvasGroup
 	textLabel.Text = props.Text or ""
 	textLabel.TextColor3 = Color3.new(1, 1, 1)
 	textLabel.TextScaled = true
+	KinUI.AddPadding(textLabel, "M")
 	textLabel.Parent = notification
 
 	if props.ItemImage then
@@ -65,6 +66,7 @@ function LootNotification.Create(props: Props): Frame & CanvasGroup
 		icon.ZIndex = 5
 		icon.Image = FFGEnum.UI.Icons[props.ItemImage] or ""
 		icon.Parent = textLabel
+		KinUI.AddPadding(icon, "S")
 		KinUI.ApplyAspect(icon, 1, Enum.DominantAxis.Width, Enum.AspectType.ScaleWithParentSize)
 	end
 

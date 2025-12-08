@@ -4,9 +4,13 @@ local Economy = require(ServerScriptService.Server.Analytics.Economy)
 local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local Events = require(ReplicatedStorage.Shared.Events.Events)
+local BoatType = require(ReplicatedStorage.Shared.Types.Classes.BoatType)
 local BuildingType = require(ReplicatedStorage.Shared.Types.Classes.BuildingType)
 local FishType = require(ReplicatedStorage.Shared.Types.Classes.FishType)
 local HelperType = require(ReplicatedStorage.Shared.Types.Classes.HelperType)
+local PortStorageType = require(ReplicatedStorage.Shared.Types.Classes.PortStorageType)
+local TenderType = require(ReplicatedStorage.Shared.Types.Classes.TenderType)
+local RodType = require(ReplicatedStorage.Shared.Types.RodType)
 local Format = require(ReplicatedStorage.Shared.Utils.Format)
 local FFGHelpers = require(ServerScriptService.Server.Modules.FFGHelpers)
 local Jobs = require(ServerScriptService.Server.Modules.Jobs.Jobs)
@@ -198,7 +202,10 @@ local function calculateBuffedAmount(player, amount)
 	return buffedAmount
 end
 
-function DataService.Earn(player: Player, currencyType: "Gold", amount: number)
+type earnSource = "ManualStorageSell" | "HelperSell" | "SoldFish"
+type earnSourceInfo = FishType.FishData
+
+function DataService.Earn(player: Player, currencyType: "Gold", amount: number, source: earnSource, sourceInfo: earnSourceInfo)
 	local profile = DataService.Profiles[player]
 	if not profile then
 		FFGHelpers.PrintLog("No profile found when attempting to earn: ", currencyType)
@@ -219,7 +226,16 @@ function DataService.Earn(player: Player, currencyType: "Gold", amount: number)
 	local newValue = current + buffedDiff
 	profile.Data.Currencies[currencyType] = newValue
 
-	Economy.Log(player, Economy.FlowType.CurrencyAdd, currencyType, amount, newValue, Economy.TransactionType.Gameplay)
+	local customField1 = source
+	local customField2 = sourceInfo and (sourceInfo.QualityId or sourceInfo.Tier) or ""
+	local customField3 = sourceInfo and sourceInfo.Name or ""
+	local customFields = {
+		[Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = customField1,
+		[Enum.AnalyticsCustomFieldKeys.CustomField02.Name] = customField2,
+		[Enum.AnalyticsCustomFieldKeys.CustomField03.Name] = customField3,
+	}
+
+	Economy.Log(player, Economy.FlowType.CurrencyAdd, currencyType, amount, newValue, Economy.TransactionType.Gameplay, nil, customFields)
 
 	local leaderStats = player:FindFirstChild("leaderstats")
 	local currency = leaderStats:FindFirstChild(currencyType)
@@ -241,7 +257,23 @@ function DataService.CanAfford(player: Player, currencyType: "Gold", amount: num
 	return (tonumber(profile.Data.Currencies[currencyType]) or 0) >= amount
 end
 
-function DataService.Spend(player: Player, currencyType: "Gold", amount: number)
+type spendSource =
+	"BoatPurchased"
+	| "BoatUpgraded"
+	| "TenderPurchased"
+	| "TenderUpgraded"
+	| "StoragePurchased"
+	| "StorageUpgraded"
+	| "HelperPurchased"
+	| "HelperUpgraded"
+	| "RodPurchased"
+	| "BuildingPurchased"
+	| "BuildingUpgraded"
+	| "JobSlotPurchased"
+
+type spendSourceInfo = RodType.FishingRodType | HelperType.HelperData | BoatType.BoatData | TenderType.TenderData | PortStorageType.PortStorageData | BuildingType.BuildingData
+
+function DataService.Spend(player: Player, currencyType: "Gold", amount: number, source: spendSource, sourceInfo: spendSourceInfo?)
 	local profile = DataService.Profiles[player]
 	if not profile then return end
 	if typeof(amount) ~= "number" or amount <= 0 then return end
@@ -253,7 +285,16 @@ function DataService.Spend(player: Player, currencyType: "Gold", amount: number)
 	local newValue = current - amount
 	profile.Data.Currencies[currencyType] = newValue
 
-	Economy.Log(player, Economy.FlowType.CurrencyRemove, currencyType, amount, newValue, Economy.TransactionType.Gameplay)
+	local customField1 = source
+	local customField2 = sourceInfo and (sourceInfo.QualityId or sourceInfo.Tier) or ""
+	local customField3 = sourceInfo and sourceInfo.Name or ""
+	local customFields = {
+		[Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = customField1,
+		[Enum.AnalyticsCustomFieldKeys.CustomField02.Name] = customField2,
+		[Enum.AnalyticsCustomFieldKeys.CustomField03.Name] = customField3,
+	}
+
+	Economy.Log(player, Economy.FlowType.CurrencyRemove, currencyType, amount, newValue, Economy.TransactionType.Gameplay, nil, customFields)
 
 	local leaderStats = player:FindFirstChild("leaderstats")
 	local currency = leaderStats:FindFirstChild(currencyType)

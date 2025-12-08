@@ -151,7 +151,7 @@ function InventoryManager.AttachEventListeners(self: InventoryManager)
 			end
 
 			local sellAmount = item.SellPrice
-			if sellAmount then DataService.Earn(player, "Gold", sellAmount) end
+			if sellAmount then DataService.Earn(player, "Gold", sellAmount, "SoldFish", item) end
 
 			self:RemoveTool(item, itemType)
 		end))

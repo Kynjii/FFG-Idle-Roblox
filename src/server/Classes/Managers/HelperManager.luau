@@ -31,7 +31,6 @@ function HelperManager.AttachEventListeners(self: HelperManager)
 	if getHelperInventoryEvent then
 		getHelperInventoryEvent.OnServerInvoke = function(player: Player)
 			if self.Player ~= player or self.Owner ~= player.UserId then return end
-			print(self.Player, player)
 			self.Inventory = DataService.GetHelperInventory(self.Player)
 			return self.Inventory
 		end

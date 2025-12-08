@@ -108,7 +108,7 @@ function HelperShopManager.Purchasehelper(self: HelperShopManager, helperId: str
 	helperClass:Purchase()
 	helperClass:Destroy()
 
-	DataService.Spend(self.Player, helperClass.CurrencyType, helperClass.BaseCost)
+	DataService.Spend(self.Player, helperClass.CurrencyType, helperClass.BaseCost, "HelperPurchased", { QualityId = helperClass.QualityId })
 
 	self.Inventory[helperId] = nil
 

@@ -15,17 +15,27 @@ Economy.FlowType = {
 	CurrencyRemove = Enum.AnalyticsEconomyFlowType.Sink, -- Currency is being removed from the player's account.
 }
 
-function Economy.Log(player: Player, flowType: Enum.AnalyticsEconomyFlowType, currencyType: string, amount: number, endingBalance: number, transactionType: string, itemSku: string?)
+function Economy.Log(
+	player: Player,
+	flowType: Enum.AnalyticsEconomyFlowType,
+	currencyType: string,
+	amount: number,
+	endingBalance: number,
+	transactionType: Enum.AnalyticsEconomyTransactionType,
+	itemSku: string?,
+	customFields: { Enum.AnalyticsCustomFieldKeys }?
+)
 	if not player or not flowType or not currencyType or not amount or not endingBalance or not transactionType then return end
 
 	AnalyticsService:LogEconomyEvent(
 		player,
 		flowType,
 		currencyType,
-		amount, -- How many coins are in the bundle
-		endingBalance, -- balance after transaction
+		amount,
+		endingBalance,
 		transactionType,
-		itemSku or "" -- Unique identifier of the coin bundle
+		itemSku or "", -- Unique identifier of the bundle
+		customFields or {}
 	)
 end
 
