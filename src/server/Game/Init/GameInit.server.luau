@@ -49,6 +49,7 @@ local function Initialize(player: Player, profile: typeof(PlayerStore:StartSessi
 end
 
 local function updateTools()
+	local fishTemplate = ServerStorage.FishTools:WaitForChild("FishTemplate")
 	for _, fish in pairs(FishCalculators.GetAllFishVariations(1)) do
 		local fishSpeciesKey = fish.SpeciesKey
 		if ServerStorage.FishTools:FindFirstChild(fishSpeciesKey) then
@@ -59,42 +60,30 @@ local function updateTools()
 			fishTool.CanBeDropped = true
 		else
 			-- //TODO - Remove once models are in-game
-			local tempTool = Instance.new("Tool")
+			local tempTool = fishTemplate:Clone()
+			tempTool.Name = fish.SpeciesKey
 			tempTool.TextureId = fish.ItemImage
 			tempTool.ToolTip = fish.Species
 			tempTool.RequiresHandle = true
 			tempTool.CanBeDropped = true
 			tempTool.Parent = ServerStorage.FishTools
-
-			local tempPart = Instance.new("Part")
-			tempPart.Name = "Handle"
-			tempPart.Parent = tempTool
 		end
 	end
 
+	local rodTemplate = ServerStorage.RodTools:WaitForChild("RodTemplate")
 	for _, rod in pairs(FishingRods) do
-		local id = rod.Id
+		local rodTool = rodTemplate:Clone() :: Tool
 
-		if ServerStorage.RodTools:FindFirstChild(id) then
-			local rodTool = ServerStorage.RodTools[id] :: Tool
-			rodTool.TextureId = rod.ItemImage
-			rodTool.ToolTip = rod.Name
-			rodTool.RequiresHandle = true
-			rodTool.CanBeDropped = false
-		else
-			-- //TODO - Remove once models are in-game
-			local tempTool = Instance.new("Tool")
-			tempTool.Name = rod.Id
-			tempTool.TextureId = rod.ItemImage
-			tempTool.ToolTip = rod.Name
-			tempTool.RequiresHandle = true
-			tempTool.CanBeDropped = false
-			tempTool.Parent = ServerStorage.RodTools
-
-			local tempPart = Instance.new("Part")
-			tempPart.Name = "Handle"
-			tempPart.Parent = tempTool
+		for _, part in pairs(rodTool:GetChildren()) do
+			part.Color = rod.Color
 		end
+
+		rodTool.Name = rod.Id
+		rodTool.TextureId = rod.ItemImage
+		rodTool.ToolTip = rod.Name
+		rodTool.RequiresHandle = true
+		rodTool.CanBeDropped = false
+		rodTool.Parent = ServerStorage.RodTools
 	end
 end
 updateTools()
