@@ -28,6 +28,8 @@ FishingManager.__index = FishingManager
 
 type FishingManager = typeof(setmetatable({}, FishingManager))
 
+-- //SECTION - Constructor
+
 function FishingManager.New(player: Player, teamId: number, currentRealm: number): FishingManager
 	local self = setmetatable({}, FishingManager)
 
@@ -45,11 +47,12 @@ function FishingManager.New(player: Player, teamId: number, currentRealm: number
 	self._cleaner = Trove.new()
 
 	self:SetupProximityPrompts()
-
 	self:AttachAttListeners()
 
 	return self
 end
+
+-- //SECTION - Locations
 
 function FishingManager.GetLocations(self: FishingManager)
 	local locations = {}
@@ -65,6 +68,8 @@ function FishingManager.GetLocations(self: FishingManager)
 
 	return locations
 end
+
+-- //SECTION - Session Start
 
 function FishingManager.StartFishingSession(self: FishingManager, player: Player, fishConfig: Fish.Fish, tier: number)
 	local sessionId = HttpService:GenerateGUID(false)
@@ -129,7 +134,94 @@ function FishingManager.StartFishingSession(self: FishingManager, player: Player
 	return sessionId
 end
 
-function FishingManager.ValidateAndScoreFishing(self: FishingManager, player: Player, sessionId: string, result: {})
+function FishingManager.SimulateFishingMinigame(self, session, rodData, hitTimeline, duration)
+	local fish = session.Fish
+	local config = session.MinigameConfig
+
+	local maxHP = fish.MaxHP or 100
+	local hp = 0
+
+	local healMultiplier = config.HealMultiplier
+	local decayPerTick = (maxHP / 40) * config.DecayRate
+
+	local totalHits = 0
+	local perfectHits = 0
+
+	local escapeAttempts = 0
+	local maxEscapeAttempts = config.EscapeAttempts
+	local minHitsBeforeEscape = config.MinHitsBeforeEscape
+
+	local hitIndex = 1
+	table.sort(hitTimeline, function(a, b)
+		return a.time < b.time
+	end)
+
+	local intDuration = math.floor(duration)
+
+	for t = 0, intDuration do
+		-- DECAY (not at t=0)
+		if t > 0 then
+			hp -= decayPerTick
+			if hp <= 0 then
+				if totalHits < minHitsBeforeEscape then
+					hp = 1
+				else
+					escapeAttempts += 1
+					if escapeAttempts >= maxEscapeAttempts then
+						return false, {
+							Reason = "Escape",
+							EscapeAttempts = escapeAttempts,
+							TotalHits = totalHits,
+							PerfectHits = perfectHits,
+							FinalHP = hp,
+						}
+					end
+					hp = 1
+				end
+			end
+		end
+
+		-- APPLY HITS THIS SECOND
+		while hitIndex <= #hitTimeline and hitTimeline[hitIndex].time <= t + 0.05 do
+			local area = hitTimeline[hitIndex].area
+
+			if area > 0 then
+				totalHits += 1
+				if area == 3 then
+					perfectHits += 1
+				end
+
+				local heal = rodData.BaseDmg * area * healMultiplier
+				hp += heal
+
+				if hp >= maxHP then return true, {
+					Reason = "HPFilled",
+					TotalHits = totalHits,
+					PerfectHits = perfectHits,
+					FinalHP = hp,
+				} end
+			else
+				-- miss penalty
+				local missPenalty = rodData.BaseDmg * config.DecayRate
+				hp -= missPenalty
+				if hp < 0 then hp = 0 end
+			end
+
+			hitIndex += 1
+		end
+	end
+
+	-- OUT OF TIME
+	return false, {
+		Reason = "OutOfTime",
+		TotalHits = totalHits,
+		PerfectHits = perfectHits,
+		FinalHP = hp,
+		EscapeAttempts = escapeAttempts,
+	}
+end
+
+function FishingManager.ValidateAndScoreFishing(self, player, sessionId, result)
 	local session = self.FishingSessions[sessionId]
 	if not session then return false, "Invalid session", false end
 	if session.Player ~= player then return false, "Wrong player", false end
@@ -137,341 +229,57 @@ function FishingManager.ValidateAndScoreFishing(self: FishingManager, player: Pl
 	local now = os.clock()
 	local elapsed = now - session.StartedAt
 
-	-- Anti-cheat: Check duration
-	if elapsed < 1.0 then
-		print("Fishing validation failed: Too fast completion")
-		return false, "Too fast", false
+	-- Basic anti-cheat on duration
+	if elapsed < 1.0 then return false, "Too fast", false end
+	if elapsed > 300 then return false, "Too slow", false end
+
+	-- SANITIZE CLIENT INPUT
+	local clientDuration = math.clamp(result.Duration or elapsed, 1, 300)
+	local rawHits = result.Hits or {}
+
+	local maxHits = math.floor(clientDuration * 3) -- 3 hits/sec max
+	local timeline = {}
+
+	for _, hit in ipairs(rawHits) do
+		if #timeline >= maxHits then break end
+
+		local t = tonumber(hit.time)
+		local a = tonumber(hit.area)
+
+		if t and a then
+			if t >= 0 and t <= clientDuration + 0.25 then table.insert(timeline, {
+				time = t,
+				area = math.clamp(a, 0, 3),
+			}) end
+		end
 	end
 
-	if elapsed > 300 then -- Max 5 minutes
-		print("Fishing validation failed: Too slow completion")
-		return false, "Too slow", false
-	end
-
-	-- Clamp client-reported values to prevent exploitation
-	local clampedDuration = math.clamp(result.Duration or elapsed, 1, 300)
-	local maxPossibleHits = math.floor(clampedDuration * 3) -- Assume max 3 hits per second
-	local totalHits = math.clamp(result.TotalHits or 0, 0, maxPossibleHits)
-	local perfectHits = math.clamp(result.PerfectHits or 0, 0, totalHits)
-
-	-- Get player data for difficulty calculation
-	local playerData = DataService.GetSkillData(self.Player, "Fishing")
 	local rodData = self:GetPlayerRod()
+	if not rodData then
+		-- Player somehow lost their rod mid-session; treat as invalid / fail-safe
+		return false, "No rod equipped", false
+	end
 
-	-- Calculate difficulty factor
-	local difficultyFactor = Difficulty.GetDifficultyFactor(playerData, rodData, session.Fish)
-	local playerPower = Difficulty.GetPlayerPower(playerData, rodData)
-	local fishPower = Difficulty.GetFishPower(session.Fish)
+	-- SIMULATE
+	local didCatch, simStats = self:SimulateFishingMinigame(session, rodData, timeline, clientDuration)
 
-	-- Server-side scoring system with power scaling
-	local score = totalHits * 1 + perfectHits * 2
-
-	-- Dynamic required score based on power difference
-	local powerRatio = playerPower / math.max(fishPower, 1)
-	local baseRequirement = 8 -- Base hits needed
-
-	-- If player power >> fish power, much easier catch
-	local scaledRequirement = baseRequirement / math.max(powerRatio, 0.5)
-	local requiredScore = math.ceil(math.clamp(scaledRequirement, 1, 15)) -- Min 1, max 15
-
-	-- Additional validation: Check if client claims success
-	local clientClaimsSuccess = result.Success == true
-
-	-- Server decision: Fish is caught if all conditions are met
-	local fishCaught = clientClaimsSuccess and score >= requiredScore and elapsed >= 1.0
-
-	print(
-		string.format(
-			"Fishing validation - Player: %s, Score: %d/%d, Duration: %.1fs, Difficulty: %.2f, Caught: %s",
-			player.Name,
-			score,
-			requiredScore,
-			elapsed,
-			difficultyFactor,
-			tostring(fishCaught)
-		)
-	)
-
-	-- Debug: Show difficulty breakdown
-	print(
-		string.format(
-			"  Fish: %s %s (Q%d, T%d) | Rod: %s (Q%d) | Player: Lvl%d",
-			session.Fish.Species,
-			session.Fish.Variant,
-			session.Fish.QualityId,
-			session.Tier,
-			rodData.Name,
-			rodData.QualityId,
-			playerData.FishingLevel
-		)
-	)
-	print(string.format("  Hits: %d total, %d perfect | Client claimed: %s | Time valid: %s", totalHits, perfectHits, tostring(clientClaimsSuccess), tostring(elapsed >= 1.0)))
-	print(string.format("  Power: Player=%.1f vs Fish=%.1f (ratio=%.2fx) | Req=%.1f→%d", playerPower, fishPower, powerRatio, scaledRequirement, requiredScore))
-
-	-- Store fish data before cleanup
 	local fishData = session.Fish
+	local difficultyFactor = session.DifficultyFactor
+	local tier = session.Tier
 
-	-- Clean up session
 	self.FishingSessions[sessionId] = nil
 
 	return true,
 		"Validation complete",
-		fishCaught,
+		didCatch,
 		{
-			Score = score,
-			RequiredScore = requiredScore,
-			Difficulty = difficultyFactor,
-			Duration = elapsed,
-			TotalHits = totalHits,
-			PerfectHits = perfectHits,
 			FishData = fishData,
+			TotalHits = simStats.TotalHits,
+			PerfectHits = simStats.PerfectHits,
+			Duration = elapsed, -- real session time
+			Difficulty = difficultyFactor, -- for XP formula
+			Tier = tier, -- handy if you want it
+			Reason = simStats.Reason,
+			EscapeAttempts = simStats.EscapeAttempts,
 		}
 end
-
-function FishingManager.GetRandomFish(self: FishingManager, fishingLocTier: number, fishingLocId: number)
-	local fish = Fish.New({}, self.Player, self.TeamId, fishingLocTier, fishingLocId, self.RealmId)
-	if fish then self.GeneratedFish[fish.Id] = fish end
-	return fish
-end
-
-function FishingManager.SaveCaughtFish(self: FishingManager, caughtFish: Fish.Fish)
-	if not self.GeneratedFish[caughtFish.Id] then return end
-
-	local fish = self.GeneratedFish[caughtFish.Id]
-	fish:Save()
-
-	local updateCaughtFishEvent = Events.GetBindableEvent(Events.BindableNames.UpdateCaughtFish)
-	if updateCaughtFishEvent then updateCaughtFishEvent:Fire({ Player = self.Player, Fish = self.GeneratedFish[caughtFish.Id]:Serialize() }) end
-	local grantFishToolEvent = Events.GetBindableEvent(Events.BindableNames.FishCaught)
-	if grantFishToolEvent then grantFishToolEvent:Fire({ Player = self.Player, Fish = self.GeneratedFish[caughtFish.Id]:Serialize() }) end
-
-	Notification.SendSuccess(self.Player, `You caught a {fish.Name}`)
-end
-
-function FishingManager.GetPlayerRod(self: FishingManager)
-	return self.CurrentlyEquippedRod
-end
-
-function FishingManager.SetupProximityPrompts(self: FishingManager)
-	for _, location in pairs(self.FishingLocations) do
-		local taggedLocationTeamId = location:GetAttribute(FFGEnum.ATTRIBUTES.TeamId)
-		if taggedLocationTeamId ~= self.TeamId then continue end
-
-		local taggedLocationTier = location:GetAttribute(FFGEnum.ATTRIBUTES.Tier)
-		local taggedLocationId = location:GetAttribute(FFGEnum.ATTRIBUTES.LocationId)
-
-		local proximityPrompt = Instance.new("ProximityPrompt")
-		proximityPrompt.ObjectText = `Tier {taggedLocationTier}`
-		proximityPrompt.ActionText = "Begin Fishing"
-		proximityPrompt:SetAttribute(FFGEnum.ATTRIBUTES.Tier, taggedLocationTier)
-		proximityPrompt.Parent = location
-
-		self._cleaner:Add(proximityPrompt.Triggered:Connect(function(player: Player)
-			if self.Player ~= player or self.Owner ~= player.UserId then return end
-			if not self.CurrentlyEquippedRod then
-				Notification.SendAlert(player, "Equip a Fishing Rod first!")
-				return
-			end
-
-			self.CurrentFishingLocTier = taggedLocationTier
-			self.CurrentFishingLocId = taggedLocationId
-
-			local playerRod = self.CurrentlyEquippedRod :: RodType.FishingRodType
-
-			if playerRod.QualityId < self.CurrentFishingLocTier then
-				Notification.SendAlert(player, `Your Fishing Rod quality is too low for this spot!`)
-				return
-			end
-
-			local fishConfig = self:GetRandomFish(taggedLocationTier, taggedLocationId)
-			self:StartFishingSession(player, fishConfig, taggedLocationTier)
-
-			proximityPrompt.Enabled = false
-		end))
-
-		local gameEndedEvent = Events.GetRemote(Events.RemoteNames.GameEnded)
-		if gameEndedEvent then
-			self._cleaner:Add(gameEndedEvent.OnServerEvent:Connect(function(player: Player, tier: number)
-				if self.Player ~= player or self.Owner ~= player.UserId then return end
-				local promptTier = proximityPrompt:GetAttribute(FFGEnum.ATTRIBUTES.Tier)
-				if tier ~= promptTier then return end
-
-				proximityPrompt.Enabled = true
-			end))
-		end
-	end
-end
-
-local ANIMATIONS = {
-	FishCaught1 = "FishCaught1",
-}
-
-function FishingManager.PlayerAnim(self: FishingManager, player: Player)
-	local character = player.Character or player.CharacterAdded:Wait()
-	local humanoid = character:WaitForChild("Humanoid")
-	local animator = humanoid:WaitForChild("Animator")
-	local animation: Animation = Animator.GetAnimation(ANIMATIONS.FishCaught1)
-
-	if animator then
-		local animationTrack: AnimationTrack = animator:LoadAnimation(animation)
-		animationTrack.Priority = Enum.AnimationPriority.Action
-
-		task.wait()
-		animationTrack:Play()
-	end
-end
-
-function FishingManager.ApplyFishingXP(self: FishingManager, stats)
-	local pdata = DataService.GetSkillData(self.Player, "Fishing")
-
-	-- Get fish data from stats
-	local fishData = stats.FishData
-	if not fishData then
-		warn("No fish data in stats for XP calculation")
-		return
-	end
-
-	-- Calculate XP reward based on fish and performance
-	local xpReward = self:CalculateFishingXPReward(fishData, stats, pdata.FishingLevel)
-
-	-- Apply XP and check for level ups
-	local oldLevel = pdata.FishingLevel
-	local oldXP = pdata.FishingXP
-
-	local newLevel, newXP = FishingXP.AddXP(oldLevel, oldXP, xpReward)
-
-	local dataToSave = {
-		FishingLevel = newLevel,
-		FishingXP = newXP,
-		TotalForNextLevel = FishingXP.GetTotalForLevel(newLevel + 1),
-		TotalForCurrentLevel = FishingXP.GetTotalForLevel(newLevel),
-	}
-	DataService.UpdateSkillData(self.Player, "Fishing", dataToSave)
-
-	-- Notify player of XP gain
-	Events.FireEvent(Events.RemoteNames.LootNotification, self.Player, { ItemImage = "Fishing", Text = string.format("+%d Fishing XP", xpReward) })
-
-	-- Handle level up
-	if newLevel > oldLevel then
-		Events.FireEvent(Events.RemoteNames.LootNotification, self.Player, { ItemImage = "Fishing", Text = string.format("🎣 Fishing Level Up! Level %d → %d", oldLevel, newLevel) })
-
-		-- Log level up for debugging
-		print(string.format("%s reached Fishing Level %d! (+%d XP)", self.Player.Name, newLevel, xpReward))
-
-		-- //TODO: Unlock new content based on level
-		-- self:CheckForUnlocks(newLevel)
-	else
-		-- Show progress towards next level
-		local xpToNext = FishingXP.GetXPToNextLevel(newLevel, newXP)
-		print(string.format("%s gained %d Fishing XP (%d more needed for level %d)", self.Player.Name, xpReward, xpToNext, newLevel + 1))
-	end
-end
-
-function FishingManager.CalculateFishingXPReward(self: FishingManager, fishData, stats, playerLevel: number): number
-	-- Base XP from fish quality and tier
-	local baseXP = 5 + (fishData.QualityId * 8) + ((fishData.Tier or 1) * 4)
-
-	-- Performance bonus: perfect hits give significant bonus
-	local perfectRatio = stats.PerfectHits / math.max(stats.TotalHits, 1)
-	local performanceBonus = 1.0 + (perfectRatio * 0.5) -- Up to +50% for all perfect hits
-
-	-- Difficulty bonus: harder fish give more XP
-	local difficultyBonus = 1.0 + (stats.Difficulty - 1.0) * 0.3 -- +30% per difficulty point above 1
-
-	-- Duration bonus: faster catches get small bonus (encourages skill)
-	local durationBonus = 1.0
-	if stats.Duration < 10 then
-		durationBonus = 1.2 -- +20% for quick catches
-	elseif stats.Duration < 20 then
-		durationBonus = 1.1 -- +10% for decent speed
-	end
-
-	-- Calculate final XP
-	local finalXP = baseXP * performanceBonus * difficultyBonus * durationBonus
-
-	-- Round to nearest integer
-	finalXP = math.floor(finalXP + 0.5)
-
-	-- Ensure minimum XP (even bad catches give something)
-	finalXP = math.max(finalXP, 3)
-
-	return finalXP
-end
-
-function FishingManager.AttachAttListeners(self: FishingManager)
-	local fishingResultEvent = Events.GetRemote(Events.RemoteNames.FishingResult)
-	if fishingResultEvent then
-		self._cleaner:Add(fishingResultEvent.OnServerEvent:Connect(function(player: Player, sessionId: string, result: {})
-			print(sessionId, result)
-			if self.Player ~= player or self.Owner ~= player.UserId then return end
-
-			local isValid, message, fishCaught, stats = self:ValidateAndScoreFishing(player, sessionId, result)
-			if not isValid then
-				print("Invalid fishing attempt by:", player.Name, "Reason:", message)
-				-- Optionally kick player or log incident for repeated offenses
-				return
-			end
-
-			-- Check if fish escaped due to too many failures
-			if result.Success == false and result.EscapeReason then
-				local escapeAttempts = tonumber(result.EscapeAttempts) or 3
-				print(string.format("Fish escaped from %s. Reason: %s (Attempts: %d)", player.Name, tostring(result.EscapeReason), escapeAttempts))
-				if Notification and Notification.SendAlert then Notification.SendAlert(player, string.format("The fish got away after %d escape attempts!", escapeAttempts)) end
-				return
-			end
-
-			if fishCaught then
-				-- SERVER authorizes the catch
-				local fishData = stats.FishData
-				if fishData then
-					self:SaveCaughtFish(fishData)
-					self:ApplyFishingXP(stats)
-					self:PlayerAnim(player)
-					print(string.format("Fish caught by %s! Score: %d/%d", player.Name, stats.Score, stats.RequiredScore))
-				else
-					print("Missing fish data for successful catch by:", player.Name)
-				end
-			else
-				print(string.format("Fish escaped from %s. Score: %d/%d (insufficient)", player.Name, stats.Score, stats.RequiredScore))
-				if Notification and Notification.SendAlert then Notification.SendAlert(player, "The fish got away! Try to land more perfect hits.") end
-			end
-		end))
-	end
-
-	local equippedRodEvent = Events.GetBindableEvent(Events.BindableNames.EquippedRod)
-	if equippedRodEvent then
-		self._cleaner:Add(equippedRodEvent.Event:Connect(function(data: { Player: Player, RodId: number })
-			local player = data.Player
-			if self.Player ~= player or self.Owner ~= player.UserId then return end
-
-			local rodId = data.RodId
-			if not rodId then
-				self.CurrentlyEquippedRod = nil
-				return
-			end
-
-			local playerRods = DataService.GetRods(player)
-			local existing = TableUtil.Find(playerRods, function(rod)
-				return rod.Id == rodId
-			end)
-
-			if existing then self.CurrentlyEquippedRod = existing end
-		end))
-	end
-end
-
--- //SECTION - Cleanup
-function FishingManager.Destroy(self: FishingManager)
-	if self._cleaner then
-		self._cleaner:Clean()
-		self._cleaner = nil
-	end
-
-	self.Player = nil
-	self.Owner = nil
-	self.TeamId = nil
-	self.RealmId = nil
-end
--- //!SECTION
-
-return FishingManager

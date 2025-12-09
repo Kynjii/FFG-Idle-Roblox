@@ -75,11 +75,21 @@ local minHitsBeforeEscape = 3 -- Default, will be set by server
 local lastEscapeAttemptTime = 0
 local ESCAPE_ATTEMPT_DEBOUNCE = 1 -- 1 second debounce between escape attempts
 
+local hitTimeline = {}
+
+local elapsed = 0
+RunService.Heartbeat:Connect(function(dt)
+	if gameStarted then
+		elapsed += dt
+	end
+end)
+
 function startGame(value: boolean)
 	gameStarted = value
 
 	if value then
-		sessionStartTime = tick()
+		elapsed = 0
+		hitTimeline = {}
 		totalHits = 0
 		perfectHits = 0
 		goodHits = 0
@@ -272,9 +282,9 @@ function startLosingHP()
 								Success = false, -- Fish escaped
 								TotalHits = totalHits,
 								PerfectHits = perfectHits,
-								Duration = tick() - sessionStartTime,
+								Duration = elapsed,
 								EscapeReason = "TooManyFailures",
-								EscapeAttempts = fishEscapeAttempts, -- Send actual count
+								EscapeAttempts = fishEscapeAttempts, -- Send actual count,
 							}
 
 							local fishingResultEvent = Events.GetRemote(Events.RemoteNames.FishingResult)
@@ -322,6 +332,11 @@ local function buttonReleased()
 	if isOverLapping2 then area = 2 end
 	if isOverLapping3 then area = 3 end
 
+	table.insert(hitTimeline, {
+		time = elapsed,
+		area = area,
+	})
+
 	if area > 0 then
 		totalHits += 1
 		if area == 3 then
@@ -354,7 +369,8 @@ local function buttonReleased()
 			Success = true,
 			TotalHits = totalHits,
 			PerfectHits = perfectHits,
-			Duration = tick() - sessionStartTime,
+			Duration = elapsed,
+			Hits = hitTimeline,
 		}
 
 		local fishingResultEvent = Events.GetRemote(Events.RemoteNames.FishingResult)
