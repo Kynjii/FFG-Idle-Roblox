@@ -77,6 +77,10 @@ RunService.Heartbeat:Connect(function(dt)
 end)
 
 function startGame(value: boolean)
+	resetProgress()
+	resetHitMarker()
+	relocateHitContainer()
+
 	gameStarted = value
 
 	if value then
@@ -98,10 +102,6 @@ function startGame(value: boolean)
 		end
 		Events.FireEvent(Events.RemoteNames.GameEnded, player, currentTier)
 	end
-
-	resetHitMarker()
-	resetProgress()
-	relocateHitContainer()
 
 	if value then
 		markerConnection = RunService.Heartbeat:Connect(function(deltaTime: number)
@@ -400,29 +400,24 @@ end
 
 local startGameEvent = Events.GetRemote(Events.RemoteNames.StartFishingMiniGame)
 if startGameEvent then
-	startGameEvent.OnClientEvent:Connect(function(data: { Fish: {}, Rod: {}, Tier: number, SessionId: string, MinigameConfig: {} })
-		currentTier = data.Tier
-		currentSessionId = data.SessionId
+	startGameEvent.OnClientEvent:Connect(function(data)
+		isLosingHP = false
+		startGame(false)
+		task.wait()
 
-		-- Apply difficulty-based minigame configuration
-		if data.MinigameConfig then
-			minigameConfig = data.MinigameConfig
-			print(
-				string.format(
-					"Minigame difficulty - HitZone: %.2f, Speed: %.2f, Decay: %.2f, Heal: %.2f",
-					minigameConfig.HitZoneSize,
-					minigameConfig.MarkerSpeed,
-					minigameConfig.DecayRate,
-					minigameConfig.HealMultiplier
-				)
-			)
-		end
-
-		showGame(true)
-		startGame(true)
+		currentFishHP = 0
+		ProgressBar.Reset(pbFrame)
 
 		hookedFish = data.Fish
 		playerRod = data.Rod
+
+		if data.MinigameConfig then minigameConfig = data.MinigameConfig end
+
+		currentTier = data.Tier
+		currentSessionId = data.SessionId
+
+		showGame(true)
+		startGame(true)
 
 		handleClosingGameUI()
 	end)

@@ -178,7 +178,7 @@ function InventoryManager.AttachEventListeners(self: InventoryManager)
 				error(`No Fishing Rod found with id of: {playerData.Rod.Id}`)
 			end
 
-			self:SaveRod(self.Inventory.Equipment[rodCopy])
+			self:SaveRod(rodCopy)
 
 			if rodCopy then self:GrantTool(rodCopy, "Equipment") end
 		end))
