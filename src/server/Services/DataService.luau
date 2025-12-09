@@ -752,6 +752,12 @@ task.delay(9, function()
 	if canAffordEventFn then canAffordEventFn.OnServerInvoke = function(player: Player, currencyType: "Gold", amount: number)
 		return DataService.CanAfford(player, currencyType, amount)
 	end end
+
+	local getHelperInventoryEvent = Events.GetRemoteFn(Events.RemoteFunctionNames.GetHelperInventory)
+	if getHelperInventoryEvent then getHelperInventoryEvent.OnServerInvoke = function(player: Player)
+		local helperInventory = DataService.GetHelperInventory(player)
+		return helperInventory
+	end end
 end)
 
 -- //!SECTION

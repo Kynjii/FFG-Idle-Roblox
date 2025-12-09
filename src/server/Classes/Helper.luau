@@ -410,6 +410,18 @@ function Helper.AttachEventListeners(self: Helper)
 			Events.FireBindableEvent(Events.BindableNames.HelperUpgraded, self:Serialize())
 		end))
 	end
+
+	local updateInfoPanel = Events.GetRemote(Events.RemoteNames.UpdateInfoPanel)
+	if updateInfoPanel then
+		self._cleaner:Add(updateInfoPanel.OnServerEvent:Connect(function(player: Player, data: { Item: HelperType.HelperData, isFishDex: boolean? })
+			if self.Player ~= player or self.Owner ~= player.UserId then return end
+			if data.isFishDex then return end
+			if not data.Item or data.Item.Entity ~= FFGEnum.CLASS.ENTITY_NAME.Helper then return end
+			if data.Item.Id ~= self.Id then return end
+
+			Events.FireEvent(Events.RemoteNames.UpdateInfoPanel, player, { Item = self:Serialize() })
+		end))
+	end
 end
 -- //!SECTION
 
