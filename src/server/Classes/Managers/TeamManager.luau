@@ -9,7 +9,6 @@ local FishDexManager = require(script.Parent.FishDexManager)
 local FishingManager = require(script.Parent.FishingManager)
 local FishingRodShopManager = require(script.Parent.FishingRodShopManager)
 local HelperShopManager = require(script.Parent.HelperShopManager)
-local HelperManager = require(script.Parent.HelperManager)
 local InventoryManager = require(script.Parent.InventoryManager)
 local JobManager = require(script.Parent.JobManager)
 local MarketManager = require(script.Parent.MarketManager)
@@ -66,7 +65,6 @@ TeamManager.Teams = {
 TeamManager.ChainManagers = {}
 TeamManager.BuildingsManager = {}
 TeamManager.HelperShopManager = {}
-TeamManager.HelperManager = {}
 TeamManager.JobManager = {}
 TeamManager.FishingManager = {}
 TeamManager.FishDexManager = {}
@@ -131,19 +129,6 @@ function TeamManager.AssignHelperShopManager(profile, player: Player, teamId: nu
 
 	TeamManager.HelperShopManager[player.UserId] = helperShopManager
 	helperShopManager:Initialize()
-end
-
-function TeamManager.AssignHelperManager(profile, player: Player, teamId: number): ()
-	TeamManager.HelperManager[player.UserId] = TeamManager.HelperManager[player.UserId] or { OwnerId = player.UserId }
-	local currentRealm = profile.CurrentRealm or 1
-	local realmData = profile and profile.Realms[currentRealm]
-
-	local playerInventoryState = realmData.Helpers or {}
-
-	local helperManager = HelperManager.New(playerInventoryState, player, teamId)
-	if not helperManager then return end
-
-	TeamManager.HelperManager[player.UserId] = helperManager
 end
 
 function TeamManager.AssignJobManager(profile, player: Player, teamId: number): ()
@@ -238,7 +223,6 @@ function TeamManager.AssignManagers(profile, player: Player, teamId: number): ()
 	TeamManager.AssignFishDexManager(profile.Data, player, teamId)
 	TeamManager.AssignInventoryManager(profile.Data, player, teamId)
 	TeamManager.AssignFishingManager(profile.Data, player, teamId)
-	TeamManager.AssignHelperManager(profile.Data, player, teamId)
 	TeamManager.AssignHelperShopManager(profile.Data, player, teamId)
 	TeamManager.AssignBuildingsManager(profile.Data, player, teamId)
 	TeamManager.AssignChainManagers(profile.Data, player, teamId)
@@ -278,8 +262,6 @@ local function listClean(list, userId, managerType): ()
 		TeamManager.BuildingsManager[userId] = nil
 	elseif managerType == managerTypes.Shop then
 		TeamManager.HelperShopManager[userId] = nil
-	elseif managerType == managerTypes.Helper then
-		TeamManager.HelperManager[userId] = nil
 	elseif managerType == managerTypes.Job then
 		TeamManager.JobManager[userId] = nil
 	elseif managerType == managerTypes.Fishing then
@@ -299,7 +281,6 @@ function TeamManager.CleanupPlayer(userId: number): ()
 	local chainList = TeamManager.ChainManagers[userId]
 	local buildingList = TeamManager.BuildingsManager[userId]
 	local helperShopList = TeamManager.HelperShopManager[userId]
-	local helperManagerList = TeamManager.HelperManager[userId]
 	local jobList = TeamManager.JobManager[userId]
 	local fishingList = TeamManager.FishingManager[userId]
 	local fishDexList = TeamManager.FishDexManager[userId]
@@ -310,7 +291,6 @@ function TeamManager.CleanupPlayer(userId: number): ()
 	if chainList then listClean(chainList, userId, managerTypes.Chain) end
 	if buildingList then listClean(buildingList, userId, managerTypes.Building) end
 	if helperShopList then listClean(helperShopList, userId, managerTypes.Shop) end
-	if helperManagerList then listClean(helperManagerList, userId, managerTypes.Helper) end
 	if jobList then listClean(jobList, userId, managerTypes.Job) end
 	if fishingList then listClean(fishingList, userId, managerTypes.Fishing) end
 	if fishDexList then listClean(fishDexList, userId, managerTypes.FishDex) end
