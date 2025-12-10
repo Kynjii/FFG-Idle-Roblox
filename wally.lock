@@ -13,14 +13,14 @@ version = "0.0.11"
 dependencies = []
 
 [[package]]
-name = "evaera/promise"
-version = "4.0.0"
-dependencies = []
-
-[[package]]
 name = "ffg/game"
 version = "0.1.0"
-dependencies = [["Find", "sleitnick/find@1.0.0"], ["Ripple", "littensy/ripple@0.9.3"], ["Sift", "csqrl/sift@0.0.11"], ["Signal", "sleitnick/signal@1.5.0"], ["TableUtil", "sleitnick/table-util@1.2.1"], ["Trove", "sleitnick/trove@1.5.1"], ["react", "jsdotlua/react@17.2.1"], ["satchel", "ryanlua/satchel@1.4.1"], ["uilabs", "pepeeltoro41/ui-labs@2.4.1"]]
+dependencies = [["ByteNet", "ffrostflame/bytenet@0.4.6"], ["Charm", "littensy/charm@0.10.0"], ["CharmSync", "littensy/charm-sync@0.3.0"], ["Find", "sleitnick/find@1.0.0"], ["React", "jsdotlua/react@17.2.1"], ["React-charm", "littensy/react-charm@0.3.0"], ["React-roblox", "jsdotlua/react-roblox@17.2.1"], ["Satchel", "ryanlua/satchel@1.4.1"], ["Sift", "csqrl/sift@0.0.11"], ["Signal", "sleitnick/signal@1.5.0"], ["TableUtil", "sleitnick/table-util@1.2.1"], ["Trove", "sleitnick/trove@1.5.1"], ["Uilabs", "pepeeltoro41/ui-labs@2.4.1"]]
+
+[[package]]
+name = "ffrostflame/bytenet"
+version = "0.4.6"
+dependencies = []
 
 [[package]]
 name = "jsdotlua/boolean"
@@ -63,7 +63,27 @@ version = "1.2.7"
 dependencies = []
 
 [[package]]
+name = "jsdotlua/promise"
+version = "3.5.2"
+dependencies = []
+
+[[package]]
 name = "jsdotlua/react"
+version = "17.2.1"
+dependencies = [["luau-polyfill", "jsdotlua/luau-polyfill@1.2.7"], ["shared", "jsdotlua/shared@17.2.1"]]
+
+[[package]]
+name = "jsdotlua/react-reconciler"
+version = "17.2.1"
+dependencies = [["luau-polyfill", "jsdotlua/luau-polyfill@1.2.7"], ["promise", "jsdotlua/promise@3.5.2"], ["react", "jsdotlua/react@17.2.1"], ["scheduler", "jsdotlua/scheduler@17.2.1"], ["shared", "jsdotlua/shared@17.2.1"]]
+
+[[package]]
+name = "jsdotlua/react-roblox"
+version = "17.2.1"
+dependencies = [["luau-polyfill", "jsdotlua/luau-polyfill@1.2.7"], ["react", "jsdotlua/react@17.2.1"], ["react-reconciler", "jsdotlua/react-reconciler@17.2.1"], ["scheduler", "jsdotlua/scheduler@17.2.1"], ["shared", "jsdotlua/shared@17.2.1"]]
+
+[[package]]
+name = "jsdotlua/scheduler"
 version = "17.2.1"
 dependencies = [["luau-polyfill", "jsdotlua/luau-polyfill@1.2.7"], ["shared", "jsdotlua/shared@17.2.1"]]
 
@@ -88,9 +108,19 @@ version = "1.2.7"
 dependencies = [["collections", "jsdotlua/collections@1.2.7"]]
 
 [[package]]
-name = "littensy/ripple"
-version = "0.9.3"
-dependencies = [["Promise", "evaera/promise@4.0.0"]]
+name = "littensy/charm"
+version = "0.10.0"
+dependencies = []
+
+[[package]]
+name = "littensy/charm-sync"
+version = "0.3.0"
+dependencies = [["charm", "littensy/charm@0.10.0"]]
+
+[[package]]
+name = "littensy/react-charm"
+version = "0.3.0"
+dependencies = [["React", "jsdotlua/react@17.2.1"], ["charm", "littensy/charm@0.10.0"]]
 
 [[package]]
 name = "pepeeltoro41/ui-labs"
