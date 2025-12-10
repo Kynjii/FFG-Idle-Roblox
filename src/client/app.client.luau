@@ -1,13 +1,15 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
-local Roact = require(ReplicatedStorage.Shared.Roact)
+local React = require(ReplicatedStorage.Packages.react)
+local ReactRoblox = require(ReplicatedStorage.Packages:FindFirstChild("react-roblox"))
 
-local app = Roact.createElement("ScreenGui", {}, {
-    HelloWorld = Roact.createElement("TextLabel", {
-        Size = UDim2.new(0, 400, 0, 300),
-        Text = "Hello, Roact!",
-    }),
-})
+local function MyTestFrame()
+    return React.createElement("Frame", {
+        Size = UDim2.new(0, 100, 0, 100),
+    })
+end
 
-Roact.mount(app, Players.LocalPlayer.PlayerGui)
+local handle = Instance.new("ScreenGui", Players.LocalPlayer.PlayerGui)
+local root = ReactRoblox.createRoot(handle)
+root:render(React.createElement(MyTestFrame, {}, {}))
