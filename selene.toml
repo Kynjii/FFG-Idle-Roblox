@@ -1,5 +1,11 @@
 std = "roblox"
 
+exclude = [
+    "Packages/_Index/**",
+    "Generated/**",
+    "build/**"
+]
+
 [[rules]]
 name = "unused_variable"
 severity = "warning"
@@ -7,9 +13,3 @@ severity = "warning"
 [[rules]]
 name = "shadowing"
 enabled = false
-
-exclude = [
-    "Packages/**",
-    "Generated/**",
-    "build/**"
-]

@@ -5,8 +5,13 @@
 /*.rbxlx.lock
 /*.rbxl.lock
 
-# luau-lsp wath folder
+# luau-lsp sourcemap
 /sourcemap.json
 
-# Packages
-/Packages
+# Wally dependencies (auto-generated)
+Packages/_Index/
+
+!Packages/ffg/game/
+
+Packages/**/*.exe
+Packages/**/*.dll

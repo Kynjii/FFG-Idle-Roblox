@@ -1,0 +1,14 @@
+[workspace]
+dirs = ["src"]
+
+ignoreGlobs = [
+    "Packages/_Index/**",
+    "build/**",
+    "Generated/**"
+]
+
+[diagnostics]
+globals = ["workspace", "game", "script"]
+
+[typeChecking]
+mode = "off"

@@ -1,44 +1,31 @@
 {
-  "name": "FFG-Idle-Roblox",
-  "tree": {
-    "$className": "DataModel",
+    "name": "FFG-Idle-Roblox",
 
-    "ReplicatedFirst": {
-      "RepFirst": {
-        "$path": "src/repFirst"
-      }
-    },
+    "tree": {
+        "$className": "DataModel",
 
-    "ReplicatedStorage": {
-      "Shared": {
-        "$path": "src/shared"
-      },
-      "Packages": { "$path": "Packages" }
-    },
-
-    "ServerScriptService": {
-      "Server": {
-        "$path": "src/server"
-      }
-    },
-
-    "StarterPlayer": {
-      "StarterPlayerScripts": {
-        "Client": {
-          "$path": "src/client"
+        "ReplicatedFirst": {
+            "RepFirst": {
+                "$path": "src/repFirst"
+            }
+        },
+        "ReplicatedStorage": {
+            "Shared": {
+                "$path": "src/shared"
+            },
+            "Packages": { "$path": "Packages" }
+        },
+        "ServerScriptService": {
+            "Server": {
+                "$path": "src/server"
+            }
+        },
+        "StarterPlayer": {
+            "StarterPlayerScripts": {
+                "Client": {
+                    "$path": "src/client"
+                }
+            }
         }
-      }
-    },
-
-    "Workspace": {
-      "$properties": {
-        "FilteringEnabled": true
-      }
-    },
-    "SoundService": {
-      "$properties": {
-        "RespectFilteringEnabled": true
-      }
     }
-  }
 }

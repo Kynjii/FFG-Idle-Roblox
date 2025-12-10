@@ -1,9 +1,12 @@
 {
-  "[luau]": {
-    "editor.defaultFormatter": "JohnnyMorganz.stylua"
-  },
-  "[lua]": {
-    "editor.defaultFormatter": "JohnnyMorganz.stylua"
-  },
-  "stylua.targetReleaseVersion": "latest"
+    "luau-lsp.sourcemap.enabled": true,
+    "luau-lsp.sourcemap.autogenerate": true,
+
+    "files.associations": {
+        "*.luau": "luau"
+    },
+
+    "editor.formatOnSave": true,
+    "[lua]": { "editor.defaultFormatter": "JohnnyMorganz.stylua" },
+    "[luau]": { "editor.defaultFormatter": "JohnnyMorganz.stylua" }
 }
