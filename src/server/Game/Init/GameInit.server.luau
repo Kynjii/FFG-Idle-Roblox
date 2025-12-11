@@ -90,11 +90,28 @@ local function updateTools()
 end
 updateTools()
 
-local function initPlayerState(player, profile)
+local function initPlayerState(player: Player, profile)
     local playerAtoms = PlayerStateService:InitPlayer(player, profile)
     PlayerStateSyncService:ConnectPlayer(player)
 
     return playerAtoms
+end
+
+local function handleTutorial(profile, teamId: number, player: Player)
+    local completedTutorial = profile.Data and profile.Data.CompletedTutorial or false
+    if not completedTutorial then
+        local stageProgress
+        for i, completed in ipairs(profile.Data.TutorialStageComplete) do
+            if not completed then
+                stageProgress = i
+                break
+            end
+        end
+
+        if stageProgress then
+            Tutorial.Show(player, teamId, stageProgress)
+        end
+    end
 end
 
 local function PlayerAdded(player: Player)
@@ -114,33 +131,17 @@ local function PlayerAdded(player: Player)
         end)
 
         if player.Parent == Players then
-            DataService.Profiles[player] = profile
-            Initialize(player, profile)
-
-            local playerAtoms = initPlayerState(player, profile)
-
             local teamId = TeamManager.AssignTeam(player)
             if not teamId then
                 player:Kick("Server is full, try again")
                 return
             end
 
+            DataService.Profiles[player] = profile
+            Initialize(player, profile)
+            initPlayerState(player, profile)
             addPlayerToLeaderboard(player, profile.Data)
-
-            local completedTutorial = profile.Data and profile.Data.CompletedTutorial or false
-            if not completedTutorial then
-                local stageProgress
-                for i, completed in ipairs(profile.Data.TutorialStageComplete) do
-                    if not completed then
-                        stageProgress = i
-                        break
-                    end
-                end
-
-                if stageProgress then
-                    Tutorial.Show(player, teamId, stageProgress)
-                end
-            end
+            handleTutorial(profile, teamId, player)
 
             TeamManager.AssignManagers(profile, player, teamId)
 
