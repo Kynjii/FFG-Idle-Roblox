@@ -206,13 +206,7 @@ end
 type earnSource = "ManualStorageSell" | "HelperSell" | "SoldFish"
 type earnSourceInfo = FishType.FishData
 
-function DataService.Earn(
-    player: Player,
-    currencyType: "Gold",
-    amount: number,
-    source: earnSource,
-    sourceInfo: earnSourceInfo
-)
+function DataService.Earn(player: Player, currencyType: "Gold", amount: number, source: earnSource, sourceInfo: earnSourceInfo)
     if typeof(amount) ~= "number" then
         error(`Type of amount is not a number. {type(amount)}`)
         return
@@ -247,16 +241,7 @@ function DataService.Earn(
         [Enum.AnalyticsCustomFieldKeys.CustomField03.Name] = customField3,
     }
 
-    Economy.Log(
-        player,
-        Economy.FlowType.CurrencyAdd,
-        currencyType,
-        amount,
-        newValue,
-        Economy.TransactionType.Gameplay,
-        nil,
-        customFields
-    )
+    Economy.Log(player, Economy.FlowType.CurrencyAdd, currencyType, amount, newValue, Economy.TransactionType.Gameplay, nil, customFields)
 
     local leaderStats = player:FindFirstChild("leaderstats")
     local currency = leaderStats:FindFirstChild(currencyType)
@@ -276,11 +261,7 @@ function DataService.Earn(
     end
 
     Events.FireBindableEvent(Events.BindableNames.UpdateState, player)
-    Events.FireEvent(
-        Events.RemoteNames.LootNotification,
-        player,
-        { ItemImage = currencyType or "Gold", Text = Format.CurrencyNumber(amount) }
-    )
+    Events.FireEvent(Events.RemoteNames.LootNotification, player, { ItemImage = currencyType or "Gold", Text = Format.CurrencyNumber(amount) })
     Events.FireEvent(Events.RemoteNames.GoldChanged, player, newValue)
 end
 
@@ -307,21 +288,9 @@ type spendSource =
     | "BuildingUpgraded"
     | "JobSlotPurchased"
 
-type spendSourceInfo =
-    RodType.FishingRodType
-    | HelperType.HelperData
-    | BoatType.BoatData
-    | TenderType.TenderData
-    | PortStorageType.PortStorageData
-    | BuildingType.BuildingData
+type spendSourceInfo = RodType.FishingRodType | HelperType.HelperData | BoatType.BoatData | TenderType.TenderData | PortStorageType.PortStorageData | BuildingType.BuildingData
 
-function DataService.Spend(
-    player: Player,
-    currencyType: "Gold",
-    amount: number,
-    source: spendSource,
-    sourceInfo: spendSourceInfo?
-)
+function DataService.Spend(player: Player, currencyType: "Gold", amount: number, source: spendSource, sourceInfo: spendSourceInfo?)
     local profile = DataService.Profiles[player]
     if not profile then
         return
@@ -353,16 +322,7 @@ function DataService.Spend(
         [Enum.AnalyticsCustomFieldKeys.CustomField03.Name] = customField3,
     }
 
-    Economy.Log(
-        player,
-        Economy.FlowType.CurrencyRemove,
-        currencyType,
-        amount,
-        newValue,
-        Economy.TransactionType.Gameplay,
-        nil,
-        customFields
-    )
+    Economy.Log(player, Economy.FlowType.CurrencyRemove, currencyType, amount, newValue, Economy.TransactionType.Gameplay, nil, customFields)
 
     local leaderStats = player:FindFirstChild("leaderstats")
     local currency = leaderStats:FindFirstChild(currencyType)
@@ -975,10 +935,12 @@ function DataService.UpdateSkillData(player: Player, skillName: "Fishing", skill
 
     profile.Data.Skills[skillName] = skillData
 
-    local replica = DataService.Replicas[player]
-    if replica then
-        replica:Set({ "Skills", skillName }, skillData)
+    local state = PlayerStateService:Get(player)
+    if state and state.FishingSkillState then
+        print("updating fishing state")
+        state.FishingSkillState(skillData)
     end
+
     return true
 end
 
