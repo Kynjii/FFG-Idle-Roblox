@@ -1,12 +1,20 @@
---!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Charm = require(ReplicatedStorage.Packages.Charm)
+local RodType = require(ReplicatedStorage.Shared.Types.RodType)
+
+export type state = {
+    Gold: () -> number,
+    SelectedRod: () -> RodType.FishingRodType | nil,
+    SelectedMenuTab: () -> "Crew" | "Jobs" | "Fishing",
+}
 
 local PlayerStateService = {}
-PlayerStateService.State = {}
+export type PlayerStateService = typeof(PlayerStateService)
 
-local function createState(profile)
+PlayerStateService.State = {} :: state
+
+local function createState(profile): state
     return {
         Gold = Charm.atom(profile.Data.Currencies.Gold or 0),
         SelectedRod = Charm.atom(nil),

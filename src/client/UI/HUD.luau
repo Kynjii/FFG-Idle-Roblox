@@ -1,9 +1,9 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local StarterPlayer = game:GetService("StarterPlayer")
 
-local PlayerStateService = require(StarterPlayer.StarterPlayerScripts.Client.PlayerState.PlayerStateService)
 local React = require(ReplicatedStorage.Packages.React)
 local RC = require(ReplicatedStorage.Packages["React-charm"])
+local PlayerStateService = require(ReplicatedStorage.Shared.Atoms.PlayerStateService)
+local Format = require(ReplicatedStorage.Shared.Utils.Format)
 local e = React.createElement
 
 local HUD = {}
@@ -84,11 +84,11 @@ function HUD.component()
                         Position = UDim2.fromScale(0.538998, 0.526316),
                         RichText = true,
                         Size = UDim2.fromScale(0.900306, 1.05263),
-                        Text = `{goldAmount}`,
+                        Text = `{Format.CurrencyNumber(goldAmount)}`,
                         TextColor3 = Color3.new(1, 1, 1),
                         TextScaled = true,
                         TextStrokeTransparency = 0,
-                        Visible = false,
+                        Visible = true,
                         ZIndex = 5,
                     }, {
                         uIPadding = e("UIPadding", {
@@ -117,6 +117,7 @@ function HUD.component()
                     LayoutOrder = 1,
                     Position = UDim2.fromScale(0, 0.5),
                     Size = UDim2.fromScale(0.262281, 1.10947),
+                    ZIndex = 10,
                 }, {
                     uIAspectRatioConstraint = e("UIAspectRatioConstraint"),
                 }),

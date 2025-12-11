@@ -1,15 +1,17 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CharmSync = require(ReplicatedStorage.Packages.CharmSync)
+local PlayerStateService = require(ReplicatedStorage.Shared.Atoms.PlayerStateService)
 local CharmPackets = require(ReplicatedStorage.Shared.Networking.CharmSyncPackets)
-local PlayerStateService = require(script.Parent.PlayerStateService)
+task.wait(3)
+
+local atomsToGet = PlayerStateService:Get()
 
 local syncer = CharmSync.client({
-    atoms = PlayerStateService:Get(),
+    atoms = atomsToGet,
     ignoreUnhydrated = true,
 })
 
 CharmPackets.StateUpdate.listen(function(data)
-    print(`got data: {data}`)
     syncer:sync(data.message)
 end)
 
