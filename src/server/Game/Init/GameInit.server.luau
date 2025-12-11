@@ -172,6 +172,8 @@ Players.PlayerRemoving:Connect(function(player)
             profile:EndSession()
         end)
     end
+
+    PlayerStateService:RemovePlayer(player)
 end)
 
 -- Start music
