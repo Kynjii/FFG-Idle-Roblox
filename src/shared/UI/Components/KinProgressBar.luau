@@ -2,6 +2,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local React = require(ReplicatedStorage.Packages.React)
 local Ripple = require(ReplicatedStorage.Packages.Ripple)
+local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
+
+local rTween = Ripple.createTween
+local R = React
 local e = React.createElement
 
 type Props = {
@@ -11,22 +15,28 @@ type Props = {
 local KinProgressBar = {}
 
 function KinProgressBar.component(props: Props)
-    local progressRef = React.useRef(nil)
+    local progressRef = R.useRef(nil)
 
-    React.useEffect(function()
+    print(props)
+
+    R.useEffect(function()
         local progressBar: ImageLabel = progressRef.current
         if not progressBar then
             return
         end
 
-        Ripple.createTween(progressBar, {
+        print(progressRef.current)
+
+        local tween = rTween(progressBar, {
             easing = "linear",
-            duration = 0.5,
-            start = true,
-            goal = {
-                Size = UDim2.fromScale(props.state or 0, 1),
-            },
+            duration = 1,
         })
+
+        tween:setGoal(progressBar, {
+            Size = UDim2.fromScale(props.state or 0, 1),
+        })
+
+        tween:start()
     end, { props.state })
 
     return e("Frame", {
@@ -34,7 +44,7 @@ function KinProgressBar.component(props: Props)
         BackgroundTransparency = 1,
         ClipsDescendants = true,
         LayoutOrder = 2,
-        Position = UDim2.fromScale(0.5, 0.5),
+        Position = FFGEnum.THEME.alignment.position.center,
         Size = UDim2.fromScale(0.8, 1),
     }, {
         progressBG = e("ImageLabel", {
@@ -42,21 +52,21 @@ function KinProgressBar.component(props: Props)
             BackgroundTransparency = 1,
             ClipsDescendants = true,
             Image = "rbxassetid://79661382966531",
-            ImageColor3 = Color3.fromRGB(6, 38, 65),
-            Position = UDim2.fromScale(0.5, 0.5),
+            ImageColor3 = FFGEnum.UI.ProgressBar.BackgroundColor,
+            Position = FFGEnum.THEME.alignment.position.center,
             ScaleType = Enum.ScaleType.Slice,
             Size = UDim2.fromScale(1, 1),
-            SliceCenter = Rect.new(62, 72, 72, 77),
+            SliceCenter = FFGEnum.UI.ProgressBar.BackgroundWhite.SliceCenter,
         }, {
             progressBar = e("ImageLabel", {
+                key = "Progressbar",
                 AnchorPoint = Vector2.new(0, 0.5),
                 BackgroundTransparency = 1,
                 Image = "rbxassetid://79661382966531",
                 ImageColor3 = Color3.fromRGB(62, 255, 62),
                 Position = UDim2.fromScale(0, 0.5),
                 ScaleType = Enum.ScaleType.Slice,
-                Size = UDim2.fromScale(0, 1),
-                SliceCenter = Rect.new(62, 72, 72, 77),
+                SliceCenter = FFGEnum.UI.ProgressBar.BackgroundWhite.SliceCenter,
                 ZIndex = 2,
                 ref = progressRef,
             }),

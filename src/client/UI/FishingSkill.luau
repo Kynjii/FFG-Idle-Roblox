@@ -1,6 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Charm = require(ReplicatedStorage.Packages.Charm)
 local React = require(ReplicatedStorage.Packages.React)
 local RC = require(ReplicatedStorage.Packages["React-charm"])
 local PlayerStateService = require(ReplicatedStorage.Shared.Atoms.PlayerStateService)
@@ -17,21 +16,17 @@ type FishingLevelState = {
 local FishingSkillBar = {}
 
 function FishingSkillBar.component()
-    local _fishingLevelState: FishingLevelState, _setFishingLevelState = RC.useAtom(PlayerStateService.State.FishingSkillState)
+    local fishingLevelState: FishingLevelState = RC.useAtom(PlayerStateService.State.FishingSkillState)
 
-    local progress = Charm.computed(function()
-        local newState = table.clone(_fishingLevelState) :: FishingLevelState
-        local newXpAmount = newState.FishingXP or 0
-        local totalForCurrentLevel = newState.TotalForCurrentLevel or 0
-        local totalForNextLevel = newState.TotalForNextLevel or 0
+    local state = fishingLevelState
+    local xp = state.FishingXP or 0
+    local current = state.TotalForCurrentLevel or 0
+    local next = state.TotalForNextLevel or 0
 
-        local currentLevelProgress = newXpAmount - totalForCurrentLevel
-        local xpNeededForThisLevel = totalForNextLevel - totalForCurrentLevel
+    local currentLevelProgress = xp - current
+    local xpNeededForThisLevel = next - current
 
-        local progress = (xpNeededForThisLevel > 0) and math.clamp(currentLevelProgress / xpNeededForThisLevel, 0, 1) or 0
-
-        return progress
-    end)
+    local progress = (xpNeededForThisLevel > 0) and math.clamp(currentLevelProgress / xpNeededForThisLevel, 0, 1) or 0
 
     return e("Frame", {
         AnchorPoint = Vector2.new(0.5, 1),
@@ -52,7 +47,7 @@ function FishingSkillBar.component()
             LayoutOrder = 1,
             Position = UDim2.fromScale(0.5, 0.5),
             Size = UDim2.fromScale(0.1, 1),
-            Text = `{_fishingLevelState.FishingLevel}`,
+            Text = `{fishingLevelState.FishingLevel}`,
             TextColor3 = Color3.new(1, 1, 1),
             TextScaled = true,
         }, {
@@ -68,7 +63,7 @@ function FishingSkillBar.component()
             LayoutOrder = 3,
             Position = UDim2.fromScale(0.5, 0.5),
             Size = UDim2.fromScale(0.1, 1),
-            Text = `{_fishingLevelState.FishingLevel + 1}`,
+            Text = `{fishingLevelState.FishingLevel + 1}`,
             TextColor3 = Color3.new(1, 1, 1),
             TextScaled = true,
         }, {
@@ -77,7 +72,7 @@ function FishingSkillBar.component()
             }),
         }),
 
-        KinProgressBar.component({ state = progress() }),
+        KinProgressBar.component({ state = progress }),
     })
 end
 
