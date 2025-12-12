@@ -1,10 +1,10 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local React = require(ReplicatedStorage.Packages.React)
-local Ripple = require(ReplicatedStorage.Packages.Ripple)
+local ReactRipple = require(ReplicatedStorage.Packages.ReactRipple)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 
-local rTween = Ripple.createTween
+local useTween = ReactRipple.useTween
 local R = React
 local e = React.createElement
 
@@ -16,27 +16,11 @@ local KinProgressBar = {}
 
 function KinProgressBar.component(props: Props)
     local progressRef = R.useRef(nil)
-
-    print(props)
+    local progressBinding, progressTween = useTween(0, { easing = "linear", duration = 1 })
 
     R.useEffect(function()
-        local progressBar: ImageLabel = progressRef.current
-        if not progressBar then
-            return
-        end
-
-        print(progressRef.current)
-
-        local tween = rTween(progressBar, {
-            easing = "linear",
-            duration = 1,
-        })
-
-        tween:setGoal(progressBar, {
-            Size = UDim2.fromScale(props.state or 0, 1),
-        })
-
-        tween:start()
+        progressTween:setGoal(props.state)
+        progressTween:start()
     end, { props.state })
 
     return e("Frame", {
@@ -68,6 +52,9 @@ function KinProgressBar.component(props: Props)
                 ScaleType = Enum.ScaleType.Slice,
                 SliceCenter = FFGEnum.UI.ProgressBar.BackgroundWhite.SliceCenter,
                 ZIndex = 2,
+                Size = progressBinding:map(function(p)
+                    return UDim2.fromScale(p, 1)
+                end),
                 ref = progressRef,
             }),
         }),

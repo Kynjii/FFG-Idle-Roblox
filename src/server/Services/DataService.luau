@@ -937,7 +937,6 @@ function DataService.UpdateSkillData(player: Player, skillName: "Fishing", skill
 
     local state = PlayerStateService:Get(player)
     if state and state.FishingSkillState then
-        print("updating fishing state")
         state.FishingSkillState(skillData)
     end
 
