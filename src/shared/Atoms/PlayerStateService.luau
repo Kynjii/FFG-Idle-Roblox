@@ -8,8 +8,6 @@ export type PlayerStateService = typeof(PlayerStateService)
 
 PlayerStateService.State = {
     Gold = Charm.atom(0),
-    SelectedRod = Charm.atom(nil),
-    SelectedMenuTab = Charm.atom(""),
     FishingSkillState = Charm.atom({}),
 }
 

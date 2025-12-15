@@ -11,8 +11,6 @@ PlayerStateService.State = {} :: { [Player]: { PlayerStateType.Type } }
 local function createState(profile): PlayerStateType.Type
     return {
         Gold = Charm.atom(profile.Data.Currencies.Gold or 0),
-        SelectedRod = Charm.atom(nil),
-        SelectedMenuTab = Charm.atom(""),
         FishingSkillState = Charm.atom(profile.Data.Skills.Fishing),
     }
 end
