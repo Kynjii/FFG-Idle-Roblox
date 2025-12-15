@@ -34,7 +34,7 @@ function KinProgressBar.component(props: Props)
             AnchorPoint = FFGEnum.THEME.alignment.anchor.center,
             BackgroundTransparency = 1,
             ClipsDescendants = true,
-            Image = FFGEnum.UI.ProgressBar.BackgroundWhite,
+            Image = FFGEnum.UI.ProgressBar.BackgroundWhite.Asset,
             ImageColor3 = FFGEnum.UI.ProgressBar.BackgroundColor,
             Position = FFGEnum.THEME.alignment.position.center,
             ScaleType = Enum.ScaleType.Slice,
@@ -44,7 +44,7 @@ function KinProgressBar.component(props: Props)
             progressBar = e("ImageLabel", {
                 AnchorPoint = FFGEnum.THEME.alignment.anchor.left,
                 BackgroundTransparency = 1,
-                Image = FFGEnum.UI.ProgressBar.BackgroundWhite,
+                Image = FFGEnum.UI.ProgressBar.BackgroundWhite.Asset,
                 ImageColor3 = Color3.fromRGB(62, 255, 62),
                 Position = FFGEnum.THEME.alignment.position.left,
                 ScaleType = Enum.ScaleType.Slice,
