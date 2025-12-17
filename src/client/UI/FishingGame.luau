@@ -82,7 +82,7 @@ function FishingGame.manager()
         Size = UDim2.fromScale(0.31, 0.52),
         Visible = showGameAtom,
     }, {
-        fishingTimingBar = FishingTimingBar.component({
+        fishingTimingBar = e(FishingTimingBar.component, {
             ButtonPressedAtom = FishingGame.Atoms.ButtonPressed,
             HitMarkerPosition = FishingGame.Atoms.HitMarkerPosition,
             Refs = {
@@ -92,14 +92,14 @@ function FishingGame.manager()
                 Area3 = FishingGame.Atoms.HitArea3Ref,
             },
         }),
-        fishingHitNotification = FishingHitNotification.component({ AreaHitAtom = FishingGame.Atoms.AreaHit }),
+        fishingHitNotification = e(FishingHitNotification.component, { AreaHitAtom = FishingGame.Atoms.AreaHit }),
     })
 end
 
-local startGame = Charm.subscribe(FishingGame.Atoms.StartGame, function(newState)
-    FishingGame.resetProgress()
-    FishingGame.resetHitMarker()
-    FishingGame.relocateHitContainer()
+local _startGame = Charm.subscribe(FishingGame.Atoms.StartGame, function(newState)
+    FishingGame:resetProgress()
+    FishingGame:resetHitMarker()
+    FishingGame:relocateHitContainer()
 
     if newState then
         up = true
@@ -132,9 +132,11 @@ local startGame = Charm.subscribe(FishingGame.Atoms.StartGame, function(newState
 
             if up then
                 local newPosition = FishingGame.Atoms.HitMarkerPosition() - UDim2.fromScale(0, deltaTime * markerSpeed)
+                print(newPosition, FishingGame.Atoms.HitMarkerPosition())
                 FishingGame.Atoms.HitMarkerPosition(newPosition)
             else
                 local newPosition = FishingGame.Atoms.HitMarkerPosition() + UDim2.fromScale(0, deltaTime * markerSpeed)
+                print(newPosition, FishingGame.Atoms.HitMarkerPosition())
                 FishingGame.Atoms.HitMarkerPosition(newPosition)
             end
 
@@ -147,7 +149,7 @@ local startGame = Charm.subscribe(FishingGame.Atoms.StartGame, function(newState
     end
 end)
 
-local showGame = Charm.subscribe(FishingGame.Atoms.ShowGame, function(newState)
+local _showGame = Charm.subscribe(FishingGame.Atoms.ShowGame, function(newState)
     if reelingSound.IsPlaying then
         reelingSound:Stop()
     end
@@ -166,8 +168,8 @@ function FishingGame.handleClosingGameUI(self: FishingGame)
     while true do
         local distance = player:DistanceFromCharacter(originalPosition)
         if distance >= 8 then
-            FishingGame.Atoms.ShowGame(false)
-            FishingGame.Atoms.StartGame(false)
+            self.Atoms.ShowGame(false)
+            self.Atoms.StartGame(false)
             break
         end
 
@@ -175,7 +177,12 @@ function FishingGame.handleClosingGameUI(self: FishingGame)
     end
 end
 
-function FishingGame:checkObjectsOverlap(a: GuiObject, b: GuiObject)
+function FishingGame.checkObjectsOverlap(a: GuiObject, b: GuiObject)
+    if not a or not b then
+        warn("No objects passed to checkObjectsOverlap")
+        return
+    end
+
     local aAbsPos = a.AbsolutePosition
     local aAbsSize = a.AbsoluteSize
 
@@ -191,15 +198,15 @@ function FishingGame:checkObjectsOverlap(a: GuiObject, b: GuiObject)
     return aLeft < bRight and aRight > bLeft
 end
 
-function FishingGame:resetProgress()
-    -- ProgressBar.Reset(pbFrame)
+function FishingGame.resetProgress(self: FishingGame)
+    self.Atoms.FishHPProgress(0)
 end
 
-function FishingGame:resetHitMarker()
-    FishingGame.Atoms.HitMarkerPosition(UDim2.fromScale(0.5, 1))
+function FishingGame.resetHitMarker(self: FishingGame)
+    self.Atoms.HitMarkerPosition(UDim2.fromScale(0.5, 1))
 end
 
-function FishingGame:relocateHitContainer()
+function FishingGame.relocateHitContainer(self: FishingGame)
     local hitZoneSize = minigameConfig.HitZoneSize
     local minPosition = 0.1
     local maxPosition = 1 - hitZoneSize - 0.1
@@ -208,35 +215,35 @@ function FishingGame:relocateHitContainer()
     local hitArea1Size = UDim2.fromScale(1, hitZoneSize)
     local hitArea1Position = UDim2.fromScale(0.5, randY)
 
-    FishingGame.Atoms.TargetSettings({ Size = hitArea1Size, Position = hitArea1Position })
+    self.Atoms.TargetSettings({ Size = hitArea1Size, Position = hitArea1Position })
 end
 
-function FishingGame:startLosingHP()
-    if FishingGame.Atoms.IsLosingHP() then
+function FishingGame.startLosingHP(self: FishingGame)
+    if self.Atoms.IsLosingHP() then
         return
     end
 
-    FishingGame.Atoms.IsLosingHP(true)
+    self.Atoms.IsLosingHP(true)
 
-    while FishingGame.Atoms.IsLosingHP() and gameStarted do
+    while self.Atoms.IsLosingHP() and gameStarted do
         task.wait(1)
 
         local baseDecay = hookedFish.MaxHP / 40
         local actualDecay = baseDecay * minigameConfig.DecayRate
 
-        local amount = FishingGame.Atoms.CurrentFishHP()
+        local amount = self.Atoms.CurrentFishHP()
         local new = amount - actualDecay
-        FishingGame.Atoms.CurrentFishHP(new)
+        self.Atoms.CurrentFishHP(new)
 
-        if FishingGame.Atoms.CurrentFishHP() < 0 then
-            FishingGame.Atoms.CurrentFishHP(0)
+        if self.Atoms.CurrentFishHP() < 0 then
+            self.Atoms.CurrentFishHP(0)
         end
 
-        local progress = KinProgressBar.CalculateProgress(FishingGame.Atoms.CurrentFishHP(), hookedFish.MaxHP)
-        FishingGame.Atoms.FishHPProgress(progress)
+        local progress = KinProgressBar.CalculateProgress(self.Atoms.CurrentFishHP(), hookedFish.MaxHP)
+        self.Atoms.FishHPProgress(progress)
 
-        if FishingGame.Atoms.CurrentFishHP() <= 0 then
-            FishingGame.Atoms.IsLosingHP(false)
+        if self.Atoms.CurrentFishHP() <= 0 then
+            self.Atoms.IsLosingHP(false)
 
             local fishingResult = {
                 Success = false,
@@ -249,14 +256,14 @@ function FishingGame:startLosingHP()
                 fishingResultEvent:FireServer(currentSessionId, fishingResult)
             end
 
-            FishingGame.Atoms.ShowGame(false)
-            FishingGame.Atoms.StartGame(false)
+            self.Atoms.ShowGame(false)
+            self.Atoms.StartGame(false)
             break
         end
     end
 end
 
-local buttonReleased = Charm.subscribe(FishingGame.Atoms.ButtonPressed, function(isPressed)
+local _buttonReleased = Charm.subscribe(FishingGame.Atoms.ButtonPressed, function(isPressed)
     if isPressed then
         return
     end
@@ -276,7 +283,7 @@ local buttonReleased = Charm.subscribe(FishingGame.Atoms.ButtonPressed, function
     local isOverLapping2 = FishingGame.checkObjectsOverlap(FishingGame.Atoms.HitMarkerRef(), FishingGame.Atoms.HitArea2Ref())
     local isOverLapping3 = FishingGame.checkObjectsOverlap(FishingGame.Atoms.HitMarkerRef(), FishingGame.Atoms.HitArea3Ref())
 
-    FishingGame.resetHitMarker()
+    FishingGame:resetHitMarker()
 
     local area = 0
     if isOverLapping1 then
@@ -343,14 +350,15 @@ local buttonReleased = Charm.subscribe(FishingGame.Atoms.ButtonPressed, function
         return
     end
 
-    FishingGame.relocateHitContainer()
+    FishingGame:relocateHitContainer()
 
     if area > 0 then
-        FishingGame.startLosingHP()
+        FishingGame:startLosingHP()
     end
 end)
 
-local buttonPressed = Charm.subscribe(FishingGame.Atoms.ButtonPressed, function(isPressed)
+local _buttonPressed = Charm.subscribe(FishingGame.Atoms.ButtonPressed, function(isPressed)
+    print("Atom: ButtonPressed changed to", isPressed)
     if not isPressed then
         return
     end
@@ -364,6 +372,7 @@ local buttonPressed = Charm.subscribe(FishingGame.Atoms.ButtonPressed, function(
     if not markerConnection and gameStarted then
         markerConnection = RunService.Heartbeat:Connect(function(deltaTime: number)
             if not gameStarted or not isButtonHeld then
+                warn("Either gameStarted == false or isButtonHeld == false")
                 return
             end
 
@@ -409,7 +418,7 @@ if startGameEvent then
         FishingGame.Atoms.ShowGame(true)
         FishingGame.Atoms.StartGame(true)
 
-        FishingGame.handleClosingGameUI()
+        FishingGame:handleClosingGameUI()
     end)
 end
 

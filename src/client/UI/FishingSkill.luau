@@ -48,7 +48,7 @@ function FishingSkillBar.manager()
             LayoutOrder = 1,
             Position = FFGEnum.THEME.alignment.position.center,
             Size = UDim2.fromScale(0.1, 1),
-            Text = `{fishingLevelState.FishingLevel}`,
+            Text = `{fishingLevelState.FishingLevel or 1}`,
             TextColor3 = Color3.new(1, 1, 1),
             TextScaled = true,
         }, {
@@ -64,7 +64,7 @@ function FishingSkillBar.manager()
             LayoutOrder = 3,
             Position = FFGEnum.THEME.alignment.position.center,
             Size = UDim2.fromScale(0.1, 1),
-            Text = `{fishingLevelState.FishingLevel + 1}`,
+            Text = `{fishingLevelState.FishingLevel or 1 + 1}`,
             TextColor3 = Color3.new(1, 1, 1),
             TextScaled = true,
         }, {

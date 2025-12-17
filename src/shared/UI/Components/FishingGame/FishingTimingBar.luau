@@ -1,7 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Charm = require(ReplicatedStorage.Packages.Charm)
-local RCharm = require(ReplicatedStorage.Packages.RCharm)
 local React = require(ReplicatedStorage.Packages.React)
 
 local e = React.createElement
@@ -19,7 +18,15 @@ function FishingTimingBar.component(props: {
     },
 })
     local buttonPressed = props.ButtonPressedAtom
-    local hitMarkerPosition = RCharm.useAtom(props.HitMarkerPosition)
+    local hitMarkerPosition, setHitMarkerPosition = React.useBinding(props.HitMarkerPosition())
+
+    React.useEffect(function()
+        local unsubscribe = Charm.subscribe(props.HitMarkerPosition, function(newValue)
+            setHitMarkerPosition(newValue)
+            print(hitMarkerPosition)
+        end)
+        return unsubscribe
+    end, {})
 
     return e("Frame", {
         AnchorPoint = Vector2.new(0.5, 0.5),
@@ -136,9 +143,20 @@ function FishingTimingBar.component(props: {
 
         catchButton = e("ImageButton", {
             AnchorPoint = Vector2.new(0.5, 0),
+            Active = true,
             BackgroundColor3 = Color3.new(1, 1, 1),
             Position = UDim2.fromScale(0.5, 1.02),
             Size = UDim2.fromScale(2.11351, 0.172228),
+            [React.Event.InputBegan] = function(rbxInstance, input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    buttonPressed(true)
+                end
+            end,
+            [React.Event.InputEnded] = function(rbxInstance, input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    buttonPressed(false)
+                end
+            end,
         }, {
             uICorner = e("UICorner", {
                 CornerRadius = UDim.new(1, 0),
@@ -168,18 +186,6 @@ function FishingTimingBar.component(props: {
                 }),
                 Rotation = 19,
             }),
-
-            [React.Event.InputBegan] = function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                    buttonPressed(true)
-                end
-            end,
-
-            [React.Event.InputEnded] = function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                    buttonPressed(false)
-                end
-            end,
         }),
 
         uIGradient = e("UIGradient", {

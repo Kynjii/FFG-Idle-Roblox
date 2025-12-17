@@ -57,7 +57,7 @@ function FishingHitNotification.component(props: { AreaHitAtom: Charm.Atom<{ Are
                 end),
                 Image = FFGEnum.UI.Icons.Sword,
                 Position = UDim2.fromScale(0.2, 0.5),
-                ImageColor = color,
+                ImageColor3 = color,
                 Size = UDim2.fromScale(0.4, 0.55),
                 ZIndex = 5,
             }, {

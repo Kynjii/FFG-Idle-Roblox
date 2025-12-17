@@ -9,7 +9,7 @@ local e = React.createElement
 local HUD = {}
 
 function HUD.manager()
-    local goldAmount, setGoldAmount = RCharm.useAtom(PlayerStateService.State.Gold)
+    local goldAmount = RCharm.useAtom(PlayerStateService.State.Gold)
 
     return e("Frame", {
         AnchorPoint = Vector2.new(1, 0),
