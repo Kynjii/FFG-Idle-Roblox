@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local React = require(ReplicatedStorage.Packages.React)
-local RC = require(ReplicatedStorage.Packages["React-charm"])
+local RCharm = require(ReplicatedStorage.Packages.RCharm)
 local PlayerStateService = require(ReplicatedStorage.Shared.Atoms.PlayerStateService)
 local FFGEnum = require(ReplicatedStorage.Shared.Enums.FFGEnum)
 local KinProgressBar = require(ReplicatedStorage.Shared.UI.Components.KinProgressBar)
@@ -16,8 +16,8 @@ type FishingLevelState = {
 
 local FishingSkillBar = {}
 
-function FishingSkillBar.component()
-    local fishingLevelState: FishingLevelState = RC.useAtom(PlayerStateService.State.FishingSkillState)
+function FishingSkillBar.manager()
+    local fishingLevelState: FishingLevelState = RCharm.useAtom(PlayerStateService.State.FishingSkillState)
 
     local state = fishingLevelState
     local xp = state.FishingXP or 0

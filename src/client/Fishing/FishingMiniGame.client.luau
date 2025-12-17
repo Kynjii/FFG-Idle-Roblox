@@ -55,16 +55,14 @@ local perfectHits = 0
 local goodHits = 0
 local okHits = 0
 
--- Fish HP and decay tracking
 local currentFishHP = 0
 local isLosingHP = false
 
--- Difficulty-based minigame config
 local minigameConfig = {
-    HitZoneSize = 0.25, -- Default hit zone size
-    MarkerSpeed = 0.5, -- Default marker speed
-    DecayRate = 1.0, -- Default HP decay rate
-    HealMultiplier = 1.0, -- Default heal amount multiplier
+    HitZoneSize = 0.25,
+    MarkerSpeed = 0.5,
+    DecayRate = 1.0,
+    HealMultiplier = 1.0,
 }
 
 local hitTimeline = {}
@@ -416,10 +414,7 @@ end
 
 if catchButton then
     catchButton.InputBegan:Connect(function(input)
-        if
-            input.UserInputType == Enum.UserInputType.MouseButton1
-            or input.UserInputType == Enum.UserInputType.Touch
-        then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             buttonPressed()
         end
     end)
@@ -427,10 +422,7 @@ end
 
 if catchButton then
     catchButton.InputEnded:Connect(function(input)
-        if
-            input.UserInputType == Enum.UserInputType.MouseButton1
-            or input.UserInputType == Enum.UserInputType.Touch
-        then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             buttonReleased()
         end
     end)

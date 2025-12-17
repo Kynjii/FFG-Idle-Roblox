@@ -1,8 +1,9 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterPlayer = game:GetService("StarterPlayer")
 
 local React = require(ReplicatedStorage.Packages.React)
 local ReactRoblox = require(ReplicatedStorage.Packages["React-roblox"])
-local FishingMiniGame = require(ReplicatedStorage.Shared.UI.Components.FishingGame.FishingMiniGame)
+local FishingGameUI = require(StarterPlayer.StarterPlayerScripts.Client.UI.FishingGameUI)
 
 local story = {
     react = React,
@@ -15,7 +16,7 @@ local story = {
             Position = UDim2.fromScale(0.5, 0.5),
             Size = UDim2.fromScale(0.7, 0.7),
         }, {
-            component = FishingMiniGame.component(props),
+            component = FishingGameUI.component(props),
         })
 
         return container

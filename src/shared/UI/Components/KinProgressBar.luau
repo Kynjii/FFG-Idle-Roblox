@@ -10,6 +10,7 @@ local e = React.createElement
 
 type Props = {
     state: number?,
+    forY: boolean?,
 }
 
 local KinProgressBar = {}
@@ -51,11 +52,23 @@ function KinProgressBar.component(props: Props)
                 SliceCenter = FFGEnum.UI.ProgressBar.BackgroundWhite.SliceCenter,
                 ZIndex = 2,
                 Size = progressBinding:map(function(p)
-                    return UDim2.fromScale(p, 1)
+                    if props.forY then
+                        return UDim2.fromScale(1, p)
+                    else
+                        return UDim2.fromScale(p, 1)
+                    end
                 end),
             }),
         }),
     })
+end
+
+function KinProgressBar.CalculateProgress(currentValue: number, maxValue: number): number
+    local max = maxValue or 0
+    local current = currentValue or 0
+    local progress = (max > 0) and math.clamp(current / max, 0, 1) or 0
+
+    return progress
 end
 
 return KinProgressBar

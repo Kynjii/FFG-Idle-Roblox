@@ -6,14 +6,16 @@ local e = React.createElement
 
 local HUD = require(StarterPlayer.StarterPlayerScripts.Client.UI.HUD)
 local FishingSkill = require(StarterPlayer.StarterPlayerScripts.Client.UI.FishingSkill)
+local FishingGame = require(StarterPlayer.StarterPlayerScripts.Client.UI.FishingGame)
 
 local function App()
     return e("Frame", {
         Size = UDim2.fromScale(1, 1),
         BackgroundTransparency = 1,
     }, {
-        HUD = HUD.component(),
-        FishingSkill = FishingSkill.component(),
+        HUD = HUD.manager(),
+        FishingSkill = FishingSkill.manager(),
+        FishingGame = FishingGame.manager(),
     })
 end
 

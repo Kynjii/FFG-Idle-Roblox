@@ -1,15 +1,15 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local RCharm = require(ReplicatedStorage.Packages.RCharm)
 local React = require(ReplicatedStorage.Packages.React)
-local RC = require(ReplicatedStorage.Packages["React-charm"])
 local PlayerStateService = require(ReplicatedStorage.Shared.Atoms.PlayerStateService)
 local Format = require(ReplicatedStorage.Shared.Utils.Format)
 local e = React.createElement
 
 local HUD = {}
 
-function HUD.component()
-    local goldAmount, setGoldAmount = RC.useAtom(PlayerStateService.State.Gold)
+function HUD.manager()
+    local goldAmount, setGoldAmount = RCharm.useAtom(PlayerStateService.State.Gold)
 
     return e("Frame", {
         AnchorPoint = Vector2.new(1, 0),
