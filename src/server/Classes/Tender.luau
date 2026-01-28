@@ -1,3 +1,15 @@
+--[[
+	Tender.luau
+	
+	Represents a tender entity that transports fish from boats to port storage.
+	Tenders travel between boats and the dock, automatically collecting fish
+	when boats' storage is full. They have travel time and load time stats
+	that improve with upgrades.
+	
+	@class Tender
+	@server
+]]
+
 local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
@@ -30,30 +42,30 @@ type BuffState = BuffType.BuffState
 local DESCRIPTION = "A nimble Tender, darting back and forth between port and sea. \n\n- Delivers your boat’s Fish with travel and load times that improve as you upgrade."
 
 local DEFAULTS = {
-	Entity = FFGEnum.CLASS.ENTITY_NAME.Tender,
-	RealmId = 1,
-	Tier = 1,
-	Name = "Transporter",
-	Level = 1,
-	MaxLevel = Formulas.MAX_LEVEL,
-	BaseCost = Formulas.TENDER.BaseCost,
-	IsPurchased = false,
-	BaseStorage = Formulas.TENDER.BaseStorage,
-	UpgradeStage = 1,
-	FishInStorage = 0,
-	StorageFull = false,
-	BaseTravelTime = 10, -- secs
-	BaseLoadTime = 10, -- secs
+    Entity = FFGEnum.CLASS.ENTITY_NAME.Tender,
+    RealmId = 1,
+    Tier = 1,
+    Name = "Transporter",
+    Level = 1,
+    MaxLevel = Formulas.MAX_LEVEL,
+    BaseCost = Formulas.TENDER.BaseCost,
+    IsPurchased = false,
+    BaseStorage = Formulas.TENDER.BaseStorage,
+    UpgradeStage = 1,
+    FishInStorage = 0,
+    StorageFull = false,
+    BaseTravelTime = 10, -- secs
+    BaseLoadTime = 10, -- secs
 }
 
 local ANIMATIONS = {
-	WaterBob = "WaterBob",
+    WaterBob = "WaterBob",
 }
 
 local TENDER_BUFFS = {
-	TenderStorage_Percent = FFGEnum.BUFFS.STORAGE.Tender_Percent,
-	TenderTravelTime_Percent = FFGEnum.BUFFS.TRAVEL_TIME.Tender_Percent,
-	TenderLoadTime_Percent = FFGEnum.BUFFS.LOAD_TIME.Tender_Percent,
+    TenderStorage_Percent = FFGEnum.BUFFS.STORAGE.Tender_Percent,
+    TenderTravelTime_Percent = FFGEnum.BUFFS.TRAVEL_TIME.Tender_Percent,
+    TenderLoadTime_Percent = FFGEnum.BUFFS.LOAD_TIME.Tender_Percent,
 }
 -- //!SECTION
 
@@ -63,527 +75,593 @@ Tender.__index = Tender
 type Tender = typeof(setmetatable({} :: TenderData, Tender))
 
 -- //SECTION - Constructor
+--- Creates a new Tender entity instance.
+--- Merges provided state with defaults and calculates all derived properties.
+--- @param state table? -- Optional saved state to restore (from DataStore)
+--- @param player Player -- The player who owns this tender
+--- @param model Model -- The tender's 3D model in workspace
+--- @param teamId number -- The player's team/plot identifier
+--- @return Tender -- The constructed tender instance
 function Tender.New(state: { [string]: any }?, player: Player, model: Model, teamId: number): Tender
-	local self = setmetatable({} :: TenderData, Tender)
+    local self = setmetatable({} :: TenderData, Tender)
 
-	-- Start with default stats as base
-	for key, value in pairs(DEFAULTS) do
-		self[key] = value
-	end
+    -- Start with default stats as base
+    for key, value in pairs(DEFAULTS) do
+        self[key] = value
+    end
 
-	-- Override with provided state values
-	if state then
-		for key, value in pairs(state) do
-			self[key] = value
-		end
-	end
+    -- Override with provided state values
+    if state then
+        for key, value in pairs(state) do
+            self[key] = value
+        end
+    end
 
-	-- Calculate derived properties
-	self.Id = self.Id or HttpService:GenerateGUID(false)
-	self.TeamId = teamId
-	self.Description = DESCRIPTION
-	self.Owner = self.Owner or player.UserId
-	self.Model = model
-	self.Entity = self.Entity or DEFAULTS.Entity
-	self.VisualRoot = model:FindFirstChild("VisualRoot", true)
-	self.PortPos = model.PrimaryPart and model.PrimaryPart.CFrame or CFrame.new()
-	self.Tier = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.Tier) or DEFAULTS.Tier
-	self.Player = player
+    -- Calculate derived properties
+    self.Id = self.Id or HttpService:GenerateGUID(false)
+    self.TeamId = teamId
+    self.Description = DESCRIPTION
+    self.Owner = self.Owner or player.UserId
+    self.Model = model
+    self.Entity = self.Entity or DEFAULTS.Entity
+    self.VisualRoot = model:FindFirstChild("VisualRoot", true)
+    self.PortPos = model.PrimaryPart and model.PrimaryPart.CFrame or CFrame.new()
+    self.Tier = self.Model:GetAttribute(FFGEnum.ATTRIBUTES.Tier) or DEFAULTS.Tier
+    self.Player = player
 
-	self.Buffs = self:GetBuffs()
+    self.Buffs = self:GetBuffs()
 
-	self.BaseCost = self:CalculateBaseCost()
-	self.UpgradeCost = self:CalculateUpgradeCost()
-	self.BaseStorage = self:CalculateBaseStorage()
+    self.BaseCost = self:CalculateBaseCost()
+    self.UpgradeCost = self:CalculateUpgradeCost()
+    self.BaseStorage = self:CalculateBaseStorage()
 
-	self.VisualModels = self:GetVisualModels()
-	self.CurrentVisualModel = nil
+    self.VisualModels = self:GetVisualModels()
+    self.CurrentVisualModel = nil
 
-	-- Storage calcs
-	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
+    -- Storage calcs
+    self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
 
-	-- Load Time calcs
-	self.LoadTime = self:CalculateLoadTime()
+    -- Load Time calcs
+    self.LoadTime = self:CalculateLoadTime()
 
-	-- Travel Time calcs
-	self.CurrentTravelTime = self:CalculateTravelTime()
+    -- Travel Time calcs
+    self.CurrentTravelTime = self:CalculateTravelTime()
 
-	-- Warnings
-	self.ClonedBillboard = nil
+    -- Warnings
+    self.ClonedBillboard = nil
 
-	-- Tweens
-	self.ProgressTween = nil
-	self.MoveTween = nil
+    -- Tweens
+    self.ProgressTween = nil
+    self.MoveTween = nil
 
-	self._cleaner = Trove.new()
+    self._cleaner = Trove.new()
 
-	self.PurchaseButton, self.Nameplate = self:SetupPurchaseButton()
-	if self.PurchaseButton then self:SetButtonLogic() end
-	self.ButtonDebounce = false
+    self.PurchaseButton, self.Nameplate = self:SetupPurchaseButton()
+    if self.PurchaseButton then
+        self:SetButtonLogic()
+    end
+    self.ButtonDebounce = false
 
-	return self
+    return self
 end
 -- //!SECTION
 
 -- //SECTION - Buffs
+--- Retrieves current buff values affecting this tender from the player's buff state.
+--- @return table -- Map of buff names to their current values
 function Tender.GetBuffs(self: Tender)
-	local buffs = Buffs.GetBuffs(self.Player, TENDER_BUFFS)
-	return buffs
+    local buffs = Buffs.GetBuffs(self.Player, TENDER_BUFFS)
+    return buffs
 end
 
+--- Refreshes the cached buff values from the player's current buff state.
 function Tender.UpdateBuffs(self: Tender)
-	self.Buffs = self:GetBuffs()
+    self.Buffs = self:GetBuffs()
 end
 
+--- Recalculates all derived stats after a buff or level change.
+--- Updates: buffs, upgrade cost, storage, travel time, load time, and nameplate.
 function Tender.RecalculateAll(self: Tender)
-	self:UpdateBuffs()
+    self:UpdateBuffs()
 
-	self.UpgradeCost = self:CalculateUpgradeCost()
-	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
-	self.LoadTime = self:CalculateLoadTime()
-	self.CurrentTravelTime = self:CalculateTravelTime()
+    self.UpgradeCost = self:CalculateUpgradeCost()
+    self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
+    self.LoadTime = self:CalculateLoadTime()
+    self.CurrentTravelTime = self:CalculateTravelTime()
 
-	self:UpdateNameplate()
+    self:UpdateNameplate()
 end
 -- //!SECTION
 
 -- //SECTION - Core Tender Actions
 function Tender.Purchase(self: Tender)
-	self.IsPurchased = true
-	if self.Model.PrimaryPart then self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.IsPurchased, true) end
+    self.IsPurchased = true
+    if self.Model.PrimaryPart then
+        self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.IsPurchased, true)
+    end
 
-	self:UpdateBuffs()
-	self:UpdateVisualModel()
-	self:Save()
+    self:UpdateBuffs()
+    self:UpdateVisualModel()
+    self:Save()
 
-	if self.Tier == 1 then Tutorial.Update(self.Player, self.TeamId) end
+    if self.Tier == 1 then
+        Tutorial.Update(self.Player, self.TeamId)
+    end
 
-	self:UpdateNameplate()
+    self:UpdateNameplate()
 end
 
 function Tender.Upgrade(self: Tender)
-	if not self:CanUpgrade() then return end
+    if not self:CanUpgrade() then
+        return
+    end
 
-	self.Level += 1
-	local stage = Formulas.StageForLevel(self.Level)
-	if self.UpgradeStage < stage then
-		self:IncreaseUpgradeStage(stage)
-		self:UpdateVisualModel()
-		self.CurrentTravelTime = self:CalculateTravelTime()
-		self.LoadTime = self:CalculateLoadTime()
-	end
+    self.Level += 1
+    local stage = Formulas.StageForLevel(self.Level)
+    if self.UpgradeStage < stage then
+        self:IncreaseUpgradeStage(stage)
+        self:UpdateVisualModel()
+        self.CurrentTravelTime = self:CalculateTravelTime()
+        self.LoadTime = self:CalculateLoadTime()
+    end
 
-	self:UpdateBuffs()
-	self.UpgradeCost = self:CalculateUpgradeCost()
-	self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
+    self:UpdateBuffs()
+    self.UpgradeCost = self:CalculateUpgradeCost()
+    self.CurrentMaxStorage, self.NextLvlMaxStorage = self:CalculateMaxStorage()
 
-	self:UpdateNameplate()
+    self:UpdateNameplate()
 
-	self:Save()
+    self:Save()
 end
 
 function Tender.IncreaseUpgradeStage(self: Tender, stage: number)
-	self.UpgradeStage = stage
+    self.UpgradeStage = stage
 end
 -- //!SECTION
 
 -- //SECTION - Calculations
 function Tender.CalculateBaseCost(self: Tender): number
-	local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, self.Tier, self.RealmId)
-	self.BaseCost = base
+    local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, self.Tier, self.RealmId)
+    self.BaseCost = base
 
-	return base
+    return base
 end
 
 function Tender.CalculateUpgradeCost(self: Tender): number
-	local baseCost = self.BaseCost or DEFAULTS.BaseCost
-	if baseCost == DEFAULTS.BaseCost then baseCost = self:CalculateBaseCost() end
+    local baseCost = self.BaseCost or DEFAULTS.BaseCost
+    if baseCost == DEFAULTS.BaseCost then
+        baseCost = self:CalculateBaseCost()
+    end
 
-	local cost = ClassCalculators.CalculateUpgradeCost(baseCost, self.Level, self.Tier, self.RealmId)
+    local cost = ClassCalculators.CalculateUpgradeCost(baseCost, self.Level, self.Tier, self.RealmId)
 
-	self.UpgradeCost = cost
+    self.UpgradeCost = cost
 
-	return cost
+    return cost
 end
 
 function Tender.CalculateBaseStorage(self: Tender): number
-	local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseStorage, self.Tier, self.RealmId)
-	self.BaseStorage = base
+    local base = ClassCalculators.CalculateBaseValue(DEFAULTS.BaseStorage, self.Tier, self.RealmId)
+    self.BaseStorage = base
 
-	return base
+    return base
 end
 
 function Tender.CalculateMaxStorage(self: Tender): (number, number)
-	local baseStorage = self.BaseStorage or DEFAULTS.BaseStorage
-	if baseStorage == DEFAULTS.BaseStorage then baseStorage = self:CalculateBaseStorage() end
-	local storagePercentBuff = self.Buffs[TENDER_BUFFS.TenderStorage_Percent] and self.Buffs[TENDER_BUFFS.TenderStorage_Percent].CurrentValue or nil
+    local baseStorage = self.BaseStorage or DEFAULTS.BaseStorage
+    if baseStorage == DEFAULTS.BaseStorage then
+        baseStorage = self:CalculateBaseStorage()
+    end
+    local storagePercentBuff = self.Buffs[TENDER_BUFFS.TenderStorage_Percent] and self.Buffs[TENDER_BUFFS.TenderStorage_Percent].CurrentValue or nil
 
-	return ClassCalculators.CalculateMaxStorage(baseStorage, self.Level, storagePercentBuff)
+    return ClassCalculators.CalculateMaxStorage(baseStorage, self.Level, storagePercentBuff)
 end
 
 function Tender.CalculateTravelTime(self: Tender): number
-	local travelTimeBuff = self.Buffs[TENDER_BUFFS.TenderTravelTime_Percent] and self.Buffs[TENDER_BUFFS.TenderTravelTime_Percent].CurrentValue or nil
-	return ClassCalculators.CalculateTravelTime(DEFAULTS.BaseTravelTime, travelTimeBuff)
+    local travelTimeBuff = self.Buffs[TENDER_BUFFS.TenderTravelTime_Percent] and self.Buffs[TENDER_BUFFS.TenderTravelTime_Percent].CurrentValue or nil
+    return ClassCalculators.CalculateTravelTime(DEFAULTS.BaseTravelTime, travelTimeBuff)
 end
 
 function Tender.CalculateLoadTime(self: Tender): number
-	local loadTimeBuff = self.Buffs[TENDER_BUFFS.TenderLoadTime_Percent] and self.Buffs[TENDER_BUFFS.TenderLoadTime_Percent].CurrentValue or nil
-	return ClassCalculators.CalculateLoadTime(DEFAULTS.BaseLoadTime, loadTimeBuff)
+    local loadTimeBuff = self.Buffs[TENDER_BUFFS.TenderLoadTime_Percent] and self.Buffs[TENDER_BUFFS.TenderLoadTime_Percent].CurrentValue or nil
+    return ClassCalculators.CalculateLoadTime(DEFAULTS.BaseLoadTime, loadTimeBuff)
 end
 -- //!SECTION
 
 -- //SECTION - Handle Travelling
 function Tender.MoveToBoat(self: Tender, boatPos: CFrame)
-	if self.Model.PrimaryPart then self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.atPort, false) end
+    if self.Model.PrimaryPart then
+        self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.atPort, false)
+    end
 
-	-- cancel any existing motion/progress tweens first
-	if self.MoveTween then pcall(function()
-		self.MoveTween:Cancel()
-		self.MoveTween = nil
-	end) end
+    -- cancel any existing motion/progress tweens first
+    if self.MoveTween then
+        pcall(function()
+            self.MoveTween:Cancel()
+            self.MoveTween = nil
+        end)
+    end
 
-	local tenderModel = self.Model
+    local tenderModel = self.Model
 
-	local offset = CFrame.new(0, -12, 0)
-	local tweenGoal = {
-		CFrame = boatPos:ToWorldSpace(offset),
-	}
+    local offset = CFrame.new(0, -12, 0)
+    local tweenGoal = {
+        CFrame = boatPos:ToWorldSpace(offset),
+    }
 
-	local tweenInfo = TweenInfo.new(self.CurrentTravelTime, Enum.EasingStyle.Linear)
-	local tween = TweenService:Create(tenderModel.PrimaryPart, tweenInfo, tweenGoal)
+    local tweenInfo = TweenInfo.new(self.CurrentTravelTime, Enum.EasingStyle.Linear)
+    local tween = TweenService:Create(tenderModel.PrimaryPart, tweenInfo, tweenGoal)
 
-	self.MoveTween = tween
-	if self._cleaner then
-		self._cleaner:Add(tween)
+    self.MoveTween = tween
+    if self._cleaner then
+        self._cleaner:Add(tween)
 
-		self._cleaner:Add(tween.Completed:Once(function(playbackState)
-			if self.Model.PrimaryPart then self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.atBoat, true) end
-			if self.MoveTween == tween then self.MoveTween = nil end
-		end))
-	end
+        self._cleaner:Add(tween.Completed:Once(function(playbackState)
+            if self.Model.PrimaryPart then
+                self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.atBoat, true)
+            end
+            if self.MoveTween == tween then
+                self.MoveTween = nil
+            end
+        end))
+    end
 
-	tween:Play()
+    tween:Play()
 end
 
 function Tender.MoveToPort(self: Tender)
-	if self.Model.PrimaryPart then self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.atBoat, false) end
+    if self.Model.PrimaryPart then
+        self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.atBoat, false)
+    end
 
-	if self.MoveTween then pcall(function()
-		self.MoveTween:Cancel()
-		self.MoveTween = nil
-	end) end
+    if self.MoveTween then
+        pcall(function()
+            self.MoveTween:Cancel()
+            self.MoveTween = nil
+        end)
+    end
 
-	local tenderModel = self.Model
-	local portPos = self.PortPos
+    local tenderModel = self.Model
+    local portPos = self.PortPos
 
-	local tweenGoal = {
-		CFrame = portPos,
-	}
+    local tweenGoal = {
+        CFrame = portPos,
+    }
 
-	local tweenInfo = TweenInfo.new(self.CurrentTravelTime, Enum.EasingStyle.Linear)
-	local tween = TweenService:Create(tenderModel.PrimaryPart, tweenInfo, tweenGoal)
+    local tweenInfo = TweenInfo.new(self.CurrentTravelTime, Enum.EasingStyle.Linear)
+    local tween = TweenService:Create(tenderModel.PrimaryPart, tweenInfo, tweenGoal)
 
-	self.MoveTween = tween
-	if self._cleaner then
-		self._cleaner:Add(tween)
+    self.MoveTween = tween
+    if self._cleaner then
+        self._cleaner:Add(tween)
 
-		self._cleaner:Add(tween.Completed:Once(function(playbackState)
-			if self.Model.PrimaryPart then self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.atPort, true) end
-			if self.MoveTween == tween then self.MoveTween = nil end
-		end))
-	end
+        self._cleaner:Add(tween.Completed:Once(function(playbackState)
+            if self.Model.PrimaryPart then
+                self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.atPort, true)
+            end
+            if self.MoveTween == tween then
+                self.MoveTween = nil
+            end
+        end))
+    end
 
-	tween:Play()
+    tween:Play()
 end
 
 function Tender.AddFish(self: Tender, amount: number)
-	if self:IsStorageFull() then return end
+    if self:IsStorageFull() then
+        return
+    end
 
-	self.FishInStorage += amount
+    self.FishInStorage += amount
 
-	self:ShowFishPopUp(amount)
+    self:ShowFishPopUp(amount)
 
-	if self.FishInStorage >= self.CurrentMaxStorage then
-		self.FishInStorage = self.CurrentMaxStorage
-		self:UpdateStorageStatus(true)
-	end
+    if self.FishInStorage >= self.CurrentMaxStorage then
+        self.FishInStorage = self.CurrentMaxStorage
+        self:UpdateStorageStatus(true)
+    end
 
-	self:Save()
+    self:Save()
 
-	self:UpdateNameplate()
+    self:UpdateNameplate()
 end
 
 function Tender.RemoveFish(self: Tender, amount: number)
-	self.FishInStorage = math.max(self.FishInStorage - amount, 0)
+    self.FishInStorage = math.max(self.FishInStorage - amount, 0)
 
-	self:UpdateStorageStatus(false)
-	self:Save()
+    self:UpdateStorageStatus(false)
+    self:Save()
 
-	self:UpdateNameplate()
+    self:UpdateNameplate()
 end
 
 function Tender.UpdateStorageStatus(self: Tender, status: boolean)
-	self.StorageFull = status
+    self.StorageFull = status
 end
 -- //!SECTION
 
 -- //SECTION - UI Setup
 function Tender.Initialize(self: Tender)
-	-- Handle visibility based on purchase status
-	if not self.IsPurchased then
-		self:Hide()
-		self:CannotCollide()
-	else
-		self:Show()
-		self:CanCollide()
-	end
+    -- Handle visibility based on purchase status
+    if not self.IsPurchased then
+        self:Hide()
+        self:CannotCollide()
+    else
+        self:Show()
+        self:CanCollide()
+    end
 
-	self:UpdateVisualModel()
-	self:StartAnimation()
+    self:UpdateVisualModel()
+    self:StartAnimation()
 
-	-- Apply attributes for ChainManager
-	if self.IsPurchased then
-		if self.Model.PrimaryPart then self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.IsPurchased, self.IsPurchased) end
-	end
+    -- Apply attributes for ChainManager
+    if self.IsPurchased then
+        if self.Model.PrimaryPart then
+            self.Model.PrimaryPart:SetAttribute(FFGEnum.ATTRIBUTES.IsPurchased, self.IsPurchased)
+        end
+    end
 end
 
 function Tender.UpdateNameplate(self: Tender)
-	EntityNameplate.Update(self.Nameplate, self)
+    EntityNameplate.Update(self.Nameplate, self)
 end
 
 function Tender.SetupPurchaseButton(self: Tender): (Model, { [string]: any })
-	local purchaseButton = self.Model:WaitForChild("Purchase_Button")
+    local purchaseButton = self.Model:WaitForChild("Purchase_Button")
 
-	return PurchaseButton.CreatePB(purchaseButton, self :: any)
+    return PurchaseButton.CreatePB(purchaseButton, self :: any)
 end
 
 function Tender.SetButtonLogic(self: Tender): ()
-	PurchaseButton.CreateLogic(self)
+    PurchaseButton.CreateLogic(self)
 end
 
 function Tender.ShowFishPopUp(self: Tender, amount: number)
-	if not self.Model then return end
+    if not self.Model then
+        return
+    end
 
-	local billboard: BillboardGui = game.Workspace:FindFirstChild("BillBoards"):FindFirstChild("FishPopupTemplate")
-	if billboard and self.Model.PrimaryPart then
-		local billboardFolder = self.Model.PrimaryPart:FindFirstChild("Billboard")
-		if billboardFolder then
-			local clone = billboard:Clone()
-			clone.Parent = billboardFolder
-			clone.Adornee = self.Model.PrimaryPart
-			clone.Name = "Popup_Clone"
-			PopUp.Animate(clone, amount, clone.Fish)
-		end
-	end
+    local billboard: BillboardGui = game.Workspace:FindFirstChild("BillBoards"):FindFirstChild("FishPopupTemplate")
+    if billboard and self.Model.PrimaryPart then
+        local billboardFolder = self.Model.PrimaryPart:FindFirstChild("Billboard")
+        if billboardFolder then
+            local clone = billboard:Clone()
+            clone.Parent = billboardFolder
+            clone.Adornee = self.Model.PrimaryPart
+            clone.Name = "Popup_Clone"
+            PopUp.Animate(clone, amount, clone.Fish)
+        end
+    end
 end
 
 function Tender.ShowTenderStoppedBillboard(self: Tender): ()
-	if self.ClonedBillboard then return end
+    if self.ClonedBillboard then
+        return
+    end
 
-	local billboard: BillboardGui = game.Workspace.BillBoards:FindFirstChild("TenderStopped", true)
-	if billboard then
-		local clone: BillboardGui = billboard:Clone()
-		clone.Parent = self.PurchaseButton.BillboardRoot
-		clone.Adornee = self.PurchaseButton.BillboardRoot
-		clone.Name = "TenderStopped_Clone"
+    local billboard: BillboardGui = game.Workspace.BillBoards:FindFirstChild("TenderStopped", true)
+    if billboard then
+        local clone: BillboardGui = billboard:Clone()
+        clone.Parent = self.PurchaseButton.BillboardRoot
+        clone.Adornee = self.PurchaseButton.BillboardRoot
+        clone.Name = "TenderStopped_Clone"
 
-		local canvasGroup: CanvasGroup = clone:FindFirstChild("CanvasGroup") :: CanvasGroup
-		canvasGroup.Visible = true
+        local canvasGroup: CanvasGroup = clone:FindFirstChild("CanvasGroup") :: CanvasGroup
+        canvasGroup.Visible = true
 
-		self.ClonedBillboard = clone
-	end
+        self.ClonedBillboard = clone
+    end
 end
 
 function Tender.DestroyTenderStoppedBillboard(self: Tender): ()
-	if not self.ClonedBillboard then return end
+    if not self.ClonedBillboard then
+        return
+    end
 
-	self.ClonedBillboard:Destroy()
-	self.ClonedBillboard = nil
+    self.ClonedBillboard:Destroy()
+    self.ClonedBillboard = nil
 end
 -- //!SECTION
 
 -- //SECTION - Visibility and Collision
 function Tender.Show(self: Tender)
-	ClassVisualizer.Show(self.VisualRoot)
+    ClassVisualizer.Show(self.VisualRoot)
 end
 
 function Tender.Hide(self: Tender)
-	ClassVisualizer.Hide(self.VisualRoot)
+    ClassVisualizer.Hide(self.VisualRoot)
 end
 
 function Tender.CanCollide(self: Tender)
-	ClassVisualizer.CanCollide(self.VisualRoot)
+    ClassVisualizer.CanCollide(self.VisualRoot)
 end
 
 function Tender.CannotCollide(self: Tender)
-	ClassVisualizer.CannotCollide(self.VisualRoot)
+    ClassVisualizer.CannotCollide(self.VisualRoot)
 end
 -- //!SECTION
 
 -- //SECTION - Tender Utilities
 function Tender.CanUpgrade(self: Tender): boolean
-	return self.Level < self.MaxLevel
+    return self.Level < self.MaxLevel
 end
 
 function Tender.IsStorageFull(self: Tender): boolean
-	local status = self.FishInStorage >= self.CurrentMaxStorage
-	self:UpdateStorageStatus(status)
-	return status
+    local status = self.FishInStorage >= self.CurrentMaxStorage
+    self:UpdateStorageStatus(status)
+    return status
 end
 
 function Tender.ShowUpgradeStageUpgrade(self: Tender): boolean
-	local threshold = Formulas.PROMO_LEVEL[self.UpgradeStage + 1] - 1
-	if self.Level < 9 then return false end
-	if self.Level == threshold then
-		return true
-	else
-		return false
-	end
+    local threshold = Formulas.PROMO_LEVEL[self.UpgradeStage + 1] - 1
+    if self.Level < 9 then
+        return false
+    end
+    if self.Level == threshold then
+        return true
+    else
+        return false
+    end
 end
 -- //!SECTION
 
 -- //SECTION - Loading and Saving
 function Tender.Serialize(self: Tender): { [string]: any }
-	return {
-		Entity = self.Entity,
-		Description = self.Description,
-		Id = self.Id,
-		Owner = self.Owner,
-		RealmId = self.RealmId,
-		Tier = self.Tier,
-		Name = self.Name,
-		Level = self.Level,
-		MaxLevel = self.MaxLevel,
-		BaseCost = self.BaseCost,
-		UpgradeCost = self.UpgradeCost,
-		IsPurchased = self.IsPurchased,
-		BaseStorage = self.BaseStorage,
-		UpgradeStage = self.UpgradeStage,
-		CurrentMaxStorage = self.CurrentMaxStorage,
-		NextLvlMaxStorage = self.NextLvlMaxStorage,
-		FishInStorage = self.FishInStorage,
-		StorageFull = self.StorageFull,
-		CurrentTravelTime = self.CurrentTravelTime,
-		LoadTime = self.LoadTime,
-	}
+    return {
+        Entity = self.Entity,
+        Description = self.Description,
+        Id = self.Id,
+        Owner = self.Owner,
+        RealmId = self.RealmId,
+        Tier = self.Tier,
+        Name = self.Name,
+        Level = self.Level,
+        MaxLevel = self.MaxLevel,
+        BaseCost = self.BaseCost,
+        UpgradeCost = self.UpgradeCost,
+        IsPurchased = self.IsPurchased,
+        BaseStorage = self.BaseStorage,
+        UpgradeStage = self.UpgradeStage,
+        CurrentMaxStorage = self.CurrentMaxStorage,
+        NextLvlMaxStorage = self.NextLvlMaxStorage,
+        FishInStorage = self.FishInStorage,
+        StorageFull = self.StorageFull,
+        CurrentTravelTime = self.CurrentTravelTime,
+        LoadTime = self.LoadTime,
+    }
 end
 
 function Tender.Save(self: Tender)
-	DataService.SaveTenderState(self.Player, self.Id, self:Serialize())
+    DataService.SaveTenderState(self.Player, self.Id, self:Serialize())
 end
 -- //!SECTION
 
 -- //SECTION - Visual Models
 function Tender.GetVisualModels(self: Tender): { [number]: Model }
-	local modelsFolder = DeepWait(game.Workspace, "Tenders", "VisualStages")
-	local models = modelsFolder:GetChildren()
+    local modelsFolder = DeepWait(game.Workspace, "Tenders", "VisualStages")
+    local models = modelsFolder:GetChildren()
 
-	local sortedModels = {}
-	for k, v in pairs(models) do
-		sortedModels[tonumber(v.Name)] = v
-	end
+    local sortedModels = {}
+    for k, v in pairs(models) do
+        sortedModels[tonumber(v.Name)] = v
+    end
 
-	return sortedModels
+    return sortedModels
 end
 
 function Tender.RemovePreviousVisualModel(self: Tender)
-	local visualModel = self.CurrentVisualModel
-	if not visualModel then return end
+    local visualModel = self.CurrentVisualModel
+    if not visualModel then
+        return
+    end
 
-	visualModel:Destroy()
-	self.CurrentVisualModel = nil
+    visualModel:Destroy()
+    self.CurrentVisualModel = nil
 end
 
 function Tender.UpdateVisualModel(self: Tender)
-	self:RemovePreviousVisualModel()
+    self:RemovePreviousVisualModel()
 
-	if not self.VisualModels then return end
-	local templateModel = self.VisualModels[self.UpgradeStage]
-	if not templateModel then return end
-	local updatedModel = templateModel:Clone()
+    if not self.VisualModels then
+        return
+    end
+    local templateModel = self.VisualModels[self.UpgradeStage]
+    if not templateModel then
+        return
+    end
+    local updatedModel = templateModel:Clone()
 
-	updatedModel.Name = templateModel.Name .. "_Clone"
-	updatedModel.Parent = self.VisualRoot
-	updatedModel:PivotTo(self.VisualRoot.CFrame)
+    updatedModel.Name = templateModel.Name .. "_Clone"
+    updatedModel.Parent = self.VisualRoot
+    updatedModel:PivotTo(self.VisualRoot.CFrame)
 
-	for _, part in pairs(updatedModel:GetDescendants()) do
-		if part:IsA("BasePart") then
-			local weld = Instance.new("WeldConstraint")
-			weld.Parent = part
-			weld.Part0 = part
-			weld.Part1 = self.VisualRoot
-			part.Anchored = false
+    for _, part in pairs(updatedModel:GetDescendants()) do
+        if part:IsA("BasePart") then
+            local weld = Instance.new("WeldConstraint")
+            weld.Parent = part
+            weld.Part0 = part
+            weld.Part1 = self.VisualRoot
+            part.Anchored = false
 
-			if self.IsPurchased then FadeEffect.In(part) end
-		end
-	end
+            if self.IsPurchased then
+                FadeEffect.In(part)
+            end
+        end
+    end
 
-	if self.VisualRoot.Anchored == true then self.VisualRoot.Anchored = false end
+    if self.VisualRoot.Anchored == true then
+        self.VisualRoot.Anchored = false
+    end
 
-	self.CurrentVisualModel = updatedModel
+    self.CurrentVisualModel = updatedModel
 end
 -- //!SECTION
 
 -- //SECTION - Animations
 function Tender.StartAnimation(self: Tender)
-	local animator: Animator = DeepWait(self.Model, "Tender", "AnimationController", "Animator")
-	local animation: Animation = Animator.GetAnimation(ANIMATIONS.WaterBob)
+    local animator: Animator = DeepWait(self.Model, "Tender", "AnimationController", "Animator")
+    local animation: Animation = Animator.GetAnimation(ANIMATIONS.WaterBob)
 
-	local animationTrack = animator:LoadAnimation(animation)
-	if not animationTrack then return end
+    local animationTrack = animator:LoadAnimation(animation)
+    if not animationTrack then
+        return
+    end
 
-	if self._cleaner then self._cleaner:Add(animationTrack) end
-	animationTrack.Looped = true
+    if self._cleaner then
+        self._cleaner:Add(animationTrack)
+    end
+    animationTrack.Looped = true
 
-	task.wait(math.random(0.5, 1.5))
-	animationTrack:Play()
+    task.wait(math.random(0.5, 1.5))
+    animationTrack:Play()
 end
 -- //!SECTION
 
 -- //SECTION - Cleanup
 function Tender.ClearAllAttributes(self: Tender, instance: Instance)
-	for name, _ in pairs(instance:GetAttributes()) do
-		instance:SetAttribute(name, nil)
-	end
+    for name, _ in pairs(instance:GetAttributes()) do
+        instance:SetAttribute(name, nil)
+    end
 end
 
 function Tender.Destroy(self: Tender)
-	self:MoveToPort()
-	self:Hide()
-	self:CannotCollide()
-	self:RemovePreviousVisualModel()
-	PurchaseButton.Destroy(self.PurchaseButton)
-	self:DestroyTenderStoppedBillboard()
+    self:MoveToPort()
+    self:Hide()
+    self:CannotCollide()
+    self:RemovePreviousVisualModel()
+    PurchaseButton.Destroy(self.PurchaseButton)
+    self:DestroyTenderStoppedBillboard()
 
-	pcall(function()
-		self:Save()
-	end)
+    pcall(function()
+        self:Save()
+    end)
 
-	if self.MoveTween then
-		pcall(function()
-			self.MoveTween:Cancel()
-		end)
-		self.MoveTween = nil
-	end
+    if self.MoveTween then
+        pcall(function()
+            self.MoveTween:Cancel()
+        end)
+        self.MoveTween = nil
+    end
 
-	if self.ProgressTween then
-		pcall(function()
-			self.ProgressTween:Cancel()
-		end)
-		self.ProgressTween = nil
-	end
+    if self.ProgressTween then
+        pcall(function()
+            self.ProgressTween:Cancel()
+        end)
+        self.ProgressTween = nil
+    end
 
-	self:ClearAllAttributes(self.Model.PrimaryPart)
+    self:ClearAllAttributes(self.Model.PrimaryPart)
 
-	if self._cleaner then
-		self._cleaner:Clean()
-		self._cleaner = nil
-	end
+    if self._cleaner then
+        self._cleaner:Clean()
+        self._cleaner = nil
+    end
 
-	self.Player = nil
-	self.Owner = nil
-	self.TeamId = nil
-	self.Model = nil
+    self.Player = nil
+    self.Owner = nil
+    self.TeamId = nil
+    self.Model = nil
 end
 
 -- //!SECTION

@@ -1,5 +1,32 @@
+--[[
+	FFGEnum.luau
+	
+	Central enumeration and constants module for the game.
+	Contains all game-wide constants, quality tiers, UI identifiers,
+	attribute names, job categories, buff definitions, and more.
+	
+	Usage:
+	```luau
+	local FFGEnum = require(path.to.FFGEnum)
+	local quality = FFGEnum.QUALITIES[5] -- Legendary
+	local entityType = FFGEnum.CLASS.ENTITY_NAME.Boat
+	```
+	
+	@module FFGEnum
+	@shared
+]]
+
 local FFGEnum = {}
 
+--[[
+	Quality tiers for helpers and items.
+	Higher quality = better stats but rarer drops.
+	
+	Fields:
+	- Label: Display name
+	- Color: UI color for the quality
+	- DropChance: Weighted chance (out of ~100 total)
+]]
 FFGEnum.QUALITIES = {
     [1] = {
         Label = "Common",
@@ -33,6 +60,7 @@ FFGEnum.QUALITIES = {
     },
 }
 
+--- Visual stages for entities (1-16), determines appearance upgrades
 FFGEnum.STAGES = {
     [1] = { Color = Color3.fromHex("#B0B0B0"), Label = "Stage I" },
     [2] = { Color = Color3.fromHex("#C0C0C0"), Label = "Stage II" },

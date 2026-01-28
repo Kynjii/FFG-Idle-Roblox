@@ -1,3 +1,11 @@
+--[[
+	Helper.luau
+	
+	Hireable worker entity that collects resources from production entities (Boats).
+	Helpers have procedurally generated stats based on quality tier and automate
+	fish collection from boats to port storage.
+]]
+
 local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
@@ -21,30 +29,32 @@ local ProgressBar = require(ReplicatedStorage.Shared.UI.Components.ProgressBar)
 local NAME = FFGEnum.JOB_NAMES
 
 local DESCRIPTION = {
-	Fishing = "A crew member specialized in Fishing and transporting Fish.",
-	Woodcutting = "A crew member specialized in Woodcutting and transporting Wood.",
-	Mining = "A crew member specialized in Mining and transporting Ore.",
-	Transporting = "A crew member specialized in Transporting Fish from the Port to the Market.",
+    Fishing = "A crew member specialized in Fishing and transporting Fish.",
+    Woodcutting = "A crew member specialized in Woodcutting and transporting Wood.",
+    Mining = "A crew member specialized in Mining and transporting Ore.",
+    Transporting = "A crew member specialized in Transporting Fish from the Port to the Market.",
 }
 
 local helperFolder: Instance = game.Workspace:WaitForChild("Helpers")
 local helperModel
 if helperFolder then
-	helperModel = helperFolder:FindFirstChild("HelperTemplate") :: Model
-	if not helperModel then error("Unable to locate the helperModel") end
+    helperModel = helperFolder:FindFirstChild("HelperTemplate") :: Model
+    if not helperModel then
+        error("Unable to locate the helperModel")
+    end
 end
 
 local DEFAULTS = {
-	Entity = FFGEnum.CLASS.ENTITY_NAME.Helper,
-	RealmId = 1,
-	Name = "Unnamed Helper",
-	Level = 1,
-	MaxLevel = Formulas.MAX_LEVEL,
-	UpgradeStage = 1,
-	StorageFull = false,
-	BaseCost = Formulas.HELPER.BaseCost,
-	IsPurchased = false,
-	ResourceInStorage = 0,
+    Entity = FFGEnum.CLASS.ENTITY_NAME.Helper,
+    RealmId = 1,
+    Name = "Unnamed Helper",
+    Level = 1,
+    MaxLevel = Formulas.MAX_LEVEL,
+    UpgradeStage = 1,
+    StorageFull = false,
+    BaseCost = Formulas.HELPER.BaseCost,
+    IsPurchased = false,
+    ResourceInStorage = 0,
 }
 -- //!SECTION
 
@@ -55,415 +65,443 @@ type Helper = typeof(setmetatable({} :: HelperType.HelperData, Helper))
 
 -- //SECTION - Helpers for generating only stats for Shop
 local function chooseJob()
-	local jobs = {}
+    local jobs = {}
 
-	local index: number = 1
-	for k, v in pairs(FFGEnum.JOB_CATEGORY) do
-		jobs[index] = v
-		index += 1
-	end
+    local index: number = 1
+    for k, v in pairs(FFGEnum.JOB_CATEGORY) do
+        jobs[index] = v
+        index += 1
+    end
 
-	return jobs[math.random(1, #jobs)]
+    return jobs[math.random(1, #jobs)]
 end
 
 local function grabName(jobCategory)
-	return NAME[jobCategory]
+    return NAME[jobCategory]
 end
 
-local function chooseQuality()
-	local function getRandomQuality(): number?
-		local totalWeight: number = 0
-		for _, data in pairs(FFGEnum.QUALITIES) do
-			totalWeight += data.DropChance
-		end
+local function chooseQuality(): number?
+    local function getRandomQuality(): number?
+        local totalWeight: number = 0
+        for _, data in pairs(FFGEnum.QUALITIES) do
+            totalWeight += data.DropChance
+        end
 
-		local randomValue: number = math.random() * totalWeight
-		local cumulative: number = 0
+        local randomValue: number = math.random() * totalWeight
+        local cumulative: number = 0
 
-		for qualityId, data in pairs(FFGEnum.QUALITIES) do
-			cumulative += data.DropChance
-			if randomValue <= cumulative then return qualityId end
-		end
+        for qualityId, data in pairs(FFGEnum.QUALITIES) do
+            cumulative += data.DropChance
+            if randomValue <= cumulative then
+                return qualityId
+            end
+        end
 
-		return nil
-	end
+        return nil
+    end
 
-	local qualityId: number? = getRandomQuality()
-	return qualityId
+    local qualityId: number? = getRandomQuality()
+    return qualityId
 end
 -- //!SECTION
 
 -- //SECTION - Constructor
 function Helper.New(state: HelperType.HelperData, player: Player, teamId: number): Helper
-	local self = setmetatable({} :: HelperType.HelperInstance, Helper)
+    local self = setmetatable({} :: HelperType.HelperInstance, Helper)
 
-	-- Start with default stats as base
-	for key, value in pairs(DEFAULTS) do
-		self[key] = value
-	end
+    -- Start with default stats as base
+    for key, value in pairs(DEFAULTS) do
+        self[key] = value
+    end
 
-	-- Override with provided state values
-	if state then
-		for key, value in pairs(state) do
-			self[key] = value
-		end
-	end
+    -- Override with provided state values
+    if state then
+        for key, value in pairs(state) do
+            self[key] = value
+        end
+    end
 
-	-- Calculate derived properties
-	self.Entity = state.Entity or DEFAULTS.Entity
-	self.Player = player
-	self.RealmId = state.RealmId
-	self.Owner = state.Owner or self.Owner or player.UserId
-	self.Model = nil
-	self.Id = state.Id
-	self.TeamId = teamId
-	self.JobCategory = state.JobCategory
-	self.ItemImage = state.ItemImage
-	self.Name = self:GetName()
-	self.Description = state.Description or DESCRIPTION[self.JobCategory]
+    -- Calculate derived properties
+    self.Entity = state.Entity or DEFAULTS.Entity
+    self.Player = player
+    self.RealmId = state.RealmId
+    self.Owner = state.Owner or self.Owner or player.UserId
+    self.Model = nil
+    self.Id = state.Id
+    self.TeamId = teamId
+    self.JobCategory = state.JobCategory
+    self.ItemImage = state.ItemImage
+    self.Name = self:GetName()
+    self.Description = state.Description or DESCRIPTION[self.JobCategory]
 
-	-- Define quality first
-	self.QualityId = state.QualityId
-	self.Quality = FFGEnum.QUALITIES[self.QualityId]
+    -- Define quality first
+    self.QualityId = state.QualityId
+    self.Quality = FFGEnum.QUALITIES[self.QualityId]
 
-	self.ResourceType = state.ResourceType or FFGEnum.RESOURCE_TYPE[self.JobCategory]
+    self.ResourceType = state.ResourceType or FFGEnum.RESOURCE_TYPE[self.JobCategory]
 
-	-- Calculate default stats based on quality and job (with variance for new helpers)
-	self.Stats = state.Stats or HelperCalculators.GenerateBaseStats(self.JobCategory, self.QualityId) :: HelperType.HelperStats
-	self.BaseCost = self:CalculateBaseCost()
-	self.UpgradeCost = self:CalculateUpgradeCost()
+    -- Calculate default stats based on quality and job (with variance for new helpers)
+    self.Stats = state.Stats or HelperCalculators.GenerateBaseStats(self.JobCategory, self.QualityId) :: HelperType.HelperStats
+    self.BaseCost = self:CalculateBaseCost()
+    self.UpgradeCost = self:CalculateUpgradeCost()
 
-	self.CurrentAssignment = state.CurrentAssignment
+    self.CurrentAssignment = state.CurrentAssignment
 
-	self._cleaner = Trove.new()
+    self._cleaner = Trove.new()
 
-	self:AttachEventListeners()
+    self:AttachEventListeners()
 
-	return self
+    return self
 end
 -- //!SECTION
 
 -- //SECTION - Static to generate data for shops
 function Helper.CreateStateData(player: Player, currencyType: string)
-	local state: HelperType.HelperData = {}
+    local state: HelperType.HelperData = {}
 
-	-- Start with default stats as base
-	for key, value in pairs(DEFAULTS) do
-		state[key] = value
-	end
+    -- Start with default stats as base
+    for key, value in pairs(DEFAULTS) do
+        state[key] = value
+    end
 
-	-- Calculate derived properties
-	state.Entity = state.Entity or FFGEnum.CLASS.ENTITY_NAME.Helper
-	state.Owner = state.Owner or player.UserId
-	state.Id = state.Id or HttpService:GenerateGUID(false)
-	state.JobCategory = state.JobCategory or chooseJob()
-	state.Name = state.Name and state.Name ~= DEFAULTS.Name or grabName(state.JobCategory)
-	state.CurrencyType = state.CurrencyType or currencyType
-	state.Description = state.Description or DESCRIPTION[state.JobCategory]
+    -- Calculate derived properties
+    state.Entity = state.Entity or FFGEnum.CLASS.ENTITY_NAME.Helper
+    state.Owner = state.Owner or player.UserId
+    state.Id = state.Id or HttpService:GenerateGUID(false)
+    state.JobCategory = state.JobCategory or chooseJob()
+    state.Name = state.Name and state.Name ~= DEFAULTS.Name or grabName(state.JobCategory)
+    state.CurrencyType = state.CurrencyType or currencyType
+    state.Description = state.Description or DESCRIPTION[state.JobCategory]
 
-	-- Define quality first
-	state.QualityId = state.QualityId or chooseQuality()
+    -- Define quality first
+    state.QualityId = state.QualityId or chooseQuality()
 
-	-- Get correct image
-	state.ItemImage = state.ItemImage or FFGEnum.JOB_ASSETS[state.JobCategory]
+    -- Get correct image
+    state.ItemImage = state.ItemImage or FFGEnum.JOB_ASSETS[state.JobCategory]
 
-	state.ResourceType = FFGEnum.RESOURCE_TYPE[state.JobCategory]
+    state.ResourceType = FFGEnum.RESOURCE_TYPE[state.JobCategory]
 
-	-- Calculate default stats based on quality and job (with variance for shop items)
-	state.Stats = state.Stats or HelperCalculators.GenerateBaseStats(state.JobCategory, state.QualityId)
-	state.BaseCost = state.BaseCost and state.BaseCost ~= DEFAULTS.BaseCost or ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, state.QualityId, state.RealmId)
-	state.UpgradeCost = state.UpgradeCost or ClassCalculators.CalculateUpgradeCost(state.BaseCost, state.Level, state.QualityId, state.RealmId)
+    -- Calculate default stats based on quality and job (with variance for shop items)
+    state.Stats = state.Stats or HelperCalculators.GenerateBaseStats(state.JobCategory, state.QualityId)
+    state.BaseCost = state.BaseCost and state.BaseCost ~= DEFAULTS.BaseCost or ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, state.QualityId, state.RealmId)
+    state.UpgradeCost = state.UpgradeCost or ClassCalculators.CalculateUpgradeCost(state.BaseCost, state.Level, state.QualityId, state.RealmId)
 
-	state.IsPurchased = state.IsPurchased or false
+    state.IsPurchased = state.IsPurchased or false
 
-	state.CurrentAssignment = state.CurrentAssignment or 0
+    state.CurrentAssignment = state.CurrentAssignment or 0
 
-	return state
+    return state
 end
 -- //!SECTION
 
 -- //SECTION - Assignments
 function Helper.CanAssignJob(self: Helper, jobId: number): boolean
-	local jobInfo = Jobs.Data[jobId]
-	if not jobInfo then return false end
+    local jobInfo = Jobs.Data[jobId]
+    if not jobInfo then
+        return false
+    end
 
-	return jobInfo.Category == self.JobCategory
+    return jobInfo.Category == self.JobCategory
 end
 
 function Helper.CreateModel(self: Helper)
-	if self.Model then self.Model:Destroy() end
-	local clonedModel = helperModel and helperModel:Clone()
-	clonedModel.Name = `{self.Player}'s {self.Name} | Level {self.Level}`
-	clonedModel.Parent = helperModel.Parent
-	self.Model = self._cleaner and self._cleaner:Add(clonedModel)
+    if self.Model then
+        self.Model:Destroy()
+    end
+    local clonedModel = helperModel and helperModel:Clone()
+    clonedModel.Name = `{self.Player}'s {self.Name} | Level {self.Level}`
+    clonedModel.Parent = helperModel.Parent
+    self.Model = self._cleaner and self._cleaner:Add(clonedModel)
 
-	if clonedModel then
-		local modelChildren = clonedModel:GetChildren()
-		for _, part: Instance in pairs(modelChildren) do
-			if part:IsA("MeshPart") or part:IsA("Part") then
-				if part.Name ~= "HumanoidRootPart" then part.Transparency = 0 end
-				part.Anchored = false
-			end
+    if clonedModel then
+        local modelChildren = clonedModel:GetChildren()
+        for _, part: Instance in pairs(modelChildren) do
+            if part:IsA("MeshPart") or part:IsA("Part") then
+                if part.Name ~= "HumanoidRootPart" then
+                    part.Transparency = 0
+                end
+                part.Anchored = false
+            end
 
-			if part.Name == "Humanoid" then
-				local humanoid: Humanoid = part
-				humanoid.WalkSpeed = self.Stats and self.Stats.WalkSpeed
-			end
-		end
+            if part.Name == "Humanoid" then
+                local humanoid: Humanoid = part
+                humanoid.WalkSpeed = self.Stats and self.Stats.WalkSpeed
+            end
+        end
 
-		local nameplate: BillboardGui = EntityNameplate.Create({
-			EntityData = self,
-			Adornee = clonedModel,
-			HasProgressBar = true, -- //TODO -
-		})
-		nameplate.ExtentsOffsetWorldSpace = Vector3.new(0, 2, 0)
-		nameplate.Enabled = true
-		nameplate.Parent = clonedModel
+        local nameplate: BillboardGui = EntityNameplate.Create({
+            EntityData = self,
+            Adornee = clonedModel,
+            HasProgressBar = true, -- //TODO -
+        })
+        nameplate.ExtentsOffsetWorldSpace = Vector3.new(0, 2, 0)
+        nameplate.Enabled = true
+        nameplate.Parent = clonedModel
 
-		local hasProgressBar = nameplate:FindFirstChild("ProgressContainer")
-		if not hasProgressBar then
-			local progressContainer = ProgressBar.Create({ Color = "Blue", HasText = true, hasProgressBar = true, Adornee = nameplate })
-			progressContainer.Size = UDim2.fromScale(1, 0.2)
-			progressContainer.Position = UDim2.fromScale(0.5, 1)
-			progressContainer.Parent = nameplate
-			progressContainer.Visible = false
-		end
+        local hasProgressBar = nameplate:FindFirstChild("ProgressContainer")
+        if not hasProgressBar then
+            local progressContainer = ProgressBar.Create({ Color = "Blue", HasText = true, hasProgressBar = true, Adornee = nameplate })
+            progressContainer.Size = UDim2.fromScale(1, 0.2)
+            progressContainer.Position = UDim2.fromScale(0.5, 1)
+            progressContainer.Parent = nameplate
+            progressContainer.Visible = false
+        end
 
-		CollisionGroups.SetNpcCollisionGroup(clonedModel)
-	end
+        CollisionGroups.SetNpcCollisionGroup(clonedModel)
+    end
 
-	local startPos: Vector3 = Jobs.GetJobLocation(self.CurrentAssignment, self.TeamId)
-	if startPos then
-		self.Model:MoveTo(startPos)
-		Events.FireBindableEvent(Events.BindableNames.HelperAtUnloadingLoc, { Id = self.Id, JobId = self.CurrentAssignment, Player = self.Player })
-	end
+    local startPos: Vector3 = Jobs.GetJobLocation(self.CurrentAssignment, self.TeamId)
+    if startPos then
+        self.Model:MoveTo(startPos)
+        Events.FireBindableEvent(Events.BindableNames.HelperAtUnloadingLoc, { Id = self.Id, JobId = self.CurrentAssignment, Player = self.Player })
+    end
 end
 
 function Helper.AssignJob(self: Helper, jobId: number, isNewJob: boolean): ()
-	if jobId > 0 then
-		if not self:CanAssignJob(jobId) then return end
-	end
+    if jobId > 0 then
+        if not self:CanAssignJob(jobId) then
+            return
+        end
+    end
 
-	if isNewJob then
-		self.ResourceInStorage = 0
-		self.CurrentAssignment = jobId
-	end
+    if isNewJob then
+        self.ResourceInStorage = 0
+        self.CurrentAssignment = jobId
+    end
 
-	if self.CurrentAssignment > 0 then
-		self:CreateModel()
-	else
-		if self.Model then self.Model:Destroy() end
-	end
+    if self.CurrentAssignment > 0 then
+        self:CreateModel()
+    else
+        if self.Model then
+            self.Model:Destroy()
+        end
+    end
 
-	self:Save()
+    self:Save()
 end
 -- //!SECTION
 
 -- //SECTION - Core Helper Actions
 function Helper.Purchase(self: Helper): ()
-	self.IsPurchased = true
+    self.IsPurchased = true
 
-	self:Save()
+    self:Save()
 end
 
 function Helper.Upgrade(self: Helper): ()
-	if not self:CanUpgrade() then return end
+    if not self:CanUpgrade() then
+        return
+    end
 
-	self.Level += 1
-	local stage: number = Formulas.StageForLevel(self.Level)
-	if self.UpgradeStage < stage then self:IncreaseUpgradeStage(stage) end
+    self.Level += 1
+    local stage: number = Formulas.StageForLevel(self.Level)
+    if self.UpgradeStage < stage then
+        self:IncreaseUpgradeStage(stage)
+    end
 
-	self.UpgradeCost = self:CalculateUpgradeCost()
+    self.UpgradeCost = self:CalculateUpgradeCost()
 
-	self.Stats = self:CalculateStats()
-	self:AdjustWalkSpeed()
+    self.Stats = self:CalculateStats()
+    self:AdjustWalkSpeed()
 
-	self:Save()
+    self:Save()
 end
 
 function Helper.AdjustWalkSpeed(self: Helper): ()
-	local model: Model? = self.Model
+    local model: Model? = self.Model
 
-	if model then
-		local humanoid: Humanoid? = model:FindFirstChild("Humanoid")
-		if humanoid then humanoid.WalkSpeed = self.Stats.WalkSpeed end
-	end
+    if model then
+        local humanoid: Humanoid? = model:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = self.Stats.WalkSpeed
+        end
+    end
 end
 
 function Helper.IncreaseUpgradeStage(self: Helper, stage: number): ()
-	self.UpgradeStage = stage
+    self.UpgradeStage = stage
 end
 
 function Helper.CalculateBaseCost(self: Helper): number
-	return ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, self.QualityId, self.RealmId)
+    return ClassCalculators.CalculateBaseValue(DEFAULTS.BaseCost, self.QualityId, self.RealmId)
 end
 
 function Helper.CalculateUpgradeCost(self: Helper): number
-	return ClassCalculators.CalculateUpgradeCost(self.BaseCost, self.Level, self.QualityId, self.RealmId)
+    return ClassCalculators.CalculateUpgradeCost(self.BaseCost, self.Level, self.QualityId, self.RealmId)
 end
 -- //!SECTION
 
 -- //SECTION - Calculations
 function Helper.GenerateJobCategory(self: Helper): number
-	return chooseJob()
+    return chooseJob()
 end
 
 function Helper.CalculateStats(self: Helper)
-	return HelperCalculators.CalculateStats(self.JobCategory, self.Level, self.QualityId)
+    return HelperCalculators.CalculateStats(self.JobCategory, self.Level, self.QualityId)
 end
 
 function Helper.DefineQuality(self: Helper): number?
-	return chooseQuality()
+    return chooseQuality()
 end
 -- //!SECTION
 
 -- //SECTION - Handling Resources
 function Helper.AddResource(self: Helper, amount: number): ()
-	local availableStorage = (self.Stats and self.Stats.Storage) - self.ResourceInStorage
-	local calcAmount: number = math.min(availableStorage, amount)
+    local availableStorage = (self.Stats and self.Stats.Storage) - self.ResourceInStorage
+    local calcAmount: number = math.min(availableStorage, amount)
 
-	self.ResourceInStorage += calcAmount
+    self.ResourceInStorage += calcAmount
 
-	if self.ResourceInStorage >= (self.Stats and self.Stats.Storage) then
-		self.ResourceInStorage = self.Stats and self.Stats.Storage
-		self:UpdateStorageStatus(true)
-	end
+    if self.ResourceInStorage >= (self.Stats and self.Stats.Storage) then
+        self.ResourceInStorage = self.Stats and self.Stats.Storage
+        self:UpdateStorageStatus(true)
+    end
 
-	self:Save()
+    self:Save()
 end
 
 function Helper.RemoveResource(self: Helper, amount: number): ()
-	self.ResourceInStorage -= amount
-	self:UpdateStorageStatus(false)
-	self:Save()
+    self.ResourceInStorage -= amount
+    self:UpdateStorageStatus(false)
+    self:Save()
 end
 
 function Helper.ClearStorage(self: Helper): ()
-	self.ResourceInStorage = 0
-	self:UpdateStorageStatus(true)
-	self:Save()
+    self.ResourceInStorage = 0
+    self:UpdateStorageStatus(true)
+    self:Save()
 end
 
 function Helper.UpdateStorageStatus(self: Helper, status: boolean): ()
-	self.StorageFull = status
+    self.StorageFull = status
 end
 -- //!SECTION
 
 -- //SECTION - Setup
 function Helper.Initialize(self: Helper): ()
-	self:Show()
-	self:CanCollide()
+    self:Show()
+    self:CanCollide()
 end
 -- //!SECTION
 
 -- //SECTION - Visibility and Collision
 function Helper.Show(self: Helper): ()
-	ClassVisualizer.Show(self.VisualRoot)
+    ClassVisualizer.Show(self.VisualRoot)
 end
 
 function Helper.Hide(self: Helper): ()
-	ClassVisualizer.Hide(self.VisualRoot)
+    ClassVisualizer.Hide(self.VisualRoot)
 end
 
 function Helper.CanCollide(self: Helper): ()
-	ClassVisualizer.CanCollide(self.VisualRoot)
+    ClassVisualizer.CanCollide(self.VisualRoot)
 end
 
 function Helper.CannotCollide(self: Helper): ()
-	ClassVisualizer.CannotCollide(self.VisualRoot)
+    ClassVisualizer.CannotCollide(self.VisualRoot)
 end
 -- //!SECTION
 
 -- //SECTION -  Helper Utilities
 function Helper.GetName(self: Helper): string
-	return NAME[self.JobCategory]
+    return NAME[self.JobCategory]
 end
 
 function Helper.CanUpgrade(self: Helper): boolean
-	return self.Level < self.MaxLevel
+    return self.Level < self.MaxLevel
 end
 
 function Helper.IsStorageFull(self: Helper): boolean
-	local status: boolean = self.ResourceInStorage == (self.Stats and self.Stats.Storage)
-	if self.StorageFull ~= status then self:UpdateStorageStatus(status) end
-	return status
+    local status: boolean = self.ResourceInStorage == (self.Stats and self.Stats.Storage)
+    if self.StorageFull ~= status then
+        self:UpdateStorageStatus(status)
+    end
+    return status
 end
 -- //!SECTION
 
 -- //SECTION - Event Listeners
 function Helper.AttachEventListeners(self: Helper)
-	local upgradeHelper = Events.GetRemote(Events.RemoteNames.UpgradeHelper)
-	if upgradeHelper then
-		self._cleaner:Add(upgradeHelper.OnServerEvent:Connect(function(player: Player, helperId: string)
-			if self.Player ~= player or self.Owner ~= player.UserId then return end
-			if helperId ~= self.Id then return end
+    local upgradeHelper = Events.GetRemote(Events.RemoteNames.UpgradeHelper)
+    if upgradeHelper then
+        self._cleaner:Add(upgradeHelper.OnServerEvent:Connect(function(player: Player, helperId: string)
+            if self.Player ~= player or self.Owner ~= player.UserId then
+                return
+            end
+            if helperId ~= self.Id then
+                return
+            end
 
-			if not DataService.CanAfford(self.Player, self.CurrencyType, not self.IsPurchased and self.BaseCost or self.UpgradeCost or 0) then
-				Notification.SendAlert(self.Player, "Not enough gold.")
-				return
-			end
-			DataService.Spend(self.Player, self.CurrencyType, self.BaseCost, "HelperUpgraded", { QualityId = self.QualityId })
+            if not DataService.CanAfford(self.Player, self.CurrencyType, not self.IsPurchased and self.BaseCost or self.UpgradeCost or 0) then
+                Notification.SendAlert(self.Player, "Not enough gold.")
+                return
+            end
+            DataService.Spend(self.Player, self.CurrencyType, self.BaseCost, "HelperUpgraded", { QualityId = self.QualityId })
 
-			self:Upgrade()
-			local helperUpgradedEvent = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
-			if helperUpgradedEvent then helperUpgradedEvent:FireClient(player, self:Serialize()) end
+            self:Upgrade()
+            local helperUpgradedEvent = Events.GetRemote(Events.RemoteNames.HelperUpgraded)
+            if helperUpgradedEvent then
+                helperUpgradedEvent:FireClient(player, self:Serialize())
+            end
 
-			local updateInfoPanelEvent = Events.GetRemote(Events.RemoteNames.UpdateInfoPanel)
-			if updateInfoPanelEvent then updateInfoPanelEvent:FireClient(player, { Item = self:Serialize() }) end
+            local updateInfoPanelEvent = Events.GetRemote(Events.RemoteNames.UpdateInfoPanel)
+            if updateInfoPanelEvent then
+                updateInfoPanelEvent:FireClient(player, { Item = self:Serialize() })
+            end
 
-			Events.FireBindableEvent(Events.BindableNames.HelperUpgraded, self:Serialize())
-		end))
-	end
+            Events.FireBindableEvent(Events.BindableNames.HelperUpgraded, self:Serialize())
+        end))
+    end
 end
 -- //!SECTION
 
 -- //SECTION - Loading and Saving
 function Helper.Serialize(self: Helper): { [string]: any }
-	return {
-		Entity = self.Entity,
-		Id = self.Id,
-		RealmId = self.RealmId,
-		TeamId = self.TeamId,
-		Owner = self.Owner,
-		Name = self.Name,
-		Level = self.Level,
-		MaxLevel = self.MaxLevel,
-		CurrencyType = self.CurrencyType,
-		ItemImage = self.ItemImage,
-		JobCategory = self.JobCategory,
-		QualityId = self.QualityId,
-		Stats = self.Stats,
-		UpgradeStage = self.UpgradeStage,
-		ResourceInStorage = self.ResourceInStorage,
-		StorageFull = self.StorageFull,
-		CurrentAssignment = self.CurrentAssignment,
-		IsPurchased = self.IsPurchased,
-		BaseCost = self.BaseCost,
-		UpgradeCost = self.UpgradeCost,
-		Description = self.Description,
-	}
+    return {
+        Entity = self.Entity,
+        Id = self.Id,
+        RealmId = self.RealmId,
+        TeamId = self.TeamId,
+        Owner = self.Owner,
+        Name = self.Name,
+        Level = self.Level,
+        MaxLevel = self.MaxLevel,
+        CurrencyType = self.CurrencyType,
+        ItemImage = self.ItemImage,
+        JobCategory = self.JobCategory,
+        QualityId = self.QualityId,
+        Stats = self.Stats,
+        UpgradeStage = self.UpgradeStage,
+        ResourceInStorage = self.ResourceInStorage,
+        StorageFull = self.StorageFull,
+        CurrentAssignment = self.CurrentAssignment,
+        IsPurchased = self.IsPurchased,
+        BaseCost = self.BaseCost,
+        UpgradeCost = self.UpgradeCost,
+        Description = self.Description,
+    }
 end
 
 function Helper.Save(self: Helper): ()
-	DataService.SaveHelper(self.Player, self:Serialize())
+    DataService.SaveHelper(self.Player, self:Serialize())
 end
 -- //!SECTION
 
 -- //SECTION - Cleanup
 function Helper.Destroy(self: Helper)
-	pcall(function()
-		self:Save()
-	end)
+    pcall(function()
+        self:Save()
+    end)
 
-	if self._cleaner then
-		self._cleaner:Clean()
-		self._cleaner = nil
-	end
+    if self._cleaner then
+        self._cleaner:Clean()
+        self._cleaner = nil
+    end
 
-	self.Player = nil
-	self.Owner = nil
-	self.TeamId = nil
-	self.RealmId = nil
+    self.Player = nil
+    self.Owner = nil
+    self.TeamId = nil
+    self.RealmId = nil
 end
 -- //!SECTION
 
