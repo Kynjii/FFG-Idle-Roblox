@@ -80,7 +80,7 @@ local function updateTools()
         end
     end
 
-    local rodTemplate = ServerStorage.RodTools:WaitForChild("RodTemplate")
+    local rodTemplate = ServerStorage.RodTools:WaitForChild("RodTemplate") :: Instance
     for _, rod in pairs(FishingRods) do
         local rodTool = rodTemplate:Clone() :: Tool
 
